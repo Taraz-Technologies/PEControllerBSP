@@ -1,7 +1,7 @@
 # PEControllerBSP
 Board Support Package for PEController module made by Taraz Technologies
 
-# Components
+## Components
 Microcontroller - STM32H745BIT6
 Debug Interface - STLink-v2 / SWD
 Display
