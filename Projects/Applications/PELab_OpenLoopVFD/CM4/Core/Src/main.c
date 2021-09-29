@@ -22,7 +22,6 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "RGB565_480x272.h"
 #include "MAX11046App.h"
 #include "SharedMemory.h"
 #include <string.h>
@@ -50,8 +49,6 @@
 
 I2C_HandleTypeDef hi2c2;
 
-LTDC_HandleTypeDef hltdc;
-
 TIM_HandleTypeDef htim12;
 TIM_HandleTypeDef htim17;
 
@@ -61,12 +58,11 @@ TIM_HandleTypeDef htim17;
 
 /* Private function prototypes -----------------------------------------------*/
 static void MX_GPIO_Init(void);
-static void MX_LTDC_Init(void);
 static void MX_TIM12_Init(void);
 static void MX_TIM17_Init(void);
 static void MX_I2C2_Init(void);
 /* USER CODE BEGIN PFP */
-
+void LCDDisplay_Init(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -122,10 +118,10 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_LTDC_Init();
   MX_TIM17_Init();
   MX_I2C2_Init();
   /* USER CODE BEGIN 2 */
+  LCDDisplay_Init();
   HAL_TIM_PWM_Start(&htim17,TIM_CHANNEL_1);			// LCD PWM channel
   MAX11046App_Init(sharedData->m7Tom4.periodUs, DataProcessingCallback);	// Measurements @ 200KHz
   MAX11046App_Run();
@@ -185,107 +181,6 @@ static void MX_I2C2_Init(void)
   /* USER CODE BEGIN I2C2_Init 2 */
 
   /* USER CODE END I2C2_Init 2 */
-
-}
-
-/**
-  * @brief LTDC Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_LTDC_Init(void)
-{
-
-  /* USER CODE BEGIN LTDC_Init 0 */
-
-  /* USER CODE END LTDC_Init 0 */
-
-  LTDC_LayerCfgTypeDef pLayerCfg = {0};
-
-  /* USER CODE BEGIN LTDC_Init 1 */
-
-  /* USER CODE END LTDC_Init 1 */
-  hltdc.Instance = LTDC;
-  hltdc.Init.HSPolarity = LTDC_HSPOLARITY_AL;
-  hltdc.Init.VSPolarity = LTDC_VSPOLARITY_AL;
-  hltdc.Init.DEPolarity = LTDC_DEPOLARITY_AL;
-  hltdc.Init.PCPolarity = LTDC_PCPOLARITY_IPC;
-  hltdc.Init.HorizontalSync = 19;
-  hltdc.Init.VerticalSync = 9;
-  hltdc.Init.AccumulatedHBP = 65;
-  hltdc.Init.AccumulatedVBP = 32;
-  hltdc.Init.AccumulatedActiveW = 865;
-  hltdc.Init.AccumulatedActiveH = 512;
-  hltdc.Init.TotalWidth = 1075;
-  hltdc.Init.TotalHeigh = 534;
-  hltdc.Init.Backcolor.Blue = 0;
-  hltdc.Init.Backcolor.Green = 255;
-  hltdc.Init.Backcolor.Red = 0;
-  if (HAL_LTDC_Init(&hltdc) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  pLayerCfg.WindowX0 = 0;
-  pLayerCfg.WindowX1 = 0;
-  pLayerCfg.WindowY0 = 0;
-  pLayerCfg.WindowY1 = 0;
-  pLayerCfg.PixelFormat = LTDC_PIXEL_FORMAT_RGB888;
-  pLayerCfg.Alpha = 0;
-  pLayerCfg.Alpha0 = 0;
-  pLayerCfg.BlendingFactor1 = LTDC_BLENDING_FACTOR1_CA;
-  pLayerCfg.BlendingFactor2 = LTDC_BLENDING_FACTOR2_CA;
-  pLayerCfg.FBStartAdress = 0;
-  pLayerCfg.ImageWidth = 0;
-  pLayerCfg.ImageHeight = 0;
-  pLayerCfg.Backcolor.Blue = 0;
-  pLayerCfg.Backcolor.Green = 0;
-  pLayerCfg.Backcolor.Red = 0;
-  if (HAL_LTDC_ConfigLayer(&hltdc, &pLayerCfg, 0) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN LTDC_Init 2 */
-  /* Layer1 Configuration ------------------------------------------------------*/
-
-    /* Windowing configuration */
-    /* In this case all the active display area is used to display a picture then :
-       Horizontal start = horizontal synchronization + Horizontal back porch = 43
-       Vertical start   = vertical synchronization + vertical back porch     = 12
-       Horizontal stop = Horizontal start + window width -1 = 43 + 480 -1
-       Vertical stop   = Vertical start + window height -1  = 12 + 272 -1      */
-    pLayerCfg.WindowX0 = 0;
-    pLayerCfg.WindowX1 = 800;
-    pLayerCfg.WindowY0 = 0;
-    pLayerCfg.WindowY1 = 320;
-
-    /* Pixel Format configuration*/
-    pLayerCfg.PixelFormat = LTDC_PIXEL_FORMAT_RGB888;
-
-    /* Start Address configuration : frame buffer is located at FLASH memory */
-    pLayerCfg.FBStartAdress = (uint32_t)&image_lcd;
-
-    /* Alpha constant (255 == totally opaque) */
-    pLayerCfg.Alpha = 255;
-
-    /* Default Color configuration (configure A,R,G,B component values) : no background color */
-    pLayerCfg.Alpha0 = 255; /* fully transparent */
-    pLayerCfg.Backcolor.Blue = 255;
-    pLayerCfg.Backcolor.Green = 255;
-    pLayerCfg.Backcolor.Red = 255;
-
-    /* Configure blending factors */
-    pLayerCfg.BlendingFactor1 = LTDC_BLENDING_FACTOR1_CA;
-    pLayerCfg.BlendingFactor2 = LTDC_BLENDING_FACTOR2_CA;
-
-    /* Configure the number of lines and number of pixels per line */
-    pLayerCfg.ImageWidth  = 800;
-    pLayerCfg.ImageHeight = 320;
-  	if (HAL_LTDC_ConfigLayer(&hltdc, &pLayerCfg, 0) != HAL_OK)
-    {
-      Error_Handler();
-    }
-
-  /* USER CODE END LTDC_Init 2 */
 
 }
 

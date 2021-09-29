@@ -25,5 +25,6 @@ Common \
 Common/Src \
 Core/Src \
 Core/Startup \
+Display \
 Drivers/STM32H7xx_HAL_Driver \
 
