@@ -45,11 +45,11 @@
 									<listOptionValue builtIn="false" value="../../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy"/>
 									<listOptionValue builtIn="false" value="../../Drivers/CMSIS/Device/ST/STM32H7xx/Include"/>
 									<listOptionValue builtIn="false" value="../../Drivers/CMSIS/Include"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/PELab_OpenLoopVFD_CM7/Control}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/PELab_OpenLoopVFD/Drivers/ModifiedDrivers}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/PELab_OpenLoopVFD_CM4/ADCs}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/PELab_OpenLoopVFD/Common}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/PELab_OpenLoopVFD_CM7}&quot;"/>
+									<listOptionValue builtIn="false" value="../../Common"/>
+									<listOptionValue builtIn="false" value="../../CM7"/>
+									<listOptionValue builtIn="false" value="../../ADCs"/>
+									<listOptionValue builtIn="false" value="../../../../../Control"/>
+									<listOptionValue builtIn="false" value="../../Drivers/ModifiedDrivers"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.1694427148" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
 							</tool>
@@ -135,6 +135,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/PELab_OpenLoopVFD/Drivers/ModifiedDrivers}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/PELab_OpenLoopVFD_CM4/ADCs}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/PELab_OpenLoopVFD/Common}&quot;"/>
+									<listOptionValue builtIn="false" value="../../Drivers/ModifiedDrivers"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.917277749" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
 							</tool>
