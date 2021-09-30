@@ -47,9 +47,9 @@
 									<listOptionValue builtIn="false" value="../../Drivers/CMSIS/Include"/>
 									<listOptionValue builtIn="false" value="../../CM7"/>
 									<listOptionValue builtIn="false" value="../../../../../Control"/>
-									<listOptionValue builtIn="false" value="../../Drivers/ModifiedDrivers"/>
 									<listOptionValue builtIn="false" value="../../../../../ADCs"/>
 									<listOptionValue builtIn="false" value="../../../../../Common"/>
+									<listOptionValue builtIn="false" value="../../../../../Drivers/ModifiedDrivers"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.1694427148" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
 							</tool>
@@ -77,13 +77,14 @@
 					</folderInfo>
 					<fileInfo id="com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.353946906.625564279" name="raw_max11046.h" rcbsApplicability="disable" resourcePath="ADCs/raw_max11046.h" toolsToInvoke=""/>
 					<sourceEntries>
-						<entry excluding="CommonMain|ADCs|Common|Configurations|Control|Core|Drivers" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name=""/>
+						<entry excluding="ModifiedDrivers|CommonMain|ADCs|Common|Configurations|Control|Core|Drivers" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name=""/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="ADCs"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Common"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="CommonMain"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Control"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="ModifiedDrivers"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

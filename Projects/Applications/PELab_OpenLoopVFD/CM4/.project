@@ -55,9 +55,9 @@
 			<locationURI>$%7BPARENT-4-PROJECT_LOC%7D/Display</locationURI>
 		</link>
 		<link>
-			<name>Drivers/ModifiedDrivers</name>
+			<name>ModifiedDrivers</name>
 			<type>2</type>
-			<location>C:/TarazWorkDir/TempLoc/PEControllerBSP/Drivers/ModifiedDrivers</location>
+			<locationURI>$%7BPARENT-4-PROJECT_LOC%7D/Drivers/ModifiedDrivers</locationURI>
 		</link>
 		<link>
 			<name>Drivers/STM32H7xx_HAL_Driver/stm32h7xx_hal.c</name>
