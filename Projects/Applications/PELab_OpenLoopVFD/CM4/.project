@@ -32,7 +32,7 @@
 		<link>
 			<name>ADCs</name>
 			<type>2</type>
-			<location>C:/TarazWorkDir/TempLoc/PEControllerBSP/Projects/Applications/PELab_OpenLoopVFD/ADCs</location>
+			<locationURI>$%7BPARENT-4-PROJECT_LOC%7D/ADCs</locationURI>
 		</link>
 		<link>
 			<name>Common</name>
@@ -40,9 +40,19 @@
 			<locationURI>PARENT-1-PROJECT_LOC/Common</locationURI>
 		</link>
 		<link>
-			<name>Configurations</name>
+			<name>CommonMain</name>
 			<type>2</type>
-			<location>C:/TarazWorkDir/TempLoc/PEControllerBSP/Projects/Applications/PELab_OpenLoopVFD/Configurations</location>
+			<locationURI>$%7BPARENT-4-PROJECT_LOC%7D/Common</locationURI>
+		</link>
+		<link>
+			<name>Control</name>
+			<type>2</type>
+			<locationURI>$%7BPARENT-4-PROJECT_LOC%7D/Control</locationURI>
+		</link>
+		<link>
+			<name>Display</name>
+			<type>2</type>
+			<locationURI>$%7BPARENT-4-PROJECT_LOC%7D/Display</locationURI>
 		</link>
 		<link>
 			<name>Drivers/ModifiedDrivers</name>

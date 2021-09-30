@@ -50,3 +50,7 @@ Mkfile.old
 dkms.conf
 *.bin
 *.list
+
+# Folders
+**/Debug/
+**/Release/

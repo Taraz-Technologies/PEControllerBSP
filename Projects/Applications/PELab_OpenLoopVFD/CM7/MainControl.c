@@ -20,9 +20,9 @@
 #define PWM_PERIOD_US									(40)
 
 #define PWM_FREQ  										((1000000U / PWM_PERIOD_US))
-#define MAX_FREQ											(60.0f)	
-#define MIN_FREQ											(1.0f)
-#define NOMINAL_MODULATION_INDEX			(0.7f)
+#define MAX_FREQ										(60.0f)
+#define MIN_FREQ										(1.0f)
+#define NOMINAL_MODULATION_INDEX						(0.7f)
 #define NOMINAL_FREQ									(50.0f)
 #define MAX_VOLTAGE										(4.5f)
 #define ACCELERATION									(1.00001f)
@@ -48,7 +48,7 @@ static inverter3Ph_init_config_t inverterInitConfig1 =
 	.pins = { 1, 3, 5 },  /* should be odd as these are pairs */
 	.dsblPin = 13,
 	.periodInUs = 40,
-	.interruptEnabled = true,			/* not cattered for right now */
+	.interruptEnabled = true,			/* not catered for right now */
 	.alignment = CENTER_ALIGNED,
 	.deadtimeInNanosec = 1000,
 	.deadtimeEnable = true,
@@ -59,13 +59,14 @@ static inverter3Ph_init_config_t inverterInitConfig2 =
 	.pins = { 7, 9, 11 },  /* should be odd as these are pairs */
 	.dsblPin = 14,
 	.periodInUs = 40,
-	.interruptEnabled = false,			/* not cattered for right now */
+	.interruptEnabled = false,			/* not catered for right now */
 	.alignment = CENTER_ALIGNED,
 	.deadtimeInNanosec = 1000,
 	.deadtimeEnable = true,
 	.resetCallback = Inverter3Ph_ResetSignal,
 };
 static volatile bool recompute = false;
+extern HRTIM_HandleTypeDef hhrtim;
 /*******************************************************************************
  * Code
  ******************************************************************************/
@@ -79,8 +80,6 @@ void MainControl_Init(void)
 	if(inverterConfig1 == NULL || inverterConfig2 == NULL)
 		Error_Handler();
 	
-//	for (int i = 13; i <= 14; i++)
-//		DoutManager_SelectMode(i, PWM_FNC_IO, GPIO_PIN_RESET);
 	DoutController_SelectMode(15, PWM_FNC_IO, GPIO_PIN_RESET);
 	DoutController_SelectMode(16, PWM_FNC_IO, GPIO_PIN_RESET);
 }

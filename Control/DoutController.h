@@ -27,12 +27,6 @@ typedef struct
 	digital_pin_t pin;
 	uint32_t AlternateFnc;
 } dout_pin_t;
-
-typedef enum
-{
-	PWM_FNC_PWM,
-	PWM_FNC_IO
-} pwm_fnc_t;
  /*******************************************************************************
  * Prototypes
  ******************************************************************************/
