@@ -215,8 +215,9 @@ void MainControl_Loop(void)
 			convert_wt2sincos(sSincos);
 			if(lockedPhase == false)
 			{
-				//DoutManager_SelectMode(15, PWM_FNC_IO, GPIO_PIN_SET);
-				//DoutManager_SelectMode(16, PWM_FNC_IO, GPIO_PIN_SET);		
+				// turn on relays once the phase is locked properly
+				// DoutManager_SelectMode(15, PWM_FNC_IO, GPIO_PIN_SET);
+				// DoutManager_SelectMode(16, PWM_FNC_IO, GPIO_PIN_SET);
 				lockedPhase = true;
 			}				
 			theta = sSincos->fTheta;
@@ -224,8 +225,6 @@ void MainControl_Loop(void)
 		
 		if(lockedPhase)
 		{
-//			Inverter3Ph_UpdateDuty(inverterConfig, duties);
-//			Inverter3Ph_UpdateSPWM(inverterConfig, theta, modulationIndex);
 			static LIB_3COOR_ABC_t sIabc; 
 			float duties[3];
 			FillGridCurrents(&sIabc);

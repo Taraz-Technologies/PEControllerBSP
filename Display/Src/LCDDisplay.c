@@ -161,7 +161,7 @@ static void ConfigIO(void)
 	HAL_GPIO_Init(GPIOG, &GPIO_InitStruct);
 }
 
-void ConfigLTDC()
+void ConfigLTDC(void)
 {
 	LTDC_LayerCfgTypeDef pLayerCfg = {0};
 	hltdc.Instance = LTDC;

@@ -89,7 +89,10 @@ static HRTIM_OutputCfgTypeDef pOutputCfg =
 /*******************************************************************************
  * Code
  ******************************************************************************/
-/*! @brief initialize the pwm modules */
+/**
+ * @brief Initialize the relevant PWM modules (high Precision timers)
+ *
+ */
 void PWM1_10_Drivers_Init(void)
 {
 	if(moduleEnabled)
@@ -110,7 +113,16 @@ void PWM1_10_Drivers_Init(void)
     Error_Handler();
 	moduleEnabled = true;
 }
-/*! @brief update the duty cycle from 0-1 */
+/**
+ * @brief
+ *
+ * @param pwmNo Channel no of the first PWM Channel in the pair (Valid Values 1,3,5,7,9)
+ * 				 Channel1 = pwmNo
+ * 				 Channel2 = pwmNo + 1
+ * @param duty duty cycle to be applied to the pair (Range 0-1)
+ * @param *config Pointer to a  pwm_pair_config_t structure that contains the configuration
+ * 				   parameters for the PWM pair
+ */
 void PWM1_10_UpdatePair(uint32_t pwmNo, float duty, pwm_pair_config_t* config)
 {
 	uint32_t TimerIdx = (pwmNo - 1) / 2;
@@ -133,7 +145,17 @@ void PWM1_10_UpdatePair(uint32_t pwmNo, float duty, pwm_pair_config_t* config)
 		MODIFY_REG(hhrtim.Instance->sTimerxRegs[TimerIdx].TIMxCR, HRTIM_TIMCR_DELCMP2, 0U);
 	}
 }
-/*! @brief Confiure the inverted pair */
+/**
+ * @brief Configure the inverted pair
+ *
+ * @param pwmNo Channel no of the first PWM Channel in the pair (Valid Values 1,3,5,7,9)
+ * 				 Channel1 = pwmNo
+ * 				 Channel2 = pwmNo + 1
+ * @param *config Pointer to a  pwm_pair_config_t structure that contains the configuration
+ * 				   parameters for the PWM pair
+ * @return UpdatePWMPair Returns the function pointer of the type UpdatePWMPair which needs to be called
+ * 						  whenever the duty cycles of the pair need to be updated
+ */
 UpdatePWMPair PWM1_10_ConfigPair(uint32_t pwmNo, pwm_pair_config_t* config)
 {
 	uint32_t TimerIdx = (pwmNo - 1) / 2;

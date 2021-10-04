@@ -45,10 +45,11 @@
 									<listOptionValue builtIn="false" value="../../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy"/>
 									<listOptionValue builtIn="false" value="../../Drivers/CMSIS/Device/ST/STM32H7xx/Include"/>
 									<listOptionValue builtIn="false" value="../../Drivers/CMSIS/Include"/>
-									<listOptionValue builtIn="false" value="../../../../../ADCs"/>
-									<listOptionValue builtIn="false" value="../../../../../Common"/>
-									<listOptionValue builtIn="false" value="../../../../../Control"/>
-									<listOptionValue builtIn="false" value="../../../../../Drivers/ModifiedDrivers"/>
+									<listOptionValue builtIn="false" value="../../../../../ADCs/Inc"/>
+									<listOptionValue builtIn="false" value="../../../../../Common/Inc"/>
+									<listOptionValue builtIn="false" value="../../../../../Control/Inc"/>
+									<listOptionValue builtIn="false" value="../../../../../Drivers/ModifiedDrivers/Inc"/>
+									<listOptionValue builtIn="false" value="../../../../../Display/Inc"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.1929048227" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
 							</tool>
@@ -82,7 +83,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Display"/>
 						<entry excluding="ModifiedDrivers/PWM11_16_Drivers.c|ModifiedDrivers/PWMDriver.h|ModifiedDrivers/PWM1_10_Drivers.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
-						<entry excluding="PWM11_16_Drivers.c|PWM1_10_Drivers.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="ModifiedDrivers"/>
+						<entry excluding="Src/PWM11_16_Drivers.c|Src/PWM1_10_Drivers.c|PWM11_16_Drivers.c|PWM1_10_Drivers.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="ModifiedDrivers"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
