@@ -11,6 +11,7 @@
 /*******************************************************************************
  * Includes
  ******************************************************************************/
+#include "GeneralHeader.h"
 #include <DigitalPins.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -39,7 +40,6 @@ typedef struct
 	uint32_t periodInUsec;
 	uint32_t dtInNanoSec;
 } pwm_pair_config_t;
-
 typedef struct
 {
 	pwm_alignment_t alignment;
@@ -54,7 +54,19 @@ typedef struct
 	pwm_channel_t ch2;
 } pwm_individual_config_t;
 
-typedef void (*UpdatePWMPair)(uint32_t pwmNo, float duty, pwm_pair_config_t *config);
+/**
+ * @brief structure containing the configuration of a certain PWM channel
+ *
+ */
+typedef struct
+{
+	bool interruptEnabled;
+	pwm_alignment_t alignment;
+	uint32_t periodInUsec;
+} pwm_ch_config_t;
+
+typedef void (*PWMPairUpdateCallback)(uint32_t pwmNo, float duty, pwm_pair_config_t *config);
+typedef void (*PWMUpdateCallback)(uint32_t pwmNo, float duty, pwm_ch_config_t *config);
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
@@ -71,10 +83,10 @@ void PWM1_10_Drivers_Init(void);
  * 				 Channel2 = pwmNo + 1
  * @param *config Pointer to a  pwm_pair_config_t structure that contains the configuration
  * 				   parameters for the PWM pair
- * @return UpdatePWMPair Returns the function pointer of the type UpdatePWMPair which needs to be called
+ * @return PWMPairUpdateCallback Returns the function pointer of the type PWMPairUpdateCallback which needs to be called
  * 						  whenever the duty cycles of the pair need to be updated
  */
-UpdatePWMPair PWM1_10_ConfigPair(uint32_t pwmNo, pwm_pair_config_t *config);
+PWMPairUpdateCallback PWM1_10_ConfigPair(uint32_t pwmNo, pwm_pair_config_t *config);
 /**
  * @brief Update the PWM of the Channels
  *
@@ -86,6 +98,23 @@ UpdatePWMPair PWM1_10_ConfigPair(uint32_t pwmNo, pwm_pair_config_t *config);
  * 				   parameters for the PWM pair
  */
 void PWM1_10_UpdatePair(uint32_t pwmNo, float duty, pwm_pair_config_t *config);
+/**
+ * @brief Configure the PWM channel
+ *
+ * @param pwmNo channel no
+ * @param *config Pointer to the channel configuration structure
+ * @return PWMUpdateCallback Returns the function pointer of the type PWMUpdateCallback which needs to be called
+ * 						  whenever the duty cycles of the channel needs to be updated
+ */
+PWMUpdateCallback PWM1_10_ConfigChannel(uint32_t pwmNo, pwm_ch_config_t* config);
+/**
+ * @brief Update the PWM Channels duty cycle
+ *
+ * @param pwmNo channel no
+ * @param duty duty cycle to be applied to the channel (Range 0-1)
+ * @param *config Pointer to the channel configuration structure
+ */
+void PWM1_10_UpdateChannel(uint32_t pwmNo, float duty, pwm_ch_config_t* config);
 /**
  * @brief Initialize the relevant PWM modules (Timer1). Frequency is constant for the PWMs 11-16
  *
@@ -101,10 +130,10 @@ void PWM11_16_Drivers_Init(pwm_pair_config_t *config);
  * 				 Channel2 = pwmNo + 1
  * @param *config Pointer to a  pwm_pair_config_t structure that contains the configuration
  * 				   parameters for the PWM pair
- * @return UpdatePWMPair Returns the function pointer of the type UpdatePWMPair which needs to be called
+ * @return PWMPairUpdateCallback Returns the function pointer of the type PWMPairUpdateCallback which needs to be called
  * 						  whenever the duty cycles of the pair need to be updated
  */
-UpdatePWMPair PWM11_16_ConfigPair(uint32_t pwmNo, pwm_pair_config_t *config);
+PWMPairUpdateCallback PWM11_16_ConfigPair(uint32_t pwmNo, pwm_pair_config_t *config);
 /**
  * @brief Update the PWM of the Channels
  *
@@ -116,6 +145,23 @@ UpdatePWMPair PWM11_16_ConfigPair(uint32_t pwmNo, pwm_pair_config_t *config);
  * 				   parameters for the PWM pair
  */
 void PWM11_16_UpdatePair(uint32_t pwmNo, float duty, pwm_pair_config_t *config);
+/**
+ * @brief Configure the PWM channel
+ *
+ * @param pwmNo channel no. Valid Values (11, 13, 15)
+ * @param *config Pointer to the channel configuration structure
+ * @return PWMUpdateCallback Returns the function pointer of the type PWMUpdateCallback which needs to be called
+ * 						  whenever the duty cycles of the channel needs to be updated
+ */
+PWMUpdateCallback PWM11_16_ConfigChannel(uint32_t pwmNo, pwm_ch_config_t* config);
+/**
+ * @brief Update the PWM Channels duty cycle
+ *
+ * @param pwmNo channel no. Valid Values (11, 13, 15)
+ * @param duty duty cycle to be applied to the channel (Range 0-1)
+ * @param *config Pointer to the channel configuration structure
+ */
+void PWM11_16_UpdateChannel(uint32_t pwmNo, float duty, pwm_ch_config_t* config);
 /*******************************************************************************
  * Variables
  ******************************************************************************/
@@ -130,10 +176,10 @@ extern TIM_HandleTypeDef htim1;
  * 				 Channel2 = pwmNo + 1
  * @param *config Pointer to a  pwm_pair_config_t structure that contains the configuration
  * 				   parameters for the PWM pair
- * @return UpdatePWMPair Returns the function pointer of the type UpdatePWMPair which needs to be called
+ * @return PWMPairUpdateCallback Returns the function pointer of the type PWMPairUpdateCallback which needs to be called
  * 						  whenever the duty cycles of the pair need to be updated
  */
-static UpdatePWMPair PWMDriver_ConfigPair(uint16_t pwmNo,
+static PWMPairUpdateCallback PWMDriver_ConfigPair(uint16_t pwmNo,
 		pwm_pair_config_t *config)
 {
 	if (pwmNo <= 10)
@@ -167,6 +213,51 @@ static void PWMDriver_UpdatePair(uint16_t pwmNo, float duty,
 		PWM1_10_UpdatePair(pwmNo, duty, config);
 	else if (pwmNo <= 16)
 		PWM11_16_UpdatePair(pwmNo, duty, config);
+}
+
+/**
+ * @brief Configure the PWM channel
+ *
+ * @param pwmNo channel no
+ * @param *config Pointer to the channel configuration structure
+ * @return PWMUpdateCallback Returns the function pointer of the type PWMUpdateCallback which needs to be called
+ * 						  whenever the duty cycles of the channel needs to be updated
+ */
+static PWMUpdateCallback PWMDriver_ConfigChannel(uint16_t pwmNo,
+		pwm_ch_config_t *config)
+{
+	if (pwmNo <= 10)
+	{
+		PWM1_10_Drivers_Init();
+		return PWM1_10_ConfigChannel(pwmNo, config);
+	}
+	else if (pwmNo <= 16)
+	{
+		pwm_pair_config_t pairConfig = {
+						.alignment = config->alignment,
+						.dtEnabled = false,
+						.interruptEnabled = config->interruptEnabled,
+						.periodInUsec = config->periodInUsec
+				};
+		PWM11_16_Drivers_Init(&pairConfig);
+		return PWM11_16_ConfigChannel(pwmNo, config);
+	}
+	return NULL;
+}
+
+/**
+ * @brief Update the PWM Channels' duty cycle
+ *
+ * @param pwmNo channel no
+ * @param duty duty cycle to be applied to the channel (Range 0-1)
+ * @param *config Pointer to the channel configuration structure
+ */
+static void PWMDriver_UpdateChannel(uint32_t pwmNo, float duty, pwm_ch_config_t* config)
+{
+	if (pwmNo <= 10)
+		PWM1_10_UpdateChannel(pwmNo, duty, config);
+	else if (pwmNo <= 16)
+		PWM11_16_UpdateChannel(pwmNo, duty, config);
 }
 
 #endif

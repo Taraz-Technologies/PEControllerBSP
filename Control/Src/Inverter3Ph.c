@@ -71,12 +71,12 @@ static void TnpcPWM_UpdatePair(uint32_t pwmNo, float duty, pwm_pair_config_t *co
  * @param pwmNo Channel no of the initial switch of the leg.
  * @param *initConfig pointer to the initial configuration of the inverter
  * @param *handle  pointer to the handle of the inverter
- * @return UpdatePWMPair Returns the function pointer of the type UpdatePWMPair which needs to be called
+ * @return PWMPairUpdateCallback Returns the function pointer of the type PWMPairUpdateCallback which needs to be called
  * 						  whenever the duty cycles of the leg needs to be updated
  */
-static UpdatePWMPair ConfigSingleLeg(uint16_t pwmNo, inverter3Ph_init_config_t* initConfig, inverter3Ph_config_t* handle)
+static PWMPairUpdateCallback ConfigSingleLeg(uint16_t pwmNo, inverter3Ph_init_config_t* initConfig, inverter3Ph_config_t* handle)
 {
-	UpdatePWMPair callback = NULL;
+	PWMPairUpdateCallback callback = NULL;
 	callback = PWMDriver_ConfigPair(pwmNo, &handle->pairConfig);
 	DoutController_SelectMode(pwmNo, PWM_FNC_PWM, GPIO_PIN_RESET);
 	DoutController_SelectMode(pwmNo + 1, PWM_FNC_PWM, GPIO_PIN_RESET);

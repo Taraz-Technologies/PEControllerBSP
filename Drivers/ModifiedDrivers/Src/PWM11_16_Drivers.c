@@ -41,6 +41,7 @@ static TIM_OC_InitTypeDef sConfigOC =
 		.OCNIdleState = TIM_OCNIDLESTATE_SET,
 };
 TIM_HandleTypeDef htim1;
+static bool moduleEnabled = false;
 /*******************************************************************************
  * Code
  ******************************************************************************/
@@ -52,6 +53,8 @@ TIM_HandleTypeDef htim1;
  */
 void PWM11_16_Drivers_Init(pwm_pair_config_t* config)
 {
+	if(moduleEnabled)
+		return;
 	__HAL_RCC_TIM1_CLK_ENABLE();
 	htim1.Instance = TIM1;
 	htim1.Init.Prescaler = 0;
@@ -96,9 +99,10 @@ void PWM11_16_Drivers_Init(pwm_pair_config_t* config)
 	sBreakDeadTimeConfig.AutomaticOutput = config->dtEnabled ? TIM_AUTOMATICOUTPUT_ENABLE : TIM_AUTOMATICOUTPUT_DISABLE;
 	if (HAL_TIMEx_ConfigBreakDeadTime(&htim1, &sBreakDeadTimeConfig) != HAL_OK)
 		Error_Handler();
+	moduleEnabled = true;
 }
 /**
- * @brief
+ * @brief Update the PWM Pairs duty cycle
  *
  * @param pwmNo Channel no of the first PWM Channel in the pair (Valid Values 11,13,15)
  * 				 Channel1 = pwmNo
@@ -112,7 +116,6 @@ void PWM11_16_UpdatePair(uint32_t pwmNo, float duty, pwm_pair_config_t* config)
 	uint32_t ch = (pwmNo - 11) / 2; 
 	*(((uint32_t*)&(TIM1->CCR1)) + ch) = (config->alignment == CENTER_ALIGNED ? 1 - duty : duty) * TIM1->ARR;
 }
-
 /**
  * @brief Configure the inverted pair
  *
@@ -121,15 +124,52 @@ void PWM11_16_UpdatePair(uint32_t pwmNo, float duty, pwm_pair_config_t* config)
  * 				 Channel2 = pwmNo + 1
  * @param *config Pointer to a  pwm_pair_config_t structure that contains the configuration
  * 				   parameters for the PWM pair
- * @return UpdatePWMPair Returns the function pointer of the type UpdatePWMPair which needs to be called
+ * @return PWMPairUpdateCallback Returns the function pointer of the type PWMPairUpdateCallback which needs to be called
  * 						  whenever the duty cycles of the pair need to be updated
  */
-UpdatePWMPair PWM11_16_ConfigPair(uint32_t pwmNo, pwm_pair_config_t* config)
+PWMPairUpdateCallback PWM11_16_ConfigPair(uint32_t pwmNo, pwm_pair_config_t* config)
 {
 	uint32_t ch = (pwmNo - 11);
-	ch = ch == TIM_CHANNEL_1 ? 0 : (ch == 2 ? TIM_CHANNEL_2 : TIM_CHANNEL_3);
+	// If pair not selected correctly
+	if(ch % 2 != 0)
+		Error_Handler();
+	ch = ch == 0 ? TIM_CHANNEL_1 : (ch == 2 ? TIM_CHANNEL_2 : TIM_CHANNEL_3);
 	if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, ch) != HAL_OK)
 		Error_Handler();
 	return PWM11_16_UpdatePair;
 }
+
+/**
+ * @brief Update the PWM Channels duty cycle
+ *
+ * @param pwmNo channel no. Valid Values (11, 13, 15)
+ * @param duty duty cycle to be applied to the channel (Range 0-1)
+ * @param *config Pointer to the channel configuration structure
+ */
+void PWM11_16_UpdateChannel(uint32_t pwmNo, float duty, pwm_ch_config_t* config)
+{
+	uint32_t ch = (pwmNo - 11) / 2;
+	*(((uint32_t*)&(TIM1->CCR1)) + ch) = (config->alignment == CENTER_ALIGNED ? 1 - duty : duty) * TIM1->ARR;
+}
+
+/**
+ * @brief Configure the PWM channel
+ *
+ * @param pwmNo channel no. Valid Values (11, 13, 15)
+ * @param *config Pointer to the channel configuration structure
+ * @return PWMUpdateCallback Returns the function pointer of the type PWMUpdateCallback which needs to be called
+ * 						  whenever the duty cycles of the channel needs to be updated
+ */
+PWMUpdateCallback PWM11_16_ConfigChannel(uint32_t pwmNo, pwm_ch_config_t* config)
+{
+	uint32_t ch = (pwmNo - 11);
+	// Even pairs may only be selected as inverted channels
+	if(ch % 2 != 0)
+		Error_Handler();
+	ch = ch == 0 ? TIM_CHANNEL_1 : (ch == 2 ? TIM_CHANNEL_2 : TIM_CHANNEL_3);
+	if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, ch) != HAL_OK)
+		Error_Handler();
+	return PWM11_16_UpdateChannel;
+}
+
 /* EOF */

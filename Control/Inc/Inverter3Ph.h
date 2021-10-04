@@ -41,7 +41,7 @@ typedef struct
 	const dout_pin_t* dsblePins;
 	uint16_t doutPins[3];
 	pwm_pair_config_t pairConfig;
-	UpdatePWMPair fncs[3];
+	PWMPairUpdateCallback fncs[3];
 } inverter3Ph_config_t;
 typedef struct
 {
