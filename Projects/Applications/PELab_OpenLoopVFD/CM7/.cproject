@@ -50,6 +50,7 @@
 									<listOptionValue builtIn="false" value="../../../../../Common/Inc"/>
 									<listOptionValue builtIn="false" value="../../../../../Drivers/ModifiedDrivers/Inc"/>
 									<listOptionValue builtIn="false" value="../Inc"/>
+									<listOptionValue builtIn="false" value="../../../../../Drivers/BSP/Inc"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.1694427148" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
 							</tool>
@@ -77,6 +78,7 @@
 					</folderInfo>
 					<sourceEntries>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="ADCs"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="BSP"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Common"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="CommonMain"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Control"/>
@@ -136,6 +138,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/PELab_OpenLoopVFD_CM4/ADCs}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/PELab_OpenLoopVFD/Common}&quot;"/>
 									<listOptionValue builtIn="false" value="../../Drivers/ModifiedDrivers"/>
+									<listOptionValue builtIn="false" value="../../../../../Drivers/BSP/Inc"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.917277749" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
 							</tool>

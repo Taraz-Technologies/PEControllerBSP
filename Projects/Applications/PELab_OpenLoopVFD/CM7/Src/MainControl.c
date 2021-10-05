@@ -80,8 +80,8 @@ void MainControl_Init(void)
 	if(inverterConfig1 == NULL || inverterConfig2 == NULL)
 		Error_Handler();
 	
-	DoutController_SelectMode(15, PWM_FNC_IO, GPIO_PIN_RESET);
-	DoutController_SelectMode(16, PWM_FNC_IO, GPIO_PIN_RESET);
+	Dout_SetAsIOPin(15, GPIO_PIN_RESET);
+	Dout_SetAsIOPin(16, GPIO_PIN_RESET);
 }
 
 void MainControl_Run(void)
@@ -215,9 +215,7 @@ void MainControl_Loop(void)
 			convert_wt2sincos(sSincos);
 			if(lockedPhase == false)
 			{
-				// turn on relays once the phase is locked properly
-				// DoutManager_SelectMode(15, PWM_FNC_IO, GPIO_PIN_SET);
-				// DoutManager_SelectMode(16, PWM_FNC_IO, GPIO_PIN_SET);
+				// turn on relays once the phase is locked properly --todo--
 				lockedPhase = true;
 			}				
 			theta = sSincos->fTheta;

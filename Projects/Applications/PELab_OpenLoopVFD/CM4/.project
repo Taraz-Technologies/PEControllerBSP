@@ -35,6 +35,11 @@
 			<locationURI>$%7BPARENT-4-PROJECT_LOC%7D/ADCs</locationURI>
 		</link>
 		<link>
+			<name>BSP</name>
+			<type>2</type>
+			<locationURI>$%7BPARENT-4-PROJECT_LOC%7D/Drivers/BSP</locationURI>
+		</link>
+		<link>
 			<name>Common</name>
 			<type>2</type>
 			<locationURI>PARENT-1-PROJECT_LOC/Common</locationURI>

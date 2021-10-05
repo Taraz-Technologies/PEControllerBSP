@@ -9,7 +9,7 @@
 /*******************************************************************************
  * Includes
  ******************************************************************************/
-#include "DoutController.h"
+#include "DoutPort.h"
 #include "PWMDriver.h"
 #include "Inverter3Ph.h"
 #include "Control.h"
@@ -78,15 +78,15 @@ static PWMPairUpdateCallback ConfigSingleLeg(uint16_t pwmNo, inverter3Ph_init_co
 {
 	PWMPairUpdateCallback callback = NULL;
 	callback = PWMDriver_ConfigPair(pwmNo, &handle->pairConfig);
-	DoutController_SelectMode(pwmNo, PWM_FNC_PWM, GPIO_PIN_RESET);
-	DoutController_SelectMode(pwmNo + 1, PWM_FNC_PWM, GPIO_PIN_RESET);
+	Dout_SetAsPWMPin(pwmNo);
+	Dout_SetAsPWMPin(pwmNo + 1);
 	/* for Tnpc use four switches */
 	if (initConfig->legType == LEG_TNPC)
 	{
 		PWMDriver_ConfigPair(pwmNo + 2, &handle->pairConfig);
 		callback = TnpcPWM_UpdatePair; 				/* use this function to update all 4 switch duty cycles */
-		DoutController_SelectMode(pwmNo + 2, PWM_FNC_PWM, GPIO_PIN_RESET);
-		DoutController_SelectMode(pwmNo + 3, PWM_FNC_PWM, GPIO_PIN_RESET);
+		Dout_SetAsPWMPin(pwmNo + 2);
+		Dout_SetAsPWMPin(pwmNo + 3);
 	}
 	return callback;
 }
@@ -109,10 +109,6 @@ inverter3Ph_config_t* Inverter3Ph_Init(inverter3Ph_init_config_t* initConfig)
 
 	inverter3Ph_config_t* handle = &handles[handleCounter++];
 
-	/* check module usage */
-	bool pwm1_10_needed = initConfig->pins[0] < 11 ||  initConfig->pins[1] < 11 || initConfig->pins[2] < 11;
-	bool pwm11_16_needed = initConfig->pins[0] > 10 ||  initConfig->pins[1] > 10 || initConfig->pins[2] > 10;
-
 	handle->pairConfig.alignment = initConfig->alignment;
 	handle->pairConfig.dtEnabled = initConfig->deadtimeEnable;
 	handle->pairConfig.dtInNanoSec = initConfig->deadtimeInNanosec;
@@ -130,7 +126,7 @@ inverter3Ph_config_t* Inverter3Ph_Init(inverter3Ph_init_config_t* initConfig)
 
 	/* disable pin setting should include multiple disable pins --todo-- */
 	if (initConfig->dsblPin)
-		handle->dsblePins = DoutController_SelectMode(initConfig->dsblPin, PWM_FNC_IO, GPIO_PIN_RESET);
+		handle->dsblePins = Dout_SetAsIOPin(initConfig->dsblPin, GPIO_PIN_RESET);
 
 	return handle;
 }

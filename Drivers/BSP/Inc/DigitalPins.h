@@ -1,11 +1,13 @@
-/*! 
-@file DigitalPins.h
-@brief 
-@details 
-
-@author Waqas Ehsan Butt
-@copyright Taraz Technologies Pvt. Ltd.
-*/
+/**
+ ********************************************************************************
+ * @file    DigitalPins.h
+ * @author Waqas Ehsan Butt
+ * @date    10 July 2021
+ * @copyright TarazTechnologies Pvt. Ltd.
+ *
+ * @brief
+ ********************************************************************************
+ */
 #ifndef DIGITAL_PINS_H
 #define DIGITAL_PINS_H
 /*******************************************************************************
@@ -63,3 +65,4 @@ static void DigitalPins_Init(void)
 
 #endif
 /* EOF */
+

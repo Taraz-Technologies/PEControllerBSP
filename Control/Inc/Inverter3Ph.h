@@ -13,7 +13,7 @@
  ******************************************************************************/
 #include "GeneralHeader.h"
 #include "PWMDriver.h"
-#include "DoutController.h"
+#include "DoutPort.h"
 /*******************************************************************************
  * Defines
  ******************************************************************************/
@@ -37,8 +37,8 @@ typedef enum
  ******************************************************************************/
 typedef struct
 {
-	dout_pin_t* phasePins[3];
-	const dout_pin_t* dsblePins;
+	digital_pin_t* phasePins[3];
+	const digital_pin_t* dsblePins;
 	uint16_t doutPins[3];
 	pwm_pair_config_t pairConfig;
 	PWMPairUpdateCallback fncs[3];
