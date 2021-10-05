@@ -8,7 +8,8 @@
  * @brief   Open Loop V/f Control
  ********************************************************************************
  */
-
+#pragma GCC push_options
+#pragma GCC optimize ("O3")
 /********************************************************************************
  * Includes
  *******************************************************************************/
@@ -81,5 +82,5 @@ void OpenLoopVfControl_GetDuties(openloopvf_config_t* config, float* duties)
 	GenerateSPWM(config->theta, config->modulationIndex, duties);
 }
 
-
+#pragma GCC pop_options
 /* EOF */

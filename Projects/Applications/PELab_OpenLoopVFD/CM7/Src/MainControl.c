@@ -1,11 +1,13 @@
-/*! 
-@file MainControl.c
-@brief 
-@details 
-
-@author Waqas Ehsan Butt
-@copyright Taraz Technologies Pvt. Ltd.
-*/
+/**
+ ********************************************************************************
+ * @file    	MainControl.c
+ * @author  	Waqas Ehsan Butt
+ * @date    	Oct 5, 2021
+ * @copyright 	TarazTechnologies Pvt. Ltd.
+ *
+ * @brief  Main Controller for this Application
+ ********************************************************************************
+ */
 /*******************************************************************************
  * Includes
  ******************************************************************************/
@@ -24,7 +26,7 @@
  ******************************************************************************/
 
 /*******************************************************************************
- * Structs
+ * Structures
  ******************************************************************************/
 
  /*******************************************************************************
@@ -119,9 +121,9 @@ void HAL_HRTIM_CounterResetCallback(HRTIM_HandleTypeDef * hhrtim,
 /*! @brief Fill the Voltage ABC Units */
 static void FillGridVoltages(LIB_3COOR_ABC_t* sVabc)
 {
-	sVabc->fA = adcVals.V1; 
-	sVabc->fB = adcVals.V2;
-	sVabc->fC = adcVals.V3;
+	sVabc->a = adcVals.V1;
+	sVabc->b = adcVals.V2;
+	sVabc->c = adcVals.V3;
 }
 
 /*! @brief fill the grid current values */
@@ -131,9 +133,9 @@ static void FillGridCurrents(LIB_3COOR_ABC_t* sIabc)
 //  sIabc->fB = adcVals.Ih2;
 //	sIabc->fC = adcVals.Ih3;
 	
-	sIabc->fA = adcVals.V1; 
-	sIabc->fB = adcVals.V2;
-	sIabc->fC = adcVals.V3;
+	sIabc->a = adcVals.V1;
+	sIabc->b = adcVals.V2;
+	sIabc->c = adcVals.V3;
 }
 
 void MainControl_Loop(void)
