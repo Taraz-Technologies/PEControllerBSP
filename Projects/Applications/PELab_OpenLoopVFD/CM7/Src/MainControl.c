@@ -14,18 +14,11 @@
 #include "MainControl.h"
 #include "Control.h"
 #include "MAX11046App.h"
+#include "OpenLoopVfControl.h"
 /*******************************************************************************
  * Defines
  ******************************************************************************/
-#define PWM_PERIOD_US									(40)
 
-#define PWM_FREQ  										((1000000U / PWM_PERIOD_US))
-#define MAX_FREQ										(60.0f)
-#define MIN_FREQ										(1.0f)
-#define NOMINAL_MODULATION_INDEX						(0.7f)
-#define NOMINAL_FREQ									(50.0f)
-#define MAX_VOLTAGE										(4.5f)
-#define ACCELERATION									(1.00001f)
 /*******************************************************************************
  * Enums
  ******************************************************************************/
@@ -123,52 +116,6 @@ void HAL_HRTIM_CounterResetCallback(HRTIM_HandleTypeDef * hhrtim,
 	recompute = true;
 }
 
-/*! 
-@brief Compute Open Loop Duty Cycles for V/f Control
-@description Computes the duty cycle for the next cycle. 
-Here the frequency starts from the MIN_FREQ value and keeps increasing till
-it reaches the MAX_FREQ value with constant acceleration given by ACCELERATION.
-The modulation index is acquired by using the nominal frequency and modulation
-index along with the current frequency to apply simple open loop V/F control
-@param duties- duty cycles of the inverter to be applied in the next cycle (0-1)
-*/
-static void OpenLoopVByfControl(float* theta, float* modulationIndex)
-{
-	// should get desired frequency from adc values incase of control through an ADC value
-	float desiredFreq = NOMINAL_FREQ * 0.5f;
-	if(desiredFreq < MIN_FREQ)
-		desiredFreq = MIN_FREQ;
-	if(desiredFreq > MAX_FREQ)
-		desiredFreq = MAX_FREQ;
-	float reqModulationIndex = (NOMINAL_MODULATION_INDEX * desiredFreq) / NOMINAL_FREQ;
-	// this is the current frequency value which should be varied very slowly
-	static float currFreq = MIN_FREQ;
-	// adjust the current frequency if needed
-	const float adjuster = ACCELERATION;						// for acceleration control can get it from the adc
-	if(currFreq < desiredFreq)
-	{
-		currFreq *= adjuster;
-		if(currFreq > desiredFreq)
-			currFreq = desiredFreq;
-	}
-	if(currFreq > desiredFreq)
-	{
-		currFreq /= adjuster;
-		if(currFreq < desiredFreq)
-			currFreq = desiredFreq;
-	}
-
-	// compute the current modulation index
-	*modulationIndex = (NOMINAL_MODULATION_INDEX * currFreq) / NOMINAL_FREQ;
-	
-	float divider = PWM_FREQ / currFreq;
-	float stepSize = TWO_PI / divider;
-	*theta += stepSize;
-	// Adjust the base theta
-	if(*theta > TWO_PI)
-		*theta -= TWO_PI;
-}
-
 /*! @brief Fill the Voltage ABC Units */
 static void FillGridVoltages(LIB_3COOR_ABC_t* sVabc)
 {
@@ -193,13 +140,14 @@ void MainControl_Loop(void)
 {
 	if(recompute)
 	{
-		static float theta = 0.5f;
-		static float modulationIndex = NOMINAL_MODULATION_INDEX * 0.5f;
 #if 1
 		float duties[3];
-		OpenLoopVByfControl(&theta, duties);
-		Inverter3Ph_UpdateSPWM(inverterConfig1, theta, modulationIndex);
-		Inverter3Ph_UpdateSPWM(inverterConfig2, theta, modulationIndex);
+		static openloopvf_config_t vfConfig = {
+				.pwmFreq = 25000, .acceleration = 1.00001f, .nominalFreq = 50, .nominalModulationIndex = 0.7f, .freq = 1.0f, .theta = 0, .reqFreq = 25,
+		};
+		OpenLoopVfControl_GetDuties(&vfConfig, duties);
+		Inverter3Ph_UpdateDuty(inverterConfig1, duties);
+		Inverter3Ph_UpdateDuty(inverterConfig2, duties);
 #else
 		static LIB_3COOR_ABC_t sVabc; 
 		static LIB_3COOR_DQ0_t sVdq0;
