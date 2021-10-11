@@ -51,7 +51,7 @@ extern "C" {
  */
 static inline void Transform_abc_alphaBeta(LIB_3COOR_ABC_t* abc, LIB_2COOR_ALBE_t* alphaBeta)
 {
-	alphaBeta->alpha = abc->a;
+	alphaBeta->alpha = (2 * abc->a - abc->b - abc->c) / (3.f);
 	alphaBeta->beta = (abc->b - abc->c ) / sqrtf(3.f);
 }
 
@@ -64,7 +64,7 @@ static inline void Transform_abc_alphaBeta(LIB_3COOR_ABC_t* abc, LIB_2COOR_ALBE_
 static inline void Transform_alphaBeta_abc(LIB_2COOR_ALBE_t* alphaBeta, LIB_3COOR_ABC_t* abc)
 {
 	abc->a = alphaBeta->alpha;
-	abc->b = ((sqrtf(3.f)/2.f)*alphaBeta->beta)-(alphaBeta->alpha/2.f);
+	abc->b = ((sqrtf(3.f) * alphaBeta->beta)- alphaBeta->alpha) / 2.f;
 	abc->c = -(abc->a + abc->b );
 }
 

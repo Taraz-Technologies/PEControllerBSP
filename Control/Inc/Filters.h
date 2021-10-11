@@ -33,7 +33,7 @@ typedef struct
 	/*! @brief pointer to the data array */
 	float* dataPtr;
 	/*! @brief no of samples per computation */
-	const int count;
+	int count;
 	/*! @brief initialize to zero - used internally */
 	int index;
 } mov_avg_float_t;

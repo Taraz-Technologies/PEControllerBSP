@@ -1,93 +1,74 @@
 /**
  ********************************************************************************
- * @file 		Pll.h
+ * @file    	BasicGridTieConrol.c
  * @author 		Waqas Ehsan Butt
- * @date 		Oct 5, 2021
+ * @date    	Oct 11, 2021
  * @copyright 	Taraz Technologies Pvt. Ltd.
  *
- * @brief
+ * @brief   
  ********************************************************************************
  */
-
-#ifndef INC_PLL_H_
-#define INC_PLL_H_
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 /********************************************************************************
  * Includes
  *******************************************************************************/
-#include "GeneralHeader.h"
-#include "Control.h"
+#include "BasicGridTieControl.h"
 /********************************************************************************
  * Defines
  *******************************************************************************/
-#define FILTER_DEFAULT_SIZE				(8)
-#define FILTER_MAX_SIZE					(32)
-#define FILTER_COUNT					(10)
-#define ACCEPTABLE_Q					(20.f)
-#define MAX_Q_DATA_INDEX				(25000)
+
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
-typedef enum
-{
-	PLL_INVALID,
-	PLL_LOCKED
-} pll_states_t;
+
 /********************************************************************************
  * Structures
  *******************************************************************************/
-typedef struct
-{
-	float* data;
-	mov_avg_float_t filt;
-	int size;
-} low_pass_filter_t;
 
-typedef struct
-{
-	float tempCycleMax;
-	float acceptableMax;
-	float cycleMax;
-	int index;
-	int maxIndex;
-} pll_info_t;
-
-typedef struct
-{
-	LIB_COOR_ALL_t coords;
-	low_pass_filter_t dFilt;
-	low_pass_filter_t qFilt;
-	pi_data_t compensator;
-	pll_info_t info;
-	pll_states_t status;
-	pll_states_t prevStatus;
-} pll_lock_t;
 /********************************************************************************
- * Exported Variables
+ * Static Variables
  *******************************************************************************/
 
 /********************************************************************************
- * Global Function Prototypes
+ * Global Variables
  *******************************************************************************/
-/**
- * @brief Lock the grid voltages using Pll
- *
- * @param pll Pointer to the data structure
- * @return pll_states_t PLL_LOCKED if grid phase successfully locked
- */
-pll_states_t Pll_LockGrid(pll_lock_t* pll);
+
+/********************************************************************************
+ * Function Prototypes
+ *******************************************************************************/
+
 /********************************************************************************
  * Code
  *******************************************************************************/
-
-
-#ifdef __cplusplus
+static void ConnectGrid()
+{
+	Error_Handler();  // --todo--
 }
-#endif
 
-#endif 
+/**
+ * @brief Evaluates the Duty Cycle Values for the Basic Grid Tie
+ *
+ * @param *gridTie Pointer to the parameter structure
+ * @param *duties resultant duty cycles for the inverter (Range 0 - 1)
+ */
+void BasicGridTieControl_GetDuties(basic_grid_tie_t* gridTie, float* duties)
+{
+	// copy the grid voltages
+	memcpy(&gridTie->pll.coords.abc, &gridTie->v1, 12);
+	pll_lock_t* pll = &gridTie->pll;
+
+	if (Pll_LockGrid(pll) == PLL_LOCKED)
+	{
+		if(pll->prevStatus == PLL_INVALID)
+			ConnectGrid();
+		Transform_abc_alphaBeta(&pll->coords.abc, &pll->coords.alphaBeta);
+		GetSVPWM_FromVref(&pll->coords.alphaBeta, gridTie->vdc, duties);
+	}
+	else
+	{
+		duties[0] = 0; duties[1] = 0; duties[2] = 0;
+	}
+}
+
+
 /* EOF */

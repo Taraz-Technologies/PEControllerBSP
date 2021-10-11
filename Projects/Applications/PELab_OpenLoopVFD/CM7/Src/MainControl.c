@@ -17,10 +17,14 @@
 #include "Control.h"
 #include "MAX11046App.h"
 #include "OpenLoopVfControl.h"
+#include "BasicGridTieControl.h"
 /*******************************************************************************
  * Defines
  ******************************************************************************/
+#define OPEN_LOOP_VF_CONTROL			(1)
+#define BASIC_GRID_TIE_CONTROL			(2)
 
+#define CONTROL_TYPE					(BASIC_GRID_TIE_CONTROL)
 /*******************************************************************************
  * Enums
  ******************************************************************************/
@@ -118,14 +122,6 @@ void HAL_HRTIM_CounterResetCallback(HRTIM_HandleTypeDef * hhrtim,
 	recompute = true;
 }
 
-/*! @brief Fill the Voltage ABC Units */
-static void FillGridVoltages(LIB_3COOR_ABC_t* sVabc)
-{
-	sVabc->a = adcVals.V1;
-	sVabc->b = adcVals.V2;
-	sVabc->c = adcVals.V3;
-}
-
 /*! @brief fill the grid current values */
 static void FillGridCurrents(LIB_3COOR_ABC_t* sIabc)
 {
@@ -142,49 +138,25 @@ void MainControl_Loop(void)
 {
 	if(recompute)
 	{
-#if 1
 		float duties[3];
+#if CONTROL_TYPE == OPEN_LOOP_VF_CONTROL
 		static openloopvf_config_t vfConfig = {
 				.pwmFreq = 25000, .acceleration = 1.00001f, .nominalFreq = 50, .nominalModulationIndex = 0.7f, .freq = 1.0f, .theta = 0, .reqFreq = 25,
 		};
 		OpenLoopVfControl_GetDuties(&vfConfig, duties);
 		Inverter3Ph_UpdateDuty(inverterConfig1, duties);
 		Inverter3Ph_UpdateDuty(inverterConfig2, duties);
-#else
-		static LIB_3COOR_ABC_t sVabc; 
-		static LIB_3COOR_DQ0_t sVdq0;
-		static bool lockedPhase = false;
-		LIB_3COOR_SINCOS_t* sSincos;
-		FillGridVoltages(&sVabc);
-		sSincos = LockVoltagePhase(&sVabc, &sVdq0);
-		
-		if(sSincos != NULL)
-		{
-			sSincos->fTheta += 0;
-			sSincos->fTheta = AdjustTheta(sSincos->fTheta);
-			convert_wt2sincos(sSincos);
-			if(lockedPhase == false)
-			{
-				// turn on relays once the phase is locked properly --todo--
-				lockedPhase = true;
-			}				
-			theta = sSincos->fTheta;
-		}
-		
-		if(lockedPhase)
-		{
-			static LIB_3COOR_ABC_t sIabc; 
-			float duties[3];
-			FillGridCurrents(&sIabc);
-			SetCurrent(&sIabc, sSincos, 5, duties);
-			Inverter3Ph_UpdateDuty(inverterConfig, duties);
-		}
-		if(sSincos != NULL)
-		{
-			sSincos->fTheta -= 0;
-			sSincos->fTheta = AdjustTheta(sSincos->fTheta);
-			convert_wt2sincos(sSincos);
-		}
+#elif CONTROL_TYPE == BASIC_GRID_TIE_CONTROL
+
+		static basic_grid_tie_t gridTie = {0};
+		gridTie.v1 = adcVals.V1;
+		gridTie.v2 = adcVals.V2;
+		gridTie.v3 = adcVals.V3;
+		gridTie.vdc = adcVals.Vdc1;
+
+		BasicGridTieControl_GetDuties(&gridTie, duties);
+		Inverter3Ph_UpdateDuty(inverterConfig1, duties);
+		Inverter3Ph_UpdateDuty(inverterConfig2, duties);
 #endif
 		recompute = false;
 	}
