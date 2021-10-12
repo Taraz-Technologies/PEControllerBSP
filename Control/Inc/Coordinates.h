@@ -24,8 +24,11 @@ extern "C" {
 /********************************************************************************
  * Defines
  *******************************************************************************/
+/** @brief Mathematical constant Pi */
 #define PI    										(3.141593f)
+/** @brief Mathematical constant Pi multiplied by 2 */
 #define TWO_PI 										(2 * PI)
+/** @brief Mathematical constant Pi divided by 3 */
 #define PI_3										(PI / 3)
 /********************************************************************************
  * Typedefs
@@ -34,44 +37,60 @@ extern "C" {
 /********************************************************************************
  * Structures
  *******************************************************************************/
+/** @brief Structure containing the ABC coordinates of the 3 phase system */
 typedef struct
 {
+	/** @brief First Phase Value */
 	float a;
+	/** @brief Second Phase Value */
 	float b;
+	/** @brief Third Phase Value */
 	float c;
 } LIB_3COOR_ABC_t;
 
+/** @brief Structure containing the Alpha Beta And Zero Coordinates of 3 phase system */
 typedef struct
 {
+	/** @brief Value of Alpha Axis */
 	float alpha;
+	/** @brief Value of Beta Axis */
 	float beta;
-} LIB_2COOR_ALBE_t;
+	/** @brief Value of Zero Axis */
+	float zero;
+} LIB_3COOR_ALBE0_t;
 
+/** @brief Structure containing the Angle information of the system */
 typedef struct
 {
-	float d;
-	float q;
-} LIB_2COOR_DQ_t;
-
-typedef struct
-{
+	/** @brief Value of Current Angle */
 	float theta;
+	/** @brief Sin value of the angle given by \p theta */
 	float sin;
+	/** @brief Cos value of the angle given by \p theta */
 	float cos;
 } LIB_3COOR_SINCOS_t;
 
+/** @brief Structure containing the DQ0 coordinates of the 3 phase system */
 typedef struct
 {
+	/** @brief Value of D Axis */
 	float d;
+	/** @brief Value of Q Axis */
 	float q;
+	/** @brief Value of Zero Axis */
 	float zero;
 } LIB_3COOR_DQ0_t;
 
+/** @brief Structure containing all coordinates of the 3 phase system in different coordinate systems */
 typedef struct
 {
+	/** @brief Structure for the ABC coordinates */
 	LIB_3COOR_ABC_t abc;
-	LIB_2COOR_ALBE_t alphaBeta;
+	/** @brief Structure for the Alpha Beta Zero coordinates */
+	LIB_3COOR_ALBE0_t alBe0;
+	/** @brief Structure for the DQ0 coordinates */
 	LIB_3COOR_DQ0_t dq0;
+	/** @brief Structure for the angle coordinates */
 	LIB_3COOR_SINCOS_t sinCosAngle;
 } LIB_COOR_ALL_t;
 /********************************************************************************

@@ -33,12 +33,20 @@ extern "C" {
 /********************************************************************************
  * Structures
  *******************************************************************************/
+/**
+ * @brief Data structure used by the basic grid tie controller
+ */
 typedef struct
 {
+	/*! @brief Voltage level of phase V */
 	float v1;
+	/*! @brief Voltage level of phase V */
 	float v2;
+	/*! @brief Voltage level of phase W */
 	float v3;
+	/*! @brief Voltage level of DC Link */
 	float vdc;
+	/*! @brief PLL structure used by the basic grid tie converter */
 	pll_lock_t pll;
 } basic_grid_tie_t;
 /********************************************************************************

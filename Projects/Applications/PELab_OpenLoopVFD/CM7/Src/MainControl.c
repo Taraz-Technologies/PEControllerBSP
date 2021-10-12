@@ -3,7 +3,7 @@
  * @file    	MainControl.c
  * @author  	Waqas Ehsan Butt
  * @date    	Oct 5, 2021
- * @copyright 	TarazTechnologies Pvt. Ltd.
+ * @copyright 	Taraz Technologies Pvt. Ltd.
  *
  * @brief  Main Controller for this Application
  ********************************************************************************
@@ -23,6 +23,7 @@
  ******************************************************************************/
 #define OPEN_LOOP_VF_CONTROL			(1)
 #define BASIC_GRID_TIE_CONTROL			(2)
+#define GRID_TIE_CONTROL				(3)
 
 #define CONTROL_TYPE					(BASIC_GRID_TIE_CONTROL)
 /*******************************************************************************
@@ -66,6 +67,9 @@ static inverter3Ph_init_config_t inverterInitConfig2 =
 };
 static volatile bool recompute = false;
 extern HRTIM_HandleTypeDef hhrtim;
+#if CONTROL_TYPE == BASIC_GRID_TIE_CONTROL
+basic_grid_tie_t gridTie = {0};
+#endif
 /*******************************************************************************
  * Code
  ******************************************************************************/
@@ -122,18 +126,6 @@ void HAL_HRTIM_CounterResetCallback(HRTIM_HandleTypeDef * hhrtim,
 	recompute = true;
 }
 
-/*! @brief fill the grid current values */
-static void FillGridCurrents(LIB_3COOR_ABC_t* sIabc)
-{
-//	sIabc->fA = adcVals.Ih1; 
-//  sIabc->fB = adcVals.Ih2;
-//	sIabc->fC = adcVals.Ih3;
-	
-	sIabc->a = adcVals.V1;
-	sIabc->b = adcVals.V2;
-	sIabc->c = adcVals.V3;
-}
-
 void MainControl_Loop(void)
 {
 	if(recompute)
@@ -148,7 +140,6 @@ void MainControl_Loop(void)
 		Inverter3Ph_UpdateDuty(inverterConfig2, duties);
 #elif CONTROL_TYPE == BASIC_GRID_TIE_CONTROL
 
-		static basic_grid_tie_t gridTie = {0};
 		gridTie.v1 = adcVals.V1;
 		gridTie.v2 = adcVals.V2;
 		gridTie.v3 = adcVals.V3;

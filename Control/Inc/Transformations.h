@@ -27,7 +27,31 @@ extern "C" {
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
+/** @brief Defines the transformation sources */
+typedef enum
+{
+	/** @brief Select the ABC coordinates as source */
+	SRC_ABC,
+	/** @brief Select the Alpha Beta 0 coordinates as source */
+	SRC_ALBE0,
+	/** @brief Select the DQ0 coordinates as source */
+	SRC_DQ0
+} transformation_source_t;
 
+/**
+ * @brief types of park transformation
+ *
+ * @note https://www.mathworks.com/help/physmod/sps/powersys/ref/alphabetazerotodq0dq0toalphabetazero.html?s_tid=doc_ta
+ */
+typedef enum
+{
+	/** @brief Rotating frame aligned with A axis at t = 0.
+		 This type of Park transformation is also known as the cosine-based Park transformation. */
+	PARK_COSINE,/**< PARK_COSINE */
+	/** @brief Rotating frame aligned 90 degrees behind A axis.
+		 This type of Park transformation is also known as the cosine-based Park transformation. */
+	PARK_SINE,  /**< PARK_SINE */
+} park_transform_type_t;
 /********************************************************************************
  * Structures
  *******************************************************************************/
@@ -44,54 +68,124 @@ extern "C" {
  * Code
  *******************************************************************************/
 /**
- * @brief Clarke Transform (abc to alpha beta transform)
+ * @brief Performs the Clarke and inverse Clarke transformations
  *
- * @param *abc Pointer to the abc coordinates
- * @param *alphaBeta Pointer to the alpha Beta coordinates
+ * @param *abc Pointer to the abc coordinates structure
+ * @param *alphaBeta0 Pointer to the alpha Beta zero coordinates structure
+ * @param src conversion source. If src = SRC_ABC converts from ABC to ALBE0 else converts from ALBE0 to ABC coordinates
+ *
+ * @note https://www.mathworks.com/help/physmod/sps/powersys/ref/abctoalphabetazeroalphabetazerotoabc.html
  */
-static inline void Transform_abc_alphaBeta(LIB_3COOR_ABC_t* abc, LIB_2COOR_ALBE_t* alphaBeta)
+static inline void Transform_abc_alBe0(LIB_3COOR_ABC_t* abc, LIB_3COOR_ALBE0_t* alBe0, transformation_source_t src)
 {
-	alphaBeta->alpha = (2 * abc->a - abc->b - abc->c) / (3.f);
-	alphaBeta->beta = (abc->b - abc->c ) / sqrtf(3.f);
+	if(src == SRC_ABC)
+	{
+		alBe0->alpha = (2 * abc->a - abc->b - abc->c) / (3.f);
+		alBe0->beta = (abc->b - abc->c ) / sqrtf(3.f);
+		alBe0->zero = (abc->a + abc->b + abc->c) / (3.f);
+	}
+	else
+	{
+		abc->a = alBe0->alpha + alBe0->zero;
+		abc->b = ((sqrtf(3.f) * alBe0->beta)- alBe0->alpha) / 2.f + alBe0->zero;
+		abc->c = (-(sqrtf(3.f) * alBe0->beta)- alBe0->alpha) / 2.f + alBe0->zero;
+	}
 }
 
 /**
- * @brief Inverse Clarke Transform (alpha beta to abc transform)	--todo--
+ * @brief Performs the Park and inverse Park transformations
  *
- * @param *alphaBeta Pointer to the alpha Beta coordinates
- * @param *abc Pointer to the abc coordinates
+ * @param *alphaBeta0 Pointer to the alpha Beta zero coordinates structure
+ * @param *dq0 Pointer to the dq0 coordinates structures
+ * @param *angle Pointer to the angle structure, Make sure that the Sines and Cosines are precomputed before calling this method
+ * @param src conversion source. If src = SRC_ALBE0 converts from ALBE0 to DQ0 else converts from DQ0 to ALBE0 coordinates
+ * @param parkType Select the park transformation types. For three phase systems set to PARK_SINE
+ *
+ * @note https://www.mathworks.com/help/physmod/sps/powersys/ref/alphabetazerotodq0dq0toalphabetazero.html?s_tid=doc_ta
  */
-static inline void Transform_alphaBeta_abc(LIB_2COOR_ALBE_t* alphaBeta, LIB_3COOR_ABC_t* abc)
+static inline void Transform_alphaBeta0_dq0(LIB_3COOR_ALBE0_t* alBe0, LIB_3COOR_DQ0_t* dq0, LIB_3COOR_SINCOS_t* angle,
+		transformation_source_t src, park_transform_type_t parkType)
 {
-	abc->a = alphaBeta->alpha;
-	abc->b = ((sqrtf(3.f) * alphaBeta->beta)- alphaBeta->alpha) / 2.f;
-	abc->c = -(abc->a + abc->b );
+	// ALBE0 to DQO transform
+	if (src == SRC_ALBE0)
+	{
+		if (parkType == PARK_COSINE)
+		{
+			dq0->d = alBe0->alpha * angle->cos + alBe0->beta * angle->sin;
+			dq0->q = -alBe0->alpha * angle->sin + alBe0->beta * angle->cos;
+			dq0->zero = alBe0->zero;
+		}
+		else
+		{
+			dq0->d = alBe0->alpha * cosf(angle->theta - (PI / 2)) + alBe0->beta * sinf(angle->theta - (PI / 2));
+			dq0->q = -alBe0->alpha * sinf(angle->theta - (PI / 2)) + alBe0->beta * cosf(angle->theta - (PI / 2));
+			dq0->zero = alBe0->zero;
+		}
+	}
+	// DQ0 to ALBE0 transform
+	else
+	{
+		if (parkType == PARK_COSINE)
+		{
+			alBe0->alpha = dq0->d * angle->cos - dq0->q * angle->sin;
+			alBe0->beta = dq0->d * angle->sin + dq0->q * angle->cos;
+			alBe0->zero = dq0->zero;
+		}
+		else
+		{
+			alBe0->alpha = dq0->d * cosf(angle->theta - (PI / 2)) - dq0->q * sinf(angle->theta - (PI / 2));
+			alBe0->beta = dq0->d * sinf(angle->theta - (PI / 2)) + dq0->q * cosf(angle->theta - (PI / 2));
+			alBe0->zero = dq0->zero;
+		}
+	}
 }
 
 /**
- * @brief Park Transform (alpha beta to DQ transform)
+ * @brief Performs the transforms between ABC and DQ0 coordinates
  *
- * @param *alphaBeta Pointer to the alpha Beta coordinates
- * @param *dq Pointer to the DQ coordinates
- * @param *angle Pointer to the angles
- */
-static inline void Transform_alphaBeta_dq(LIB_2COOR_ALBE_t* alphaBeta, LIB_2COOR_DQ_t* dq, LIB_3COOR_SINCOS_t* angle)
-{
-	dq->d = alphaBeta->alpha * angle->cos + alphaBeta->beta * angle->sin;
-	dq->q = alphaBeta->beta * angle->cos - alphaBeta->alpha * angle->sin;
-}
-
-/**
- * @brief Inverse Park Transform (alpha beta to dq transform)
+ * @param *abc Pointer to the abc coordinates structure
+ * @param *dq0 Pointer to the dq0 coordinates structures
+ * @param *angle Pointer to the angle structure, Make sure that the Sines and Cosines are precomputed before calling this method
+ * @param src conversion source. If src = SRC_ABC converts from ABC to DQ0 else converts from DQ0 to ABC coordinates
+ * @param parkType Select the park transformation types. For three phase systems set to PARK_SINE
  *
- * @param *dq Pointer to the DQ coordinates
- * @param *alphaBeta Pointer to the alpha Beta coordinates
- * @param *angle Pointer to the angles
+ * @note https://www.mathworks.com/help/physmod/sps/powersys/ref/abctodq0dq0toabc.html?s_tid=doc_ta
  */
-static inline void Transform_dq_alphaBeta(LIB_2COOR_DQ_t* dq, LIB_2COOR_ALBE_t* alphaBeta, LIB_3COOR_SINCOS_t* angle)
+static inline void Transform_abc_dq0(LIB_3COOR_ABC_t* abc, LIB_3COOR_DQ0_t* dq0, LIB_3COOR_SINCOS_t* angle,
+		transformation_source_t src, park_transform_type_t parkType)
 {
-	alphaBeta->alpha = dq->d * angle->cos - dq->q * angle->sin;
-	alphaBeta->beta = dq->d * angle->sin + dq->q * angle->cos;
+	// ABC to DQO transform
+	if (src == SRC_ABC)
+	{
+		if (parkType == PARK_COSINE)
+		{
+			dq0->d = 2/3.f * (abc->a * cosf(angle->theta) + abc->b * cosf((angle->theta - TWO_PI/3)) + abc->c * cosf((angle->theta + TWO_PI/3)));
+			dq0->q = -2/3.f * (abc->a * sinf(angle->theta) + abc->b * sinf((angle->theta - TWO_PI/3)) + abc->c * sinf((angle->theta + TWO_PI/3)));
+			dq0->zero = (abc->a + abc->b + abc->c) / 3.f;
+		}
+		else
+		{
+			dq0->d = 2/3.f * (abc->a * sinf(angle->theta) + abc->b * sinf((angle->theta - TWO_PI/3)) + abc->c * sinf((angle->theta + TWO_PI/3)));
+			dq0->q = 2/3.f * (abc->a * cosf(angle->theta) + abc->b * cosf((angle->theta - TWO_PI/3)) + abc->c * cosf((angle->theta + TWO_PI/3)));
+			dq0->zero = 1/3.f * (abc->a + abc->b + abc->c );
+		}
+	}
+	// DQ0 to ABC transform
+	else
+	{
+		if (parkType == PARK_COSINE)
+		{
+			abc->a = dq0->d * cosf(angle->theta) - dq0->q * sin(angle->theta) + dq0->zero;
+			abc->b = dq0->d * cosf(angle->theta - (2 * PI_3)) - dq0->q * sinf(angle->theta - (2 * PI_3)) + dq0->zero;
+			abc->c = dq0->d * cosf(angle->theta + (2 * PI_3)) - dq0->q * sinf(angle->theta + (2 * PI_3)) + dq0->zero;
+		}
+		else
+		{
+			abc->a = dq0->d * sinf(angle->theta) + dq0->q * cosf(angle->theta) + dq0->zero;
+			abc->b = dq0->d * sinf(angle->theta - (2 * PI_3)) + dq0->q * cosf(angle->theta - (2 * PI_3)) + dq0->zero;
+			abc->c = dq0->d * sinf(angle->theta + (2 * PI_3)) + dq0->q * cosf(angle->theta + (2 * PI_3)) + dq0->zero;
+		}
+	}
 }
 
 /**
@@ -103,84 +197,6 @@ static inline void Transform_theta_sincos(LIB_3COOR_SINCOS_t *angle)
 {
 	angle->sin = sinf(angle->theta);
 	angle->cos = cosf(angle->theta);
-}
-
-/**
- * @brief Transform abc to dq0 coordinates (90 degrees behind axis)
- *
- * @param *abc Pointer to the abc coordinates
- * @param *dq0 Pointer to the dq0 coordinates
- * @param theta current angle in radians
- */
-static inline void Transform_abc_dq0_90DegreeBehind(LIB_3COOR_ABC_t *abc, LIB_3COOR_DQ0_t* dq0, float theta)
-{
-	dq0->d = 2/3.f * (abc->a * sinf(theta) + abc->b * sinf((theta - TWO_PI/3)) + abc->c * sinf((theta + TWO_PI/3)));
-	dq0->q = 2/3.f * (abc->a * cosf(theta) + abc->b * cosf((theta - TWO_PI/3)) + abc->c * cosf((theta + TWO_PI/3)));
-	dq0->zero = 1/3.f * (abc->a + abc->b + abc->c );
-}
-
-/**
- * @brief Transform abc to dq0 coordinates (aligned axis)
- *
- * @param *abc Pointer to the abc coordinates
- * @param *dq0 Pointer to the dq0 coordinates
- * @param theta current angle in radians
- */
-static inline void Transform_abc_dq0_aligned(LIB_3COOR_ABC_t *abc, LIB_3COOR_DQ0_t* dq0, float theta)
-{
-	dq0->d = 2/3.f * (abc->a * cosf(theta) + abc->b * cosf((theta - TWO_PI/3)) + abc->c * cosf((theta + TWO_PI/3)));
-	dq0->q = -2/3.f * (abc->a * sinf(theta) + abc->b * sinf((theta - TWO_PI/3)) + abc->c * sinf((theta + TWO_PI/3)));
-	dq0->zero = 1/3.f * (abc->a + abc->b + abc->c );
-}
-
-/*
-static inline void Transform_dq0_alphaBeta_90DegreeBehind(LIB_3COOR_DQ0_t *dq0,
-		LIB_2COOR_ALBE_t *alphaBeta
-		LIB_3COOR_SINCOS_t *angle,)
-{
-
-}
- */
-
-/**
- * @brief Transform dq0 to alpha beta coordinates (aligned axis)
- *
- * @param *dq0 Pointer to the dq0 coordinates
- * @param *alphaBeta Pointer to the alpha beta coordinates
- * @param *angle Pointer to the angle information
- */
-static inline void Transform_dq0_alphaBeta_aligned(LIB_3COOR_DQ0_t *dq0, LIB_2COOR_ALBE_t *alphaBeta, LIB_3COOR_SINCOS_t *angle)
-{
-	alphaBeta->alpha = dq0->d * angle->cos - dq0->q * angle->sin;
-	alphaBeta->beta = dq0->d * angle->sin + dq0->q * angle->cos;
-}
-
-/**
- * @brief Transform dq0 to abc coordinates (90 degrees behind axis)
- *
- * @param *dq0 Pointer to the dq0 coordinates
- * @param *abc Pointer to the abc coordinates
- * @param *theta current angle in radians
- */
-static inline void Transform_dq0_abc_90DegreeBehind(LIB_3COOR_DQ0_t* dq0, LIB_3COOR_ABC_t *abc, float theta)
-{
-	abc->a = dq0->d * sinf(theta) + dq0->q * cosf(theta) + dq0->zero;
-	abc->b = dq0->d * sinf(theta - (2 * PI_3)) + dq0->q * cosf(theta - (2 * PI_3)) + dq0->zero;
-	abc->c = dq0->d * sinf(theta + (2 * PI_3)) + dq0->q * cosf(theta + (2 * PI_3)) + dq0->zero;
-}
-
-/**
- * @brief Transform dq0 to abc coordinates (aligned axis)
- *
- * @param *dq0 Pointer to the dq0 coordinates
- * @param *abc Pointer to the abc coordinates
- * @param *theta current angle in radians
- */
-static inline void Transform_dq0_abc_aligned(LIB_3COOR_DQ0_t* dq0, LIB_3COOR_ABC_t *abc, float theta)
-{
-	abc->a = dq0->d * cosf(theta) - dq0->q * sin(theta) + dq0->zero;
-	abc->b = dq0->d * cosf(theta - (2 * PI_3)) - dq0->q * sinf(theta - (2 * PI_3)) + dq0->zero;
-	abc->c = dq0->d * cosf(theta + (2 * PI_3)) - dq0->q * sinf(theta + (2 * PI_3)) + dq0->zero;
 }
 
 #ifdef __cplusplus

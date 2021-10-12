@@ -146,7 +146,7 @@ pll_states_t Pll_LockGrid(pll_lock_t* pll)
 	InitCompensatorIfNeeded(&pll->compensator);
 
 	// evaluate DQ0 coordinates from the ABC coordinates
-	Transform_abc_dq0_90DegreeBehind(&coords->abc, &coords->dq0, coords->sinCosAngle.theta);
+	Transform_abc_dq0(&coords->abc, &coords->dq0, &coords->sinCosAngle, SRC_ABC, PARK_SINE);
 
 	ApplyLowPassFilters_DQ(pll);
 

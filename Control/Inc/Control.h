@@ -144,23 +144,23 @@ static void GetSVPWM(LIB_2COOR_ALBE_t *alphaBeta, float* duties)
 /**
  * @brief Generate the SVPWM based on the DC-Link
  *
- * @param *alphaBeta Pointer to the alpha beta coordinates
+ * @param *alBe0 Pointer to the alpha beta zero coordinates structure
  * @param dc value of the dc-link
  * @param *duties duty cycle values to be exported to the PWM channels (Range 0 - 1)
  */
-static void GetSVPWM_FromVref(LIB_2COOR_ALBE_t* alphaBeta, float dc, float* duties)
+static void GetSVPWM_FromVref(LIB_3COOR_ALBE0_t* alBe0, float dc, float* duties)
 {
 	// Ur1, Ur2, Ur3 calculation
 	float max = dc / sqrtf(3);
-	float amp = sqrtf(alphaBeta->alpha * alphaBeta->alpha + alphaBeta->beta * alphaBeta->beta);
+	float amp = sqrtf(alBe0->alpha * alBe0->alpha + alBe0->beta * alBe0->beta);
 
-	alphaBeta->alpha =  alphaBeta->alpha / max;
-	alphaBeta->beta =  alphaBeta->beta / max;
+	alBe0->alpha =  alBe0->alpha / max;
+	alBe0->beta =  alBe0->beta / max;
 
 	LIB_3COOR_ABC_t abc;
-	abc.a = alphaBeta->beta;
-	abc.b = -alphaBeta->beta/2 + alphaBeta->alpha * sqrtf(3)/2;
-	abc.c = -alphaBeta->beta/2 - alphaBeta->alpha * sqrtf(3)/2;
+	abc.a = alBe0->beta;
+	abc.b = -alBe0->beta/2 + alBe0->alpha * sqrtf(3)/2;
+	abc.c = -alBe0->beta/2 - alBe0->alpha * sqrtf(3)/2;
 
 	// Voltage vector section determination
 	// Ur1 = Ubeta_pr;
