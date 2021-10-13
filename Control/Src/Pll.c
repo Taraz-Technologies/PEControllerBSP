@@ -8,7 +8,8 @@
  * @brief   
  ********************************************************************************
  */
-
+#pragma GCC push_options
+#pragma GCC optimize ("O3")
 /********************************************************************************
  * Includes
  *******************************************************************************/
@@ -29,7 +30,8 @@
  * Static Variables
  *******************************************************************************/
 static float dataBufferMemory[FILTER_COUNT * FILTER_MAX_SIZE] = {0};
-static int nextBuffPtr = &dataBufferMemory;
+static float* lastBuffPtr = &dataBufferMemory[FILTER_COUNT * FILTER_MAX_SIZE - 1];
+static float* nextBuffPtr = dataBufferMemory;
 static pi_data_t qPI = { .Integral = 0, .Kp = 0.001f, .Ki = 0.08f, .dt = 0.00004f };
 /********************************************************************************
  * Global Variables
@@ -42,10 +44,18 @@ static pi_data_t qPI = { .Integral = 0, .Kp = 0.001f, .Ki = 0.08f, .dt = 0.00004
 /********************************************************************************
  * Code
  *******************************************************************************/
+/**
+ * @brief Get pointer to the acquired buffer of given size
+ * @param size Size of the buffer
+ * @return float* Pointer to the buffer location
+ */
 static float* GetBufferPtr(int size)
 {
-
-	return NULL;
+	if (lastBuffPtr < (nextBuffPtr + size - 1))
+		return NULL;
+	float* result = nextBuffPtr;
+	nextBuffPtr += size;
+	return result;
 }
 
 /**
@@ -98,7 +108,7 @@ static void InitCompensatorIfNeeded(pi_data_t* comp)
 static void ApplyLowPassFilters_DQ(pll_lock_t* pll)
 {
 	pll->coords.dq0.q = MovingAverage_Float_Evaluate(&pll->qFilt.filt, pll->coords.dq0.q);
-	pll->coords.dq0.d = MovingAverage_Float_Evaluate(&pll->qFilt.filt, pll->coords.dq0.d);
+	pll->coords.dq0.d = MovingAverage_Float_Evaluate(&pll->dFilt.filt, pll->coords.dq0.d);
 }
 
 
@@ -116,15 +126,35 @@ static pll_states_t IsPLLSynched(pll_lock_t* pll)
 	if(absQ > info->tempCycleMax)
 		info->tempCycleMax = absQ;
 
+#if EVALUATE_D_STATS
+	if (pll->coords.dq0.d < info->dMin)
+		info->dMin = pll->coords.dq0.d;
+	if (pll->coords.dq0.d > info->dMax)
+		info->dMax = pll->coords.dq0.d;
+#endif
+
 	info->index++;
 
 	if(info->index > info->maxIndex)
 	{
 		info->cycleMax = info->tempCycleMax;
 		if(info->cycleMax < info->acceptableMax)
-			pll->status = PLL_LOCKED;
+			pll->status = PLL_PENDING;
 		info->index = 0;
 		info->tempCycleMax = 0;
+#if EVALUATE_D_STATS
+		info->dDiff = info->dMax - info->dMin;
+		info->dMid = (info->dMax + info->dMin) / 2.f;
+		info->dMax = -200000;
+		info->dMin = 200000;
+#endif
+	}
+
+	// lock to the phase once the phase is very low
+	if(pll->status == PLL_PENDING)
+	{
+		if (fabsf(pll->coords.abc.a) < (pll->dFilt.filt.avg) / 40)
+			pll->status = PLL_LOCKED;
 	}
 
 	return pll->status;
@@ -159,5 +189,5 @@ pll_states_t Pll_LockGrid(pll_lock_t* pll)
 	return IsPLLSynched(pll);
 }
 
-
+#pragma GCC pop_options
 /* EOF */

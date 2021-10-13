@@ -1,8 +1,8 @@
 /**
  ********************************************************************************
- * @file    	BasicGridTieConrol.c
+ * @file    	GridTieControl.c
  * @author 		Waqas Ehsan Butt
- * @date    	Oct 11, 2021
+ * @date    	Oct 13, 2021
  * @copyright 	Taraz Technologies Pvt. Ltd.
  *
  * @brief   
@@ -13,12 +13,11 @@
 /********************************************************************************
  * Includes
  *******************************************************************************/
-#include "BasicGridTieControl.h"
+#include "GridTieControl.h"
 #include "DoutPort.h"
 /********************************************************************************
  * Defines
  *******************************************************************************/
-
 #define GRID_RELAY_IO					(15)
 /********************************************************************************
  * Typedefs
@@ -44,15 +43,16 @@
  * Code
  *******************************************************************************/
 /**
- * @brief Evaluates the Duty Cycle Values for the Basic Grid Tie
+ * @brief Evaluates the Duty Cycle Values using the Grid Tie Control
  *
  * @param *gridTie Pointer to the parameter structure
  * @param *duties resultant duty cycles for the inverter (Range 0 - 1)
  */
-void BasicGridTieControl_GetDuties(basic_grid_tie_t* gridTie, float* duties)
+void GridTieControl_GetDuties(grid_tie_t* gridTie, float* duties)
 {
 	// copy the grid voltages
 	memcpy(&gridTie->pll.coords.abc, &gridTie->v1, 12);
+
 	pll_lock_t* pll = &gridTie->pll;
 
 	if (Pll_LockGrid(pll) == PLL_LOCKED)

@@ -1,74 +1,85 @@
 /**
  ********************************************************************************
- * @file    	BasicGridTieConrol.c
+ * @file 		GridTieControl.h
  * @author 		Waqas Ehsan Butt
- * @date    	Oct 11, 2021
+ * @date 		Oct 13, 2021
  * @copyright 	Taraz Technologies Pvt. Ltd.
  *
  * @brief   
  ********************************************************************************
  */
-#pragma GCC push_options
-#pragma GCC optimize ("O3")
+
+#ifndef GRIDTIECONTROL_H_
+#define GRIDTIECONTROL_H_
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /********************************************************************************
  * Includes
  *******************************************************************************/
-#include "BasicGridTieControl.h"
-#include "DoutPort.h"
+#include "Control.h"
+#include "pll.h"
 /********************************************************************************
  * Defines
  *******************************************************************************/
 
-#define GRID_RELAY_IO					(15)
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
-
+/**
+ * @brief Data structure containing all grid tie related measurements
+ */
+typedef struct
+{
+	/*! @brief Voltage level of phase V */
+	float v1;
+	/*! @brief Voltage level of phase V */
+	float v2;
+	/*! @brief Voltage level of phase W */
+	float v3;
+	/*! @brief Voltage level of DC Link */
+	float vdc;
+	/*! @brief Current level of phase V */
+	float i1;
+	/*! @brief Current level of phase V */
+	float i2;
+	/*! @brief Current level of phase W */
+	float i3;
+} grid_tie_measurements;
+/**
+ * @brief Data structure used by the Grid Tie Control
+ */
+typedef struct
+{
+	/*! @brief Measurements required by the Grid Tie Control */
+	grid_tie_measurements measures;
+	/*! @brief Reference current to be used by the Grid Tie Control */
+	float iRef;
+	/*! @brief PLL structure used by the Grid Tie Control */
+	pll_lock_t pll;
+} grid_tie_t;
 /********************************************************************************
  * Structures
  *******************************************************************************/
 
 /********************************************************************************
- * Static Variables
+ * Exported Variables
  *******************************************************************************/
 
 /********************************************************************************
- * Global Variables
- *******************************************************************************/
-
-/********************************************************************************
- * Function Prototypes
+ * Global Function Prototypes
  *******************************************************************************/
 
 /********************************************************************************
  * Code
  *******************************************************************************/
-/**
- * @brief Evaluates the Duty Cycle Values for the Basic Grid Tie
- *
- * @param *gridTie Pointer to the parameter structure
- * @param *duties resultant duty cycles for the inverter (Range 0 - 1)
- */
-void BasicGridTieControl_GetDuties(basic_grid_tie_t* gridTie, float* duties)
-{
-	// copy the grid voltages
-	memcpy(&gridTie->pll.coords.abc, &gridTie->v1, 12);
-	pll_lock_t* pll = &gridTie->pll;
 
-	if (Pll_LockGrid(pll) == PLL_LOCKED)
-	{
-		if(pll->prevStatus != PLL_LOCKED)
-			Dout_SetAsIOPin(GRID_RELAY_IO, GPIO_PIN_SET);
-		Transform_alphaBeta0_dq0(&pll->coords.alBe0, &pll->coords.dq0, &pll->coords.sinCosAngle, SRC_DQ0, PARK_SINE);
-		GetSVPWM_FromVref(&pll->coords.alBe0, gridTie->vdc, duties);
-	}
-	else
-	{
-		if(pll->prevStatus == PLL_LOCKED)
-			Dout_SetAsIOPin(GRID_RELAY_IO, GPIO_PIN_RESET);
-		duties[0] = 0; duties[1] = 0; duties[2] = 0;
-	}
+
+#ifdef __cplusplus
 }
+#endif
 
-#pragma GCC pop_options
+#endif 
 /* EOF */

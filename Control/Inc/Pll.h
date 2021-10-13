@@ -29,12 +29,15 @@ extern "C" {
 #define FILTER_COUNT					(10)
 #define ACCEPTABLE_Q					(20.f)
 #define MAX_Q_DATA_INDEX				(25000)
+
+#define EVALUATE_D_STATS				(1)
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
 typedef enum
 {
 	PLL_INVALID,
+	PLL_PENDING,
 	PLL_LOCKED
 } pll_states_t;
 /********************************************************************************
@@ -54,6 +57,12 @@ typedef struct
 	float cycleMax;
 	int index;
 	int maxIndex;
+#if EVALUATE_D_STATS
+	float dMin;
+	float dMax;
+	float dDiff;
+	float dMid;
+#endif
 } pll_info_t;
 
 typedef struct
