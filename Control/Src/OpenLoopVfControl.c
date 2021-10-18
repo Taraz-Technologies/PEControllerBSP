@@ -74,12 +74,12 @@ void OpenLoopVfControl_GetDuties(openloopvf_config_t* config, float* duties)
 	// compute the current modulation index
 	config->modulationIndex = (config->nominalModulationIndex / config->nominalFreq) * config->freq;
 	float stepSize = (TWO_PI * config->freq) / config->pwmFreq;
-	config->theta += stepSize;
-	if(config->theta > TWO_PI)
-		config->theta -= TWO_PI;
+	config->wt += stepSize;
+	if(config->wt > TWO_PI)
+		config->wt -= TWO_PI;
 
 	// generate SPWM according to the theta and modulation index
-	GenerateSPWM(config->theta, config->modulationIndex, duties);
+	GenerateSPWM(config->wt, config->modulationIndex, duties);
 }
 
 #pragma GCC pop_options

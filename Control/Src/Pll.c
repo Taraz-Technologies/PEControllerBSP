@@ -8,8 +8,8 @@
  * @brief   
  ********************************************************************************
  */
-#pragma GCC push_options
-#pragma GCC optimize ("O3")
+//#pragma GCC push_options
+//#pragma GCC optimize ("O3")
 /********************************************************************************
  * Includes
  *******************************************************************************/
@@ -107,8 +107,8 @@ static void InitCompensatorIfNeeded(pi_data_t* comp)
  */
 static void ApplyLowPassFilters_DQ(pll_lock_t* pll)
 {
-	pll->coords.dq0.q = MovingAverage_Float_Evaluate(&pll->qFilt.filt, pll->coords.dq0.q);
-	pll->coords.dq0.d = MovingAverage_Float_Evaluate(&pll->dFilt.filt, pll->coords.dq0.d);
+	pll->coords->dq0.q = MovingAverage_Float_Evaluate(&pll->qFilt.filt, pll->coords->dq0.q);
+	pll->coords->dq0.d = MovingAverage_Float_Evaluate(&pll->dFilt.filt, pll->coords->dq0.d);
 }
 
 
@@ -122,15 +122,15 @@ static pll_states_t IsPLLSynched(pll_lock_t* pll)
 	if(info->maxIndex <= 0)
 		info->maxIndex = MAX_Q_DATA_INDEX;
 
-	float absQ = fabsf(pll->coords.dq0.q);
+	float absQ = fabsf(pll->coords->dq0.q);
 	if(absQ > info->tempCycleMax)
 		info->tempCycleMax = absQ;
 
 #if EVALUATE_D_STATS
-	if (pll->coords.dq0.d < info->dMin)
-		info->dMin = pll->coords.dq0.d;
-	if (pll->coords.dq0.d > info->dMax)
-		info->dMax = pll->coords.dq0.d;
+	if (pll->coords->dq0.d < info->dMin)
+		info->dMin = pll->coords->dq0.d;
+	if (pll->coords->dq0.d > info->dMax)
+		info->dMax = pll->coords->dq0.d;
 #endif
 
 	info->index++;
@@ -153,9 +153,19 @@ static pll_states_t IsPLLSynched(pll_lock_t* pll)
 	// lock to the phase once the phase is very low
 	if(pll->status == PLL_PENDING)
 	{
-		if (fabsf(pll->coords.abc.a) < (pll->dFilt.filt.avg) / 40)
+		if (fabsf(pll->coords->abc.a) < (pll->dFilt.filt.avg) / 40)
 			pll->status = PLL_LOCKED;
 	}
+#if CHECK_PLL
+	else if (pll->status == PLL_LOCKED)
+	{
+		if (pll->coords->sinCosAngle.wt > (PI / 2 - 0.1f) && pll->coords->sinCosAngle.wt < (PI / 2 + 0.1f))
+			pll->info.th = pll->coords->abc.a;
+
+		pll->info.inc = pll->coords->sinCosAngle.wt > pll->info.thOld ? 1 : 0;
+		pll->info.thOld = pll->coords->sinCosAngle.wt;
+	}
+#endif
 
 	return pll->status;
 }
@@ -168,7 +178,7 @@ static pll_states_t IsPLLSynched(pll_lock_t* pll)
  */
 pll_states_t Pll_LockGrid(pll_lock_t* pll)
 {
-	LIB_COOR_ALL_t* coords = &pll->coords;
+	LIB_COOR_ALL_t* coords = pll->coords;
 
 	// Initialize the filters and Compensator if not already initialized
 	InitFilterIfNeeded(&pll->dFilt);
@@ -181,13 +191,15 @@ pll_states_t Pll_LockGrid(pll_lock_t* pll)
 	ApplyLowPassFilters_DQ(pll);
 
 	float thetaShift = EvaluatePI(&pll->compensator, -coords->dq0.q);
-	coords->sinCosAngle.theta -= thetaShift;
-	coords->sinCosAngle.theta = AdjustTheta(coords->sinCosAngle.theta);
+	coords->sinCosAngle.wt -= thetaShift;
+
+//	coords->sinCosAngle.theta = EvaluatePI(&pll->compensator, -coords->dq0.q);
+	coords->sinCosAngle.wt = AdjustTheta(coords->sinCosAngle.wt);
 
 	Transform_theta_sincos(&coords->sinCosAngle);
 
 	return IsPLLSynched(pll);
 }
 
-#pragma GCC pop_options
+//#pragma GCC pop_options
 /* EOF */

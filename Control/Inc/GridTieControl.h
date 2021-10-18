@@ -29,34 +29,18 @@ extern "C" {
  * Typedefs
  *******************************************************************************/
 /**
- * @brief Data structure containing all grid tie related measurements
- */
-typedef struct
-{
-	/*! @brief Voltage level of phase V */
-	float v1;
-	/*! @brief Voltage level of phase V */
-	float v2;
-	/*! @brief Voltage level of phase W */
-	float v3;
-	/*! @brief Voltage level of DC Link */
-	float vdc;
-	/*! @brief Current level of phase V */
-	float i1;
-	/*! @brief Current level of phase V */
-	float i2;
-	/*! @brief Current level of phase W */
-	float i3;
-} grid_tie_measurements;
-/**
  * @brief Data structure used by the Grid Tie Control
  */
 typedef struct
 {
-	/*! @brief Measurements required by the Grid Tie Control */
-	grid_tie_measurements measures;
+	/*! @brief Voltage level of DC Link */
+	float vdc;
 	/*! @brief Reference current to be used by the Grid Tie Control */
 	float iRef;
+	/** @brief Coordinates for the Phase to Phase Voltages */
+	LIB_COOR_ALL_t vCoor;
+	/** @brief Coordinates for the Phase Currents */
+	LIB_COOR_ALL_t iCoor;
 	/*! @brief PLL structure used by the Grid Tie Control */
 	pll_lock_t pll;
 } grid_tie_t;
@@ -71,7 +55,13 @@ typedef struct
 /********************************************************************************
  * Global Function Prototypes
  *******************************************************************************/
-
+/**
+ * @brief Evaluates the Duty Cycle Values for the Grid Tie Control
+ *
+ * @param *gridTie Pointer to the parameter structure
+ * @param *duties resultant duty cycles for the inverter (Range 0 - 1)
+ */
+void GridTieControl_GetDuties(grid_tie_t* gridTie, float* duties);
 /********************************************************************************
  * Code
  *******************************************************************************/

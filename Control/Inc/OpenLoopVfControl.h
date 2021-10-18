@@ -39,7 +39,7 @@ typedef struct
 	float acceleration;
 	float reqFreq;
 	float freq;
-	float theta;
+	float wt;
 	float modulationIndex;
 } openloopvf_config_t;
 /********************************************************************************

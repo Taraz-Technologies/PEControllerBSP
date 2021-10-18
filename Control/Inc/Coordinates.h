@@ -62,12 +62,12 @@ typedef struct
 /** @brief Structure containing the Angle information of the system */
 typedef struct
 {
-	/** @brief Value of Current Angle */
-	float theta;
+	/** @brief Value of Current Angle in Radians */
+	float wt;
 	/** @brief Sin value of the angle given by \p theta */
-	float sin;
+	//float sin;
 	/** @brief Cos value of the angle given by \p theta */
-	float cos;
+	//float cos;
 } LIB_3COOR_SINCOS_t;
 
 /** @brief Structure containing the DQ0 coordinates of the 3 phase system */

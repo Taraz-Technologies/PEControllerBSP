@@ -31,6 +31,7 @@ extern "C" {
 #define MAX_Q_DATA_INDEX				(25000)
 
 #define EVALUATE_D_STATS				(1)
+#define CHECK_PLL						(1)
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
@@ -63,11 +64,16 @@ typedef struct
 	float dDiff;
 	float dMid;
 #endif
+#if CHECK_PLL
+	float th;
+	float thOld;
+	uint8_t inc;
+#endif
 } pll_info_t;
 
 typedef struct
 {
-	LIB_COOR_ALL_t coords;
+	LIB_COOR_ALL_t* coords;
 	low_pass_filter_t dFilt;
 	low_pass_filter_t qFilt;
 	pi_data_t compensator;
