@@ -104,12 +104,12 @@ void MAX11046App_Init(uint32_t periodUs, adcMeauresDataCallback dataCallback)
 		adcMults[i] = 1;
 	}
 	
-	mults.Ih1 = 50.0f / 32768;
-	mults.Ih2 = 50.0f / 32768;
-	mults.Ih3 = 50.0f / 32768;
-	mults.Ie1 = 50.0f / 32768;
-	mults.Ie2 = 50.0f / 32768;
-	mults.Ie3 = 50.0f / 32768;
+	mults.Ih1 = 25.0f / 32768;
+	mults.Ih2 = 25.0f / 32768;
+	mults.Ih3 = 25.0f / 32768;
+	mults.Ie1 = 25.0f / 32768;
+	mults.Ie2 = 25.0f / 32768;
+	mults.Ie3 = 25.0f / 32768;
 	
 	mults.Vdc1 = 1000.0f / 32768;
 	mults.V1 = 1000.0f / 32768;
