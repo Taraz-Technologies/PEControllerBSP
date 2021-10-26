@@ -72,9 +72,16 @@ void PWM1_10_UpdatePair(uint32_t pwmNo, float duty, pwm_pair_config_t* config)
 {
 	uint32_t TimerIdx = (pwmNo - 1) / 2;
 	uint32_t period = hhrtim.Instance->sTimerxRegs[TimerIdx].PERxR;
+
+	if (duty > .995f)			// --todo--
+		duty = .995f;
+	else if (duty < 0.005f)
+		duty = .005f;
+
 	uint32_t onTime = duty * period;
 	if(config->alignment == CENTER_ALIGNED)
 	{
+		//onTime += (config->dtInNanoSec * 16) / HRTIM_FREQ;
 		int t0 = (period - onTime) / 2;
 		hhrtim.Instance->sTimerxRegs[TimerIdx].CMP1xR = t0;
 		hhrtim.Instance->sTimerxRegs[TimerIdx].CMP2xR = t0 + onTime;

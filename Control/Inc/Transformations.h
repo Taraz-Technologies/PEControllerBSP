@@ -107,10 +107,10 @@ static inline void Transform_abc_alBe0(LIB_3COOR_ABC_t* abc, LIB_3COOR_ALBE0_t* 
 static inline void Transform_alphaBeta0_dq0(LIB_3COOR_ALBE0_t* alBe0, LIB_3COOR_DQ0_t* dq0, LIB_3COOR_SINCOS_t* angle,
 		transformation_source_t src, park_transform_type_t parkType)
 {
-	dq0->zero = alBe0->zero;
 	// ALBE0 to DQO transform
 	if (src == SRC_ALBE0)
 	{
+		dq0->zero = alBe0->zero;
 		if (parkType == PARK_COSINE)
 		{
 			dq0->d = alBe0->alpha * cosf(angle->wt) + alBe0->beta * sinf(angle->wt);
@@ -125,6 +125,7 @@ static inline void Transform_alphaBeta0_dq0(LIB_3COOR_ALBE0_t* alBe0, LIB_3COOR_
 	// DQ0 to ALBE0 transform
 	else
 	{
+		alBe0->zero = dq0->zero;
 		if (parkType == PARK_COSINE)
 		{
 			alBe0->alpha = dq0->d * cosf(angle->wt) - dq0->q *  sinf(angle->wt);

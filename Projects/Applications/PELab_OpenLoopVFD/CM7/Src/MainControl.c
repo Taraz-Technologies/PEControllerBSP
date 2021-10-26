@@ -129,11 +129,11 @@ void HAL_HRTIM_CounterResetCallback(HRTIM_HandleTypeDef * hhrtim,
 	recompute = true;
 }
 
+float duties[3];
 void MainControl_Loop(void)
 {
 	if(recompute)
 	{
-		float duties[3];
 #if CONTROL_TYPE == OPEN_LOOP_VF_CONTROL
 		static openloopvf_config_t vfConfig = {
 				.pwmFreq = 25000, .acceleration = 1.00001f, .nominalFreq = 50, .nominalModulationIndex = 0.7f, .freq = 1.0f, .theta = 0, .reqFreq = 25,
@@ -159,7 +159,7 @@ void MainControl_Loop(void)
 		gridTie.iCoor.abc.a = adcVals.Ih1;
 		gridTie.iCoor.abc.b = adcVals.Ih2;
 		gridTie.iCoor.abc.c = adcVals.Ih3;
-		gridTie.iRef = 10.f;
+		gridTie.iRef = 5.f;
 
 		GridTieControl_GetDuties(&gridTie, duties);
 		Inverter3Ph_UpdateDuty(inverterConfig1, duties);

@@ -18,7 +18,7 @@
 /*******************************************************************************
  * Defines
  ******************************************************************************/
-
+#define MONITOR_PI			(1)
 /*******************************************************************************
  * Enums
  ******************************************************************************/
@@ -28,9 +28,16 @@
  ******************************************************************************/
 typedef struct
 {
+	bool has_lmt;
 	float Kp; float Ki;
 	float dt;
 	float Integral;
+	float max;
+	float min;
+#if MONITOR_PI
+	float err;
+	float result;
+#endif
 } pi_data_t;
 
 
@@ -87,8 +94,23 @@ static void GenerateSPWM(float theta, float modulationIndex, float* duties)
 /*! @brief evaluate the pi for the error */
 static float EvaluatePI(pi_data_t* data, float err)
 {
+#if MONITOR_PI
+	data->err = err;
+#endif
 	data->Integral += (err * data->dt) ;
+	if (data->has_lmt)
+	{
+		if(data->Integral > data->max)
+			data->Integral = data->max;
+		if(data->Integral < data->min)
+			data->Integral = data->min;
+	}
+#if MONITOR_PI
+	data->result = (data->Kp * err) + (data->Ki * data->Integral);
+	return data->result;
+#else
 	return (data->Kp * err) + (data->Ki * data->Integral);
+#endif
 }
 
 static float GetRef(LIB_3COOR_ALBE0_t *alBe0)
@@ -151,12 +173,12 @@ static void GetSVPWM_FromAlBe(LIB_3COOR_ALBE0_t *alBe0, float* duties)
 	if (a < m)
 	{
 		a  = a / m;
-		m = sqrtf(a * a + 1.0) * m;
+		m = sqrtf(a * a + 1) * m;
 	}
 	else if (a > m)
 	{
 		m = m / a;
-		m = sqrtf(m * m + 1.0) * a;
+		m = sqrtf(m * m + 1) * a;
 	}
 
 	if (m < 0)
