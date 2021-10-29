@@ -73,25 +73,30 @@ void PWM1_10_UpdatePair(uint32_t pwmNo, float duty, pwm_pair_config_t* config)
 	uint32_t TimerIdx = (pwmNo - 1) / 2;
 	uint32_t period = hhrtim.Instance->sTimerxRegs[TimerIdx].PERxR;
 
-	if (duty > .995f)			// --todo--
-		duty = .995f;
-	else if (duty < 0.005f)
-		duty = .005f;
+	if (duty > config->maxDutyCycle)			/* assigned during initialization */
+		duty = config->maxDutyCycle;
 
 	uint32_t onTime = duty * period;
 	if(config->alignment == CENTER_ALIGNED)
 	{
-		//onTime += (config->dtInNanoSec * 16) / HRTIM_FREQ;
 		int t0 = (period - onTime) / 2;
+		int tEnd = t0 + onTime;
+		if(config->dtEnabled)
+		{
+			int dt = (config->dtInNanoSec * HRTIM_FREQ) / 1000;
+			t0 -= dt;
+		}
+		if (t0 < 3)
+			t0 = 3;
 		hhrtim.Instance->sTimerxRegs[TimerIdx].CMP1xR = t0;
-		hhrtim.Instance->sTimerxRegs[TimerIdx].CMP2xR = t0 + onTime;
+		hhrtim.Instance->sTimerxRegs[TimerIdx].CMP2xR = tEnd;
 		MODIFY_REG(hhrtim.Instance->sTimerxRegs[TimerIdx].TIMxCR, HRTIM_TIMCR_DELCMP2, 0U);
 	}
 	else
 	{
 		uint32_t dt = 0;
 		if(config->dtEnabled)
-			dt = (config->dtInNanoSec * 16) / HRTIM_FREQ;
+			dt = (config->dtInNanoSec * HRTIM_FREQ) / 1000;
 		hhrtim.Instance->sTimerxRegs[TimerIdx].CMP1xR = dt;
 		hhrtim.Instance->sTimerxRegs[TimerIdx].CMP2xR = dt + onTime;
 		MODIFY_REG(hhrtim.Instance->sTimerxRegs[TimerIdx].TIMxCR, HRTIM_TIMCR_DELCMP2, 0U);
@@ -166,6 +171,8 @@ PWMPairUpdateCallback PWM1_10_ConfigPair(uint32_t pwmNo, pwm_pair_config_t* conf
 	if (HAL_HRTIM_WaveformCompareConfig(&hhrtim, TimerIdx, HRTIM_COMPAREUNIT_2, &pCompareCfg) != HAL_OK)
 		Error_Handler();
 
+	float deadTicks = 3;	/* dead ticks because compare value cant be lower than 3 */
+
 	if (config->dtEnabled)
 	{	/* deadtime configuration */
 		HRTIM_DeadTimeCfgTypeDef pDeadTimeCfg =
@@ -181,9 +188,11 @@ PWMPairUpdateCallback PWM1_10_ConfigPair(uint32_t pwmNo, pwm_pair_config_t* conf
 				.FallingSignLock = HRTIM_TIMDEADTIME_FALLINGSIGNLOCK_WRITE,
 		};
 		pDeadTimeCfg.Prescaler = HRTIM_TIMDEADTIME_PRESCALERRATIO_DIV16;
-		pDeadTimeCfg.FallingValue = pDeadTimeCfg.RisingValue = (config->dtInNanoSec * 16) / HRTIM_FREQ;
+		pDeadTimeCfg.FallingValue = pDeadTimeCfg.RisingValue = (config->dtInNanoSec * HRTIM_FREQ) / (16000);
 		if (HAL_HRTIM_DeadTimeConfig(&hhrtim, TimerIdx, &pDeadTimeCfg) != HAL_OK)
 			Error_Handler();
+
+		deadTicks += (pDeadTimeCfg.RisingValue * 16);
 	}
 
 	/* output configuration */
@@ -206,6 +215,9 @@ PWMPairUpdateCallback PWM1_10_ConfigPair(uint32_t pwmNo, pwm_pair_config_t* conf
 		Error_Handler();
 	if (HAL_HRTIM_WaveformTimerConfig(&hhrtim, TimerIdx, &pTimerCfg) != HAL_OK)
 		Error_Handler();
+
+	config->maxDutyCycle = 1 - ((deadTicks / HRTIM_FREQ) / config->periodInUsec);
+
 	return PWM1_10_UpdatePair;
 }
 

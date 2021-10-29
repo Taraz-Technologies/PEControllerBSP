@@ -39,6 +39,7 @@ typedef struct
 	pwm_alignment_t alignment;
 	uint32_t periodInUsec;
 	uint32_t dtInNanoSec;
+	float maxDutyCycle;  /* value auto computed to be between 0-1 */
 } pwm_pair_config_t;
 typedef struct
 {
