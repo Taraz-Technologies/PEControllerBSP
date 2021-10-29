@@ -167,8 +167,8 @@ static void GetSVPWM_FromDQ(LIB_3COOR_DQ0_t *dq0, float* duties)
 static void GetSVPWM_FromAlBe(LIB_3COOR_ALBE0_t *alBe0, float* duties)
 {
 	// hypotd (Get the value of m)
-	float a = abs(alBe0->alpha);
-	float m = abs(alBe0->beta);
+	float a = fabsf(alBe0->alpha);
+	float m = fabsf(alBe0->beta);
 
 	if (a < m)
 	{
@@ -193,7 +193,7 @@ static void GetSVPWM_FromAlBe(LIB_3COOR_ALBE0_t *alBe0, float* duties)
 		if (alBe0->beta > 0)
 			wt = PI/2;
 		else if (alBe0->beta < 0)
-			wt = PI/2;
+			wt = -PI/2;
 		else
 			wt = 0;
 	}
@@ -250,6 +250,10 @@ static void GetSVPWM_FromAlBe(LIB_3COOR_ALBE0_t *alBe0, float* duties)
 	{
 		duties[2] = t1;
 		duties[0] = tAll;
+	}
+	else
+	{
+		duties[0] = 0;
 	}
 }
 
