@@ -76,6 +76,9 @@ void PWM1_10_UpdatePair(uint32_t pwmNo, float duty, pwm_pair_config_t* config)
 	if (duty > config->maxDutyCycle)			/* assigned during initialization */
 		duty = config->maxDutyCycle;
 
+	if (duty < config->minDutyCycle)
+		duty = config->minDutyCycle;
+
 	uint32_t onTime = duty * period;
 	if(config->alignment == CENTER_ALIGNED)
 	{
@@ -216,6 +219,12 @@ PWMPairUpdateCallback PWM1_10_ConfigPair(uint32_t pwmNo, pwm_pair_config_t* conf
 	if (HAL_HRTIM_WaveformTimerConfig(&hhrtim, TimerIdx, &pTimerCfg) != HAL_OK)
 		Error_Handler();
 
+	if (config->alignment == CENTER_ALIGNED)
+		deadTicks = deadTicks * 2 + 1;
+	else
+		deadTicks++;
+
+	config->minDutyCycle = config->minMaxDutyCycleBalancing ? ((deadTicks / HRTIM_FREQ) / config->periodInUsec) : 0;
 	config->maxDutyCycle = 1 - ((deadTicks / HRTIM_FREQ) / config->periodInUsec);
 
 	return PWM1_10_UpdatePair;

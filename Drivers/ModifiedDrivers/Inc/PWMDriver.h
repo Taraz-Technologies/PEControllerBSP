@@ -40,6 +40,8 @@ typedef struct
 	uint32_t periodInUsec;
 	uint32_t dtInNanoSec;
 	float maxDutyCycle;  /* value auto computed to be between 0-1 */
+	float minDutyCycle;  /* value auto computed to be between 0-1 */
+	bool minMaxDutyCycleBalancing;
 } pwm_pair_config_t;
 typedef struct
 {

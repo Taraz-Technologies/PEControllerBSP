@@ -55,6 +55,7 @@ typedef struct
 	pwm_alignment_t alignment;
 	uint16_t deadtimeInNanosec;
 	bool deadtimeEnable;
+	bool minMaxDutyCycleBalancing;
 } inverter3Ph_init_config_t;
 /*******************************************************************************
  * Prototypes

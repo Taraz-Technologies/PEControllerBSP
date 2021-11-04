@@ -114,6 +114,7 @@ inverter3Ph_config_t* Inverter3Ph_Init(inverter3Ph_init_config_t* initConfig)
 	handle->pairConfig.dtInNanoSec = initConfig->deadtimeInNanosec;
 	handle->pairConfig.periodInUsec = initConfig->periodInUs;
 	handle->pairConfig.interruptEnabled = initConfig->interruptEnabled;
+	handle->pairConfig.minMaxDutyCycleBalancing = initConfig->minMaxDutyCycleBalancing;
 
 	// configure PWM
 	for (int i = 0; i < 3; i++)

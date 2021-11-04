@@ -51,9 +51,10 @@ static inverter3Ph_init_config_t inverterInitConfig1 =
 		.periodInUs = 40,
 		.interruptEnabled = true,			/* not catered for right now */
 		.alignment = CENTER_ALIGNED,
-		.deadtimeInNanosec = 1000,
+		.deadtimeInNanosec = 500,
 		.deadtimeEnable = true,
 		.resetCallback = Inverter3Ph_ResetSignal,
+		.minMaxDutyCycleBalancing = false,
 };
 static inverter3Ph_init_config_t inverterInitConfig2 =
 {
@@ -62,9 +63,10 @@ static inverter3Ph_init_config_t inverterInitConfig2 =
 		.periodInUs = 40,
 		.interruptEnabled = false,			/* not catered for right now */
 		.alignment = CENTER_ALIGNED,
-		.deadtimeInNanosec = 1000,
+		.deadtimeInNanosec = 500,
 		.deadtimeEnable = true,
 		.resetCallback = Inverter3Ph_ResetSignal,
+		.minMaxDutyCycleBalancing = false,
 };
 static volatile bool recompute = false;
 extern HRTIM_HandleTypeDef hhrtim;
@@ -159,7 +161,7 @@ void MainControl_Loop(void)
 		gridTie.iCoor.abc.a = adcVals.Ih1;
 		gridTie.iCoor.abc.b = adcVals.Ih2;
 		gridTie.iCoor.abc.c = adcVals.Ih3;
-		gridTie.iRef = 5.f;
+		gridTie.iRef = 8.f;
 
 		GridTieControl_GetDuties(&gridTie, duties);
 		Inverter3Ph_UpdateDuty(inverterConfig1, duties);
