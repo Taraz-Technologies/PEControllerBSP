@@ -22,8 +22,9 @@
 
 #define SPWM							(0)
 #define SVPWM							(1)
-#define USE_DQ							(0)
-#define PWM_TECH						(SVPWM)
+#define USE_DQ							(1)
+#define TECH_1							(2)
+#define PWM_TECH						(TECH_1)
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
@@ -35,8 +36,8 @@
 /********************************************************************************
  * Static Variables
  *******************************************************************************/
-static pi_data_t qPI = { .Integral = 0, .Kp = 0.1f, .Ki = 5.f, .dt = 0.00004f };
-static pi_data_t dPI = { .Integral = 0, .Kp = 0.1f, .Ki = 5.f, .dt = 0.00004f };
+pi_data_t qPI = { .Integral = 0, .Kp = 16.f, .Ki = 160.f, .dt = 0.00004f };
+pi_data_t dPI = { .Integral = 0, .Kp = 16.f, .Ki = 160.f, .dt = 0.00004f };
 pi_data_t v1PI = { .Integral = 0, .Kp = 200.f, .Ki = .0f, .dt = 0.00004f, .has_lmt = true, .max = .5f, .min = -.5f };
 pi_data_t v2PI = { .Integral = 0, .Kp = 200.f, .Ki = .0f, .dt = 0.00004f, .has_lmt = true, .max = .5f, .min = -.5f };
 pi_data_t v3PI = { .Integral = 0, .Kp = 200.f, .Ki = .0f, .dt = 0.00004f, .has_lmt = true, .max = .5f, .min = -.5f };
@@ -52,7 +53,8 @@ static low_pass_filter_t qFilt = {0};
 /********************************************************************************
  * Function Prototypes
  *******************************************************************************/
-
+LIB_COOR_ALL_t vCoorL = {0};
+LIB_3COOR_ABC_t abc = {0};
 /********************************************************************************
  * Code
  *******************************************************************************/
@@ -82,7 +84,7 @@ static void InitFilterIfNeeded(low_pass_filter_t* filt)
 	{
 		// filter size should be between limits
 		if (filt->size <= 0)
-			filt->size = 8;
+			filt->size = 2;
 		if (filt->size > 32)
 			filt->size = 32;
 
@@ -117,7 +119,27 @@ void GridTieControl_GetDuties(grid_tie_t* gridTie, float* duties)
 	{
 		if(pll->prevStatus != PLL_LOCKED)
 			Dout_SetAsIOPin(GRID_RELAY_IO, GPIO_PIN_SET);
+#if PWM_TECH == TECH_1
+		// copy coordinates of grid voltages
+		vCoorL.abc.a = vCoor->abc.a;
+		vCoorL.abc.b = vCoor->abc.b;
+		vCoorL.abc.c = vCoor->abc.c;
+		vCoorL.sinCosAngle.wt = vCoor->sinCosAngle.wt;
+		iCoor->sinCosAngle.wt = vCoor->sinCosAngle.wt;
 
+		Transform_abc_dq0(&iCoor->abc, &iCoor->dq0, &iCoor->sinCosAngle, SRC_ABC, PARK_SINE);
+		Transform_abc_dq0(&vCoorL.abc, &vCoorL.dq0, &vCoorL.sinCosAngle, SRC_ABC, PARK_SINE);
+
+		iCoor->dq0.d = EvaluatePI(&dPI, gridTie->iRef - iCoor->dq0.d) - TWO_PI * 50 * qPI.dt * iCoor->dq0.q + vCoorL.dq0.d;
+		iCoor->dq0.q = EvaluatePI(&qPI, 0             - iCoor->dq0.q) + TWO_PI * 50 * qPI.dt * iCoor->dq0.d + vCoorL.dq0.q;
+
+		Transform_abc_dq0(&abc, &iCoor->dq0, &iCoor->sinCosAngle, SRC_DQ0, PARK_SINE);
+
+		duties[0] = (abc.a / gridTie->vdc) + .5f;
+		duties[1] = (abc.b / gridTie->vdc) + .5f;
+		duties[2] = (abc.c / gridTie->vdc) + .5f;
+
+#else
 #if USE_DQ
 		iCoor->sinCosAngle.wt = vCoor->sinCosAngle.wt;
 		iCoor->sinCosAngle.wt = AdjustTheta(iCoor->sinCosAngle.wt);
@@ -132,7 +154,7 @@ void GridTieControl_GetDuties(grid_tie_t* gridTie, float* duties)
 
 		// Apply PIs
 		iCoor->dq0.q = EvaluatePI(&qPI, -iCoor->dq0.q);
-		iCoor->dq0.d = EvaluatePI(&dPI, gridTie->iRef -iCoor->dq0.d);
+		iCoor->dq0.d = EvaluatePI(&dPI, gridTie->iRef - iCoor->dq0.d);
 
 		// Get ALBE0
 		Transform_alphaBeta0_dq0(&iCoor->alBe0, &iCoor->dq0, &iCoor->sinCosAngle, SRC_DQ0, PARK_SINE);
@@ -163,7 +185,7 @@ void GridTieControl_GetDuties(grid_tie_t* gridTie, float* duties)
 			duties[i] = duties[i] + .5f;
 		}
 #endif
-
+#endif
 	}
 	else
 	{
