@@ -32,11 +32,13 @@
 static float dataBufferMemory[FILTER_COUNT * FILTER_MAX_SIZE] = {0};
 static float* lastBuffPtr = &dataBufferMemory[FILTER_COUNT * FILTER_MAX_SIZE - 1];
 static float* nextBuffPtr = dataBufferMemory;
-static pi_data_t qPI = { .Integral = 0, .Kp = 0.001f, .Ki = 0.08f, .dt = 0.00004f };
+static pi_data_t qPI = { .Integral = 0, .Kp = 0.001f, .Ki = 0.8f, .dt = 0.00004f };
 /********************************************************************************
  * Global Variables
  *******************************************************************************/
-
+float thetaShift;
+float wtOld = 0;
+float wtDiffMax = 0;
 /********************************************************************************
  * Function Prototypes
  *******************************************************************************/
@@ -154,7 +156,10 @@ static pll_states_t IsPLLSynched(pll_lock_t* pll)
 	if(pll->status == PLL_PENDING)
 	{
 		if (fabsf(pll->coords->abc.a) < (pll->dFilt.filt.avg) / 40)
+		{
 			pll->status = PLL_LOCKED;
+			wtOld = pll->coords->sinCosAngle.wt;
+		}
 	}
 #if CHECK_PLL
 	else if (pll->status == PLL_LOCKED)
@@ -164,6 +169,14 @@ static pll_states_t IsPLLSynched(pll_lock_t* pll)
 
 		pll->info.inc = pll->coords->sinCosAngle.wt > pll->info.thOld ? 1 : 0;
 		pll->info.thOld = pll->coords->sinCosAngle.wt;
+
+		if(((wtOld > TWO_PI - .2f && pll->coords->sinCosAngle.wt < .2f) || (pll->coords->sinCosAngle.wt > TWO_PI - .2f && wtOld < .2f)) == false)
+		{
+			float diff = fabsf(wtOld - pll->coords->sinCosAngle.wt);
+			if (diff > wtDiffMax)
+				wtDiffMax = diff;
+		}
+		wtOld = pll->coords->sinCosAngle.wt;
 	}
 #endif
 
@@ -190,10 +203,8 @@ pll_states_t Pll_LockGrid(pll_lock_t* pll)
 
 	ApplyLowPassFilters_DQ(pll);
 
-	float thetaShift = EvaluatePI(&pll->compensator, -coords->dq0.q);
+	thetaShift = EvaluatePI(&pll->compensator, -coords->dq0.q);
 	coords->sinCosAngle.wt -= thetaShift;
-
-//	coords->sinCosAngle.theta = EvaluatePI(&pll->compensator, -coords->dq0.q);
 	coords->sinCosAngle.wt = AdjustTheta(coords->sinCosAngle.wt);
 
 	Transform_theta_sincos(&coords->sinCosAngle);

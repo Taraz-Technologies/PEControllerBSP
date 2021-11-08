@@ -46,6 +46,10 @@ static float* lastBuffPtr = &dataBufferMemory[2 * 32 - 1];
 static float* nextBuffPtr = dataBufferMemory;
 static low_pass_filter_t dFilt = {0};
 static low_pass_filter_t qFilt = {0};
+LIB_COOR_ALL_t vCoorL = {0};
+LIB_3COOR_ABC_t abc = {0};
+float maxDiff = 0;
+float old = 0;
 /********************************************************************************
  * Global Variables
  *******************************************************************************/
@@ -53,8 +57,7 @@ static low_pass_filter_t qFilt = {0};
 /********************************************************************************
  * Function Prototypes
  *******************************************************************************/
-LIB_COOR_ALL_t vCoorL = {0};
-LIB_3COOR_ABC_t abc = {0};
+
 /********************************************************************************
  * Code
  *******************************************************************************/
@@ -118,8 +121,19 @@ void GridTieControl_GetDuties(grid_tie_t* gridTie, float* duties)
 	if (Pll_LockGrid(pll) == PLL_LOCKED)
 	{
 		if(pll->prevStatus != PLL_LOCKED)
+		{
 			Dout_SetAsIOPin(GRID_RELAY_IO, GPIO_PIN_SET);
+			old = vCoor->sinCosAngle.wt;
+		}
 #if PWM_TECH == TECH_1
+		float absDiff = fabsf(old - vCoor->sinCosAngle.wt);
+		if (absDiff < PI)
+		{
+			if (absDiff > maxDiff)
+				maxDiff = absDiff;
+		}
+		old = vCoor->sinCosAngle.wt;
+
 		// copy coordinates of grid voltages
 		vCoorL.abc.a = vCoor->abc.a;
 		vCoorL.abc.b = vCoor->abc.b;
@@ -138,6 +152,12 @@ void GridTieControl_GetDuties(grid_tie_t* gridTie, float* duties)
 		duties[0] = (abc.a / gridTie->vdc) + .5f;
 		duties[1] = (abc.b / gridTie->vdc) + .5f;
 		duties[2] = (abc.c / gridTie->vdc) + .5f;
+
+		if (fabsf(iCoor->abc.a) > 18)
+		{
+			duties[0] -= .5f;
+			duties[0] += .5f;
+		}
 
 #else
 #if USE_DQ
