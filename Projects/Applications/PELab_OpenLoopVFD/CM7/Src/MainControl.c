@@ -23,8 +23,7 @@
  * Defines
  ******************************************************************************/
 #define OPEN_LOOP_VF_CONTROL			(1)
-#define BASIC_GRID_TIE_CONTROL			(2)
-#define GRID_TIE_CONTROL				(3)
+#define GRID_TIE_CONTROL				(2)
 
 #define CONTROL_TYPE					(GRID_TIE_CONTROL)
 /*******************************************************************************
@@ -70,15 +69,25 @@ static inverter3Ph_init_config_t inverterInitConfig2 =
 };
 static volatile bool recompute = false;
 extern HRTIM_HandleTypeDef hhrtim;
-#if CONTROL_TYPE == BASIC_GRID_TIE_CONTROL
-basic_grid_tie_t gridTie = {0};
+#if CONTROL_TYPE == OPEN_LOOP_VF_CONTROL
+static openloopvf_config_t vfConfig = {
+		.pwmFreq = 25000, .acceleration = 1.00001f, .nominalFreq = 50, .nominalModulationIndex = 0.7f, .freq = 1.0f, .theta = 0, .reqFreq = 25,
+};
 #elif CONTROL_TYPE == GRID_TIE_CONTROL
-grid_tie_t gridTie = {0};
+/**
+ * @brief Grid Tie Control Parameters
+ */
+static grid_tie_t gridTie = {.vCoor = {0}, .iCoor = {0}, .pll = {0},
+		.qCompensator = { .Integral = 0, .Kp = 15.f, .Ki = 40.f, .dt = 0.00004f },
+		.dCompensator = { .Integral = 0, .Kp = 15.f, .Ki = 40.f, .dt = 0.00004f },
+};
 #endif
-uint32_t mainCont, mainUpdate;
 /*******************************************************************************
  * Code
  ******************************************************************************/
+/**
+ * @brief Initiates PWM for both inverters, and enable Disable signals and configure the relays
+ */
 void MainControl_Init(void)
 {
 	DigitalPins_Init();
@@ -93,6 +102,9 @@ void MainControl_Init(void)
 	Dout_SetAsIOPin(16, GPIO_PIN_RESET);
 }
 
+/**
+ * @brief Call this function to run both inverter PWMs
+ */
 void MainControl_Run(void)
 {
 	HAL_HRTIM_WaveformOutputStart(&hhrtim,HRTIM_OUTPUT_TA1 | HRTIM_OUTPUT_TA2 | HRTIM_OUTPUT_TB1 | HRTIM_OUTPUT_TB2 | HRTIM_OUTPUT_TC1 | HRTIM_OUTPUT_TC2 | HRTIM_OUTPUT_TD1 | HRTIM_OUTPUT_TD2 | HRTIM_OUTPUT_TE1 | HRTIM_OUTPUT_TE2);																	
@@ -112,6 +124,9 @@ void MainControl_Run(void)
 	hhrtim.Instance->sMasterRegs.MCR |= (HRTIM_TIMERID_TIMER_A | HRTIM_TIMERID_TIMER_B | HRTIM_TIMERID_TIMER_C | HRTIM_TIMERID_TIMER_D | HRTIM_TIMERID_TIMER_E);
 }
 
+/**
+ * @brief Call this function to stop the inverters
+ */
 void MainControl_Stop(void)
 {
 	HAL_HRTIM_WaveformOutputStop(&hhrtim,HRTIM_OUTPUT_TA1 | HRTIM_OUTPUT_TA2 | HRTIM_OUTPUT_TB1 | HRTIM_OUTPUT_TB2 | HRTIM_OUTPUT_TC1 | HRTIM_OUTPUT_TC2 | HRTIM_OUTPUT_TD1 | HRTIM_OUTPUT_TD2 | HRTIM_OUTPUT_TE1 | HRTIM_OUTPUT_TE2);
@@ -132,30 +147,21 @@ void HAL_HRTIM_CounterResetCallback(HRTIM_HandleTypeDef * hhrtim,
 	recompute = true;
 }
 
-float duties[3];
+/**
+ * @brief Call this function to process the control loop.
+ * If the new computation request is available new duty cycle values are computed and applied to all inverter legs
+ */
 void MainControl_Loop(void)
 {
 	if(recompute)
 	{
+		float duties[3];
 #if CONTROL_TYPE == OPEN_LOOP_VF_CONTROL
-		static openloopvf_config_t vfConfig = {
-				.pwmFreq = 25000, .acceleration = 1.00001f, .nominalFreq = 50, .nominalModulationIndex = 0.7f, .freq = 1.0f, .theta = 0, .reqFreq = 25,
-		};
 		OpenLoopVfControl_GetDuties(&vfConfig, duties);
 		Inverter3Ph_UpdateDuty(inverterConfig1, duties);
 		Inverter3Ph_UpdateDuty(inverterConfig2, duties);
-#elif CONTROL_TYPE == BASIC_GRID_TIE_CONTROL
-		gridTie.vCoor.abc.a = adcVals.V1;
-		gridTie.vCoor.abc.b = adcVals.V2;
-		gridTie.vCoor.abc.c = adcVals.V3;
-		gridTie.vdc = adcVals.Vdc1;
-
-		BasicGridTieControl_GetDuties(&gridTie, duties);
-		duties[0] = 0;duties[1] = 0;duties[2] = 0;
-		Inverter3Ph_UpdateDuty(inverterConfig1, duties);
-		//Inverter3Ph_UpdateDuty(inverterConfig2, duties);
 #elif CONTROL_TYPE == GRID_TIE_CONTROL
-		Dout_TogglePin(15);
+		/* add the required measurements and current reference point */
 		gridTie.vCoor.abc.a = adcVals.V1;
 		gridTie.vCoor.abc.b = adcVals.V2;
 		gridTie.vCoor.abc.c = adcVals.V3;
@@ -163,21 +169,13 @@ void MainControl_Loop(void)
 		gridTie.iCoor.abc.a = adcVals.Ih1;
 		gridTie.iCoor.abc.b = adcVals.Ih2;
 		gridTie.iCoor.abc.c = adcVals.Ih3;
-		gridTie.iRef = 10.f;
+		gridTie.iRef = 5.f;
 
-		uint32_t ticks = HAL_GetTick();
-		uint32_t t1 = SysTick->VAL;
+		/* compute the duty cycles for grid tie control */
 		GridTieControl_GetDuties(&gridTie, duties);
-		uint32_t t2 = SysTick->VAL;
-		if (ticks == HAL_GetTick())
-			mainCont = t1 - t2;
-		ticks = HAL_GetTick();
-		t1 = SysTick->VAL;
+
+		/* Update the duty cycles for all inverter legs */
 		Inverter3Ph_UpdateDuty(inverterConfig1, duties);
-		t2 = SysTick->VAL;
-		if (ticks == HAL_GetTick())
-			mainUpdate = t1 - t2;
-		Dout_TogglePin(15);
 #endif
 		recompute = false;
 	}

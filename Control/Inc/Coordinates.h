@@ -66,15 +66,15 @@ typedef struct
 	float wt;
 	/** @brief Sin value of the angle given by \p wt */
 	float sin;
-	/** @brief Cos value of the angle given by \p wt */
+	/** @brief Cosine value of the angle given by \p wt */
 	float cos;
 	/** @brief Sin value of the angle given by \p wt+2pi/3 */
 	float sin_p2pB3;
-	/** @brief Cos value of the angle given by \p wt+2pi/3 */
+	/** @brief Cosine value of the angle given by \p wt+2pi/3 */
 	float cos_p2pB3;
 	/** @brief Sin value of the angle given by \p wt-2pi/3 */
 	float sin_m2pB3;
-	/** @brief Cos value of the angle given by \p wt-2pi/3 */
+	/** @brief Cosine value of the angle given by \p wt-2pi/3 */
 	float cos_m2pB3;
 } LIB_3COOR_SINCOS_t;
 

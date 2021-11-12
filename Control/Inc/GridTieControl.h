@@ -41,6 +41,10 @@ typedef struct
 	LIB_COOR_ALL_t vCoor;
 	/** @brief Coordinates for the Phase Currents */
 	LIB_COOR_ALL_t iCoor;
+	/** @brief DQ compensator for Q Value */
+	pi_data_t qCompensator;
+	/** @brief DQ compensator for D Value */
+	pi_data_t dCompensator;
 	/*! @brief PLL structure used by the Grid Tie Control */
 	pll_lock_t pll;
 } grid_tie_t;

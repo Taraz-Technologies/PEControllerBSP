@@ -23,9 +23,22 @@ extern "C" {
 /********************************************************************************
  * Defines
  *******************************************************************************/
+/**
+ * @brief Value of sin of 120 degrees
+ */
 #define SIN_120				(0.866f)
+/**
+ * @brief Value of cosine of 120 degrees
+ */
 #define COS_120A			(-0.5f)
 
+
+/**
+ * @brief Set to 1 if pre-computed trignometric values should be used.
+ * Use the function Transform_wt_sincos() to pre-compute all trignometric values.
+ * Set to 0 if trignometric expressions should be solved in runtime.
+ * This setting will slow down the conversions considerably
+ */
 #define USE_PRECOMPUTED_TRIG		(1)
 /********************************************************************************
  * Typedefs
@@ -109,6 +122,38 @@ static inline void Transform_abc_alBe0(LIB_3COOR_ABC_t* abc, LIB_3COOR_ALBE0_t* 
 static inline void Transform_alphaBeta0_dq0(LIB_3COOR_ALBE0_t* alBe0, LIB_3COOR_DQ0_t* dq0, LIB_3COOR_SINCOS_t* angle,
 		transformation_source_t src, park_transform_type_t parkType)
 {
+#if	USE_PRECOMPUTED_TRIG
+	// ALBE0 to DQO transform
+	if (src == SRC_ALBE0)
+	{
+		dq0->zero = alBe0->zero;
+		if (parkType == PARK_COSINE)
+		{
+			dq0->d = alBe0->alpha * angle->cos + alBe0->beta * angle->sin;
+			dq0->q = -alBe0->alpha *  angle->sin + alBe0->beta * angle->cos;
+		}
+		else
+		{
+			dq0->d = alBe0->alpha * angle->sin + alBe0->beta * -angle->cos;
+			dq0->q = -alBe0->alpha * -angle->cos + alBe0->beta * angle->sin;
+		}
+	}
+	// DQ0 to ALBE0 transform
+	else
+	{
+		alBe0->zero = dq0->zero;
+		if (parkType == PARK_COSINE)
+		{
+			alBe0->alpha = dq0->d * angle->cos - dq0->q *  angle->sin;
+			alBe0->beta = dq0->d *  angle->sin + dq0->q * angle->cos;
+		}
+		else
+		{
+			alBe0->alpha = dq0->d * angle->sin - dq0->q * -angle->cos;
+			alBe0->beta = dq0->d * -angle->cos + dq0->q * angle->sin;
+		}
+	}
+#else
 	// ALBE0 to DQO transform
 	if (src == SRC_ALBE0)
 	{
@@ -139,6 +184,7 @@ static inline void Transform_alphaBeta0_dq0(LIB_3COOR_ALBE0_t* alBe0, LIB_3COOR_
 			alBe0->beta = dq0->d * sinf(angle->wt - (PI / 2)) + dq0->q * cosf(angle->wt - (PI / 2));
 		}
 	}
+#endif
 }
 
 /**
@@ -334,12 +380,6 @@ static inline void Transform_wt_sincos(LIB_3COOR_SINCOS_t *angle)
 	angle->sin_m2pB3 = sacb - casb;
 	angle->cos_p2pB3 = cacb - sasb;
 	angle->cos_m2pB3 = cacb + sasb;
-/*
-	angle->sin_p2pB3 = sinf(angle->wt + TWO_PI/3);
-	angle->sin_m2pB3 = sinf(angle->wt - TWO_PI/3);
-	angle->cos_p2pB3 = cosf(angle->wt + TWO_PI/3);
-	angle->cos_m2pB3 = cosf(angle->wt - TWO_PI/3);
-*/
 }
 
 #ifdef __cplusplus
