@@ -75,6 +75,7 @@ basic_grid_tie_t gridTie = {0};
 #elif CONTROL_TYPE == GRID_TIE_CONTROL
 grid_tie_t gridTie = {0};
 #endif
+uint32_t mainCont, mainUpdate;
 /*******************************************************************************
  * Code
  ******************************************************************************/
@@ -154,6 +155,7 @@ void MainControl_Loop(void)
 		Inverter3Ph_UpdateDuty(inverterConfig1, duties);
 		//Inverter3Ph_UpdateDuty(inverterConfig2, duties);
 #elif CONTROL_TYPE == GRID_TIE_CONTROL
+		Dout_TogglePin(15);
 		gridTie.vCoor.abc.a = adcVals.V1;
 		gridTie.vCoor.abc.b = adcVals.V2;
 		gridTie.vCoor.abc.c = adcVals.V3;
@@ -163,8 +165,19 @@ void MainControl_Loop(void)
 		gridTie.iCoor.abc.c = adcVals.Ih3;
 		gridTie.iRef = 10.f;
 
+		uint32_t ticks = HAL_GetTick();
+		uint32_t t1 = SysTick->VAL;
 		GridTieControl_GetDuties(&gridTie, duties);
+		uint32_t t2 = SysTick->VAL;
+		if (ticks == HAL_GetTick())
+			mainCont = t1 - t2;
+		ticks = HAL_GetTick();
+		t1 = SysTick->VAL;
 		Inverter3Ph_UpdateDuty(inverterConfig1, duties);
+		t2 = SysTick->VAL;
+		if (ticks == HAL_GetTick())
+			mainUpdate = t1 - t2;
+		Dout_TogglePin(15);
 #endif
 		recompute = false;
 	}

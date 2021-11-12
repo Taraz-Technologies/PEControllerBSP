@@ -126,7 +126,7 @@ void Dout_SetPortAsGPIO(void)
 }
 
 /*!
- * @brief set the value of output port, sets all gpio ports at output
+ * @brief set the value of output port, sets all GPIO ports at output
  * @param val value to be set
  */
 void Dout_SetPortValue(uint32_t val)
@@ -137,6 +137,17 @@ void Dout_SetPortValue(uint32_t val)
 		HAL_GPIO_WritePin(pin->GPIO, pin->pinMask, (GPIO_PinState)(val & 0x1));
 		val = val >> 1U;
 	}
+}
+
+/**
+ * @brief Toggles the selected pin
+ *
+ * @param pinNo Dout Pin No (Range 1-16)
+ */
+void Dout_TogglePin(int pinNo)
+{
+	const digital_pin_t* pin = &doutPins[pinNo-1];
+	HAL_GPIO_TogglePin(pin->GPIO, pin->pinMask);
 }
 
 /* EOF */

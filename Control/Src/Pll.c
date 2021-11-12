@@ -8,8 +8,8 @@
  * @brief   
  ********************************************************************************
  */
-//#pragma GCC push_options
-//#pragma GCC optimize ("O3")
+#pragma GCC push_options
+#pragma GCC optimize ("-Ofast")
 /********************************************************************************
  * Includes
  *******************************************************************************/
@@ -137,7 +137,7 @@ static pll_states_t IsPLLSynched(pll_lock_t* pll)
 
 	info->index++;
 
-	if(info->index > info->maxIndex)
+	if(info->index > info->maxIndex && pll->status != PLL_LOCKED)
 	{
 		info->cycleMax = info->tempCycleMax;
 		if(info->cycleMax < info->acceptableMax)
@@ -207,10 +207,10 @@ pll_states_t Pll_LockGrid(pll_lock_t* pll)
 	coords->sinCosAngle.wt -= thetaShift;
 	coords->sinCosAngle.wt = AdjustTheta(coords->sinCosAngle.wt);
 
-	Transform_theta_sincos(&coords->sinCosAngle);
+	Transform_wt_sincos(&coords->sinCosAngle);
 
 	return IsPLLSynched(pll);
 }
 
-//#pragma GCC pop_options
+#pragma GCC pop_options
 /* EOF */

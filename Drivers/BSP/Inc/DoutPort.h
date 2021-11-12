@@ -62,6 +62,12 @@ void Dout_SetPortAsGPIO(void);
  * @param val value to be set
  */
 void Dout_SetPortValue(uint32_t val);
+/**
+ * @brief Toggles the selected pin
+ *
+ * @param pinNo Dout Pin No (Range 1-16)
+ */
+void Dout_TogglePin(int pinNo);
 /*******************************************************************************
  * Variables
  ******************************************************************************/

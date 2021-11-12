@@ -9,12 +9,13 @@
  ********************************************************************************
  */
 #pragma GCC push_options
-#pragma GCC optimize ("O0")
+#pragma GCC optimize ("-Ofast")
 /********************************************************************************
  * Includes
  *******************************************************************************/
 #include "GridTieControl.h"
 #include "DoutPort.h"
+#include <string.h>
 /********************************************************************************
  * Defines
  *******************************************************************************/
@@ -32,7 +33,13 @@
 /********************************************************************************
  * Structures
  *******************************************************************************/
-
+typedef struct
+{
+	grid_tie_t gridTie;
+	LIB_COOR_ALL_t vCoorL;
+	LIB_3COOR_ABC_t abc;
+	float duties[3];
+} log_fault_t;
 /********************************************************************************
  * Static Variables
  *******************************************************************************/
@@ -50,6 +57,9 @@ LIB_COOR_ALL_t vCoorL = {0};
 LIB_3COOR_ABC_t abc = {0};
 float maxDiff = 0;
 float old = 0;
+log_fault_t logItem[8];
+int logCount = 0;
+int logCountMod = 7;
 /********************************************************************************
  * Global Variables
  *******************************************************************************/
@@ -101,6 +111,10 @@ static void InitFilterIfNeeded(low_pass_filter_t* filt)
 	}
 }
 
+int contCountMax = 0;
+int contCount = 0;
+volatile uint32_t endCount, piCount, dqCount, pllCount;
+
 /**
  * @brief Evaluates the Duty Cycle Values using the Grid Tie Control
  *
@@ -117,15 +131,24 @@ void GridTieControl_GetDuties(grid_tie_t* gridTie, float* duties)
 
 	//InitFilterIfNeeded(&qFilt);
 	//InitFilterIfNeeded(&dFilt);
-
+	uint32_t ticks = HAL_GetTick();
+	uint32_t t1 = SysTick->VAL;
 	if (Pll_LockGrid(pll) == PLL_LOCKED)
 	{
+		uint32_t t2 = SysTick->VAL;
+		if (ticks == HAL_GetTick())
+			pllCount = t1 - t2;
 		if(pll->prevStatus != PLL_LOCKED)
 		{
 			Dout_SetAsIOPin(GRID_RELAY_IO, GPIO_PIN_SET);
-			old = vCoor->sinCosAngle.wt;
+			//old = vCoor->sinCosAngle.wt;
 		}
+
+		memcpy(&vCoorL, vCoor, sizeof(vCoorL));
 #if PWM_TECH == TECH_1
+
+		memcpy(&iCoor->sinCosAngle, &vCoor->sinCosAngle, sizeof(vCoor->sinCosAngle));
+		/*
 		float absDiff = fabsf(old - vCoor->sinCosAngle.wt);
 		if (absDiff < PI)
 		{
@@ -133,31 +156,56 @@ void GridTieControl_GetDuties(grid_tie_t* gridTie, float* duties)
 				maxDiff = absDiff;
 		}
 		old = vCoor->sinCosAngle.wt;
+		*/
 
 		// copy coordinates of grid voltages
-		vCoorL.abc.a = vCoor->abc.a;
-		vCoorL.abc.b = vCoor->abc.b;
-		vCoorL.abc.c = vCoor->abc.c;
-		vCoorL.sinCosAngle.wt = vCoor->sinCosAngle.wt;
-		iCoor->sinCosAngle.wt = vCoor->sinCosAngle.wt;
+		//iCoor->sinCosAngle.wt = vCoor->sinCosAngle.wt;
 
+		ticks = HAL_GetTick();
+		t1 = SysTick->VAL;
 		Transform_abc_dq0(&iCoor->abc, &iCoor->dq0, &iCoor->sinCosAngle, SRC_ABC, PARK_SINE);
-		Transform_abc_dq0(&vCoorL.abc, &vCoorL.dq0, &vCoorL.sinCosAngle, SRC_ABC, PARK_SINE);
+		//Transform_abc_dq0(&vCoorL.abc, &vCoorL.dq0, &vCoorL.sinCosAngle, SRC_ABC, PARK_SINE);
+		t2 = SysTick->VAL;
+		if (ticks == HAL_GetTick())
+			dqCount = t1 - t2;
 
+		ticks = HAL_GetTick();
+		t1 = SysTick->VAL;
 		iCoor->dq0.d = EvaluatePI(&dPI, gridTie->iRef - iCoor->dq0.d) - TWO_PI * 50 * qPI.dt * iCoor->dq0.q + vCoorL.dq0.d;
 		iCoor->dq0.q = EvaluatePI(&qPI, 0             - iCoor->dq0.q) + TWO_PI * 50 * qPI.dt * iCoor->dq0.d + vCoorL.dq0.q;
+		t2 = SysTick->VAL;
+		if (ticks == HAL_GetTick())
+			piCount = t1 - t2;
 
+		ticks = HAL_GetTick();
+		t1 = SysTick->VAL;
 		Transform_abc_dq0(&abc, &iCoor->dq0, &iCoor->sinCosAngle, SRC_DQ0, PARK_SINE);
 
 		duties[0] = (abc.a / gridTie->vdc) + .5f;
 		duties[1] = (abc.b / gridTie->vdc) + .5f;
 		duties[2] = (abc.c / gridTie->vdc) + .5f;
+		t2 = SysTick->VAL;
+		if (ticks == HAL_GetTick())
+			endCount = t1 - t2;
+		/*
+		log_fault_t* ptr = &logItem[logCount];
+		logCount = (logCount + 1) & logCountMod;
+		memcpy(&ptr->gridTie, gridTie, sizeof(ptr->gridTie));
+		memcpy(&ptr->abc, &abc, sizeof(ptr->abc));
+		memcpy(&ptr->vCoorL, &vCoorL, sizeof(ptr->vCoorL));
+		memcpy(ptr->duties, duties, 4 * 3);
 
 		if (fabsf(iCoor->abc.a) > 18)
 		{
-			duties[0] -= .5f;
-			duties[0] += .5f;
+			if (contCount == 0)
+				iCoor->abc.a = 18;
+			if(++contCount > contCountMax)
+				contCountMax = contCount;
 		}
+		else
+			contCount = 0;
+
+		*/
 
 #else
 #if USE_DQ

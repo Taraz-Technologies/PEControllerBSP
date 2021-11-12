@@ -25,6 +25,8 @@ extern "C" {
  *******************************************************************************/
 #define SIN_120				(0.866f)
 #define COS_120A			(-0.5f)
+
+#define USE_PRECOMPUTED_TRIG		(1)
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
@@ -197,6 +199,40 @@ static inline void Transform_alphaBeta0_dq0_wt0(LIB_3COOR_ALBE0_t* alBe0, LIB_3C
 static inline void Transform_abc_dq0(LIB_3COOR_ABC_t* abc, LIB_3COOR_DQ0_t* dq0, LIB_3COOR_SINCOS_t* angle,
 		transformation_source_t src, park_transform_type_t parkType)
 {
+#if	USE_PRECOMPUTED_TRIG
+	// ABC to DQO transform
+	if (src == SRC_ABC)
+	{
+		if (parkType == PARK_COSINE)
+		{
+			dq0->d = 2/3.f * (abc->a * angle->cos + abc->b * angle->cos_m2pB3 + abc->c * angle->cos_p2pB3);
+			dq0->q = -2/3.f * (abc->a * angle->sin + abc->b * angle->sin_m2pB3 + abc->c * angle->sin_p2pB3);
+			dq0->zero = (abc->a + abc->b + abc->c) / 3.f;
+		}
+		else
+		{
+			dq0->d = 2/3.f * (abc->a * angle->sin + abc->b * angle->sin_m2pB3 + abc->c * angle->sin_p2pB3);
+			dq0->q = 2/3.f * (abc->a * angle->cos + abc->b * angle->cos_m2pB3 + abc->c * angle->cos_p2pB3);
+			dq0->zero = (abc->a + abc->b + abc->c) / 3.f;
+		}
+	}
+	// DQ0 to ABC transform
+	else
+	{
+		if (parkType == PARK_COSINE)
+		{
+			abc->a = dq0->d * angle->cos - dq0->q * angle->sin + dq0->zero;
+			abc->b = dq0->d * angle->cos_m2pB3 - dq0->q * angle->sin_m2pB3 + dq0->zero;
+			abc->c = dq0->d * angle->cos_p2pB3 - dq0->q * angle->sin_p2pB3 + dq0->zero;
+		}
+		else
+		{
+			abc->a = dq0->d * angle->sin + dq0->q * angle->cos + dq0->zero;
+			abc->b = dq0->d * angle->sin_m2pB3 + dq0->q * angle->cos_m2pB3 + dq0->zero;
+			abc->c = dq0->d * angle->sin_p2pB3 + dq0->q * angle->cos_p2pB3 + dq0->zero;
+		}
+	}
+#else
 	// ABC to DQO transform
 	if (src == SRC_ABC)
 	{
@@ -229,6 +265,7 @@ static inline void Transform_abc_dq0(LIB_3COOR_ABC_t* abc, LIB_3COOR_DQ0_t* dq0,
 			abc->c = dq0->d * sinf(angle->wt + (TWO_PI/3)) + dq0->q * cosf(angle->wt + (TWO_PI/3)) + dq0->zero;
 		}
 	}
+#endif
 }
 
 /**
@@ -279,14 +316,30 @@ static inline void Transform_abc_dq0_wt0(LIB_3COOR_ABC_t* abc, LIB_3COOR_DQ0_t* 
 }
 
 /**
- * @brief Transform theta to the trigonometric values
+ * @brief Transform wt to the trigonometric values required in DQ transforms to precompute before use
  *
  * @param *angle Pointer to the angle information
  */
-static inline void Transform_theta_sincos(LIB_3COOR_SINCOS_t *angle)
+static inline void Transform_wt_sincos(LIB_3COOR_SINCOS_t *angle)
 {
-	//angle->sin = sinf(angle->wt);
-	//angle->cos = cosf(angle->wt);
+	angle->sin = sinf(angle->wt);
+	angle->cos = cosf(angle->wt);
+
+	float casb = angle->cos * SIN_120;
+	float sacb = angle->sin * COS_120A;
+	float cacb = angle->cos * COS_120A;
+	float sasb = angle->sin * SIN_120;
+
+	angle->sin_p2pB3 = sacb + casb;
+	angle->sin_m2pB3 = sacb - casb;
+	angle->cos_p2pB3 = cacb - sasb;
+	angle->cos_m2pB3 = cacb + sasb;
+/*
+	angle->sin_p2pB3 = sinf(angle->wt + TWO_PI/3);
+	angle->sin_m2pB3 = sinf(angle->wt - TWO_PI/3);
+	angle->cos_p2pB3 = cosf(angle->wt + TWO_PI/3);
+	angle->cos_m2pB3 = cosf(angle->wt - TWO_PI/3);
+*/
 }
 
 #ifdef __cplusplus

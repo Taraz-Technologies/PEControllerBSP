@@ -30,8 +30,8 @@ extern "C" {
 #define ACCEPTABLE_Q					(20.f)
 #define MAX_Q_DATA_INDEX				(25000)
 
-#define EVALUATE_D_STATS				(1)
-#define CHECK_PLL						(1)
+#define EVALUATE_D_STATS				(0)
+#define CHECK_PLL						(0)
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
