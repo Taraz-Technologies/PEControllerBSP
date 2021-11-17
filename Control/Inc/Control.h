@@ -50,8 +50,8 @@ typedef struct
  * @param grid voltages
  * @param voltage peak measurement
  */
-LIB_3COOR_SINCOS_t* LockVoltagePhase(LIB_3COOR_ABC_t* sVabc, LIB_3COOR_DQ0_t* sVdq0);
-LIB_3COOR_SINCOS_t* SetCurrent(LIB_3COOR_ABC_t* sIabc, LIB_3COOR_SINCOS_t* sSincos, float iRef, float* duties);
+LIB_3COOR_TRIGNO_t* LockVoltagePhase(LIB_3COOR_ABC_t* sVabc, LIB_3COOR_DQ0_t* sVdq0);
+LIB_3COOR_TRIGNO_t* SetCurrent(LIB_3COOR_ABC_t* sIabc, LIB_3COOR_TRIGNO_t* sSincos, float iRef, float* duties);
 /*******************************************************************************
  * Variables
  ******************************************************************************/

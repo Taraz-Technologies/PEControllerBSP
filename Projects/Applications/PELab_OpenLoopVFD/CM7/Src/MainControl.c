@@ -26,6 +26,11 @@
 #define GRID_TIE_CONTROL				(2)
 
 #define CONTROL_TYPE					(GRID_TIE_CONTROL)
+
+#define PWM_PERIOD_Us					(40)
+#define PWM_PERIOD_s					(PWM_PERIOD_Us/1000000.f)
+#define PWM_FREQ_KHz					(1000.f/PWM_PERIOD_Us)
+#define PWM_FREQ_Hz						(1.f/PWM_PERIOD_s)
 /*******************************************************************************
  * Enums
  ******************************************************************************/
@@ -47,7 +52,7 @@ static inverter3Ph_init_config_t inverterInitConfig1 =
 {
 		.pins = { 1, 3, 5 },  /* should be odd as these are pairs */
 		.dsblPin = 13,
-		.periodInUs = 40,
+		.periodInUs = PWM_PERIOD_Us,
 		.interruptEnabled = true,			/* not catered for right now */
 		.alignment = CENTER_ALIGNED,
 		.deadtimeInNanosec = 500,
@@ -59,11 +64,11 @@ static inverter3Ph_init_config_t inverterInitConfig2 =
 {
 		.pins = { 7, 9, 11 },  /* should be odd as these are pairs */
 		.dsblPin = 14,
-		.periodInUs = 40,
+		.periodInUs = PWM_PERIOD_Us,
 		.interruptEnabled = false,			/* not catered for right now */
 		.alignment = CENTER_ALIGNED,
 		.deadtimeInNanosec = 500,
-		.deadtimeEnable = true,
+		.deadtimeEnable = true,			// --todo-- doesn't work when disabled
 		.resetCallback = Inverter3Ph_ResetSignal,
 		.minMaxDutyCycleBalancing = true,
 };
@@ -77,9 +82,9 @@ static openloopvf_config_t vfConfig = {
 /**
  * @brief Grid Tie Control Parameters
  */
-static grid_tie_t gridTie = {.vCoor = {0}, .iCoor = {0}, .pll = {0},
-		.qCompensator = { .Integral = 0, .Kp = 15.f, .Ki = 40.f, .dt = 0.00004f },
-		.dCompensator = { .Integral = 0, .Kp = 15.f, .Ki = 40.f, .dt = 0.00004f },
+static grid_tie_t gridTie = { .vCoor = {0}, .iCoor = {0}, .pll = {0},
+		.qCompensator = { .Integral = 0, .Kp = 7.f, .Ki = 70.f, .dt = PWM_PERIOD_s },
+		.dCompensator = { .Integral = 0, .Kp = 7.f, .Ki = 70.f, .dt = PWM_PERIOD_s },
 };
 #endif
 /*******************************************************************************

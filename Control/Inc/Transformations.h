@@ -113,13 +113,13 @@ static inline void Transform_abc_alBe0(LIB_3COOR_ABC_t* abc, LIB_3COOR_ALBE0_t* 
  *
  * @param *alphaBeta0 Pointer to the alpha Beta zero coordinates structure
  * @param *dq0 Pointer to the dq0 coordinates structures
- * @param *angle Pointer to the angle structure, Make sure that the Sines and Cosines are precomputed before calling this method
+ * @param *trigno Pointer to the trignometric structure, Make sure that the Sines and Cosines are pre-computed before calling this method
  * @param src conversion source. If src = SRC_ALBE0 converts from ALBE0 to DQ0 else converts from DQ0 to ALBE0 coordinates
  * @param parkType Select the park transformation types. For three phase systems set to PARK_SINE
  *
  * @note https://www.mathworks.com/help/physmod/sps/powersys/ref/alphabetazerotodq0dq0toalphabetazero.html?s_tid=doc_ta
  */
-static inline void Transform_alphaBeta0_dq0(LIB_3COOR_ALBE0_t* alBe0, LIB_3COOR_DQ0_t* dq0, LIB_3COOR_SINCOS_t* angle,
+static inline void Transform_alphaBeta0_dq0(LIB_3COOR_ALBE0_t* alBe0, LIB_3COOR_DQ0_t* dq0, LIB_3COOR_TRIGNO_t* trigno,
 		transformation_source_t src, park_transform_type_t parkType)
 {
 #if	USE_PRECOMPUTED_TRIG
@@ -129,13 +129,13 @@ static inline void Transform_alphaBeta0_dq0(LIB_3COOR_ALBE0_t* alBe0, LIB_3COOR_
 		dq0->zero = alBe0->zero;
 		if (parkType == PARK_COSINE)
 		{
-			dq0->d = alBe0->alpha * angle->cos + alBe0->beta * angle->sin;
-			dq0->q = -alBe0->alpha *  angle->sin + alBe0->beta * angle->cos;
+			dq0->d = alBe0->alpha * trigno->cos + alBe0->beta * trigno->sin;
+			dq0->q = -alBe0->alpha *  trigno->sin + alBe0->beta * trigno->cos;
 		}
 		else
 		{
-			dq0->d = alBe0->alpha * angle->sin + alBe0->beta * -angle->cos;
-			dq0->q = -alBe0->alpha * -angle->cos + alBe0->beta * angle->sin;
+			dq0->d = alBe0->alpha * trigno->sin + alBe0->beta * -trigno->cos;
+			dq0->q = -alBe0->alpha * -trigno->cos + alBe0->beta * trigno->sin;
 		}
 	}
 	// DQ0 to ALBE0 transform
@@ -144,13 +144,13 @@ static inline void Transform_alphaBeta0_dq0(LIB_3COOR_ALBE0_t* alBe0, LIB_3COOR_
 		alBe0->zero = dq0->zero;
 		if (parkType == PARK_COSINE)
 		{
-			alBe0->alpha = dq0->d * angle->cos - dq0->q *  angle->sin;
-			alBe0->beta = dq0->d *  angle->sin + dq0->q * angle->cos;
+			alBe0->alpha = dq0->d * trigno->cos - dq0->q *  trigno->sin;
+			alBe0->beta = dq0->d *  trigno->sin + dq0->q * trigno->cos;
 		}
 		else
 		{
-			alBe0->alpha = dq0->d * angle->sin - dq0->q * -angle->cos;
-			alBe0->beta = dq0->d * -angle->cos + dq0->q * angle->sin;
+			alBe0->alpha = dq0->d * trigno->sin - dq0->q * -trigno->cos;
+			alBe0->beta = dq0->d * -trigno->cos + dq0->q * trigno->sin;
 		}
 	}
 #else
@@ -160,13 +160,13 @@ static inline void Transform_alphaBeta0_dq0(LIB_3COOR_ALBE0_t* alBe0, LIB_3COOR_
 		dq0->zero = alBe0->zero;
 		if (parkType == PARK_COSINE)
 		{
-			dq0->d = alBe0->alpha * cosf(angle->wt) + alBe0->beta * sinf(angle->wt);
-			dq0->q = -alBe0->alpha *  sinf(angle->wt) + alBe0->beta * cosf(angle->wt);
+			dq0->d = alBe0->alpha * cosf(trigno->wt) + alBe0->beta * sinf(trigno->wt);
+			dq0->q = -alBe0->alpha *  sinf(trigno->wt) + alBe0->beta * cosf(trigno->wt);
 		}
 		else
 		{
-			dq0->d = alBe0->alpha * cosf(angle->wt - (PI / 2)) + alBe0->beta * sinf(angle->wt - (PI / 2));
-			dq0->q = -alBe0->alpha * sinf(angle->wt - (PI / 2)) + alBe0->beta * cosf(angle->wt - (PI / 2));
+			dq0->d = alBe0->alpha * cosf(trigno->wt - (PI / 2)) + alBe0->beta * sinf(trigno->wt - (PI / 2));
+			dq0->q = -alBe0->alpha * sinf(trigno->wt - (PI / 2)) + alBe0->beta * cosf(trigno->wt - (PI / 2));
 		}
 	}
 	// DQ0 to ALBE0 transform
@@ -175,13 +175,13 @@ static inline void Transform_alphaBeta0_dq0(LIB_3COOR_ALBE0_t* alBe0, LIB_3COOR_
 		alBe0->zero = dq0->zero;
 		if (parkType == PARK_COSINE)
 		{
-			alBe0->alpha = dq0->d * cosf(angle->wt) - dq0->q *  sinf(angle->wt);
-			alBe0->beta = dq0->d *  sinf(angle->wt) + dq0->q * cosf(angle->wt);
+			alBe0->alpha = dq0->d * cosf(trigno->wt) - dq0->q *  sinf(trigno->wt);
+			alBe0->beta = dq0->d *  sinf(trigno->wt) + dq0->q * cosf(trigno->wt);
 		}
 		else
 		{
-			alBe0->alpha = dq0->d * cosf(angle->wt - (PI / 2)) - dq0->q * sinf(angle->wt - (PI / 2));
-			alBe0->beta = dq0->d * sinf(angle->wt - (PI / 2)) + dq0->q * cosf(angle->wt - (PI / 2));
+			alBe0->alpha = dq0->d * cosf(trigno->wt - (PI / 2)) - dq0->q * sinf(trigno->wt - (PI / 2));
+			alBe0->beta = dq0->d * sinf(trigno->wt - (PI / 2)) + dq0->q * cosf(trigno->wt - (PI / 2));
 		}
 	}
 #endif
@@ -236,13 +236,13 @@ static inline void Transform_alphaBeta0_dq0_wt0(LIB_3COOR_ALBE0_t* alBe0, LIB_3C
  *
  * @param *abc Pointer to the abc coordinates structure
  * @param *dq0 Pointer to the dq0 coordinates structures
- * @param *angle Pointer to the angle structure, Make sure that the Sines and Cosines are precomputed before calling this method
+ * @param *trigno Pointer to the trignometric structure, Make sure that the Sines and Cosines are precomputed before calling this method
  * @param src conversion source. If src = SRC_ABC converts from ABC to DQ0 else converts from DQ0 to ABC coordinates
  * @param parkType Select the park transformation types. For three phase systems set to PARK_SINE
  *
  * @note https://www.mathworks.com/help/physmod/sps/powersys/ref/abctodq0dq0toabc.html?s_tid=doc_ta
  */
-static inline void Transform_abc_dq0(LIB_3COOR_ABC_t* abc, LIB_3COOR_DQ0_t* dq0, LIB_3COOR_SINCOS_t* angle,
+static inline void Transform_abc_dq0(LIB_3COOR_ABC_t* abc, LIB_3COOR_DQ0_t* dq0, LIB_3COOR_TRIGNO_t* trigno,
 		transformation_source_t src, park_transform_type_t parkType)
 {
 #if	USE_PRECOMPUTED_TRIG
@@ -251,14 +251,14 @@ static inline void Transform_abc_dq0(LIB_3COOR_ABC_t* abc, LIB_3COOR_DQ0_t* dq0,
 	{
 		if (parkType == PARK_COSINE)
 		{
-			dq0->d = 2/3.f * (abc->a * angle->cos + abc->b * angle->cos_m2pB3 + abc->c * angle->cos_p2pB3);
-			dq0->q = -2/3.f * (abc->a * angle->sin + abc->b * angle->sin_m2pB3 + abc->c * angle->sin_p2pB3);
+			dq0->d = 2/3.f * (abc->a * trigno->cos + abc->b * trigno->cos_m2pB3 + abc->c * trigno->cos_p2pB3);
+			dq0->q = -2/3.f * (abc->a * trigno->sin + abc->b * trigno->sin_m2pB3 + abc->c * trigno->sin_p2pB3);
 			dq0->zero = (abc->a + abc->b + abc->c) / 3.f;
 		}
 		else
 		{
-			dq0->d = 2/3.f * (abc->a * angle->sin + abc->b * angle->sin_m2pB3 + abc->c * angle->sin_p2pB3);
-			dq0->q = 2/3.f * (abc->a * angle->cos + abc->b * angle->cos_m2pB3 + abc->c * angle->cos_p2pB3);
+			dq0->d = 2/3.f * (abc->a * trigno->sin + abc->b * trigno->sin_m2pB3 + abc->c * trigno->sin_p2pB3);
+			dq0->q = 2/3.f * (abc->a * trigno->cos + abc->b * trigno->cos_m2pB3 + abc->c * trigno->cos_p2pB3);
 			dq0->zero = (abc->a + abc->b + abc->c) / 3.f;
 		}
 	}
@@ -267,15 +267,15 @@ static inline void Transform_abc_dq0(LIB_3COOR_ABC_t* abc, LIB_3COOR_DQ0_t* dq0,
 	{
 		if (parkType == PARK_COSINE)
 		{
-			abc->a = dq0->d * angle->cos - dq0->q * angle->sin + dq0->zero;
-			abc->b = dq0->d * angle->cos_m2pB3 - dq0->q * angle->sin_m2pB3 + dq0->zero;
-			abc->c = dq0->d * angle->cos_p2pB3 - dq0->q * angle->sin_p2pB3 + dq0->zero;
+			abc->a = dq0->d * trigno->cos - dq0->q * trigno->sin + dq0->zero;
+			abc->b = dq0->d * trigno->cos_m2pB3 - dq0->q * trigno->sin_m2pB3 + dq0->zero;
+			abc->c = dq0->d * trigno->cos_p2pB3 - dq0->q * trigno->sin_p2pB3 + dq0->zero;
 		}
 		else
 		{
-			abc->a = dq0->d * angle->sin + dq0->q * angle->cos + dq0->zero;
-			abc->b = dq0->d * angle->sin_m2pB3 + dq0->q * angle->cos_m2pB3 + dq0->zero;
-			abc->c = dq0->d * angle->sin_p2pB3 + dq0->q * angle->cos_p2pB3 + dq0->zero;
+			abc->a = dq0->d * trigno->sin + dq0->q * trigno->cos + dq0->zero;
+			abc->b = dq0->d * trigno->sin_m2pB3 + dq0->q * trigno->cos_m2pB3 + dq0->zero;
+			abc->c = dq0->d * trigno->sin_p2pB3 + dq0->q * trigno->cos_p2pB3 + dq0->zero;
 		}
 	}
 #else
@@ -284,14 +284,14 @@ static inline void Transform_abc_dq0(LIB_3COOR_ABC_t* abc, LIB_3COOR_DQ0_t* dq0,
 	{
 		if (parkType == PARK_COSINE)
 		{
-			dq0->d = 2/3.f * (abc->a * cosf(angle->wt) + abc->b * cosf((angle->wt - TWO_PI/3)) + abc->c * cosf((angle->wt + TWO_PI/3)));
-			dq0->q = -2/3.f * (abc->a * sinf(angle->wt) + abc->b * sinf((angle->wt - TWO_PI/3)) + abc->c * sinf((angle->wt + TWO_PI/3)));
+			dq0->d = 2/3.f * (abc->a * cosf(trigno->wt) + abc->b * cosf((trigno->wt - TWO_PI/3)) + abc->c * cosf((trigno->wt + TWO_PI/3)));
+			dq0->q = -2/3.f * (abc->a * sinf(trigno->wt) + abc->b * sinf((trigno->wt - TWO_PI/3)) + abc->c * sinf((trigno->wt + TWO_PI/3)));
 			dq0->zero = (abc->a + abc->b + abc->c) / 3.f;
 		}
 		else
 		{
-			dq0->d = 2/3.f * (abc->a * sinf(angle->wt) + abc->b * sinf((angle->wt - TWO_PI/3)) + abc->c * sinf((angle->wt + TWO_PI/3)));
-			dq0->q = 2/3.f * (abc->a * cosf(angle->wt) + abc->b * cosf((angle->wt - TWO_PI/3)) + abc->c * cosf((angle->wt + TWO_PI/3)));
+			dq0->d = 2/3.f * (abc->a * sinf(trigno->wt) + abc->b * sinf((trigno->wt - TWO_PI/3)) + abc->c * sinf((trigno->wt + TWO_PI/3)));
+			dq0->q = 2/3.f * (abc->a * cosf(trigno->wt) + abc->b * cosf((trigno->wt - TWO_PI/3)) + abc->c * cosf((trigno->wt + TWO_PI/3)));
 			dq0->zero = (abc->a + abc->b + abc->c) / 3.f;
 		}
 	}
@@ -300,15 +300,15 @@ static inline void Transform_abc_dq0(LIB_3COOR_ABC_t* abc, LIB_3COOR_DQ0_t* dq0,
 	{
 		if (parkType == PARK_COSINE)
 		{
-			abc->a = dq0->d * cosf(angle->wt) - dq0->q * sin(angle->wt) + dq0->zero;
-			abc->b = dq0->d * cosf(angle->wt - (TWO_PI/3)) - dq0->q * sinf(angle->wt - (TWO_PI/3)) + dq0->zero;
-			abc->c = dq0->d * cosf(angle->wt + (TWO_PI/3)) - dq0->q * sinf(angle->wt + (TWO_PI/3)) + dq0->zero;
+			abc->a = dq0->d * cosf(trigno->wt) - dq0->q * sin(trigno->wt) + dq0->zero;
+			abc->b = dq0->d * cosf(trigno->wt - (TWO_PI/3)) - dq0->q * sinf(trigno->wt - (TWO_PI/3)) + dq0->zero;
+			abc->c = dq0->d * cosf(trigno->wt + (TWO_PI/3)) - dq0->q * sinf(trigno->wt + (TWO_PI/3)) + dq0->zero;
 		}
 		else
 		{
-			abc->a = dq0->d * sinf(angle->wt) + dq0->q * cosf(angle->wt) + dq0->zero;
-			abc->b = dq0->d * sinf(angle->wt - (TWO_PI/3)) + dq0->q * cosf(angle->wt - (TWO_PI/3)) + dq0->zero;
-			abc->c = dq0->d * sinf(angle->wt + (TWO_PI/3)) + dq0->q * cosf(angle->wt + (TWO_PI/3)) + dq0->zero;
+			abc->a = dq0->d * sinf(trigno->wt) + dq0->q * cosf(trigno->wt) + dq0->zero;
+			abc->b = dq0->d * sinf(trigno->wt - (TWO_PI/3)) + dq0->q * cosf(trigno->wt - (TWO_PI/3)) + dq0->zero;
+			abc->c = dq0->d * sinf(trigno->wt + (TWO_PI/3)) + dq0->q * cosf(trigno->wt + (TWO_PI/3)) + dq0->zero;
 		}
 	}
 #endif
@@ -362,24 +362,24 @@ static inline void Transform_abc_dq0_wt0(LIB_3COOR_ABC_t* abc, LIB_3COOR_DQ0_t* 
 }
 
 /**
- * @brief Transform wt to the trigonometric values required in DQ transforms to precompute before use
+ * @brief Transform wt to the trigonometric values required in DQ transforms to pre-compute before use
  *
- * @param *angle Pointer to the angle information
+ * @param *trigno Pointer to the trignometric information
  */
-static inline void Transform_wt_sincos(LIB_3COOR_SINCOS_t *angle)
+static inline void Transform_wt_sincos(LIB_3COOR_TRIGNO_t *trigno)
 {
-	angle->sin = sinf(angle->wt);
-	angle->cos = cosf(angle->wt);
+	trigno->sin = sinf(trigno->wt);
+	trigno->cos = cosf(trigno->wt);
 
-	float casb = angle->cos * SIN_120;
-	float sacb = angle->sin * COS_120A;
-	float cacb = angle->cos * COS_120A;
-	float sasb = angle->sin * SIN_120;
+	float casb = trigno->cos * SIN_120;
+	float sacb = trigno->sin * COS_120A;
+	float cacb = trigno->cos * COS_120A;
+	float sasb = trigno->sin * SIN_120;
 
-	angle->sin_p2pB3 = sacb + casb;
-	angle->sin_m2pB3 = sacb - casb;
-	angle->cos_p2pB3 = cacb - sasb;
-	angle->cos_m2pB3 = cacb + sasb;
+	trigno->sin_p2pB3 = sacb + casb;
+	trigno->sin_m2pB3 = sacb - casb;
+	trigno->cos_p2pB3 = cacb - sasb;
+	trigno->cos_m2pB3 = cacb + sasb;
 }
 
 #ifdef __cplusplus

@@ -156,27 +156,24 @@ static pll_states_t IsPLLSynched(pll_lock_t* pll)
 	if(pll->status == PLL_PENDING)
 	{
 		if (fabsf(pll->coords->abc.a) < (pll->dFilt.filt.avg) / 40)
-		{
 			pll->status = PLL_LOCKED;
-			wtOld = pll->coords->sinCosAngle.wt;
-		}
 	}
 #if CHECK_PLL
 	else if (pll->status == PLL_LOCKED)
 	{
-		if (pll->coords->sinCosAngle.wt > (PI / 2 - 0.1f) && pll->coords->sinCosAngle.wt < (PI / 2 + 0.1f))
+		if (pll->coords->trigno.wt > (PI / 2 - 0.1f) && pll->coords->trigno.wt < (PI / 2 + 0.1f))
 			pll->info.th = pll->coords->abc.a;
 
-		pll->info.inc = pll->coords->sinCosAngle.wt > pll->info.thOld ? 1 : 0;
-		pll->info.thOld = pll->coords->sinCosAngle.wt;
+		pll->info.inc = pll->coords->trigno.wt > pll->info.thOld ? 1 : 0;
+		pll->info.thOld = pll->coords->trigno.wt;
 
-		if(((wtOld > TWO_PI - .2f && pll->coords->sinCosAngle.wt < .2f) || (pll->coords->sinCosAngle.wt > TWO_PI - .2f && wtOld < .2f)) == false)
+		if(((wtOld > TWO_PI - .2f && pll->coords->trigno.wt < .2f) || (pll->coords->trigno.wt > TWO_PI - .2f && wtOld < .2f)) == false)
 		{
-			float diff = fabsf(wtOld - pll->coords->sinCosAngle.wt);
+			float diff = fabsf(wtOld - pll->coords->trigno.wt);
 			if (diff > wtDiffMax)
 				wtDiffMax = diff;
 		}
-		wtOld = pll->coords->sinCosAngle.wt;
+		wtOld = pll->coords->trigno.wt;
 	}
 #endif
 
@@ -184,7 +181,7 @@ static pll_states_t IsPLLSynched(pll_lock_t* pll)
 }
 
 /**
- * @brief Lock the grid voltages using Pll
+ * @brief Lock the grid voltages using PLL
  *
  * @param pll Pointer to the data structure
  * @return pll_states_t PLL_LOCKED if grid phase successfully locked
@@ -199,15 +196,15 @@ pll_states_t Pll_LockGrid(pll_lock_t* pll)
 	InitCompensatorIfNeeded(&pll->compensator);
 
 	// evaluate DQ0 coordinates from the ABC coordinates
-	Transform_abc_dq0(&coords->abc, &coords->dq0, &coords->sinCosAngle, SRC_ABC, PARK_SINE);
+	Transform_abc_dq0(&coords->abc, &coords->dq0, &coords->trigno, SRC_ABC, PARK_SINE);
 
 	ApplyLowPassFilters_DQ(pll);
 
 	thetaShift = EvaluatePI(&pll->compensator, -coords->dq0.q);
-	coords->sinCosAngle.wt -= thetaShift;
-	coords->sinCosAngle.wt = AdjustTheta(coords->sinCosAngle.wt);
+	coords->trigno.wt -= thetaShift;
+	coords->trigno.wt = AdjustTheta(coords->trigno.wt);
 
-	Transform_wt_sincos(&coords->sinCosAngle);
+	Transform_wt_sincos(&coords->trigno);
 
 	return IsPLLSynched(pll);
 }

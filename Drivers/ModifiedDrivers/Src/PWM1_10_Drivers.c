@@ -174,7 +174,7 @@ PWMPairUpdateCallback PWM1_10_ConfigPair(uint32_t pwmNo, pwm_pair_config_t* conf
 	if (HAL_HRTIM_WaveformCompareConfig(&hhrtim, TimerIdx, HRTIM_COMPAREUNIT_2, &pCompareCfg) != HAL_OK)
 		Error_Handler();
 
-	float deadTicks = 3;	/* dead ticks because compare value cant be lower than 3 */
+	float deadTicks = 3;	/* dead ticks because compare value can't be lower than 3 */
 
 	if (config->dtEnabled)
 	{	/* deadtime configuration */

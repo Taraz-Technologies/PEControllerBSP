@@ -59,10 +59,10 @@ typedef struct
 	float zero;
 } LIB_3COOR_ALBE0_t;
 
-/** @brief Structure containing the Angle information of the system */
+/** @brief Structure containing the trignometric information of the system */
 typedef struct
 {
-	/** @brief Value of Current Angle in Radians */
+	/** @brief Value of Current Angle in radian */
 	float wt;
 	/** @brief Sin value of the angle given by \p wt */
 	float sin;
@@ -76,7 +76,7 @@ typedef struct
 	float sin_m2pB3;
 	/** @brief Cosine value of the angle given by \p wt-2pi/3 */
 	float cos_m2pB3;
-} LIB_3COOR_SINCOS_t;
+} LIB_3COOR_TRIGNO_t;
 
 /** @brief Structure containing the DQ0 coordinates of the 3 phase system */
 typedef struct
@@ -98,8 +98,8 @@ typedef struct
 	LIB_3COOR_ALBE0_t alBe0;
 	/** @brief Structure for the DQ0 coordinates */
 	LIB_3COOR_DQ0_t dq0;
-	/** @brief Structure for the angle coordinates */
-	LIB_3COOR_SINCOS_t sinCosAngle;
+	/** @brief Structure for the trignometric information */
+	LIB_3COOR_TRIGNO_t trigno;
 } LIB_COOR_ALL_t;
 /********************************************************************************
  * Exported Variables
