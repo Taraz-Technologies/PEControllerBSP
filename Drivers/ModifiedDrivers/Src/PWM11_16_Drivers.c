@@ -45,6 +45,7 @@ static bool moduleEnabled = false;
 /*******************************************************************************
  * Code
  ******************************************************************************/
+#if 0
 /**
  * @brief Initialize the relevant PWM modules (Timer1). Frequency is constant for the PWMs 11-16
  *
@@ -171,5 +172,5 @@ PWMUpdateCallback PWM11_16_ConfigChannel(uint32_t pwmNo, pwm_ch_config_t* config
 		Error_Handler();
 	return PWM11_16_UpdateChannel;
 }
-
+#endif
 /* EOF */

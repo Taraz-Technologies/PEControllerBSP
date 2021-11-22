@@ -21,7 +21,6 @@
 /*******************************************************************************
  * Enums
  ******************************************************************************/
-typedef void (*Inverter3Ph_ResetCallback)(void);
 /**
  * @brief Types of legs supported by the drivers
  *
@@ -40,7 +39,7 @@ typedef struct
 	digital_pin_t* phasePins[3];
 	const digital_pin_t* dsblePins;
 	uint16_t doutPins[3];
-	pwm_pair_config_t pairConfig;
+	pwm_config_t pairConfig;
 	PWMPairUpdateCallback fncs[3];
 } inverter3Ph_config_t;
 typedef struct
@@ -50,12 +49,12 @@ typedef struct
 	uint16_t periodInUs;
 	bool interruptEnabled;
 	switch_leg_t legType;
-	Inverter3Ph_ResetCallback resetCallback;
+	PWMResetCallback resetCallback;
 	//	void* callbackFnc();   use for interrupt driven
+	bool minMaxDutyCycleBalancing;
 	pwm_alignment_t alignment;
 	uint16_t deadtimeInNanosec;
 	bool deadtimeEnable;
-	bool minMaxDutyCycleBalancing;
 } inverter3Ph_init_config_t;
 /*******************************************************************************
  * Prototypes

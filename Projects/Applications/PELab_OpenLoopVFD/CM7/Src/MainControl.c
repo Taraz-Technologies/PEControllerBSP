@@ -58,7 +58,7 @@ static inverter3Ph_init_config_t inverterInitConfig1 =
 		.deadtimeInNanosec = 500,
 		.deadtimeEnable = true,
 		.resetCallback = Inverter3Ph_ResetSignal,
-		.minMaxDutyCycleBalancing = true,
+		.minMaxDutyCycleBalancing = false,
 };
 static inverter3Ph_init_config_t inverterInitConfig2 =
 {
@@ -69,7 +69,7 @@ static inverter3Ph_init_config_t inverterInitConfig2 =
 		.alignment = CENTER_ALIGNED,
 		.deadtimeInNanosec = 500,
 		.deadtimeEnable = true,			// --todo-- doesn't work when disabled
-		.resetCallback = Inverter3Ph_ResetSignal,
+		.resetCallback = NULL,
 		.minMaxDutyCycleBalancing = true,
 };
 static volatile bool recompute = false;
@@ -98,9 +98,9 @@ void MainControl_Init(void)
 	DigitalPins_Init();
 
 	inverterConfig1 = Inverter3Ph_Init(&inverterInitConfig1);
-	inverterConfig2 = Inverter3Ph_Init(&inverterInitConfig2);
+	//inverterConfig2 = Inverter3Ph_Init(&inverterInitConfig2);
 
-	if(inverterConfig1 == NULL || inverterConfig2 == NULL)
+	if(inverterConfig1 == NULL)// || inverterConfig2 == NULL)
 		Error_Handler();
 
 	Dout_SetAsIOPin(15, GPIO_PIN_RESET);
@@ -141,13 +141,6 @@ void MainControl_Stop(void)
 }
 
 void Inverter3Ph_ResetSignal(void)
-{
-	recompute = true;
-}
-
-/*! @brief callback for when one cycle is completed on the PWM driver */
-void HAL_HRTIM_CounterResetCallback(HRTIM_HandleTypeDef * hhrtim,
-		uint32_t TimerIdx)
 {
 	recompute = true;
 }

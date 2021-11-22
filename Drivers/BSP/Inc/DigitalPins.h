@@ -27,10 +27,13 @@ typedef struct
 	GPIO_TypeDef* GPIO;
 	uint16_t pinMask;
 } digital_pin_t;
+/**
+ * @brief PWM pin functionality definitions
+ */
 typedef enum
 {
-	PWM_FNC_PWM,
-	PWM_FNC_IO
+	PWM_FNC_PWM,/**< Select PWM functionality */
+	PWM_FNC_IO  /**< Select IO functionality */
 } pwm_fnc_t;
 /*******************************************************************************
  * Structs
