@@ -46,32 +46,34 @@ void Inverter3Ph_ResetSignal(void);
 /*******************************************************************************
  * Variables
  ******************************************************************************/
-static inverter3Ph_config_t* inverterConfig1;
-static inverter3Ph_config_t* inverterConfig2;
-static inverter3Ph_init_config_t inverterInitConfig1 =
+static pwm_module_config_t inverterPWMModuleConfig =
 {
-		.pins = { 1, 3, 5 },  /* should be odd as these are pairs */
-		.dsblPin = 13,
-		.periodInUs = PWM_PERIOD_Us,
-		.interruptEnabled = true,			/* not catered for right now */
+		.interruptEnabled = true,
 		.alignment = CENTER_ALIGNED,
-		.deadtimeInNanosec = 500,
-		.deadtimeEnable = true,
-		.resetCallback = Inverter3Ph_ResetSignal,
-		.minMaxDutyCycleBalancing = false,
+		.periodInUsec = PWM_PERIOD_Us,
+		.deadtime = {
+				.on = true,
+				.nanoSec = 500,
+		},
+		.callback = Inverter3Ph_ResetSignal,
 };
-static inverter3Ph_init_config_t inverterInitConfig2 =
+static inverter3Ph_config_t inverterConfig =
 {
-		.pins = { 7, 9, 11 },  /* should be odd as these are pairs */
-		.dsblPin = 14,
-		.periodInUs = PWM_PERIOD_Us,
-		.interruptEnabled = false,			/* not catered for right now */
-		.alignment = CENTER_ALIGNED,
-		.deadtimeInNanosec = 500,
-		.deadtimeEnable = true,			// --todo-- doesn't work when disabled
-		.resetCallback = NULL,
-		.minMaxDutyCycleBalancing = true,
+		.s1PinNos = {1, 3, 5},
+		.dsblPinNo = 14,
+		.dsblPinCount = 1,
+		.legType = LEG_DEFAULT,
+		.pwmConfig = {
+				.lim = {
+						.min = 0,
+						.max = 1,
+						.minMaxDutyCycleBalancing = true
+				},
+				.dutyMode = OUTPUT_DUTY_MINUS_DEADTIME_AT_PWMH,
+				.module = &inverterPWMModuleConfig,
+		},
 };
+
 static volatile bool recompute = false;
 extern HRTIM_HandleTypeDef hhrtim;
 #if CONTROL_TYPE == OPEN_LOOP_VF_CONTROL
@@ -97,11 +99,7 @@ void MainControl_Init(void)
 {
 	DigitalPins_Init();
 
-	inverterConfig1 = Inverter3Ph_Init(&inverterInitConfig1);
-	//inverterConfig2 = Inverter3Ph_Init(&inverterInitConfig2);
-
-	if(inverterConfig1 == NULL)// || inverterConfig2 == NULL)
-		Error_Handler();
+	Inverter3Ph_Init(&inverterConfig);
 
 	Dout_SetAsIOPin(15, GPIO_PIN_RESET);
 	Dout_SetAsIOPin(16, GPIO_PIN_RESET);
@@ -173,7 +171,7 @@ void MainControl_Loop(void)
 		GridTieControl_GetDuties(&gridTie, duties);
 
 		/* Update the duty cycles for all inverter legs */
-		Inverter3Ph_UpdateDuty(inverterConfig1, duties);
+		Inverter3Ph_UpdateDuty(&inverterConfig, duties);
 #endif
 		recompute = false;
 	}

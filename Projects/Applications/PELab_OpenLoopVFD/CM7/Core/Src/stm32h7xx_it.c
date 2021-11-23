@@ -199,21 +199,41 @@ void SysTick_Handler(void)
 /* please refer to the startup file (startup_stm32h7xx.s).                    */
 /******************************************************************************/
 
+/* USER CODE BEGIN 1 */
 /**
   * @brief This function handles HRTIM timer A global interrupt.
   */
 void HRTIM1_TIMA_IRQHandler(void)
 {
-  /* USER CODE BEGIN HRTIM1_TIMA_IRQn 0 */
-
-  /* USER CODE END HRTIM1_TIMA_IRQn 0 */
   HAL_HRTIM_IRQHandler(&hhrtim,HRTIM_TIMERINDEX_TIMER_A);
-  /* USER CODE BEGIN HRTIM1_TIMA_IRQn 1 */
-
-  /* USER CODE END HRTIM1_TIMA_IRQn 1 */
 }
-
-/* USER CODE BEGIN 1 */
-
+/**
+ * @brief This function handles HRTIM timer B global interrupt.
+ */
+void HRTIM1_TIMB_IRQHandler(void)
+{
+ HAL_HRTIM_IRQHandler(&hhrtim,HRTIM_TIMERINDEX_TIMER_B);
+}
+/**
+  * @brief This function handles HRTIM timer C global interrupt.
+  */
+void HRTIM1_TIMC_IRQHandler(void)
+{
+  HAL_HRTIM_IRQHandler(&hhrtim,HRTIM_TIMERINDEX_TIMER_C);
+}
+/**
+ * @brief This function handles HRTIM timer D global interrupt.
+ */
+void HRTIM1_TIMD_IRQHandler(void)
+{
+ HAL_HRTIM_IRQHandler(&hhrtim,HRTIM_TIMERINDEX_TIMER_D);
+}
+/**
+  * @brief This function handles HRTIM timer E global interrupt.
+  */
+void HRTIM1_TIME_IRQHandler(void)
+{
+  HAL_HRTIM_IRQHandler(&hhrtim,HRTIM_TIMERINDEX_TIMER_E);
+}
 /* USER CODE END 1 */
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

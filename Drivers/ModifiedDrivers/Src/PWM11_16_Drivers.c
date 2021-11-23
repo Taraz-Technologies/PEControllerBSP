@@ -45,6 +45,62 @@ static bool moduleEnabled = false;
 /*******************************************************************************
  * Code
  ******************************************************************************/
+/**
+ * @brief Initialize the relevant PWM modules (Timer1). Frequency is constant for the PWMs 11-16
+ * @param config Pointer to a structure that contains the configuration
+ * 				   parameters for the PWM pair
+ */
+static void PWM11_16_Drivers_Init(pwm_config_t* config)
+{
+	if(moduleEnabled)
+		return;
+	__HAL_RCC_TIM1_CLK_ENABLE();
+	htim1.Instance = TIM1;
+	htim1.Init.Prescaler = 0;
+	if(config->module->alignment == CENTER_ALIGNED)
+	{
+		htim1.Init.CounterMode = TIM_COUNTERMODE_CENTERALIGNED2;
+		htim1.Init.Period = (config->module->periodInUsec * 120);		// --todo-- centralize
+	}
+	else
+	{
+		htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
+		htim1.Init.Period = (config->module->periodInUsec * 240) - 1;  // --todo-- centralize
+	}
+	htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+	htim1.Init.RepetitionCounter = 0;
+	htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+	if (HAL_TIM_Base_Init(&htim1) != HAL_OK)
+		Error_Handler();
+	TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+	sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+	if (HAL_TIM_ConfigClockSource(&htim1, &sClockSourceConfig) != HAL_OK)
+		Error_Handler();
+	if (HAL_TIM_PWM_Init(&htim1) != HAL_OK)
+		Error_Handler();
+	TIM_MasterConfigTypeDef sMasterConfig = {0};
+	sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+	sMasterConfig.MasterOutputTrigger2 = TIM_TRGO2_RESET;
+	sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+	if (HAL_TIMEx_MasterConfigSynchronization(&htim1, &sMasterConfig) != HAL_OK)
+		Error_Handler();
+	TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig = {0};
+	sBreakDeadTimeConfig.OffStateRunMode = TIM_OSSR_DISABLE;
+	sBreakDeadTimeConfig.OffStateIDLEMode = TIM_OSSI_DISABLE;
+	sBreakDeadTimeConfig.LockLevel = TIM_LOCKLEVEL_OFF;
+	sBreakDeadTimeConfig.DeadTime = 185;
+	sBreakDeadTimeConfig.BreakState = TIM_BREAK_DISABLE;
+	sBreakDeadTimeConfig.BreakPolarity = TIM_BREAKPOLARITY_HIGH;
+	sBreakDeadTimeConfig.BreakFilter = 0;
+	sBreakDeadTimeConfig.Break2State = TIM_BREAK2_DISABLE;
+	sBreakDeadTimeConfig.Break2Polarity = TIM_BREAK2POLARITY_HIGH;
+	sBreakDeadTimeConfig.Break2Filter = 0;
+	sBreakDeadTimeConfig.AutomaticOutput = IsDeadtimeEnabled(&config->module->deadtime) ? TIM_AUTOMATICOUTPUT_ENABLE : TIM_AUTOMATICOUTPUT_DISABLE;
+	if (HAL_TIMEx_ConfigBreakDeadTime(&htim1, &sBreakDeadTimeConfig) != HAL_OK)
+		Error_Handler();
+	moduleEnabled = true;
+}
+
 #if 0
 /**
  * @brief Initialize the relevant PWM modules (Timer1). Frequency is constant for the PWMs 11-16

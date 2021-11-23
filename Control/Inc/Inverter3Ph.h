@@ -22,50 +22,44 @@
  * Enums
  ******************************************************************************/
 /**
- * @brief Types of legs supported by the drivers
- *
+ * @brief Definitions of Switch Legs
  */
 typedef enum
 {
-	LEG_DEFAULT,
-	LEG_TNPC,
-	LEG_RESERVED,			/* Add all leg types before this enumeration */
+	LEG_DEFAULT,            /**< Define the leg as a default leg */
+	LEG_TNPC,               /**< Define the leg as a TNPC leg */
+	LEG_RESERVED,			/**< Final Value Not Used */
 } switch_leg_t;
 /*******************************************************************************
- * Structs
+ * Structures
  ******************************************************************************/
+/**
+ * @brief Defines the 3 Phase Inverter parameters
+ */
 typedef struct
 {
-	digital_pin_t* phasePins[3];
-	const digital_pin_t* dsblePins;
-	uint16_t doutPins[3];
-	pwm_config_t pairConfig;
-	PWMPairUpdateCallback fncs[3];
+	uint16_t s1PinNos[3];							/**< @brief Collection of the Pin numbers of the first PWM switch
+													in a leg of the 3-Phase System. The remaining PWMs are the
+													consecutive pins after this pin */
+	uint16_t dsblPinNo;							/**< @brief Pin no of the first disable pin if any. If more than one
+	 	 	 	 	 	 	 	 	 	 	 	 	 the remaining disable pins should be consecutively after this pin */
+	uint16_t dsblPinCount;						/**< @brief No of disable pins used by the system.
+													These pins will be used to disable the relevant gate drivers */
+	switch_leg_t legType;						/**< @brief Type of switch legs used for switching the inverter */
+	pwm_config_t pwmConfig;						/**< @brief The PWM configurations */
+	PWMPairUpdateCallback updateCallbacks[3];	/**< @brief These call backs are used by the drivers to update
+													the duty cycles of all switches according to the configuration */
 } inverter3Ph_config_t;
-typedef struct
-{
-	uint16_t pins[3]; // uH, vH, wH,
-	uint16_t dsblPin;
-	uint16_t periodInUs;
-	bool interruptEnabled;
-	switch_leg_t legType;
-	PWMResetCallback resetCallback;
-	//	void* callbackFnc();   use for interrupt driven
-	bool minMaxDutyCycleBalancing;
-	pwm_alignment_t alignment;
-	uint16_t deadtimeInNanosec;
-	bool deadtimeEnable;
-} inverter3Ph_init_config_t;
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
 /**
  * @brief Initialize an inverter module
  *
- * @param *initConfig pointer to the initial configuration of the inverter
+ * @param *config Pointer to the Inverter Configurations
  * @return *inverter3Ph_config_t handle representing the inverter
  */
-inverter3Ph_config_t* Inverter3Ph_Init(inverter3Ph_init_config_t* initConfig);
+void Inverter3Ph_Init(inverter3Ph_config_t* config);
 /**
  * @brief Update the duty cycles of the inverter by using SPWM configuration
  *

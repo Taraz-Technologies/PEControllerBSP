@@ -33,9 +33,6 @@
 /*******************************************************************************
  * Variables
  ******************************************************************************/
-static inverter3Ph_config_t handles[INVERTER_3PH_COUNT];
-static pwm_module_config_t mod;
-static int handleCounter = 0;
 PWMPairUpdateCallback m;
 /*******************************************************************************
  * Code
@@ -72,15 +69,13 @@ static void TnpcPWM_UpdatePair(uint32_t pwmNo, float duty, pwm_pair_config_t *co
  * @brief Configure the PWMs for a single leg of the inverter
  *
  * @param pwmNo Channel no of the initial switch of the leg.
- * @param *initConfig pointer to the initial configuration of the inverter
- * @param *handle  pointer to the handle of the inverter
+ * @param *config pointer to the configuration of the 3 phase inverter
  * @return PWMPairUpdateCallback Returns the function pointer of the type PWMPairUpdateCallback which needs to be called
  * 						  whenever the duty cycles of the leg needs to be updated
  */
-static PWMPairUpdateCallback ConfigSingleLeg(uint16_t pwmNo, inverter3Ph_init_config_t* initConfig, inverter3Ph_config_t* handle)
+static PWMPairUpdateCallback ConfigSingleLeg(uint16_t pwmNo, inverter3Ph_config_t* config)
 {
-	PWMPairUpdateCallback callback = NULL;
-	callback = PWMDriver_ConfigPair(pwmNo, &handle->pairConfig, 1);
+	PWMPairUpdateCallback callback = PWMDriver_ConfigPair(pwmNo, &config->pwmConfig, 1);
 	Dout_SetAsPWMPin(pwmNo);
 	Dout_SetAsPWMPin(pwmNo + 1);
 	/* for Tnpc use four switches */
@@ -99,50 +94,35 @@ static PWMPairUpdateCallback ConfigSingleLeg(uint16_t pwmNo, inverter3Ph_init_co
 /**
  * @brief Initialize an inverter module
  *
- * @param *initConfig pointer to the initial configuration of the inverter
+ * @param *config Pointer to the Inverter Configurations
  * @return *inverter3Ph_config_t handle representing the inverter
  */
-inverter3Ph_config_t* Inverter3Ph_Init(inverter3Ph_init_config_t* initConfig)
+void Inverter3Ph_Init(inverter3Ph_config_t* config)
 {
-	/* if not enough inverter slots return null */
-	if((handleCounter + 1) > INVERTER_3PH_COUNT)
-		return NULL;
+	/* an even output pin should be used as inverted signals are required for the PWM */
+	if((config->s1PinNos[0] % 2 == 0) || (config->s1PinNos[1] % 2 == 0) || (config->s1PinNos[2] % 2 == 0))
+		return;
 
-	/* an even output pin should be used as inverted signals are required for the pwm */
-	if((initConfig->pins[0] % 2 == 0) || (initConfig->pins[1] % 2 == 0) || (initConfig->pins[2] % 2 == 0))
-		return NULL;
-
-	inverter3Ph_config_t* handle = &handles[handleCounter++];
-
-	mod.alignment = initConfig->alignment;
-	mod.dtEnabled = initConfig->deadtimeEnable;
-	mod.dtInNanoSec = initConfig->deadtimeInNanosec;
-	mod.periodInUsec = initConfig->periodInUs;
-	mod.interruptEnabled = initConfig->interruptEnabled;
-	mod.callback = initConfig->resetCallback;
+	bool interruptState = config->pwmConfig.module->interruptEnabled;
 
 	// configure PWM
 	for (int i = 0; i < 3; i++)
 	{
-		handle->pairConfig.dutyMode = OUTPUT_DUTY_MINUS_DEADTIME_AT_PWMH;
-		handle->pairConfig.lim.minMaxDutyCycleBalancing = initConfig->minMaxDutyCycleBalancing;
-		handle->pairConfig.module = &mod;
-		handle->fncs[i] = ConfigSingleLeg(initConfig->pins[i], initConfig, handle);
-		handle->fncs[i](initConfig->pins[i], 0.5f, &handle->pairConfig);
-		handle->doutPins[i] = initConfig->pins[i];
-		mod.interruptEnabled = false;			/* --todo-- */
+		config->updateCallbacks[i] = ConfigSingleLeg(config->s1PinNos[i], config);
+		config->updateCallbacks[i](config->s1PinNos[i], 0.5f, &config->pwmConfig);
+		config->pwmConfig.module->interruptEnabled = false;
 	}
 
-	mod.alignment = EDGE_ALIGNED;
-	m = PWM1_10_Drivers_ConfigChannels(10, &handle->pairConfig, 1);
+	config->pwmConfig.module->alignment = EDGE_ALIGNED;
+	m = PWM1_10_Drivers_ConfigChannels(10, &config->pwmConfig, 1);
 	Dout_SetAsPWMPin(10);
 	Dout_SetAsIOPin(9, GPIO_PIN_RESET);
 
-	/* disable pin setting should include multiple disable pins --todo-- */
-	if (initConfig->dsblPin)
-		handle->dsblePins = Dout_SetAsIOPin(initConfig->dsblPin, GPIO_PIN_RESET);
+	// enable the pwm signals by disabling any disable feature. Disable is by default active high
+	for (int i = 0; i < config->dsblPinCount; i++)
+		Dout_SetAsIOPin(config->dsblPinNo + i, GPIO_PIN_RESET);
 
-	return handle;
+	config->pwmConfig.module->interruptEnabled = interruptState;
 }
 
 /**
@@ -154,8 +134,8 @@ inverter3Ph_config_t* Inverter3Ph_Init(inverter3Ph_init_config_t* initConfig)
 void Inverter3Ph_UpdateDuty(inverter3Ph_config_t* config, float* duties)
 {
 	for (int i = 0; i < 3; i++)//duties[i]
-		config->fncs[i](config->doutPins[i], 0.6f, &config->pairConfig);
-	m(10, 0.2f, &config->pairConfig);
+		config->updateCallbacks[i](config->s1PinNos[i], 0.6f, &config->pwmConfig);
+	m(10, 0.2f, &config->pwmConfig);
 }
 
 /**

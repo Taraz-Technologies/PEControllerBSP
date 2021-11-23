@@ -170,9 +170,9 @@ void PWM1_10_UpdatePairDuty(uint32_t pwmNo, float duty, pwm_config_t* config)
 	{
 		int t0 = (period - onTime) / 2; 		// half time
 		int tEnd = t0 + onTime;					// last edge at this time
-		if(mod->dtEnabled && config->dutyMode == OUTPUT_DUTY_AT_PWMH)
+		if(config->dutyMode == OUTPUT_DUTY_AT_PWMH && IsDeadtimeEnabled(&mod->deadtime))
 		{
-			int dt = (mod->dtInNanoSec * HRTIM_FREQ) / 1000;
+			int dt = (mod->deadtime.nanoSec * HRTIM_FREQ) / 1000;
 			t0 -= dt;
 		}
 		if (t0 < 3)
@@ -184,8 +184,8 @@ void PWM1_10_UpdatePairDuty(uint32_t pwmNo, float duty, pwm_config_t* config)
 	else
 	{
 		uint32_t dt = 0;
-		if(mod->dtEnabled && config->dutyMode == OUTPUT_DUTY_AT_PWMH)
-			dt = (mod->dtInNanoSec * HRTIM_FREQ) / 1000;
+		if(config->dutyMode == OUTPUT_DUTY_AT_PWMH && IsDeadtimeEnabled(&mod->deadtime))
+			dt = (mod->deadtime.nanoSec * HRTIM_FREQ) / 1000;
 		hhrtim.Instance->sTimerxRegs[TimerIdx].CMP1xR = 0;
 		hhrtim.Instance->sTimerxRegs[TimerIdx].CMP1xR = onTime + dt;
 		MODIFY_REG(hhrtim.Instance->sTimerxRegs[TimerIdx].TIMxCR, HRTIM_TIMCR_DELCMP2, 0U);
@@ -223,7 +223,7 @@ static void ConfigInvertedPair(uint32_t pwmNo, pwm_config_t* config)
 		pTimerCfg.InterruptRequests = HRTIM_TIM_IT_NONE;
 		HAL_NVIC_DisableIRQ(GetIRQn(TimerIdx));
 	}
-	pTimerCfg.DeadTimeInsertion = mod->dtEnabled ? HRTIM_TIMDEADTIMEINSERTION_ENABLED : HRTIM_TIMDEADTIMEINSERTION_DISABLED;
+	pTimerCfg.DeadTimeInsertion = IsDeadtimeEnabled(&mod->deadtime) ? HRTIM_TIMDEADTIMEINSERTION_ENABLED : HRTIM_TIMDEADTIMEINSERTION_DISABLED;
 	if (HAL_HRTIM_WaveformTimerConfig(&hhrtim, TimerIdx, &pTimerCfg) != HAL_OK)
 		Error_Handler();
 
@@ -236,10 +236,10 @@ static void ConfigInvertedPair(uint32_t pwmNo, pwm_config_t* config)
 
 	/* dead time configuration */
 	float deadTicks = 3;	/* dead ticks because compare value can't be lower than 3 */
-	if (mod->dtEnabled)
+	if (IsDeadtimeEnabled(&mod->deadtime))
 	{
 		HRTIM_DeadTimeCfgTypeDef pDeadTimeCfg = GetDefaultDeadtimeConfig();
-		pDeadTimeCfg.FallingValue = pDeadTimeCfg.RisingValue = (mod->dtInNanoSec * HRTIM_FREQ) / (16000);
+		pDeadTimeCfg.FallingValue = pDeadTimeCfg.RisingValue = (mod->deadtime.nanoSec * HRTIM_FREQ) / (16000);  // --todo-- centeralize
 		if (HAL_HRTIM_DeadTimeConfig(&hhrtim, TimerIdx, &pDeadTimeCfg) != HAL_OK)
 			Error_Handler();
 
@@ -250,7 +250,7 @@ static void ConfigInvertedPair(uint32_t pwmNo, pwm_config_t* config)
 	HRTIM_OutputCfgTypeDef pOutputCfg = GetDefaultOutputConfig();
 	if (HAL_HRTIM_WaveformOutputConfig(&hhrtim, TimerIdx, out1, &pOutputCfg) != HAL_OK)
 		Error_Handler();
-	if(mod->dtEnabled)
+	if(IsDeadtimeEnabled(&mod->deadtime))
 	{
 		pOutputCfg.SetSource = HRTIM_OUTPUTSET_NONE;
 		pOutputCfg.ResetSource = HRTIM_OUTPUTRESET_NONE;
