@@ -42,7 +42,7 @@
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
-void Inverter3Ph_ResetSignal(void);
+static void Inverter3Ph_ResetSignal(void);
 /*******************************************************************************
  * Variables
  ******************************************************************************/
@@ -69,11 +69,29 @@ static inverter3Ph_config_t inverterConfig =
 						.max = 1,
 						.minMaxDutyCycleBalancing = true
 				},
-				.dutyMode = OUTPUT_DUTY_MINUS_DEADTIME_AT_PWMH,
+				.dutyMode = OUTPUT_DUTY_AT_PWMH,
 				.module = &inverterPWMModuleConfig,
 		},
 };
-
+static pwm_module_config_t boostPWMConfig =
+{
+		.interruptEnabled = false,
+		.alignment = EDGE_ALIGNED,
+		.periodInUsec = PWM_PERIOD_Us,
+		.deadtime = NULL,
+		.callback = NULL,
+};
+static independent_pwm_config_t boostConfig =
+{
+		.pinNo = 8,
+		.pwmConfig = {
+				.lim = {
+						.min = 0,
+						.max = 0.5f,
+				},
+				.module = &boostPWMConfig,
+		}
+};
 static volatile bool recompute = false;
 extern HRTIM_HandleTypeDef hhrtim;
 #if CONTROL_TYPE == OPEN_LOOP_VF_CONTROL
@@ -99,7 +117,13 @@ void MainControl_Init(void)
 {
 	DigitalPins_Init();
 
+	// Initialize the inverter
 	Inverter3Ph_Init(&inverterConfig);
+
+	boostConfig.dutyUpdateFnc = PWMDriver_ConfigChannels(boostConfig.pinNo, &boostConfig.pwmConfig, 1);
+	boostConfig.dutyUpdateFnc(boostConfig.pinNo, 0.f, &boostConfig.pwmConfig);
+	Dout_SetAsIOPin(7, GPIO_PIN_RESET);
+	Dout_SetAsPWMPin(boostConfig.pinNo);
 
 	Dout_SetAsIOPin(15, GPIO_PIN_RESET);
 	Dout_SetAsIOPin(16, GPIO_PIN_RESET);
@@ -138,7 +162,7 @@ void MainControl_Stop(void)
 	HAL_HRTIM_WaveformCountStop_IT(&hhrtim,HRTIM_TIMERID_TIMER_A | HRTIM_TIMERID_TIMER_B | HRTIM_TIMERID_TIMER_C | HRTIM_TIMERID_TIMER_D | HRTIM_TIMERID_TIMER_E);
 }
 
-void Inverter3Ph_ResetSignal(void)
+static void Inverter3Ph_ResetSignal(void)
 {
 	recompute = true;
 }
@@ -165,13 +189,23 @@ void MainControl_Loop(void)
 		gridTie.iCoor.abc.a = adcVals.Ih1;
 		gridTie.iCoor.abc.b = adcVals.Ih2;
 		gridTie.iCoor.abc.c = adcVals.Ih3;
-		gridTie.iRef = 5.f;
+		gridTie.iRef = 10.f;
 
 		/* compute the duty cycles for grid tie control */
 		GridTieControl_GetDuties(&gridTie, duties);
 
 		/* Update the duty cycles for all inverter legs */
 		Inverter3Ph_UpdateDuty(&inverterConfig, duties);
+
+		/* compensator */
+		static float data_avg[8];
+		static low_pass_filter_t filt = {.data = data_avg, .size=8, .filt = {.avg = 0, .count = 8, .dataPtr = data_avg}};
+		static pi_data_t boostPI = {.has_lmt = true, .Kp = .05f, .Ki = 10.1f, .dt = PWM_PERIOD_s, .Integral = 0, .max = 0.5f, .min = 0.f };
+		float errAvg = MovingAverage_Float_Evaluate(&filt.filt, 700.f - gridTie.vdc);
+		float duty = EvaluatePI(&boostPI, errAvg);
+
+		/* Update duty cycle for the boost */
+		boostConfig.dutyUpdateFnc(boostConfig.pinNo, duty, &boostConfig.pwmConfig);
 #endif
 		recompute = false;
 	}

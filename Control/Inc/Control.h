@@ -98,19 +98,26 @@ static float EvaluatePI(pi_data_t* data, float err)
 	data->err = err;
 #endif
 	data->Integral += (err * data->dt) ;
+	float integralTerm = (data->Ki * data->Integral);
 	if (data->has_lmt)
 	{
-		if(data->Integral > data->max)
-			data->Integral = data->max;
-		if(data->Integral < data->min)
-			data->Integral = data->min;
+		if(integralTerm > data->max)
+			data->Integral = data->max / data->Ki;
+		if(integralTerm < data->min)
+			data->Integral = data->min / data->Ki;
+	}
+	float result = data->Kp * err + (data->Ki * data->Integral);
+	if (data->has_lmt)
+	{
+		if(result > data->max)
+			result = data->max;
+		if(result < data->min)
+			result = data->min;
 	}
 #if MONITOR_PI
-	data->result = (data->Kp * err) + (data->Ki * data->Integral);
-	return data->result;
-#else
-	return (data->Kp * err) + (data->Ki * data->Integral);
+	data->result = result;
 #endif
+	return result;
 }
 
 static float GetRef(LIB_3COOR_ALBE0_t *alBe0)

@@ -17,7 +17,7 @@
 /*******************************************************************************
  * Defines
  ******************************************************************************/
-#define INVERTER_3PH_COUNT								(2)
+
 /*******************************************************************************
  * Enums
  ******************************************************************************/
@@ -38,7 +38,7 @@ typedef enum
  */
 typedef struct
 {
-	uint16_t s1PinNos[3];							/**< @brief Collection of the Pin numbers of the first PWM switch
+	uint16_t s1PinNos[3];						/**< @brief Collection of the Pin numbers of the first PWM switch
 													in a leg of the 3-Phase System. The remaining PWMs are the
 													consecutive pins after this pin */
 	uint16_t dsblPinNo;							/**< @brief Pin no of the first disable pin if any. If more than one
@@ -47,7 +47,7 @@ typedef struct
 													These pins will be used to disable the relevant gate drivers */
 	switch_leg_t legType;						/**< @brief Type of switch legs used for switching the inverter */
 	pwm_config_t pwmConfig;						/**< @brief The PWM configurations */
-	PWMPairUpdateCallback updateCallbacks[3];	/**< @brief These call backs are used by the drivers to update
+	DutyCycleUpdateFnc updateCallbacks[3];		/**< @brief These call backs are used by the drivers to update
 													the duty cycles of all switches according to the configuration */
 } inverter3Ph_config_t;
 /*******************************************************************************

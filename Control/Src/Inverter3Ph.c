@@ -9,8 +9,6 @@
 /*******************************************************************************
  * Includes
  ******************************************************************************/
-#include "DoutPort.h"
-#include "PWMDriver.h"
 #include "Inverter3Ph.h"
 #include "Control.h"
 /*******************************************************************************
@@ -33,7 +31,7 @@
 /*******************************************************************************
  * Variables
  ******************************************************************************/
-PWMPairUpdateCallback m;
+
 /*******************************************************************************
  * Code
  ******************************************************************************/
@@ -73,9 +71,9 @@ static void TnpcPWM_UpdatePair(uint32_t pwmNo, float duty, pwm_pair_config_t *co
  * @return PWMPairUpdateCallback Returns the function pointer of the type PWMPairUpdateCallback which needs to be called
  * 						  whenever the duty cycles of the leg needs to be updated
  */
-static PWMPairUpdateCallback ConfigSingleLeg(uint16_t pwmNo, inverter3Ph_config_t* config)
+static DutyCycleUpdateFnc ConfigSingleLeg(uint16_t pwmNo, inverter3Ph_config_t* config)
 {
-	PWMPairUpdateCallback callback = PWMDriver_ConfigPair(pwmNo, &config->pwmConfig, 1);
+	DutyCycleUpdateFnc callback = PWMDriver_ConfigPair(pwmNo, &config->pwmConfig, 1);
 	Dout_SetAsPWMPin(pwmNo);
 	Dout_SetAsPWMPin(pwmNo + 1);
 	/* for Tnpc use four switches */
@@ -113,10 +111,7 @@ void Inverter3Ph_Init(inverter3Ph_config_t* config)
 		config->pwmConfig.module->interruptEnabled = false;
 	}
 
-	config->pwmConfig.module->alignment = EDGE_ALIGNED;
-	m = PWM1_10_Drivers_ConfigChannels(10, &config->pwmConfig, 1);
-	Dout_SetAsPWMPin(10);
-	Dout_SetAsIOPin(9, GPIO_PIN_RESET);
+
 
 	// enable the pwm signals by disabling any disable feature. Disable is by default active high
 	for (int i = 0; i < config->dsblPinCount; i++)
@@ -133,9 +128,8 @@ void Inverter3Ph_Init(inverter3Ph_config_t* config)
  */
 void Inverter3Ph_UpdateDuty(inverter3Ph_config_t* config, float* duties)
 {
-	for (int i = 0; i < 3; i++)//duties[i]
-		config->updateCallbacks[i](config->s1PinNos[i], 0.6f, &config->pwmConfig);
-	m(10, 0.2f, &config->pwmConfig);
+	for (int i = 0; i < 3; i++)
+		config->updateCallbacks[i](config->s1PinNos[i], duties[i], &config->pwmConfig);
 }
 
 /**

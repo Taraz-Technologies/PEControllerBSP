@@ -283,7 +283,7 @@ static void ConfigInvertedPair(uint32_t pwmNo, pwm_config_t* config)
  * @return PWMPairUpdateCallback Returns the function pointer of the type PWMPairUpdateCallback which needs to be called
  * 						  whenever the duty cycles of the pair need to be updated
  */
-PWMPairUpdateCallback PWM1_10_Drivers_ConfigInvertedPairs(uint32_t pwmNo, pwm_config_t* config, int pairCount)
+DutyCycleUpdateFnc PWM1_10_Drivers_ConfigInvertedPairs(uint32_t pwmNo, pwm_config_t* config, int pairCount)
 {
 	if(!moduleEnabled)
 		Drivers_Init();
@@ -422,8 +422,8 @@ static void ConfigChannel(uint32_t pwmNo, pwm_config_t* config)
 	else
 		deadTicks++;
 
-	config->lim.min = config->lim.minMaxDutyCycleBalancing ? ((deadTicks / HRTIM_FREQ) / mod->periodInUsec) : 0;
-	config->lim.max = 1 - ((deadTicks / HRTIM_FREQ) / mod->periodInUsec);
+	if (config->lim.max == 0)
+		config->lim.max = 1 - ((deadTicks / HRTIM_FREQ) / mod->periodInUsec);
 }
 
 /**
@@ -435,7 +435,7 @@ static void ConfigChannel(uint32_t pwmNo, pwm_config_t* config)
  * @return PWMPairUpdateCallback Returns the function pointer of the type PWMPairUpdateCallback which needs to be called
  * 						  whenever the duty cycles of the pair need to be updated
  */
-PWMPairUpdateCallback PWM1_10_Drivers_ConfigChannels(uint32_t pwmNo, pwm_config_t* config, int chCount)
+DutyCycleUpdateFnc PWM1_10_Drivers_ConfigChannels(uint32_t pwmNo, pwm_config_t* config, int chCount)
 {
 	if(!moduleEnabled)
 		Drivers_Init();

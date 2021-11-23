@@ -24,8 +24,16 @@
 /*******************************************************************************
  * Structs
  ******************************************************************************/
-//typedef void (*PWMPairUpdateCallback)(uint32_t pwmNo, float duty, pwm_pair_config_t *config);
-//typedef void (*PWMUpdateCallback)(uint32_t pwmNo, float duty, pwm_ch_config_t *config);
+/**
+ * @brief Defines the parameters for an independent (individual/Pair) PWM
+ */
+typedef struct
+{
+	uint16_t pinNo;							/**< @brief Defines the starting pin no of the specified PWMs.
+												Other associated PWMs if any should be consecutively after this pin */
+	DutyCycleUpdateFnc dutyUpdateFnc;		/**< @brief Function to be used for updating the duty cycle */
+	pwm_config_t pwmConfig;					/**< @brief The PWM configurations */
+} independent_pwm_config_t;
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
@@ -37,11 +45,11 @@ extern TIM_HandleTypeDef htim1;
 /*******************************************************************************
  * Code
  ******************************************************************************/
-static PWMPairUpdateCallback PWMDriver_ConfigPair(uint16_t pwmNo, pwm_config_t *config, int pairCount)
+static DutyCycleUpdateFnc PWMDriver_ConfigPair(uint16_t pwmNo, pwm_config_t *config, int pairCount)
 {
 	return PWM1_10_Drivers_ConfigInvertedPairs(pwmNo, config, pairCount);
 }
-static PWMPairUpdateCallback PWMDriver_ConfigChannels(uint16_t pwmNo, pwm_config_t *config, int chCount)
+static DutyCycleUpdateFnc PWMDriver_ConfigChannels(uint16_t pwmNo, pwm_config_t *config, int chCount)
 {
 	return PWM1_10_Drivers_ConfigChannels(pwmNo, config, chCount);
 }

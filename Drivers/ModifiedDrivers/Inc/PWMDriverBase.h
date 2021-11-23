@@ -100,7 +100,8 @@ typedef struct
 typedef struct
 {
 	duty_limits_t lim;				/**< @brief Defines the duty cycle limits for the specified channels */
-	duty_mode_t dutyMode;			/**< @brief Controls the duty cycle computation mode */
+	duty_mode_t dutyMode;			/**< @brief Controls the duty cycle computation mode.
+										This parameter is used only when the dead time is enabled */
 	pwm_module_config_t* module;	/**< @brief Define the module configuration */
 } pwm_config_t;
 /********************************************************************************
@@ -110,7 +111,13 @@ typedef struct
 /********************************************************************************
  * Global Function Prototypes
  *******************************************************************************/
-typedef void (*PWMPairUpdateCallback)(uint32_t pwmNo, float duty, pwm_config_t *config); /* --todo-- change name */
+/**
+ * @brief Function prototype for the functions to update the duty cycle of specified PWMs
+ * @param pwmNo Channel no of the first PWM in sequence
+ * @param duty Duty cycle to be applied (Range 0-1)
+ * @param *config Pointer to the PWM configuration
+ */
+typedef void (*DutyCycleUpdateFnc)(uint32_t pwmNo, float duty, pwm_config_t *config);
 /********************************************************************************
  * Code
  *******************************************************************************/

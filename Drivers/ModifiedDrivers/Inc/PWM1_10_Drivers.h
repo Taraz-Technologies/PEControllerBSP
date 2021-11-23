@@ -47,20 +47,20 @@ extern "C" {
  * @param *config Pointer to a  pwm_config_t structure that contains the configuration
  * 				   parameters for the PWM pair
  * @param pairCount No of PWM pairs to be configured
- * @return PWMPairUpdateCallback Returns the function pointer of the type PWMPairUpdateCallback which needs to be called
+ * @return DutyCycleUpdateFnc Returns the function pointer of the type PWMPairUpdateCallback which needs to be called
  * 						  whenever the duty cycles of the pair need to be updated
  */
-PWMPairUpdateCallback PWM1_10_Drivers_ConfigInvertedPairs(uint32_t pwmNo, pwm_config_t* config, int pairCount);
+DutyCycleUpdateFnc PWM1_10_Drivers_ConfigInvertedPairs(uint32_t pwmNo, pwm_config_t* config, int pairCount);
 /**
  * @brief Configures consecutive PWM channels
  * @param pwmNo Channel no of the first PWM Channel in the pair (Valid Values 1-10)
  * @param *config Pointer to a  pwm_config_t structure that contains the configuration
  * 				   parameters for the PWM pair
  * @param chCount No of channels to be configured with the setting
- * @return PWMPairUpdateCallback Returns the function pointer of the type PWMPairUpdateCallback which needs to be called
+ * @return DutyCycleUpdateFnc Returns the function pointer of the type PWMPairUpdateCallback which needs to be called
  * 						  whenever the duty cycles of the pair need to be updated
  */
-PWMPairUpdateCallback PWM1_10_Drivers_ConfigChannels(uint32_t pwmNo, pwm_config_t* config, int chCount);
+DutyCycleUpdateFnc PWM1_10_Drivers_ConfigChannels(uint32_t pwmNo, pwm_config_t* config, int chCount);
 #if 0
 /**
  * @brief Initialize the relevant PWM modules (high Precision timers)
