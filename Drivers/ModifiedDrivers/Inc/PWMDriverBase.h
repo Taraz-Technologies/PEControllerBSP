@@ -7,6 +7,17 @@
  *
  * @brief   
  ********************************************************************************
+ * @attention
+ *
+ * <h2><center>&copy; Copyright (c) 2021 Taraz Technologies Pvt. Ltd.</center></h2>
+ * <h3><center>All rights reserved.</center></h3>
+ *
+ * <center>This software component is licensed by Taraz Technologies under BSD 3-Clause license,
+ * the "License"; You may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at:
+ *                        www.opensource.org/licenses/BSD-3-Clause</center>
+ *
+ *******************************************************************************
  */
 
 #ifndef PWMDRIVERBASE_H_
@@ -16,6 +27,17 @@
 extern "C" {
 #endif
 
+/** @addtogroup PEController_Framework_Drivers
+ * @{
+ */
+
+/** @addtogroup PWM
+ * @{
+ */
+
+/** @addtogroup Base
+ * @{
+ */
 /********************************************************************************
  * Includes
  *******************************************************************************/
@@ -54,7 +76,8 @@ typedef enum
 											on the other edge duty cycle will be removed from the lower side switch */
 } duty_mode_t;
 /**
- * @brief Defines the PWM reset callback
+ * @brief Defines the PWM reset callback,
+ * The drivers will call this function whenever the timer for the PWM is reset if enabled in configuration
  */
 typedef void (*PWMResetCallback)(void);
 /********************************************************************************
@@ -124,7 +147,7 @@ typedef void (*DutyCycleUpdateFnc)(uint32_t pwmNo, float duty, pwm_config_t *con
 /**
  * @brief Checks if the dead time is enabled for the PWM
  * @param *dt Pointer to the dead time structure
- * @return bool <c>true</c> if enabled fo the specified PWM else <c>false</c>
+ * @return bool <c>true</c> if enabled for the specified PWM else <c>false</c>
  */
 static inline bool IsDeadtimeEnabled(deadtime_t* dt)
 {
@@ -137,5 +160,16 @@ static inline bool IsDeadtimeEnabled(deadtime_t* dt)
 }
 #endif
 
+/**
+ * @}
+ */
+
+/**
+ * @}
+ */
+
+/**
+ * @}
+ */
 #endif 
 /* EOF */

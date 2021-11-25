@@ -120,7 +120,7 @@ void MainControl_Init(void)
 	// Initialize the inverter
 	Inverter3Ph_Init(&inverterConfig);
 
-	boostConfig.dutyUpdateFnc = PWMDriver_ConfigChannels(boostConfig.pinNo, &boostConfig.pwmConfig, 1);
+	boostConfig.dutyUpdateFnc = PWMDriver_ConfigChannel(boostConfig.pinNo, &boostConfig.pwmConfig);
 	boostConfig.dutyUpdateFnc(boostConfig.pinNo, 0.f, &boostConfig.pwmConfig);
 	Dout_SetAsIOPin(7, GPIO_PIN_RESET);
 	Dout_SetAsPWMPin(boostConfig.pinNo);

@@ -73,7 +73,7 @@ static void TnpcPWM_UpdatePair(uint32_t pwmNo, float duty, pwm_pair_config_t *co
  */
 static DutyCycleUpdateFnc ConfigSingleLeg(uint16_t pwmNo, inverter3Ph_config_t* config)
 {
-	DutyCycleUpdateFnc callback = PWMDriver_ConfigPair(pwmNo, &config->pwmConfig, 1);
+	DutyCycleUpdateFnc callback = PWMDriver_ConfigInvertedPair(pwmNo, &config->pwmConfig);
 	Dout_SetAsPWMPin(pwmNo);
 	Dout_SetAsPWMPin(pwmNo + 1);
 	/* for Tnpc use four switches */

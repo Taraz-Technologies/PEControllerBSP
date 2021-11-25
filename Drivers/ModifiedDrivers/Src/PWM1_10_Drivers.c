@@ -280,7 +280,7 @@ static void ConfigInvertedPair(uint32_t pwmNo, pwm_config_t* config)
  * @param *config Pointer to a  pwm_config_t structure that contains the configuration
  * 				   parameters for the PWM pair
  * @param pairCount No of PWM pairs to be configured
- * @return PWMPairUpdateCallback Returns the function pointer of the type PWMPairUpdateCallback which needs to be called
+ * @return DutyCycleUpdateFnc Returns the function pointer of the type DutyCycleUpdateFnc which needs to be called
  * 						  whenever the duty cycles of the pair need to be updated
  */
 DutyCycleUpdateFnc PWM1_10_Drivers_ConfigInvertedPairs(uint32_t pwmNo, pwm_config_t* config, int pairCount)
@@ -349,15 +349,18 @@ void PWM1_10_UpdateChannelDuty(uint32_t pwmNo, float duty, pwm_config_t* config)
 		MODIFY_REG(hhrtim.Instance->sTimerxRegs[TimerIdx].TIMxCR, HRTIM_TIMCR_DELCMP4, 0U);
 	}
 }
-
+/**
+ * @brief Configures a single PWM channel
+ * @param pwmNo Channel no of the PWM Channel in the pair (Valid Values 1-10)
+ * @param *config Pointer to a  pwm_config_t structure that contains the configuration
+ * 				   parameters for the PWM channels
+ */
 static void ConfigChannel(uint32_t pwmNo, pwm_config_t* config)
 {
 	// get timer module references
 	uint32_t TimerIdx = (pwmNo - 1) / 2;
 	bool isPWM1 = pwmNo % 2 == 0 ? false : true;
-	uint32_t out1 = 1U << (TimerIdx * 2);
-	uint32_t out2 = 1U << (TimerIdx * 2 + 1);
-	//uint32_t out = 1U << (TimerIdx * 2 + (isPWM1 ? 0 : 1));
+	uint32_t out = 1U << (TimerIdx * 2 + (isPWM1 ? 0 : 1));
 	pwm_module_config_t* mod = config->module;
 
 	/* timer configuration */
@@ -401,18 +404,13 @@ static void ConfigChannel(uint32_t pwmNo, pwm_config_t* config)
 
 	/* output configuration */
 	HRTIM_OutputCfgTypeDef pOutputCfg = GetDefaultOutputConfig();
-	if (isPWM1)
-	{
-		if (HAL_HRTIM_WaveformOutputConfig(&hhrtim, TimerIdx, out1, &pOutputCfg) != HAL_OK)
-			Error_Handler();
-	}
-	else
+	if (isPWM1 == false)
 	{
 		pOutputCfg.SetSource = HRTIM_OUTPUTRESET_TIMCMP3;
 		pOutputCfg.ResetSource = HRTIM_OUTPUTRESET_TIMCMP4;
-		if (HAL_HRTIM_WaveformOutputConfig(&hhrtim, TimerIdx, out2, &pOutputCfg) != HAL_OK)
-			Error_Handler();
 	}
+	if (HAL_HRTIM_WaveformOutputConfig(&hhrtim, TimerIdx, out, &pOutputCfg) != HAL_OK)
+		Error_Handler();
 	if (HAL_HRTIM_WaveformTimerConfig(&hhrtim, TimerIdx, &pTimerCfg) != HAL_OK)
 		Error_Handler();
 
@@ -432,7 +430,7 @@ static void ConfigChannel(uint32_t pwmNo, pwm_config_t* config)
  * @param *config Pointer to a  pwm_config_t structure that contains the configuration
  * 				   parameters for the PWM channels
  * @param chCount No of channels to be configured with the setting
- * @return PWMPairUpdateCallback Returns the function pointer of the type PWMPairUpdateCallback which needs to be called
+ * @return DutyCycleUpdateFnc Returns the function pointer of the type DutyCycleUpdateFnc which needs to be called
  * 						  whenever the duty cycles of the pair need to be updated
  */
 DutyCycleUpdateFnc PWM1_10_Drivers_ConfigChannels(uint32_t pwmNo, pwm_config_t* config, int chCount)
