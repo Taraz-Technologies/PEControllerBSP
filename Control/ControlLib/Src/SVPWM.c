@@ -1,125 +1,56 @@
-/*! 
-@file Control.h
-@brief 
-@details 
-
-@author Waqas Ehsan Butt
-@copyright Taraz Technologies Pvt. Ltd.
+/**
+ ********************************************************************************
+ * @file    	SVPWM.c
+ * @author 		Waqas Ehsan Butt
+ * @date    	Nov 25, 2021
+ *
+ * @brief   
+ ********************************************************************************
+ ********************************************************************************
+ * @attention
+ *
+ * <h2><center>&copy; Copyright (c) 2021 Taraz Technologies Pvt. Ltd.</center></h2>
+ * <h3><center>All rights reserved.</center></h3>
+ *
+ * <center>This software component is licensed by Taraz Technologies under BSD 3-Clause license,
+ * the "License"; You may not use this file except in compliance with the License. You may obtain 
+ * a copy of the License at:
+ *                        www.opensource.org/licenses/BSD-3-Clause</center>
+ *
+ ********************************************************************************
  */
-#ifndef CONTROL_H
-#define CONTROL_H
-/*******************************************************************************
+
+/********************************************************************************
  * Includes
- ******************************************************************************/
-#include "GeneralHeader.h"
-#include "Converter.h"
-#include "Transformations.h"
-#include "Filters.h"
-/*******************************************************************************
+ *******************************************************************************/
+#include "SVPWM.h"
+/********************************************************************************
  * Defines
- ******************************************************************************/
-#define MONITOR_PI			(0)
-/*******************************************************************************
- * Enums
- ******************************************************************************/
+ *******************************************************************************/
 
-/*******************************************************************************
- * Structs
- ******************************************************************************/
-typedef struct
-{
-	bool has_lmt;
-	float Kp; float Ki;
-	float dt;
-	float Integral;
-	float max;
-	float min;
-#if MONITOR_PI
-	float err;
-	float result;
-#endif
-} pi_data_t;
+/********************************************************************************
+ * Typedefs
+ *******************************************************************************/
 
+/********************************************************************************
+ * Structures
+ *******************************************************************************/
 
-/*******************************************************************************
- * Prototypes
- ******************************************************************************/
+/********************************************************************************
+ * Static Variables
+ *******************************************************************************/
 
-/*!
- * @brief lock the volatge Phase to the grid
- * @param grid voltages
- * @param voltage peak measurement
- */
-LIB_3COOR_TRIGNO_t* LockVoltagePhase(LIB_3COOR_ABC_t* sVabc, LIB_3COOR_DQ0_t* sVdq0);
-LIB_3COOR_TRIGNO_t* SetCurrent(LIB_3COOR_ABC_t* sIabc, LIB_3COOR_TRIGNO_t* sSincos, float iRef, float* duties);
-/*******************************************************************************
- * Variables
- ******************************************************************************/
+/********************************************************************************
+ * Global Variables
+ *******************************************************************************/
 
-/*******************************************************************************
+/********************************************************************************
+ * Function Prototypes
+ *******************************************************************************/
+
+/********************************************************************************
  * Code
- ******************************************************************************/
-/*! @brief adjust theta so that it remains in the range 0-2pi */
-static float AdjustTheta(float theta)
-{
-	// adjust theta for the overflow
-	while (theta > TWO_PI)
-		theta -= (TWO_PI);
-
-	while (theta < 0)
-		theta += (TWO_PI);
-
-	return theta;
-}
-
-/*! @brief add a manual theta shift and readjust theta to bounded region (0-2pi) */
-static float ShiftTheta(float theta, float shift)
-{
-	theta += shift;
-	return AdjustTheta(theta);
-}
-
-/*! @brief Generate the SPWM signal */
-static void GenerateSPWM(float theta, float modulationIndex, float* duties)
-{
-	// get the equivalent duty cycle
-	float resThetas[3] = { theta , theta + (TWO_PI/3), theta - (TWO_PI/3)};
-	for (int i = 0; i < 3; i++)
-	{
-		theta = AdjustTheta(resThetas[i]);
-		duties[i] = ((sinf(theta) * modulationIndex) * 0.5f) + 0.5f;
-	}
-}
-
-/*! @brief evaluate the pi for the error */
-static float EvaluatePI(pi_data_t* data, float err)
-{
-#if MONITOR_PI
-	data->err = err;
-#endif
-	data->Integral += (err * data->dt) ;
-	float integralTerm = (data->Ki * data->Integral);
-	if (data->has_lmt)
-	{
-		if(integralTerm > data->max)
-			data->Integral = data->max / data->Ki;
-		if(integralTerm < data->min)
-			data->Integral = data->min / data->Ki;
-	}
-	float result = data->Kp * err + (data->Ki * data->Integral);
-	if (data->has_lmt)
-	{
-		if(result > data->max)
-			result = data->max;
-		if(result < data->min)
-			result = data->min;
-	}
-#if MONITOR_PI
-	data->result = result;
-#endif
-	return result;
-}
-
+ *******************************************************************************/
 static float GetRef(LIB_3COOR_ALBE0_t *alBe0)
 {
 	float a = fabs(alBe0->alpha);
@@ -411,5 +342,6 @@ static void GetSVPWM_FromVref(LIB_3COOR_ALBE0_t* alBe0, float dc, float* duties)
 	duties[2] = 1 - DCC;
 }
 
-#endif
+
+
 /* EOF */

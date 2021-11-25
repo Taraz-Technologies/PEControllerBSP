@@ -50,8 +50,7 @@ static dio_state_t dIOState = DIO_IN;
  ******************************************************************************/
 /**
  * @brief Initialize the Pin with default parameters
- *
- * @param *pin Pointer to the Dio pin
+ * @param pinNo Pin number of the specified pin
  * @param *GPIO_InitStruct Pointer to the GPIO Structure
  * @param state Output State
  * @return digital_pin_t* pointer to the pin structure
@@ -68,10 +67,9 @@ static const digital_pin_t* InitPin(uint32_t pinNo, GPIO_InitTypeDef* GPIO_InitS
 }
 /**
  * @brief Set the Dio pin as GPIO
- *
  * @param pinNo Dio Pin No ( Range 1 - 8)
  * @param state State of the pin
- * @return *pin Pointer to the Dout pin structure
+ * @return *pin Pointer to the Dio pin structure
  */
 const digital_pin_t* Dio_SetAsIOPin(uint32_t pinNo, GPIO_PinState state)
 {
@@ -82,7 +80,6 @@ const digital_pin_t* Dio_SetAsIOPin(uint32_t pinNo, GPIO_PinState state)
 
 /**
  * @brief Selects the Alternate Output Functionality. To configure as IO use Dio_SetAsIOPin(pinNo, state)
- *
  * @param pinNo Dio pin No (Range 1-16)
  * @param AlternateFunction Alternate Functionality to be used
  * @return *digital_pin_t pointer to the pin structure
@@ -134,7 +131,7 @@ void Dio_SetAsOutputPort(void)
 	dIOState = DIO_OUT;
 }
 /*!
- * @brief set the value of output port, sets all gpio ports at output
+ * @brief Set the value of output port
  * @param val- value to be set
  */
 void Dio_SetPortValue(uint32_t val)
@@ -147,7 +144,7 @@ void Dio_SetPortValue(uint32_t val)
 	}
 }
 /*!
- * @brief set the value of output port, sets all gpio ports at output
+ * @brief Gets the value of the input port
  * @returns val- value on the port
  */
 uint32_t Dio_GetPortValue(void)

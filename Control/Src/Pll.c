@@ -32,7 +32,7 @@
 static float dataBufferMemory[FILTER_COUNT * FILTER_MAX_SIZE] = {0};
 static float* lastBuffPtr = &dataBufferMemory[FILTER_COUNT * FILTER_MAX_SIZE - 1];
 static float* nextBuffPtr = dataBufferMemory;
-static pi_data_t qPI = { .Integral = 0, .Kp = 0.001f, .Ki = 0.8f, .dt = 0.00004f };
+static pi_compensator_t qPI = { .Integral = 0, .Kp = 0.001f, .Ki = 0.8f, .dt = 0.00004f };
 /********************************************************************************
  * Global Variables
  *******************************************************************************/
@@ -91,7 +91,7 @@ static void InitFilterIfNeeded(low_pass_filter_t* filt)
  *
  * @param *comp pointer to the PI compensator
  */
-static void InitCompensatorIfNeeded(pi_data_t* comp)
+static void InitCompensatorIfNeeded(pi_compensator_t* comp)
 {
 	if (comp->Ki == 0 && comp->Kp == 0)
 	{
@@ -109,8 +109,8 @@ static void InitCompensatorIfNeeded(pi_data_t* comp)
  */
 static void ApplyLowPassFilters_DQ(pll_lock_t* pll)
 {
-	pll->coords->dq0.q = MovingAverage_Float_Evaluate(&pll->qFilt.filt, pll->coords->dq0.q);
-	pll->coords->dq0.d = MovingAverage_Float_Evaluate(&pll->dFilt.filt, pll->coords->dq0.d);
+	pll->coords->dq0.q = MovingAverage_Compute(&pll->qFilt.filt, pll->coords->dq0.q);
+	pll->coords->dq0.d = MovingAverage_Compute(&pll->dFilt.filt, pll->coords->dq0.d);
 }
 
 
@@ -200,9 +200,8 @@ pll_states_t Pll_LockGrid(pll_lock_t* pll)
 
 	ApplyLowPassFilters_DQ(pll);
 
-	thetaShift = EvaluatePI(&pll->compensator, -coords->dq0.q);
-	coords->trigno.wt -= thetaShift;
-	coords->trigno.wt = AdjustTheta(coords->trigno.wt);
+	thetaShift = PI_Compensate(&pll->compensator, -coords->dq0.q);
+	coords->trigno.wt = ShiftTheta_0to2pi(coords->trigno.wt, -thetaShift);
 
 	Transform_wt_sincos(&coords->trigno);
 

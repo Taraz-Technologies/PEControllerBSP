@@ -32,7 +32,7 @@ extern "C" {
  * @{
  */
 
-/** @defgroup PWM11-16
+/** @defgroup PWM11-16 PWM 11-16
  * @brief This module contains the functionality and definitions for the PWMs (11-16)
  * @details  This module has a single time base, so all PWMs under this module will operate on the same frequency.
  * 	This module can only be configured with three channel configurations. <br>The channels 12, 14 and 16 can

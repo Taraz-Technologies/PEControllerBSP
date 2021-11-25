@@ -32,7 +32,7 @@ extern "C" {
  * @{
  */
 
-/** @defgroup PWM1-10
+/** @defgroup PWM1-10 PWM 1-10
  * @brief This module contains the functionality and definitions for the PWMs (1-10)
  * @details This module has five separate time bases available for each paired PWM.
  * 	-# <b>PWM (1,2):</b> HRTIM_TIMERA

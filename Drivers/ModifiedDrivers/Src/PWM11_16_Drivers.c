@@ -158,9 +158,7 @@ DutyCycleUpdateFnc PWM11_16_Drivers_ConfigInvertedPairs(uint32_t pwmNo, pwm_conf
 
 /**
  * @brief Update the Duty Cycle of a channel
- * @param pwmNo Channel no of the first PWM Channel in the pair (Valid Values 11,13,15)
- * 				 Channel1 = pwmNo
- * 				 Channel2 = pwmNo + 1
+ * @param pwmNo PWM channel to be configured (Valid Values 11,13,15)
  * @param duty duty cycle to be applied to the channel (Range 0-1 or given in the config parameter)
  * @param *config Pointer to a  pwm_config_t structure that contains the configuration
  * 				   parameters for the PWM channel

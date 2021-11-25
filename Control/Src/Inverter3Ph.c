@@ -10,7 +10,7 @@
  * Includes
  ******************************************************************************/
 #include "Inverter3Ph.h"
-#include "Control.h"
+#include "ControlLib.h"
 /*******************************************************************************
  * Defines
  ******************************************************************************/
@@ -110,8 +110,6 @@ void Inverter3Ph_Init(inverter3Ph_config_t* config)
 		config->updateCallbacks[i](config->s1PinNos[i], 0.5f, &config->pwmConfig);
 		config->pwmConfig.module->interruptEnabled = false;
 	}
-
-
 
 	// enable the pwm signals by disabling any disable feature. Disable is by default active high
 	for (int i = 0; i < config->dsblPinCount; i++)

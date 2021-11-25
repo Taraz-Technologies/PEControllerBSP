@@ -20,7 +20,7 @@ extern "C" {
  * Includes
  *******************************************************************************/
 #include "GeneralHeader.h"
-#include "Control.h"
+#include "ControlLib.h"
 /********************************************************************************
  * Defines
  *******************************************************************************/
@@ -47,10 +47,9 @@ typedef enum
 typedef struct
 {
 	float* data;
-	mov_avg_float_t filt;
+	mov_avg_t filt;
 	int size;
 } low_pass_filter_t;
-
 typedef struct
 {
 	float tempCycleMax;
@@ -76,7 +75,7 @@ typedef struct
 	LIB_COOR_ALL_t* coords;
 	low_pass_filter_t dFilt;
 	low_pass_filter_t qFilt;
-	pi_data_t compensator;
+	pi_compensator_t compensator;
 	pll_info_t info;
 	pll_states_t status;
 	pll_states_t prevStatus;

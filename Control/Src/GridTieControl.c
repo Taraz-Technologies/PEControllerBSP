@@ -75,10 +75,10 @@ void GridTieControl_GetDuties(grid_tie_t* gridTie, float* duties)
 		Transform_abc_dq0(&iCoor->abc, &iCoor->dq0, &iCoor->trigno, SRC_ABC, PARK_SINE);
 
 		// Apply PI control to both DQ coordinates gridTie->dCompensator.dt
-		iCoor->dq0.d = EvaluatePI(&gridTie->dCompensator, gridTie->iRef - iCoor->dq0.d) + vCoor->dq0.d
+		iCoor->dq0.d = PI_Compensate(&gridTie->dCompensator, gridTie->iRef - iCoor->dq0.d) + vCoor->dq0.d
 				- TWO_PI * GRID_FREQ * L_OUT * iCoor->dq0.q;
 
-		iCoor->dq0.q = EvaluatePI(&gridTie->qCompensator, 0             - iCoor->dq0.q) + vCoor->dq0.q
+		iCoor->dq0.q = PI_Compensate(&gridTie->qCompensator, 0             - iCoor->dq0.q) + vCoor->dq0.q
 				+ TWO_PI * GRID_FREQ * L_OUT * iCoor->dq0.d;
 
 		//iCoor->dq0.zero = 0;

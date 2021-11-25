@@ -14,7 +14,7 @@
  * Includes
  *******************************************************************************/
 #include "GeneralHeader.h"
-#include "Control.h"
+#include "ControlLib.h"
 #include "OpenLoopVfControl.h"
 /********************************************************************************
  * Defines

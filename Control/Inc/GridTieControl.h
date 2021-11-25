@@ -19,8 +19,8 @@ extern "C" {
 /********************************************************************************
  * Includes
  *******************************************************************************/
-#include "Control.h"
-#include "pll.h"
+#include "ControlLib.h"
+#include "Pll.h"
 /********************************************************************************
  * Defines
  *******************************************************************************/
@@ -42,9 +42,9 @@ typedef struct
 	/** @brief Coordinates for the Phase Currents */
 	LIB_COOR_ALL_t iCoor;
 	/** @brief DQ compensator for Q Value */
-	pi_data_t qCompensator;
+	pi_compensator_t qCompensator;
 	/** @brief DQ compensator for D Value */
-	pi_data_t dCompensator;
+	pi_compensator_t dCompensator;
 	/*! @brief PLL structure used by the Grid Tie Control */
 	pll_lock_t pll;
 } grid_tie_t;

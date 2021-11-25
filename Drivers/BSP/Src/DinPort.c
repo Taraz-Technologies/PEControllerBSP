@@ -55,8 +55,7 @@ static const digital_pin_t dinPins[DIN_COUNT] =
  ******************************************************************************/
 /**
  * @brief Initialize the Din Pin with default parameters
- *
- * @param *pin Pointer to the Din pin
+ * @param pinNo Pin number of the specified pin
  * @param *GPIO_InitStruct Pointer to the GPIO Structure
  * @return digital_pin_t* pointer to the pin structure
  */
@@ -71,9 +70,8 @@ static const digital_pin_t* InitPin(uint32_t pinNo, GPIO_InitTypeDef* GPIO_InitS
 }
 
 /**
- * @brief Selects the Input Mode. Currently only the GPIO mode is supported by this function
- *
- * @param pinNo Din pin No (Range 1-16)
+ * @brief Sets the pin as input pin
+ * @param pinNo Input pin No (Range 1-16)
  * @return digital_pin_t pointer to the pin structure
  */
 const digital_pin_t* Din_SetAsIOPin(uint32_t pinNo)
@@ -84,10 +82,9 @@ const digital_pin_t* Din_SetAsIOPin(uint32_t pinNo)
 }
 /**
  * @brief Selects the Alternate Input Functionality. To configure the input as GPIO use Din_SetAsIOPin(pinNo)
- *
  * @param pinNo Input pin No (Range 1-16)
  * @param AlternateFunction Alternate Functionality to be used
- * @return *digital_pin_t pointer to the pin structure
+ * @return digital_pin_t pointer to the pin structure
  */
 const digital_pin_t* Din_SetPinAlternateFunction(uint32_t pinNo, uint32_t AlternateFunction)
 {

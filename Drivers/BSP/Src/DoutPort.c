@@ -55,8 +55,7 @@ static const digital_pin_t doutPins[DOUT_COUNT] =
  ******************************************************************************/
 /**
  * @brief Initialize the Pin with default parameters
- *
- * @param *pin Pointer to the Dout pin
+ * @param pinNo Pin number of the specified pin
  * @param *GPIO_InitStruct Pointer to the GPIO Structure
  * @param state Output State
  * @return digital_pin_t* pointer to the pin structure
@@ -74,7 +73,6 @@ static const digital_pin_t* InitPin(uint32_t pinNo, GPIO_InitTypeDef* GPIO_InitS
 
 /**
  * @brief Set the Dout pin as GPIO
- *
  * @param pinNo Dout Pin No ( Range 1 - 16)
  * @param state State of the pin
  * @return *pin Pointer to the Dout pin structure
@@ -88,9 +86,7 @@ const digital_pin_t* Dout_SetAsIOPin(uint32_t pinNo, GPIO_PinState state)
 
 /**
  * @brief Set the Dout pin as PWM
- *
  * @param pinNo Dout Pin No ( Range 1 - 16)
- * @param state State of the pin
  * @return *pin Pointer to the Dout pin structure
  */
 const digital_pin_t* Dout_SetAsPWMPin(uint32_t pinNo)
@@ -102,8 +98,7 @@ const digital_pin_t* Dout_SetAsPWMPin(uint32_t pinNo)
 }
 
 /**
- * @brief Selects the Alternate Output Functionality. To configure as IO use Dout_SetAsIOPin(pinNo, state)
- *
+ * @brief Selects the Alternate Output Functionality. To configure as IO use Dout_SetAsIOPin(pinNo)
  * @param pinNo Dout pin No (Range 1-16)
  * @param AlternateFunction Alternate Functionality to be used
  * @return *digital_pin_t pointer to the pin structure
@@ -116,8 +111,8 @@ const digital_pin_t* Dout_SetPinAlternateFunction(uint32_t pinNo, uint32_t Alter
 	return InitPin(pinNo, &GPIO_InitStruct, GPIO_PIN_RESET);
 }
 
-/*!
- * @brief set the whole port as GPIO
+/**
+ * @brief Set the whole port as GPIO
  */
 void Dout_SetPortAsGPIO(void)
 {
@@ -125,8 +120,8 @@ void Dout_SetPortAsGPIO(void)
 		Dout_SetAsIOPin(i + 1, GPIO_PIN_RESET);
 }
 
-/*!
- * @brief set the value of output port, sets all GPIO ports at output
+/**
+ * @brief Set the value of output port, sets all gpio ports at output
  * @param val value to be set
  */
 void Dout_SetPortValue(uint32_t val)
@@ -141,7 +136,6 @@ void Dout_SetPortValue(uint32_t val)
 
 /**
  * @brief Toggles the selected pin
- *
  * @param pinNo Dout Pin No (Range 1-16)
  */
 void Dout_TogglePin(int pinNo)

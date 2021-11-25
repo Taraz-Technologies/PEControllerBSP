@@ -1,27 +1,43 @@
 /**
  ********************************************************************************
- * @file 		BasicGridTieControl.h
+ * @file 		ControlLib.h
  * @author 		Waqas Ehsan Butt
- * @date 		Oct 11, 2021
- * @copyright 	Taraz Technologies Pvt. Ltd.
+ * @date 		Nov 25, 2021
  *
- * @brief   
+ * @brief    
+ ********************************************************************************
+ * @attention
+ *
+ * <h2><center>&copy; Copyright (c) 2021 Taraz Technologies Pvt. Ltd.</center></h2>
+ * <h3><center>All rights reserved.</center></h3>
+ *
+ * <center>This software component is licensed by Taraz Technologies under BSD 3-Clause license,
+ * the "License"; You may not use this file except in compliance with the License. You may obtain 
+ * a copy of the License at:
+ *                        www.opensource.org/licenses/BSD-3-Clause</center>
+ *
  ********************************************************************************
  */
 
-#ifndef INC_BASICGRIDTIECONTROL_H_
-#define INC_BASICGRIDTIECONTROL_H_
+#ifndef CONTROL_LIB_H_
+#define CONTROL_LIB_H_
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+/** @defgroup Control_Library Control Library
+ * @brief This module contains the functionality and definitions for different control theories
+ * @{
+ */
 /********************************************************************************
  * Includes
  *******************************************************************************/
-#include "GeneralHeader.h"
-#include "ControlLib.h"
-#include "Pll.h"
+#include "Transformations.h"
+#include "Filters.h"
+#include "Compensators.h"
+#include "SPWM.h"
+#include "SVPWM.h"
 /********************************************************************************
  * Defines
  *******************************************************************************/
@@ -33,18 +49,7 @@ extern "C" {
 /********************************************************************************
  * Structures
  *******************************************************************************/
-/**
- * @brief Data structure used by the basic grid tie controller
- */
-typedef struct
-{
-	/*! @brief Voltage level of DC Link */
-	float vdc;
-	/** @brief Coordinates for the Phase to Phase Voltages */
-	LIB_COOR_ALL_t vCoor;
-	/*! @brief PLL structure used by the basic grid tie converter */
-	pll_lock_t pll;
-} basic_grid_tie_t;
+
 /********************************************************************************
  * Exported Variables
  *******************************************************************************/
@@ -52,13 +57,7 @@ typedef struct
 /********************************************************************************
  * Global Function Prototypes
  *******************************************************************************/
-/**
- * @brief Evaluates the Duty Cycle Values for the Basic Grid Tie
- *
- * @param *gridTie Pointer to the parameter structure
- * @param *duties resultant duty cycles for the inverter (Range 0 - 1)
- */
-void BasicGridTieControl_GetDuties(basic_grid_tie_t* gridTie, float* duties);
+
 /********************************************************************************
  * Code
  *******************************************************************************/

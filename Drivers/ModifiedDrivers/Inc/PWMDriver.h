@@ -29,7 +29,7 @@ extern "C" {
  * @{
  */
 
-/** @defgroup PWM
+/** @defgroup PWM PWM
  * @brief This module contains all the relevant functions and definitions relating the PWM drivers
  * @details The available drivers are currently only supported for PWMs (1-16).
  * The drivers are further subdivided in the following groups based upon the governing timer modules.
@@ -50,7 +50,7 @@ extern "C" {
  * @{
  */
 
-/** @defgroup Base
+/** @defgroup PWMBase PWM Info
  * @brief This module contains all the relevant functions and definitions relating the base PWM drivers
  * @details The PWM channels can be configured in individual / inverted pair form
  * 		-# <b>Individual PWM:</b><br>

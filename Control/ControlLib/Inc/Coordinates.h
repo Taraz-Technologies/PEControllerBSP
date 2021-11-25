@@ -3,9 +3,19 @@
  * @file 		Coordinates.h
  * @author 		Waqas Ehsan Butt
  * @date 		Oct 5, 2021
- * @copyright 	TarazTechnologies Pvt. Ltd.
  *
- * @brief   
+ * @brief	This file contains the basic definitions for different coordinate systems
+ ********************************************************************************
+ * @attention
+ *
+ * <h2><center>&copy; Copyright (c) 2021 Taraz Technologies Pvt. Ltd.</center></h2>
+ * <h3><center>All rights reserved.</center></h3>
+ *
+ * <center>This software component is licensed by Taraz Technologies under BSD 3-Clause license,
+ * the "License"; You may not use this file except in compliance with the License. You may obtain
+ * a copy of the License at:
+ *                        www.opensource.org/licenses/BSD-3-Clause</center>
+ *
  ********************************************************************************
  */
 
@@ -16,6 +26,14 @@
 extern "C" {
 #endif
 
+/** @addtogroup Control_Library
+ * @{
+ */
+
+/** @defgroup Coordinates Coordinate System
+ * @brief This module contains the basic definitions for different coordinate systems
+ * @{
+ */
 /********************************************************************************
  * Includes
  *******************************************************************************/
@@ -40,66 +58,42 @@ extern "C" {
 /** @brief Structure containing the ABC coordinates of the 3 phase system */
 typedef struct
 {
-	/** @brief First Phase Value */
-	float a;
-	/** @brief Second Phase Value */
-	float b;
-	/** @brief Third Phase Value */
-	float c;
+	float a;	/**< @brief First Phase Value */
+	float b;	/**< @brief Second Phase Value */
+	float c;	/**< @brief Third Phase Value */
 } LIB_3COOR_ABC_t;
-
 /** @brief Structure containing the Alpha Beta And Zero Coordinates of 3 phase system */
 typedef struct
 {
-	/** @brief Value of Alpha Axis */
-	float alpha;
-	/** @brief Value of Beta Axis */
-	float beta;
-	/** @brief Value of Zero Axis */
-	float zero;
+	float alpha;	/**< @brief Value of Alpha Axis */
+	float beta;		/**< @brief Value of Beta Axis */
+	float zero;		/**< @brief Value of Zero Axis */
 } LIB_3COOR_ALBE0_t;
-
-/** @brief Structure containing the trignometric information of the system */
+/** @brief Structure containing the trigonometric information of the system */
 typedef struct
 {
-	/** @brief Value of Current Angle in radian */
-	float wt;
-	/** @brief Sin value of the angle given by \p wt */
-	float sin;
-	/** @brief Cosine value of the angle given by \p wt */
-	float cos;
-	/** @brief Sin value of the angle given by \p wt+2pi/3 */
-	float sin_p2pB3;
-	/** @brief Cosine value of the angle given by \p wt+2pi/3 */
-	float cos_p2pB3;
-	/** @brief Sin value of the angle given by \p wt-2pi/3 */
-	float sin_m2pB3;
-	/** @brief Cosine value of the angle given by \p wt-2pi/3 */
-	float cos_m2pB3;
+	float wt;			/**< @brief Value of Current Angle in radians */
+	float sin;			/**< @brief Sin value of the angle given by \p wt */
+	float cos;			/**< @brief Cosine value of the angle given by \p wt */
+	float sin_p2pB3;	/**< @brief Sin value of the angle given by \p wt+2pi/3 */
+	float cos_p2pB3;	/**< @brief Cosine value of the angle given by \p wt+2pi/3 */
+	float sin_m2pB3;	/**< @brief Sin value of the angle given by \p wt-2pi/3 */
+	float cos_m2pB3;	/**< @brief Cosine value of the angle given by \p wt-2pi/3 */
 } LIB_3COOR_TRIGNO_t;
-
 /** @brief Structure containing the DQ0 coordinates of the 3 phase system */
 typedef struct
 {
-	/** @brief Value of D Axis */
-	float d;
-	/** @brief Value of Q Axis */
-	float q;
-	/** @brief Value of Zero Axis */
-	float zero;
+	float d;		/**< @brief Value of D Axis */
+	float q;		/**< @brief Value of Q Axis */
+	float zero;		/**< @brief Value of Zero Axis */
 } LIB_3COOR_DQ0_t;
-
 /** @brief Structure containing all coordinates of the 3 phase system in different coordinate systems */
 typedef struct
 {
-	/** @brief Structure for the ABC coordinates */
-	LIB_3COOR_ABC_t abc;
-	/** @brief Structure for the Alpha Beta Zero coordinates */
-	LIB_3COOR_ALBE0_t alBe0;
-	/** @brief Structure for the DQ0 coordinates */
-	LIB_3COOR_DQ0_t dq0;
-	/** @brief Structure for the trignometric information */
-	LIB_3COOR_TRIGNO_t trigno;
+	LIB_3COOR_ABC_t abc;		/**< @brief Structure for the ABC coordinates */
+	LIB_3COOR_ALBE0_t alBe0;	/**< @brief Structure for the Alpha Beta Zero coordinates */
+	LIB_3COOR_DQ0_t dq0;		/**< @brief Structure for the DQ0 coordinates */
+	LIB_3COOR_TRIGNO_t trigno;	/**< @brief Structure for the trigonometric information */
 } LIB_COOR_ALL_t;
 /********************************************************************************
  * Exported Variables
@@ -117,6 +111,14 @@ typedef struct
 #ifdef __cplusplus
 }
 #endif
+
+/**
+ * @}
+ */
+
+/**
+ * @}
+ */
 
 #endif 
 /* EOF */

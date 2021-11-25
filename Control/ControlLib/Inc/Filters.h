@@ -1,10 +1,10 @@
 /**
  ********************************************************************************
- * @file 		GeneralHeader.h
+ * @file 		Filters.h
  * @author 		Waqas Ehsan Butt
- * @date 		Nov 10, 2021
+ * @date 		July 10, 2021
  *
- * @brief General header file defining basic items to include in every component file
+ * @brief	This file contains the functionality and definitions for different filters
  ********************************************************************************
  * @attention
  *
@@ -18,22 +18,26 @@
  *
  ********************************************************************************
  */
-#ifndef GENERAL_HEADER_H
-#define GENERAL_HEADER_H
+#ifndef FILTERS_H
+#define FILTERS_H
 
-/** @defgroup PEController_Framework_Drivers
- * @brief This module defines the framework drivers for PEController
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/** @addtogroup Control_Library
  * @{
  */
 
-/**
- * @}
+/** @defgroup Filters DSP Filters
+ * @brief This module contains the functionality and definitions for different filters
+ * @details Following is the list of available filters
+ * 	-# <b>Moving Average Filter</b> mov_avg_t
+ * @{
  */
-
 /*******************************************************************************
  * Includes
  ******************************************************************************/
-#include "stm32h7xx_hal.h"
 #include <stdbool.h>
 /*******************************************************************************
  * Defines
@@ -46,7 +50,17 @@
 /*******************************************************************************
  * Structures
  ******************************************************************************/
-
+/**
+ * @brief Defines the parameters used by a moving average filter
+ */
+typedef struct
+{
+	float avg;		/**< @brief Mean observed in samples */
+	bool stable;	/**< @brief If the average is not for full count this will be false */
+	float* dataPtr;	/**< @brief Pointer to the data array */
+	int count;		/**< @brief No of samples per computation */
+	int index;		/**< @brief Initialize to zero. Used internally for detecting current data position */
+} mov_avg_t;
  /*******************************************************************************
  * Exported Variables
  ******************************************************************************/
@@ -55,13 +69,34 @@
  * Global Function Prototypes
  ******************************************************************************/
 /**
-  * @brief  This function is executed in case of error occurrence.
-  * @retval None
-  */
-extern void Error_Handler(void);
+ * @brief Computes the moving average
+ * @param *filt Pointer to the filter
+ * @param val Current value
+ * @return float Resultant value of the moving average filter
+ */
+extern float MovingAverage_Compute(mov_avg_t* filt, float val);
+/**
+ * @brief Resets the moving average filter
+ * @param *filt Pointer to the filter
+ */
+extern void MovingAverage_Reset(mov_avg_t* filt);
 /*******************************************************************************
  * Code
  ******************************************************************************/
+
+
+#ifdef __cplusplus
+}
+#endif
+
+/**
+ * @}
+ */
+
+/**
+ * @}
+ */
+
 
 #endif
 /* EOF */

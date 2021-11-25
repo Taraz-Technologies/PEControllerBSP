@@ -1,15 +1,43 @@
 /**
  ********************************************************************************
- * @file    DigitalPins.h
- * @author Waqas Ehsan Butt
- * @date    10 July 2021
- * @copyright TarazTechnologies Pvt. Ltd.
+ * @file 		DigitalPins.h
+ * @author 		Waqas Ehsan Butt
+ * @date 		July 10, 2021
  *
- * @brief
+ * @brief	This file contains the basic definitions for the digital pins
+ ********************************************************************************
+ * @attention
+ *
+ * <h2><center>&copy; Copyright (c) 2021 Taraz Technologies Pvt. Ltd.</center></h2>
+ * <h3><center>All rights reserved.</center></h3>
+ *
+ * <center>This software component is licensed by Taraz Technologies under BSD 3-Clause license,
+ * the "License"; You may not use this file except in compliance with the License. You may obtain
+ * a copy of the License at:
+ *                        www.opensource.org/licenses/BSD-3-Clause</center>
+ *
  ********************************************************************************
  */
 #ifndef DIGITAL_PINS_H
 #define DIGITAL_PINS_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+/** @addtogroup PEController_Framework_Drivers
+ * @{
+ */
+
+/** @defgroup DigitalPins Digital Pins
+ * @brief This module contains the functionality and definitions for the digital pins
+ * @note DigitalPins_Init() should be called before using any of the digital pins functionality
+ * @{
+ */
+
+/** @defgroup DigitalPinsBase Digital Pins Info
+ * @brief This module contains the base functionality and definitions for the digital pins
+ * @{
+ */
 /*******************************************************************************
  * Includes
  ******************************************************************************/
@@ -20,7 +48,7 @@
  ******************************************************************************/
 
 /*******************************************************************************
- * Enums
+ * Typedefs
  ******************************************************************************/
 /**
  * @brief PWM pin functionality definitions
@@ -33,37 +61,45 @@ typedef enum
 /*******************************************************************************
  * Structures
  ******************************************************************************/
+/**
+ * @brief Defines the basic structure for a digital pin
+ */
 typedef struct
 {
-	GPIO_TypeDef* GPIO;
-	uint16_t pinMask;
+	GPIO_TypeDef* GPIO;		/**< @brief Pointer to GPIO associated with the pin */
+	uint16_t pinMask;		/**< @brief Pin mask to be used for configuration of the pin */
 } digital_pin_t;
- /*******************************************************************************
- * Prototypes
+/*******************************************************************************
+ * Exported Variables
  ******************************************************************************/
 
 /*******************************************************************************
- * Variables
+ * Global Function Prototypes
  ******************************************************************************/
-
+/**
+ * @brief Initializes the digital pins
+ */
+extern void DigitalPins_Init(void);
 /*******************************************************************************
  * Code
  ******************************************************************************/
-static void DigitalPins_Init(void)
-{
-	__HAL_RCC_GPIOA_CLK_ENABLE();
-  __HAL_RCC_GPIOB_CLK_ENABLE();
-  __HAL_RCC_GPIOC_CLK_ENABLE();
-  __HAL_RCC_GPIOD_CLK_ENABLE();
-  __HAL_RCC_GPIOE_CLK_ENABLE();
-  __HAL_RCC_GPIOF_CLK_ENABLE();
-  __HAL_RCC_GPIOG_CLK_ENABLE();
-  __HAL_RCC_GPIOH_CLK_ENABLE();
-  __HAL_RCC_GPIOI_CLK_ENABLE();
-  __HAL_RCC_GPIOJ_CLK_ENABLE();
-  __HAL_RCC_GPIOK_CLK_ENABLE();
-}
 
+
+#ifdef __cplusplus
+}
+#endif
+
+/**
+ * @}
+ */
+
+/**
+ * @}
+ */
+
+/**
+ * @}
+ */
 
 #endif
 /* EOF */

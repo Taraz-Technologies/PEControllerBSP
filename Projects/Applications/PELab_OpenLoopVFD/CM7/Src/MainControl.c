@@ -14,7 +14,7 @@
 #include "GeneralHeader.h"
 #include "Inverter3Ph.h"
 #include "MainControl.h"
-#include "Control.h"
+#include "ControlLib.h"
 #include "MAX11046App.h"
 #include "OpenLoopVfControl.h"
 #include "BasicGridTieControl.h"
@@ -200,9 +200,9 @@ void MainControl_Loop(void)
 		/* compensator */
 		static float data_avg[8];
 		static low_pass_filter_t filt = {.data = data_avg, .size=8, .filt = {.avg = 0, .count = 8, .dataPtr = data_avg}};
-		static pi_data_t boostPI = {.has_lmt = true, .Kp = .05f, .Ki = 10.1f, .dt = PWM_PERIOD_s, .Integral = 0, .max = 0.5f, .min = 0.f };
-		float errAvg = MovingAverage_Float_Evaluate(&filt.filt, 700.f - gridTie.vdc);
-		float duty = EvaluatePI(&boostPI, errAvg);
+		static pi_compensator_t boostPI = {.has_lmt = true, .Kp = .05f, .Ki = 10.1f, .dt = PWM_PERIOD_s, .Integral = 0, .max = 0.5f, .min = 0.f };
+		float errAvg = MovingAverage_Compute(&filt.filt, 700.f - gridTie.vdc);
+		float duty = PI_Compensate(&boostPI, errAvg);
 
 		/* Update duty cycle for the boost */
 		boostConfig.dutyUpdateFnc(boostConfig.pinNo, duty, &boostConfig.pwmConfig);
