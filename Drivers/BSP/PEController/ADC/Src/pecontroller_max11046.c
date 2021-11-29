@@ -117,13 +117,13 @@ void MAX11046App_Init(uint32_t periodUs, adcMeauresDataCallback dataCallback)
 	mults.V4 = 1000.0f / 32768;
 		
 	callback = dataCallback;
-	Raw_Max11046_Init(mode, &config);
+	BSP_MAX11046_Base_Init(mode, &config);
 }
 
 /*! @brief start the measurements related to MAX11046 */
 void MAX11046App_Run(void)
 {
-	Raw_Max11046_Run();
+	BSP_MAX11046_Base_Run();
 }
 #endif
 #ifdef CORE_CM7

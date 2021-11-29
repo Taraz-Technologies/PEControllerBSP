@@ -35,6 +35,41 @@
 			<locationURI>PARENT-1-PROJECT_LOC/Common</locationURI>
 		</link>
 		<link>
+			<name>BSP/ADC/pecontroller_max11046.c</name>
+			<type>1</type>
+			<locationURI>PARENT-5-PROJECT_LOC/Drivers/BSP/PEController/ADC/Src/pecontroller_max11046.c</locationURI>
+		</link>
+		<link>
+			<name>BSP/ADC/pecontroller_max11046_base.c</name>
+			<type>1</type>
+			<locationURI>PARENT-5-PROJECT_LOC/Drivers/BSP/PEController/ADC/Src/pecontroller_max11046_base.c</locationURI>
+		</link>
+		<link>
+			<name>BSP/DigitalPins/pecontroller_digital_in.c</name>
+			<type>1</type>
+			<locationURI>PARENT-5-PROJECT_LOC/Drivers/BSP/PEController/DigitalPins/Src/pecontroller_digital_in.c</locationURI>
+		</link>
+		<link>
+			<name>BSP/DigitalPins/pecontroller_digital_inout.c</name>
+			<type>1</type>
+			<locationURI>PARENT-5-PROJECT_LOC/Drivers/BSP/PEController/DigitalPins/Src/pecontroller_digital_inout.c</locationURI>
+		</link>
+		<link>
+			<name>BSP/DigitalPins/pecontroller_digital_out.c</name>
+			<type>1</type>
+			<locationURI>PARENT-5-PROJECT_LOC/Drivers/BSP/PEController/DigitalPins/Src/pecontroller_digital_out.c</locationURI>
+		</link>
+		<link>
+			<name>BSP/DigitalPins/pecontroller_digital_pins.c</name>
+			<type>1</type>
+			<locationURI>PARENT-5-PROJECT_LOC/Drivers/BSP/PEController/DigitalPins/Src/pecontroller_digital_pins.c</locationURI>
+		</link>
+		<link>
+			<name>BSP/Display/pecontroller_display.c</name>
+			<type>1</type>
+			<locationURI>PARENT-5-PROJECT_LOC/Drivers/BSP/PEController/Display/Src/pecontroller_display.c</locationURI>
+		</link>
+		<link>
 			<name>Drivers/STM32H7xx_HAL_Driver/stm32h7xx_hal.c</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal.c</locationURI>
@@ -133,6 +168,11 @@
 			<name>Drivers/STM32H7xx_HAL_Driver/stm32h7xx_hal_tim_ex.c</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_tim_ex.c</locationURI>
+		</link>
+		<link>
+			<name>UserFiles/Src/shared_memory.c</name>
+			<type>1</type>
+			<locationURI>PARENT-5-PROJECT_LOC/Drivers/BSP/PEController/Common/Src/shared_memory.c</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>

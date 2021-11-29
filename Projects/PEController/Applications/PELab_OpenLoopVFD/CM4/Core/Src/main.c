@@ -22,8 +22,9 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "MAX11046App.h"
-#include "SharedMemory.h"
+#include "pecontroller_max11046.h"
+#include "shared_memory.h"
+#include "pecontroller_display.h"
 #include <string.h>
 /* USER CODE END Includes */
 
@@ -62,7 +63,7 @@ static void MX_TIM12_Init(void);
 static void MX_TIM17_Init(void);
 static void MX_I2C2_Init(void);
 /* USER CODE BEGIN PFP */
-void LCDDisplay_Init(void);
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -121,7 +122,7 @@ int main(void)
   MX_TIM17_Init();
   MX_I2C2_Init();
   /* USER CODE BEGIN 2 */
-  LCDDisplay_Init();
+  BSP_Display_Init();
   HAL_TIM_PWM_Start(&htim17,TIM_CHANNEL_1);			// LCD PWM channel
   MAX11046App_Init(sharedData->m7Tom4.periodUs, DataProcessingCallback);	// Measurements @ 200KHz
   MAX11046App_Run();

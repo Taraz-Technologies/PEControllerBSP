@@ -150,7 +150,7 @@ void BSP_MAX11046_Base_Init(adc_acq_mode_t type, adc_cont_config_t* contConfig)
 {
 	// DeInitialize if already initialized
 	if(moduleActive)
-		Raw_Max11046_DeInit();
+		BSP_MAX11046_Base_DeInit();
 	
 	acqType = type;
 	adcContConfig.conversionCycleTimeUs = contConfig->conversionCycleTimeUs;

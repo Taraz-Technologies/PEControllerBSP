@@ -53,6 +53,8 @@
 									<listOptionValue builtIn="false" value="../../../../../../Drivers/BSP/PEController/Display/Inc"/>
 									<listOptionValue builtIn="false" value="../../../../../../Drivers/BSP/PEController/DigitalPins/Inc"/>
 									<listOptionValue builtIn="false" value="../../../../../../Drivers/BSP/PEController/Components/Inc"/>
+									<listOptionValue builtIn="false" value="../../../../../../Drivers/BSP/PEController/Common/Inc"/>
+									<listOptionValue builtIn="false" value="../UserFiles/Inc"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.1929048227" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
 							</tool>
@@ -79,9 +81,11 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="BSP"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Common"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
 						<entry excluding="ModifiedDrivers/PWM11_16_Drivers.c|ModifiedDrivers/PWMDriver.h|ModifiedDrivers/PWM1_10_Drivers.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="UserFiles"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -133,6 +137,8 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/PELab_OpenLoopVFD/Drivers/ModifiedDrivers}&quot;"/>
 									<listOptionValue builtIn="false" value="../../../../../Control"/>
 									<listOptionValue builtIn="false" value="../../../../../Drivers/BSP/Inc"/>
+									<listOptionValue builtIn="false" value="../../../../../../Drivers/BSP/PEController/Common/Inc"/>
+									<listOptionValue builtIn="false" value="../UserFiles/Inc"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.245915100" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
 							</tool>
@@ -159,9 +165,11 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="BSP"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Common"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
 						<entry excluding="ModifiedDrivers/PWM11_16_Drivers.c|ModifiedDrivers/PWMDriver.h|ModifiedDrivers/PWM1_10_Drivers.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="UserFiles"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

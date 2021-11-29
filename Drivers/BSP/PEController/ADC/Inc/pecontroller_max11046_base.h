@@ -70,18 +70,18 @@ extern "C" {
 @param type- ADC_MODE_SINGLE or ADC_MODE_CONT for single or continuous conversions respectively
 @param *contConfig- adc_cont_config_t contains the continuous transfer configuration
 */
-void BSP_Max11046_Base_Init(adc_acq_mode_t type, adc_cont_config_t* contConfig);
+void BSP_MAX11046_Base_Init(adc_acq_mode_t type, adc_cont_config_t* contConfig);
 /*! @brief Deinitialize the max 11046 module */
-void BSP_Max11046_Base_DeInit(void);
+void BSP_MAX11046_Base_DeInit(void);
 /*! 
 @brief Perform the conversion
 @details For single conversion mode performs and provides the results in a blocking way.
 For continuous conversion mode starts the conversions, after each conversion adc_cont_config_t.callback will be called
 @returns uint16_t*- For single conversion mode returns the pointer to the eight acquired values. Returns NULL for continuous conversion mode
 */
-uint16_t* BSP_Max11046_Base_Run(void);
+uint16_t* BSP_MAX11046_Base_Run(void);
 /*! @brief Stops the adc data collection module, only effective for ADC_MODE_CONT */
-void BSP_Max11046_Base_Stop(void);
+void BSP_MAX11046_Base_Stop(void);
 
 /*******************************************************************************
  * Variables
