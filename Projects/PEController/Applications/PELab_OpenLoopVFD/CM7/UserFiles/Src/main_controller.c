@@ -13,8 +13,7 @@
  ******************************************************************************/
 #include "general_header.h"
 #include "control_library.h"
-#include "main_controller.h"
-#include "pecontroller_max11046.h"
+#include "adc_config.h"
 /*******************************************************************************
  * Defines
  ******************************************************************************/
@@ -42,6 +41,8 @@ static void Inverter3Ph_ResetSignal(void);
 /*******************************************************************************
  * Variables
  ******************************************************************************/
+extern adc_measures_t adcVals;
+
 static pwm_module_config_t inverterPWMModuleConfig =
 {
 		.interruptEnabled = true,
@@ -69,8 +70,7 @@ static inverter3Ph_config_t inverterConfig =
 				.module = &inverterPWMModuleConfig,
 		},
 };
-static pwm_module_config_t boostPWMConfig =
-{
+static pwm_module_config_t boostPWMConfig = {
 		.interruptEnabled = false,
 		.alignment = EDGE_ALIGNED,
 		.periodInUsec = PWM_PERIOD_Us,
@@ -99,8 +99,9 @@ static openloopvf_config_t vfConfig = {
  * @brief Grid Tie Control Parameters
  */
 static grid_tie_t gridTie = { .vCoor = {0}, .iCoor = {0}, .pll = {0},
-		.qCompensator = { .Integral = 0, .Kp = 7.f, .Ki = 70.f, .dt = PWM_PERIOD_s },
-		.dCompensator = { .Integral = 0, .Kp = 7.f, .Ki = 70.f, .dt = PWM_PERIOD_s },
+		.qCompensator = { .Integral = 0, .Kp = 7.f, .Ki = 40.f, .dt = PWM_PERIOD_s },
+		.dCompensator = { .Integral = 0, .Kp = 7.f, .Ki = 40.f, .dt = PWM_PERIOD_s },
+		.iRef = 0.1f,
 };
 #endif
 /*******************************************************************************
@@ -167,16 +168,28 @@ static void Inverter3Ph_ResetSignal(void)
  * @brief Call this function to process the control loop.
  * If the new computation request is available new duty cycle values are computed and applied to all inverter legs
  */
+float duties[3];
 void MainControl_Loop(void)
 {
 	if(recompute)
 	{
-		float duties[3];
+
 #if CONTROL_TYPE == OPEN_LOOP_VF_CONTROL
 		OpenLoopVfControl_GetDuties(&vfConfig, duties);
 		Inverter3Ph_UpdateDuty(inverterConfig1, duties);
 		Inverter3Ph_UpdateDuty(inverterConfig2, duties);
 #elif CONTROL_TYPE == GRID_TIE_CONTROL
+		/* compensator */
+		static bool vdcCorrect = false;
+		static float data_avg[8];
+		static low_pass_filter_t filt = {.data = data_avg, .size=8, .filt = {.avg = 0, .count = 8, .dataPtr = data_avg}};
+		static pi_compensator_t boostPI = {.has_lmt = true, .Kp = .01f, .Ki = 1.1f, .dt = PWM_PERIOD_s, .Integral = 0, .max = 0.45f, .min = 0.f };
+		float errAvg = MovingAverage_Compute(&filt.filt, 700.f - gridTie.vdc);
+		float duty = PI_Compensate(&boostPI, errAvg);
+
+		if (vdcCorrect == false && fabsf(700 - gridTie.vdc) < 20)
+			vdcCorrect = true;
+
 		/* add the required measurements and current reference point */
 		gridTie.vCoor.abc.a = adcVals.V1;
 		gridTie.vCoor.abc.b = adcVals.V2;
@@ -185,20 +198,13 @@ void MainControl_Loop(void)
 		gridTie.iCoor.abc.a = adcVals.Ih1;
 		gridTie.iCoor.abc.b = adcVals.Ih2;
 		gridTie.iCoor.abc.c = adcVals.Ih3;
-		gridTie.iRef = 10.f;
 
+		if (vdcCorrect && gridTie.iRef < 10.f)
+			gridTie.iRef += .0001f;
 		/* compute the duty cycles for grid tie control */
 		GridTieControl_GetDuties(&gridTie, duties);
-
 		/* Update the duty cycles for all inverter legs */
 		Inverter3Ph_UpdateDuty(&inverterConfig, duties);
-
-		/* compensator */
-		static float data_avg[8];
-		static low_pass_filter_t filt = {.data = data_avg, .size=8, .filt = {.avg = 0, .count = 8, .dataPtr = data_avg}};
-		static pi_compensator_t boostPI = {.has_lmt = true, .Kp = .05f, .Ki = 10.1f, .dt = PWM_PERIOD_s, .Integral = 0, .max = 0.5f, .min = 0.f };
-		float errAvg = MovingAverage_Compute(&filt.filt, 700.f - gridTie.vdc);
-		float duty = PI_Compensate(&boostPI, errAvg);
 
 		/* Update duty cycle for the boost */
 		boostConfig.dutyUpdateFnc(boostConfig.pinNo, duty, &boostConfig.pwmConfig);

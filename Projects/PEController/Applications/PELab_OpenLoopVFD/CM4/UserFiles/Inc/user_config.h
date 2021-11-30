@@ -38,8 +38,12 @@ extern "C" {
 #define LCD_AFY800480B0		(1)
 #define DISPLAY				(LCD_AFY800480A0)
 
-
-
+#define PELAB_3PH			(0)
+#define PELAB_6PH			(1)
+#define PELAB_TNPC			(2)
+#define PELAB_MMC			(3)
+#define PELAB_CUSTOM		(4)
+#define MEASUREMENT_UNIT	(PELAB_6PH)
 
 #ifdef __cplusplus
 }

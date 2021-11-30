@@ -34,7 +34,12 @@ extern "C" {
 /********************************************************************************
  * Defines
  *******************************************************************************/
-
+#define PELAB_3PH			(0)
+#define PELAB_6PH			(1)
+#define PELAB_TNPC			(2)
+#define PELAB_MMC			(3)
+#define PELAB_CUSTOM		(4)
+#define MEASUREMENT_UNIT	(PELAB_6PH)
 
 
 

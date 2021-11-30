@@ -35,16 +35,6 @@
 			<locationURI>PARENT-1-PROJECT_LOC/Common</locationURI>
 		</link>
 		<link>
-			<name>BSP/ADC/pecontroller_max11046.c</name>
-			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/Drivers/BSP/PEController/ADC/Src/pecontroller_max11046.c</locationURI>
-		</link>
-		<link>
-			<name>BSP/ADC/pecontroller_max11046_base.c</name>
-			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/Drivers/BSP/PEController/ADC/Src/pecontroller_max11046_base.c</locationURI>
-		</link>
-		<link>
 			<name>BSP/DigitalPins/pecontroller_digital_in.c</name>
 			<type>1</type>
 			<locationURI>PARENT-5-PROJECT_LOC/Drivers/BSP/PEController/DigitalPins/Src/pecontroller_digital_in.c</locationURI>

@@ -22,7 +22,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "pecontroller_max11046.h"
+#include "max11046_drivers.h"
 #include "shared_memory.h"
 #include "pecontroller_display.h"
 #include <string.h>
@@ -50,7 +50,6 @@
 
 I2C_HandleTypeDef hi2c2;
 
-TIM_HandleTypeDef htim12;
 TIM_HandleTypeDef htim17;
 
 /* USER CODE BEGIN PV */
@@ -59,7 +58,6 @@ TIM_HandleTypeDef htim17;
 
 /* Private function prototypes -----------------------------------------------*/
 static void MX_GPIO_Init(void);
-static void MX_TIM12_Init(void);
 static void MX_TIM17_Init(void);
 static void MX_I2C2_Init(void);
 /* USER CODE BEGIN PFP */
@@ -124,8 +122,11 @@ int main(void)
   /* USER CODE BEGIN 2 */
   BSP_Display_Init();
   HAL_TIM_PWM_Start(&htim17,TIM_CHANNEL_1);			// LCD PWM channel
-  MAX11046App_Init(sharedData->m7Tom4.periodUs, DataProcessingCallback);	// Measurements @ 200KHz
-  MAX11046App_Run();
+  adc_cont_config_t adcConfig = {
+		  .callback = DataProcessingCallback,
+		  .conversionCycleTimeUs = sharedData->m7Tom4.periodUs };
+  BSP_MAX11046_Init(ADC_MODE_CONT, &adcConfig);
+  BSP_MAX11046_Run();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -182,52 +183,6 @@ static void MX_I2C2_Init(void)
   /* USER CODE BEGIN I2C2_Init 2 */
 
   /* USER CODE END I2C2_Init 2 */
-
-}
-
-/**
-  * @brief TIM12 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_TIM12_Init(void)
-{
-
-  /* USER CODE BEGIN TIM12_Init 0 */
-
-  /* USER CODE END TIM12_Init 0 */
-
-  TIM_OC_InitTypeDef sConfigOC = {0};
-
-  /* USER CODE BEGIN TIM12_Init 1 */
-
-  /* USER CODE END TIM12_Init 1 */
-  htim12.Instance = TIM12;
-  htim12.Init.Prescaler = 0;
-  htim12.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim12.Init.Period = 2400;
-  htim12.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  htim12.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
-  if (HAL_TIM_PWM_Init(&htim12) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 480;
-  sConfigOC.OCPolarity = TIM_OCPOLARITY_LOW;
-  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
-  if (HAL_TIM_PWM_ConfigChannel(&htim12, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  if (HAL_TIM_PWM_ConfigChannel(&htim12, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN TIM12_Init 2 */
-
-  /* USER CODE END TIM12_Init 2 */
-  HAL_TIM_MspPostInit(&htim12);
 
 }
 

@@ -46,21 +46,6 @@ static LTDC_HandleTypeDef hltdc;
 static void ConfigClock(void)
 {
 	RCC_PeriphCLKInitTypeDef PeriphClkInitStruct =PLL3Clk;
-	/*{
-			.PeriphClockSelection = RCC_PERIPHCLK_LTDC,
-			.PLL3 = { .PLL3M = 2, .PLL3N = 21, .PLL3P = 2, .PLL3Q = 2, .PLL3RGE = RCC_PLL3VCIRANGE_3,
-					.PLL3VCOSEL = RCC_PLL3VCOWIDE, .PLL3FRACN = 0, .PLL3R = 10 },
-	};*/
-	/*PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_LTDC;
-	PeriphClkInitStruct.PLL3.PLL3M = 2;
-	PeriphClkInitStruct.PLL3.PLL3N = 21;
-	PeriphClkInitStruct.PLL3.PLL3P = 2;
-	PeriphClkInitStruct.PLL3.PLL3Q = 2;
-	PeriphClkInitStruct.PLL3.PLL3R = 10;
-	PeriphClkInitStruct.PLL3.PLL3RGE = RCC_PLL3VCIRANGE_3;
-	PeriphClkInitStruct.PLL3.PLL3VCOSEL = RCC_PLL3VCOWIDE;
-	PeriphClkInitStruct.PLL3.PLL3FRACN = 0; */
-	//		PLL3Clk;
 	if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
 		Error_Handler();
 

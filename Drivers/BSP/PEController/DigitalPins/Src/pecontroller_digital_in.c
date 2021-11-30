@@ -100,7 +100,7 @@ const digital_pin_t* BSP_Din_SetPinAlternateFunction(uint32_t pinNo, uint32_t Al
 void BSP_Din_SetPortGPIO(void)
 {
 	for(int i = 0; i < DIN_COUNT; i++)
-		Din_SetAsIOPin(i + 1);
+		BSP_Din_SetAsIOPin(i + 1);
 }
 /**
  * @brief Get the value of the  Complete Input Port
