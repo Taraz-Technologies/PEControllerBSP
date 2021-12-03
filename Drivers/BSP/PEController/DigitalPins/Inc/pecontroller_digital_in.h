@@ -1,10 +1,10 @@
 /**
  ********************************************************************************
- * @file 		DinPort.h
+ * @file 		pecontroller_digital_in.h
  * @author 		Waqas Ehsan Butt
- * @date 		Sept 25, 2021
+ * @date 		September 25, 2021
  *
- * @brief	This file contains the basic definitions for the digital input pins
+ * @brief	Controls the digital input port of the PEController
  ********************************************************************************
  * @attention
  *
@@ -18,13 +18,13 @@
  *
  ********************************************************************************
  */
-#ifndef DIN_PORT_H
-#define DIN_PORT_H
+#ifndef PECONTROLLER_DIGITAL_IN_H
+#define PECONTROLLER_DIGITAL_IN_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-/** @addtogroup PEController_Framework_Drivers
+/** @addtogroup BSP
  * @{
  */
 
@@ -35,10 +35,11 @@ extern "C" {
 /** @addtogroup DinPorts Digital Input Port
  * @brief This module contains the functionality and definitions for the digital input pins
  * @details List of functions
- * 	-# <b>@ref BSP_Din_SetAsIOPin()</b> Sets the pin as input pin
- * 	-# <b>@ref BSP_Din_SetPinAlternateFunction()</b> Selects the Alternate Input Functionality. To configure the input as GPIO use Din_SetAsIOPin(pinNo)
- * 	-# <b>@ref BSP_Din_SetPortGPIO()</b> Set the whole port as GPIO
- * 	-# <b>@ref BSP_Din_GetPortValue()</b> Get the value of the  Complete Input Port
+ * 	-# <b>@ref BSP_Din_SetAsIOPin() :</b> Sets the pin as input pin
+ * 	-# <b>@ref BSP_Din_SetPinAlternateFunction() :</b> Selects the Alternate Input Functionality.
+ * 														To configure the input as GPIO use @ref BSP_Din_SetAsIOPin()
+ * 	-# <b>@ref BSP_Din_SetPortGPIO() :</b> Set the whole port as GPIO
+ * 	-# <b>@ref BSP_Din_GetPortValue() :</b> Get the value of the  Complete Input Port
  * @{
  */
 /*******************************************************************************
@@ -48,22 +49,49 @@ extern "C" {
 /*******************************************************************************
  * Defines
  ******************************************************************************/
+/** @defgroup DIN_Exported_Macros Macros
+  * @{
+  */
 
+/**
+ * @}
+ */
 /*******************************************************************************
  * Typedefs
  ******************************************************************************/
+/** @defgroup DIN_Exported_Typedefs Type Definitions
+  * @{
+  */
 
+/**
+ * @}
+ */
 /*******************************************************************************
  * Structures
  ******************************************************************************/
+/** @defgroup DIN_Exported_Structures Structures
+  * @{
+  */
 
+/**
+ * @}
+ */
  /*******************************************************************************
  * Exported Variables
  ******************************************************************************/
+/** @defgroup DIN_Exported_Variables Variables
+  * @{
+  */
 
+/**
+ * @}
+ */
 /*******************************************************************************
  * Global Function Prototypes
  ******************************************************************************/
+/** @defgroup DIN_Exported_Functions Functions
+  * @{
+  */
 /**
  * @brief Sets the pin as input pin
  * @param pinNo Input pin No (Range 1-16)
@@ -90,7 +118,9 @@ extern uint32_t BSP_Din_GetPortValue(void);
  * Code
  ******************************************************************************/
 
-
+/**
+ * @}
+ */
 #ifdef __cplusplus
 }
 #endif

@@ -27,7 +27,7 @@ extern "C" {
 #endif
 
 /** @defgroup Control_Library Control Library
- * @brief This module contains the functionality and definitions for different control theories
+ * @brief This library module contains the functionality and definitions for different control theories
  * @{
  */
 /********************************************************************************

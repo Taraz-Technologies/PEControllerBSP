@@ -23,7 +23,7 @@
 /********************************************************************************
  * Includes
  *******************************************************************************/
-#include "SPWM.h"
+#include "spwm.h"
 /********************************************************************************
  * Defines
  *******************************************************************************/
@@ -52,12 +52,12 @@
  * Code
  *******************************************************************************/
 /**
- * @brief Adjust the duty cycles for Sinusoidal PWM
+ * @brief Get duty cycles of each leg using sinousidal PWM
  * @param theta Current angle of Phase A in radians
  * @param modulationIndex Modulation index for the PWM
- * @param *duties Resultant SPWM duty cycles.
+ * @param *duties Pointer to the array where duty cycles need to be updated.
  */
-void GenerateSPWM(float theta, float modulationIndex, float* duties)
+void ComputeDuty_SPWM(float theta, float modulationIndex, float* duties)
 {
 	// get the equivalent duty cycle
 	float resThetas[3] = { theta , theta + (TWO_PI/3), theta - (TWO_PI/3)};

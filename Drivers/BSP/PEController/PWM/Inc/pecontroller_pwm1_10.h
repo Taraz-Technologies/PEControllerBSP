@@ -1,10 +1,10 @@
 /**
  ********************************************************************************
- * @file 		PWM1_10_Drivers.h
+ * @file 		pecontroller_pwm_1_10.h
  * @author 		Waqas Ehsan Butt
- * @date 		Nov 24, 2021
+ * @date 		November 24, 2021
  *
- * @brief
+ * @brief	Controls the PWM 1-10
  ********************************************************************************
  * @attention
  *
@@ -18,13 +18,13 @@
  *
  ********************************************************************************
  */
-#ifndef PWM1_10_DRIVERS_H_
-#define PWM1_10_DRIVERS_H_
+#ifndef PECONTROLLER_PWM1_10_H
+#define PECONTROLLER_PWM1_10_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-/** @addtogroup PEController_Framework_Drivers
+/** @addtogroup BSP
  * @{
  */
 
@@ -57,22 +57,49 @@ extern "C" {
 /********************************************************************************
  * Defines
  *******************************************************************************/
+/** @defgroup PWM1_10_Exported_Macros Macros
+  * @{
+  */
 
+/**
+ * @}
+ */
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
+/** @defgroup PWM1_10_Exported_Typedefs Type Definitions
+  * @{
+  */
 
+/**
+ * @}
+ */
 /********************************************************************************
  * Structures
  *******************************************************************************/
+/** @defgroup PWM1_10_Exported_Structures Structures
+  * @{
+  */
 
+/**
+ * @}
+ */
 /********************************************************************************
  * Exported Variables
  *******************************************************************************/
+/** @defgroup PWM1_10_Exported_Variables Variables
+  * @{
+  */
 
+/**
+ * @}
+ */
 /********************************************************************************
  * Global Function Prototypes
  *******************************************************************************/
+/** @defgroup PWM1_10_Exported_Functions Functions
+  * @{
+  */
 /**
  * @brief Configures consecutive inverted pairs for PWM
  * @param pwmNo Channel no of the first PWM Channel in the pair (Valid Values 1,3,5,7,9)
@@ -117,6 +144,10 @@ extern void BSP_PWM1_10_UpdateChannelDuty(uint32_t pwmNo, float duty, pwm_config
  * Code
  *******************************************************************************/
 
+
+/**
+ * @}
+ */
 #ifdef __cplusplus
 }
 #endif

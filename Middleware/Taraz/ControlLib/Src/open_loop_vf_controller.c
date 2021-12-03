@@ -76,7 +76,7 @@ void OpenLoopVfControl_GetDuties(openloopvf_config_t* config, float* duties)
 		config->wt -= TWO_PI;
 
 	// generate SPWM according to the theta and modulation index
-	GenerateSPWM(config->wt, config->modulationIndex, duties);
+	ComputeDuty_SPWM(config->wt, config->modulationIndex, duties);
 }
 
 

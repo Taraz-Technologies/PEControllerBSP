@@ -26,8 +26,17 @@
 extern "C" {
 #endif
 
+/** @addtogroup Control_Library
+ * @{
+ */
+
 /** @defgroup DSP_Library DSP Library
  * @brief This module contains the functionality and definitions for Digital Signal Processing Library
+ * @details The following digital signal processing units are currently available in this library
+ * 	-# <b>Moving Average Filter:</b> @ref mov_avg_t defines the filter unit. Use @ref MovingAverage_Compute()
+ * 									to compute the moving average and @ref MovingAverage_Reset() to reset the filter
+ * 	-# <b>PI Compensator:</b> @ref pi_compensator_t defines the compensator unit. Use @ref PI_Compensate()
+ * 									to compute the value for the compensation
  * @{
  */
 /********************************************************************************
@@ -37,6 +46,9 @@ extern "C" {
 /********************************************************************************
  * Defines
  *******************************************************************************/
+/** @defgroup DSPLib_Exported_Macros Macros
+  * @{
+  */
 #if MONITOR
 /**
  * @brief Set to 1 to enable monitoring of PI compensator in debug window
@@ -50,16 +62,32 @@ extern "C" {
  * if has_lmt is true, otherwise the result will not be limited
  */
 #define PI_COMPENSATOR_LIMIT_CAPABLE		(1)
+/**
+ * @}
+ */
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
+/** @defgroup DSPLib_Exported_Typedef Type definitions
+  * @{
+  */
+
+/**
+ * @}
+ */
+/********************************************************************************
+ * Structures
+ *******************************************************************************/
+/** @defgroup DSPLib_Exported_Structures Structures
+  * @{
+  */
 /**
  * @brief Defines the parameters used by a moving average filter
  */
 typedef struct
 {
 	float avg;		/**< @brief Mean observed in samples */
-	bool stable;	/**< @brief If the average is not for full count this will be false */
+	bool stable;	/**< @brief If data is complete for moving average computation this value will be <c>true</c> else <c>false</c> */
 	float* dataPtr;	/**< @brief Pointer to the data array */
 	int count;		/**< @brief No of samples per computation */
 	int index;		/**< @brief Initialize to zero. Used internally for detecting current data position */
@@ -83,17 +111,25 @@ typedef struct
 	float result;		/**< @brief Variable for monitoring the instantaneous result while debugging */
 #endif
 } pi_compensator_t;
-/********************************************************************************
- * Structures
- *******************************************************************************/
-
+/**
+ * @}
+ */
 /********************************************************************************
  * Exported Variables
  *******************************************************************************/
+/** @addtogroup DSPLib_Exported_Variables Variables
+  * @{
+  */
 
+/**
+ * @}
+ */
 /********************************************************************************
  * Global Function Prototypes
  *******************************************************************************/
+/** @addtogroup DSPLib_Exported_Functions Functions
+  * @{
+  */
 /**
  * @brief Computes the moving average
  * @param *filt Pointer to the filter
@@ -113,14 +149,21 @@ extern void MovingAverage_Reset(mov_avg_t* filt);
  * @return float Result of the PI compensation of current cycle
  */
 extern float PI_Compensate(pi_compensator_t* pi, float err);
+
 /********************************************************************************
  * Code
  *******************************************************************************/
 
-
+/**
+ * @}
+ */
 #ifdef __cplusplus
 }
 #endif
+
+/**
+ * @}
+ */
 
 /**
  * @}

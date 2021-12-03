@@ -1,10 +1,10 @@
 /**
  ********************************************************************************
- * @file 		DigitalPins.h
+ * @file 		pecontroller_digital_pins.h
  * @author 		Waqas Ehsan Butt
- * @date 		July 10, 2021
+ * @date 		November 25, 2021
  *
- * @brief	This file contains the basic definitions for the digital pins
+ * @brief	Controls the digital pins of the PEController
  ********************************************************************************
  * @attention
  *
@@ -18,13 +18,13 @@
  *
  ********************************************************************************
  */
-#ifndef DIGITAL_PINS_H
-#define DIGITAL_PINS_H
+#ifndef PECONTROLLER_DIGITAL_PINS_H
+#define PECONTROLLER_DIGITAL_PINS_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-/** @addtogroup PEController_Framework_Drivers
+/** @addtogroup BSP
  * @{
  */
 
@@ -46,10 +46,19 @@ extern "C" {
 /*******************************************************************************
  * Defines
  ******************************************************************************/
+/** @defgroup DPINS_Exported_Macros Macros
+  * @{
+  */
 
+/**
+ * @}
+ */
 /*******************************************************************************
  * Typedefs
  ******************************************************************************/
+/** @defgroup DPINS_Exported_Typedefs Type Definitions
+  * @{
+  */
 /**
  * @brief PWM pin functionality definitions
  */
@@ -58,9 +67,15 @@ typedef enum
 	PWM_FNC_PWM,/**< Select PWM functionality */
 	PWM_FNC_IO  /**< Select IO functionality */
 } pwm_fnc_t;
+/**
+ * @}
+ */
 /*******************************************************************************
  * Structures
  ******************************************************************************/
+/** @defgroup DPINS_Exported_Structures Structures
+  * @{
+  */
 /**
  * @brief Defines the basic structure for a digital pin
  */
@@ -69,13 +84,25 @@ typedef struct
 	GPIO_TypeDef* GPIO;		/**< @brief Pointer to GPIO associated with the pin */
 	uint16_t pinMask;		/**< @brief Pin mask to be used for configuration of the pin */
 } digital_pin_t;
+/**
+ * @}
+ */
 /*******************************************************************************
  * Exported Variables
  ******************************************************************************/
+/** @defgroup DPINS_Exported_Variables Variables
+  * @{
+  */
 
+/**
+ * @}
+ */
 /*******************************************************************************
  * Global Function Prototypes
  ******************************************************************************/
+/** @defgroup DPINS_Exported_Functions Functions
+  * @{
+  */
 /**
  * @brief Initializes the digital pins
  */
@@ -85,6 +112,10 @@ extern void BSP_DigitalPins_Init(void);
  ******************************************************************************/
 
 
+
+/**
+ * @}
+ */
 #ifdef __cplusplus
 }
 #endif

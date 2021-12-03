@@ -1,10 +1,10 @@
 /**
  ********************************************************************************
- * @file 		DioPort.h
+ * @file 		pecontroller_digital_inout.h
  * @author 		Waqas Ehsan Butt
- * @date 		Sept 25, 2021
+ * @date 		September 25, 2021
  *
- * @brief	This file contains the basic definitions for the digital input/ouput pins
+ * @brief	Controls the digital input / output port of the PEController
  ********************************************************************************
  * @attention
  *
@@ -18,13 +18,13 @@
  *
  ********************************************************************************
  */
-#ifndef DIO_PORT_H
-#define DIO_PORT_H
+#ifndef PECONTROLLER_DIGITAL_INOUT_H
+#define PECONTROLLER_DIGITAL_INOUT_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-/** @addtogroup PEController_Framework_Drivers
+/** @addtogroup BSP
  * @{
  */
 
@@ -34,13 +34,16 @@ extern "C" {
 
 /** @addtogroup DioPorts Digital Input Output Port
  * @brief This module contains the functionality and definitions for the digital input/output pins
- * @details List of functions
- * 	-# <b>@ref BSP_Dio_SetAsIOPin()</b> Set the Dio pin as GPIO
- * 	-# <b>@ref BSP_Dio_SetPinAlternateFunction()</b> Selects the Alternate Output Functionality. To configure as IO use Dio_SetAsIOPin(pinNo, state)
- * 	-# <b>@ref BSP_Dio_SetAsInputPort()</b> Set the IO Port as Input. Pin 9 is always output
- * 	-# <b>@ref BSP_Dio_SetAsOutputPort()</b> Set the IO Port as Output. Pin 9 is always output
- * 	-# <b>@ref BSP_Dio_SetPortValue()</b> Set the value of output port
- * 	-# <b>@ref BSP_Dio_GetPortValue()</b> Gets the value of the input port
+ * @details This port can either be input only or output only at a given time.
+ * The port direction can be changed by the functions @ref BSP_Dio_SetAsInputPort() and @ref BSP_Dio_SetAsOutputPort().<br>
+ * List of functions
+ * 	-# <b>@ref BSP_Dio_SetAsIOPin() :</b> Set the Dio pin as GPIO
+ * 	-# <b>@ref BSP_Dio_SetPinAlternateFunction() :</b> Selects the Alternate Output Functionality.
+ * 													To configure as IO use @ref BSP_Dio_SetAsIOPin()
+ * 	-# <b>@ref BSP_Dio_SetAsInputPort() :</b> Set the IO Port as Input. Pin 9 is always output
+ * 	-# <b>@ref BSP_Dio_SetAsOutputPort() :</b> Set the IO Port as Output. Pin 9 is always output
+ * 	-# <b>@ref BSP_Dio_SetPortValue() :</b> Set the value of output port
+ * 	-# <b>@ref BSP_Dio_GetPortValue() :</b> Gets the value of the input port
  * @{
  */
 /*******************************************************************************
@@ -50,10 +53,19 @@ extern "C" {
 /*******************************************************************************
  * Defines
  ******************************************************************************/
+/** @defgroup DIO_Exported_Macros Macros
+  * @{
+  */
 
+/**
+ * @}
+ */
 /*******************************************************************************
  * Typedefs
  ******************************************************************************/
+/** @defgroup DIO_Exported_Typedefs Type Definitions
+  * @{
+  */
 /**
  * @brief Digital IO state definitions
  */
@@ -62,17 +74,35 @@ typedef enum
 	DIO_IN, /**< Define as input pin */
 	DIO_OUT,/**< Define as output pin */
 } dio_state_t;
+/**
+ * @}
+ */
 /*******************************************************************************
  * Structures
  ******************************************************************************/
+/** @defgroup DIO_Exported_Structures Structures
+  * @{
+  */
 
+/**
+ * @}
+ */
  /*******************************************************************************
  * Exported Variables
  ******************************************************************************/
+/** @defgroup DIO_Exported_Variables Variables
+  * @{
+  */
 
+/**
+ * @}
+ */
 /*******************************************************************************
  * Global Function Prototypes
  ******************************************************************************/
+/** @defgroup DIO_Exported_Functions Functions
+  * @{
+  */
 /**
  * @brief Set the Dio pin as GPIO
  * @param pinNo Dio Pin No ( Range 1 - 8)
@@ -106,6 +136,9 @@ extern void BSP_Dio_SetPortValue(uint32_t val);
  * @returns val- value on the port
  */
 extern uint32_t BSP_Dio_GetPortValue(void);
+/**
+ * @}
+ */
 /*******************************************************************************
  * Code
  ******************************************************************************/

@@ -1,10 +1,10 @@
 /**
  ********************************************************************************
- * @file 		DoutPort.h
+ * @file 		pecontroller_digital_out.h
  * @author 		Waqas Ehsan Butt
- * @date 		Sept 25, 2021
+ * @date 		September 25, 2021
  *
- * @brief	This file contains the basic definitions for the digital ouput pins
+ * @brief	Controls the digital output port of the PEController
  ********************************************************************************
  * @attention
  *
@@ -18,13 +18,13 @@
  *
  ********************************************************************************
  */
-#ifndef DOUT_PORT_H
-#define DOUT_PORT_H
+#ifndef PECONTROLLER_DIGITAL_OUT_H
+#define PECONTROLLER_DIGITAL_OUT_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-/** @addtogroup PEController_Framework_Drivers
+/** @addtogroup BSP
  * @{
  */
 
@@ -35,12 +35,13 @@ extern "C" {
 /** @addtogroup DoutPorts Digital Output Port
  * @brief This module contains the functionality and definitions for the digital output pins
  * @details List of functions
- * 	-# <b>@ref BSP_Dout_SetAsIOPin()</b> Set the Dout pin as GPIO
- * 	-# <b>@ref BSP_Dout_SetAsPWMPin()</b> Set the Dout pin as PWM
- * 	-# <b>@ref BSP_Dout_SetPinAlternateFunction()</b> Selects the Alternate Output Functionality. To configure as IO use Dout_SetAsIOPin(pinNo)
- * 	-# <b>@ref BSP_Dout_SetPortAsGPIO()</b> Set the whole port as GPIO
- * 	-# <b>@ref BSP_Dout_SetPortValue()</b> Set the value of output port
- * 	-# <b>@ref BSP_Dout_TogglePin()</b> Toggles the selected pin
+ * 	-# <b>@ref BSP_Dout_SetAsIOPin() :</b> Set the Dout pin as GPIO
+ * 	-# <b>@ref BSP_Dout_SetAsPWMPin() :</b> Set the Dout pin as PWM
+ * 	-# <b>@ref BSP_Dout_SetPinAlternateFunction()</b> Selects the Alternate Output Functionality.
+ * 												To configure as IO use @ref BSP_Dout_SetAsIOPin()
+ * 	-# <b>@ref BSP_Dout_SetPortAsGPIO() :</b> Set the whole port as GPIO
+ * 	-# <b>@ref BSP_Dout_SetPortValue() :</b> Set the value of output port
+ * 	-# <b>@ref BSP_Dout_TogglePin() :</b> Toggles the selected pin
  * @{
  */
 /*******************************************************************************
@@ -50,22 +51,49 @@ extern "C" {
 /*******************************************************************************
  * Defines
  ******************************************************************************/
+/** @defgroup DOUT_Exported_Macros Macros
+  * @{
+  */
 
+/**
+ * @}
+ */
 /*******************************************************************************
  * Typedefs
  ******************************************************************************/
+/** @defgroup DOUT_Exported_Typedefs Type Definitions
+  * @{
+  */
 
+/**
+ * @}
+ */
 /*******************************************************************************
  * Structures
  ******************************************************************************/
+/** @defgroup DOUT_Exported_Structures Structures
+  * @{
+  */
 
+/**
+ * @}
+ */
 /*******************************************************************************
  * Exported Variables
  ******************************************************************************/
+/** @defgroup DOUT_Exported_Variables Variables
+  * @{
+  */
 
+/**
+ * @}
+ */
  /*******************************************************************************
  * Global Function Prototypes
  ******************************************************************************/
+/** @defgroup DOUT_Exported_Functions Functions
+  * @{
+  */
 /**
  * @brief Set the Dout pin as GPIO
  * @param pinNo Dout Pin No ( Range 1 - 16)
@@ -91,7 +119,7 @@ extern const digital_pin_t* BSP_Dout_SetPinAlternateFunction(uint32_t pinNo, uin
  */
 extern void BSP_Dout_SetPortAsGPIO(void);
 /**
- * @brief Set the value of output port, sets all gpio ports at output
+ * @brief Set the value of output port, sets all GPIO ports at output
  * @param val value to be set
  */
 extern void BSP_Dout_SetPortValue(uint32_t val);
@@ -105,6 +133,9 @@ extern void BSP_Dout_TogglePin(int pinNo);
  ******************************************************************************/
 
 
+/**
+ * @}
+ */
 #ifdef __cplusplus
 }
 #endif

@@ -1,11 +1,10 @@
 /**
  ********************************************************************************
- * @file 		PWMDriverBase.h
+ * @file 		pecontroller_pwm_base.h
  * @author 		Waqas Ehsan Butt
- * @date 		Nov 18, 2021
- * @copyright 	Taraz Technologies Pvt. Ltd.
+ * @date 		November 18, 2021
  *
- * @brief   
+ * @brief    Controls the PWM base functionality and definitions
  ********************************************************************************
  * @attention
  *
@@ -13,21 +12,21 @@
  * <h3><center>All rights reserved.</center></h3>
  *
  * <center>This software component is licensed by Taraz Technologies under BSD 3-Clause license,
- * the "License"; You may not use this file except in compliance with the
- * License. You may obtain a copy of the License at:
+ * the "License"; You may not use this file except in compliance with the License. You may obtain
+ * a copy of the License at:
  *                        www.opensource.org/licenses/BSD-3-Clause</center>
  *
- *******************************************************************************
+ ********************************************************************************
  */
 
-#ifndef PWMDRIVERBASE_H_
-#define PWMDRIVERBASE_H_
+#ifndef PECONTROLLER_PWM_BASE_H
+#define PECONTROLLER_PWM_BASE_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/** @addtogroup PEController_Framework_Drivers
+/** @addtogroup BSP
  * @{
  */
 
@@ -43,17 +42,22 @@ extern "C" {
  *******************************************************************************/
 #include "general_header.h"
 #include "pecontroller_digital_pins.h"
-#include <stdbool.h>
-#include <stddef.h>
-#include <stm32h7xx_hal_tim.h>
-#include <sys/_stdint.h>
 /********************************************************************************
  * Defines
  *******************************************************************************/
+/** @defgroup PWM_Exported_Macros Macros
+  * @{
+  */
 #define HRTIM_FREQ					(480)					// --todo-- centralize
+/**
+ * @}
+ */
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
+/** @defgroup PWM_Exported_Typedefs Type Definitions
+  * @{
+  */
 /**
  * @brief PWM alignment definitions
  */
@@ -80,9 +84,15 @@ typedef enum
  * The drivers will call this function whenever the timer for the PWM is reset if enabled in configuration
  */
 typedef void (*PWMResetCallback)(void);
+/**
+ * @}
+ */
 /********************************************************************************
  * Structures
  *******************************************************************************/
+/** @defgroup PWM_Exported_Structures Structures
+  * @{
+  */
 /**
  * @brief Define the practical limit for the duty cycle of specified channels.
  * @note In-case no limit is applied limits are auto-computed and will be in the range 0 to 1
@@ -127,13 +137,12 @@ typedef struct
 										This parameter is used only when the dead time is enabled */
 	pwm_module_config_t* module;	/**< @brief Define the module configuration */
 } pwm_config_t;
-/********************************************************************************
- * Exported Variables
- *******************************************************************************/
-
-/********************************************************************************
- * Global Function Prototypes
- *******************************************************************************/
+/**
+ * @}
+ */
+/** @addtogroup PWM_Exported_Typedefs
+  * @{
+  */
 /**
  * @brief Function prototype for the functions to update the duty cycle of specified PWMs
  * @param pwmNo Channel no of the first PWM in sequence
@@ -141,6 +150,26 @@ typedef struct
  * @param *config Pointer to the PWM configuration
  */
 typedef void (*DutyCycleUpdateFnc)(uint32_t pwmNo, float duty, pwm_config_t *config);
+/**
+ * @}
+ */
+/********************************************************************************
+ * Exported Variables
+ *******************************************************************************/
+/** @defgroup PWM_Exported_Variables Variables
+  * @{
+  */
+
+/**
+ * @}
+ */
+/********************************************************************************
+ * Global Function Prototypes
+ *******************************************************************************/
+/** @defgroup PWM_Exported_Functions Functions
+  * @{
+  */
+
 /********************************************************************************
  * Code
  *******************************************************************************/
@@ -156,6 +185,9 @@ static inline bool IsDeadtimeEnabled(deadtime_t* dt)
 	return dt->on;
 }
 
+/**
+ * @}
+ */
 #ifdef __cplusplus
 }
 #endif
@@ -171,5 +203,6 @@ static inline bool IsDeadtimeEnabled(deadtime_t* dt)
 /**
  * @}
  */
-#endif 
+#endif
 /* EOF */
+

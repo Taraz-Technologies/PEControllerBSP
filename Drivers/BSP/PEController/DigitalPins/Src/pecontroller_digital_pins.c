@@ -1,10 +1,10 @@
 /**
  ********************************************************************************
- * @file    	DigitalPins.c
+ * @file    	pecontroller_digital_pins.c
  * @author 		Waqas Ehsan Butt
- * @date    	Nov 25, 2021
+ * @date    	November 25, 2021
  *
- * @brief   
+ * @brief   Controls the digital pins for the PEController
  ********************************************************************************
  ********************************************************************************
  * @attention

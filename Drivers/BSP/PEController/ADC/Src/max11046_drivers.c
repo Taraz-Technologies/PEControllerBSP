@@ -2,9 +2,9 @@
  ********************************************************************************
  * @file    	max11046_drivers.c
  * @author 		Waqas Ehsan Butt
- * @date    	Nov 30, 2021
+ * @date    	November 30, 2021
  *
- * @brief   
+ * @brief   Controls the max11046 functionality
  ********************************************************************************
  ********************************************************************************
  * @attention
@@ -39,14 +39,22 @@
 /********************************************************************************
  * Static Variables
  *******************************************************************************/
+/** module status
+ */
 static volatile bool moduleActive = false;
+/** Current applied ADC configurations
+ */
 static adc_cont_config_t adcContConfig = { .conversionCycleTimeUs = 40, .callback = NULL };
+/** Current ADC acquisition mode
+ */
 static adc_acq_mode_t acqType = ADC_MODE_CONT;
-adc_measures_t adcVals;
 /********************************************************************************
  * Global Variables
  *******************************************************************************/
 TIM_HandleTypeDef maxTimerHandle;
+/** Contains the latest values of the acquired ADC readings
+ */
+adc_measures_t adcVals;
 /********************************************************************************
  * Function Prototypes
  *******************************************************************************/

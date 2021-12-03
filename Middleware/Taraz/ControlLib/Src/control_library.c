@@ -1,6 +1,6 @@
 /**
  ********************************************************************************
- * @file    	ControlLib.c
+ * @file    	control_library.c
  * @author 		Waqas Ehsan Butt
  * @date    	Nov 25, 2021
  *
@@ -27,9 +27,9 @@
 #include "control_library.h"
 #include "transforms.c"
 #include "dsp_library.c"
-#include "pll.c"
 #include "spwm.c"
 #include "svpwm.c"
+#include "pll.c"
 #include "inverter_3phase.c"
 #include "open_loop_vf_controller.c"
 #include "grid_tie_controller.c"

@@ -1,8 +1,8 @@
 /**
  ********************************************************************************
- * @file 		GeneralHeader.h
+ * @file 		general_header.h
  * @author 		Waqas Ehsan Butt
- * @date 		Nov 10, 2021
+ * @date 		November 10, 2021
  *
  * @brief General header file defining basic items to include in every component file
  ********************************************************************************
@@ -21,14 +21,11 @@
 #ifndef GENERAL_HEADER_H
 #define GENERAL_HEADER_H
 
-/** @defgroup PEController_Framework_Drivers
- * @brief This module defines the framework drivers for PEController
+/** @defgroup BSP
+ * @brief This module defines the Board Support Driver Package for PEController
  * @{
  */
 
-/**
- * @}
- */
 
 /*******************************************************************************
  * Includes
@@ -59,4 +56,8 @@
  ******************************************************************************/
 
 #endif
+
+/**
+ * @}
+ */
 /* EOF */

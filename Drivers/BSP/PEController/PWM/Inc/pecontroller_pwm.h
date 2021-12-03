@@ -1,10 +1,10 @@
 /**
  ********************************************************************************
- * @file 		PWMDriver.h
+ * @file 		pecontroller_pwm.h
  * @author 		Waqas Ehsan Butt
- * @date 		Nov 18, 2021
+ * @date 		November 18, 2021
  *
- * @brief
+ * @brief	Controls the PWM functionality and definitions
  ********************************************************************************
  * @attention
  *
@@ -18,14 +18,15 @@
  *
  ********************************************************************************
  */
-#ifndef PWM_DRIVER_H
-#define PWM_DRIVER_H
+
+#ifndef PECONTROLLER_PWM_H
+#define PECONTROLLER_PWM_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/** @addtogroup PEController_Framework_Drivers
+/** @addtogroup BSP
  * @{
  */
 
@@ -69,14 +70,29 @@ extern "C" {
 /*******************************************************************************
  * Defines
  ******************************************************************************/
+/** @addtogroup PWM_Exported_Macros
+  * @{
+  */
 
+/**
+ * @}
+ */
 /*******************************************************************************
  * Typedefs
  ******************************************************************************/
+/** @addtogroup PWM_Exported_Typedefs
+  * @{
+  */
 
+/**
+ * @}
+ */
 /*******************************************************************************
  * Structures
  ******************************************************************************/
+/** @addtogroup PWM_Exported_Structures
+  * @{
+  */
 /**
  * @brief Defines the parameters for an independent (individual/Pair) PWM
  */
@@ -87,13 +103,25 @@ typedef struct
 	DutyCycleUpdateFnc dutyUpdateFnc;		/**< @brief Function to be used for updating the duty cycle */
 	pwm_config_t pwmConfig;					/**< @brief The PWM configurations */
 } independent_pwm_config_t;
+/**
+ * @}
+ */
 /*******************************************************************************
  * Exported Variables
  ******************************************************************************/
+/** @addtogroup PWM_Exported_Variables
+  * @{
+  */
 
+/**
+ * @}
+ */
 /*******************************************************************************
  * Global Function Prototypes
  ******************************************************************************/
+/** @addtogroup PWM_Exported_Functions
+  * @{
+  */
 
 /*******************************************************************************
  * Code
@@ -167,6 +195,9 @@ static void BSP_PWM_UpdateChannelDuty(uint32_t pwmNo, float duty, pwm_config_t* 
 
 #endif
 
+/**
+ * @}
+ */
 #ifdef __cplusplus
 }
 #endif

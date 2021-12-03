@@ -36,7 +36,7 @@ extern "C" {
  *******************************************************************************/
 #define LCD_AFY800480A0 	(0)
 #define LCD_AFY800480B0		(1)
-#define DISPLAY				(LCD_AFY800480A0)
+#define DISPLAY				(LCD_AFY800480B0)
 
 #define PELAB_3PH			(0)
 #define PELAB_6PH			(1)

@@ -1,10 +1,10 @@
 /**
  ********************************************************************************
- * @file 		PWM11_16_Drivers.h
+ * @file 		pecontroller_pwm11_16.h
  * @author 		Waqas Ehsan Butt
  * @date 		Nov 18, 2021
  *
- * @brief
+ * @brief	Controls the PWM 11-16
  ********************************************************************************
  * @attention
  *
@@ -18,13 +18,13 @@
  *
  ********************************************************************************
  */
-#ifndef PWM11_16_DRIVERS_H_
-#define PWM11_16_DRIVERS_H_
+#ifndef PECONTROLLER_PWM11_16_H
+#define PECONTROLLER_PWM11_16_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-/** @addtogroup PEController_Framework_Drivers
+/** @addtogroup BSP
  * @{
  */
 
@@ -58,24 +58,51 @@ extern "C" {
 /********************************************************************************
  * Defines
  *******************************************************************************/
+/** @defgroup PWM11_16_Exported_Macros Macros
+  * @{
+  */
 
+/**
+ * @}
+ */
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
+/** @defgroup PWM11_16_Exported_Typedefs Type Definitions
+  * @{
+  */
 
+/**
+ * @}
+ */
 /********************************************************************************
  * Structures
  *******************************************************************************/
+/** @defgroup PWM11_16_Exported_Structures Structures
+  * @{
+  */
 
+/**
+ * @}
+ */
 /********************************************************************************
  * Exported Variables
  *******************************************************************************/
-/** Exports the timer 1 handle for external use
+/** @defgroup PWM11_16_Exported_Variables Variables
+  * @{
+  */
+/** Timer 1 handle
  */
 extern TIM_HandleTypeDef htim1;
+/**
+ * @}
+ */
 /********************************************************************************
  * Global Function Prototypes
  *******************************************************************************/
+/** @defgroup PWM11_16_Exported_Functions Functions
+  * @{
+  */
 /**
  * @brief Configures consecutive inverted pairs for PWM
  * @param pwmNo Channel no of the first PWM Channel in the pair (Valid Values 11,13,15)
@@ -122,6 +149,10 @@ extern void BSP_PWM11_16_UpdateChannelDuty(uint32_t pwmNo, float duty, pwm_confi
  *******************************************************************************/
 
 
+
+/**
+ * @}
+ */
 #ifdef __cplusplus
 }
 #endif

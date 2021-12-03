@@ -20,7 +20,7 @@
 #define OPEN_LOOP_VF_CONTROL			(1)
 #define GRID_TIE_CONTROL				(2)
 
-#define CONTROL_TYPE					(GRID_TIE_CONTROL)
+#define CONTROL_TYPE					(OPEN_LOOP_VF_CONTROL)
 
 #define PWM_PERIOD_Us					(40)
 #define PWM_PERIOD_s					(PWM_PERIOD_Us/1000000.f)
@@ -70,6 +70,24 @@ static inverter3Ph_config_t inverterConfig =
 				.module = &inverterPWMModuleConfig,
 		},
 };
+#if CONTROL_TYPE == OPEN_LOOP_VF_CONTROL
+static inverter3Ph_config_t inverterConfig2 =
+{
+		.s1PinNos = {7, 9, 11},
+		.dsblPinNo = 0,
+		.dsblPinCount = 0,
+		.legType = LEG_DEFAULT,
+		.pwmConfig = {
+				.lim = {
+						.min = 0,
+						.max = 1,
+						.minMaxDutyCycleBalancing = true
+				},
+				.dutyMode = OUTPUT_DUTY_AT_PWMH,
+				.module = &inverterPWMModuleConfig,
+		},
+};
+#endif
 static pwm_module_config_t boostPWMConfig = {
 		.interruptEnabled = false,
 		.alignment = EDGE_ALIGNED,
@@ -92,7 +110,7 @@ static volatile bool recompute = false;
 extern HRTIM_HandleTypeDef hhrtim;
 #if CONTROL_TYPE == OPEN_LOOP_VF_CONTROL
 static openloopvf_config_t vfConfig = {
-		.pwmFreq = 25000, .acceleration = 1.00001f, .nominalFreq = 50, .nominalModulationIndex = 0.7f, .freq = 1.0f, .theta = 0, .reqFreq = 25,
+		.pwmFreq = 25000, .acceleration = 1.00001f, .nominalFreq = 50, .nominalModulationIndex = 0.7f, .freq = 1.0f, .wt = 0, .reqFreq = 25,
 };
 #elif CONTROL_TYPE == GRID_TIE_CONTROL
 /**
@@ -116,12 +134,15 @@ void MainControl_Init(void)
 
 	// Initialize the inverter
 	Inverter3Ph_Init(&inverterConfig);
-
+#if CONTROL_TYPE == OPEN_LOOP_VF_CONTROL
+	inverterPWMModuleConfig.interruptEnabled = false;
+	Inverter3Ph_Init(&inverterConfig2);
+#else
 	boostConfig.dutyUpdateFnc = BSP_PWM_ConfigChannel(boostConfig.pinNo, &boostConfig.pwmConfig);
 	boostConfig.dutyUpdateFnc(boostConfig.pinNo, 0.f, &boostConfig.pwmConfig);
 	BSP_Dout_SetAsIOPin(7, GPIO_PIN_RESET);
 	BSP_Dout_SetAsPWMPin(boostConfig.pinNo);
-
+#endif
 	BSP_Dout_SetAsIOPin(15, GPIO_PIN_RESET);
 	BSP_Dout_SetAsIOPin(16, GPIO_PIN_RESET);
 }
@@ -176,8 +197,8 @@ void MainControl_Loop(void)
 
 #if CONTROL_TYPE == OPEN_LOOP_VF_CONTROL
 		OpenLoopVfControl_GetDuties(&vfConfig, duties);
-		Inverter3Ph_UpdateDuty(inverterConfig1, duties);
-		Inverter3Ph_UpdateDuty(inverterConfig2, duties);
+		Inverter3Ph_UpdateDuty(&inverterConfig, duties);
+		Inverter3Ph_UpdateDuty(&inverterConfig2, duties);
 #elif CONTROL_TYPE == GRID_TIE_CONTROL
 		/* compensator */
 		static bool vdcCorrect = false;

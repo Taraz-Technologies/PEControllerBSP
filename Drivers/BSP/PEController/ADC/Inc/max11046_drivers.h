@@ -2,9 +2,9 @@
  ********************************************************************************
  * @file 		max11046_drivers.h
  * @author 		Waqas Ehsan Butt
- * @date 		Nov 30, 2021
+ * @date 		November 30, 2021
  *
- * @brief    
+ * @brief    Controls the max11046 functionality
  ********************************************************************************
  * @attention
  *
@@ -26,6 +26,23 @@
 extern "C" {
 #endif
 
+/** @addtogroup BSP
+ * @{
+ */
+
+/** @addtogroup ADC
+ * @{
+ */
+
+/** @defgroup MAX11046 Max11046
+ * @brief This module contains the base functionality and definitions for MAX11046 ADC
+ * @details List of functions
+ * 	-# <b>@ref BSP_MAX11046_Init() :</b> Initializes the MAX11046 drivers
+ * 	-# <b>@ref BSP_MAX11046_DeInit() :</b> De-initialize the MAX11046 drivers
+ * 	-# <b>@ref BSP_MAX11046_Run() :</b> Performs the conversion
+ * 	-# <b>@ref BSP_MAX11046_Stop() :</b> Stops the ADC data collection module, only effective for ADC_MODE_CONT
+ * @{
+ */
 /********************************************************************************
  * Includes
  *******************************************************************************/
@@ -34,10 +51,19 @@ extern "C" {
 /********************************************************************************
  * Defines
  *******************************************************************************/
+/** @defgroup MAX11046_Exported_Macros Macros
+  * @{
+  */
 
+/**
+ * @}
+ */
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
+/** @defgroup MAX11046_Exported_Typedefs Type Definitions
+  * @{
+  */
 /**
  * @brief ADC acquisition mode definitions
  */
@@ -51,9 +77,15 @@ typedef enum _adc_acq_mode_
  * @param *result Pointer to the most recent ADC results
  */
 typedef void (*adcMeauresDataCallback)(adc_measures_t* result);
+/**
+ * @}
+ */
 /********************************************************************************
  * Structures
  *******************************************************************************/
+/** @defgroup MAX11046_Exported_Structures Structures
+  * @{
+  */
 /**
  * @brief Defines the parameters for continuous conversions
  */
@@ -62,13 +94,27 @@ typedef struct
 	int conversionCycleTimeUs;			/**< @brief Period In micro-seconds */
 	adcMeauresDataCallback callback;	/**< @brief Callback function called when results are ready */
 } adc_cont_config_t;
+/**
+ * @}
+ */
 /********************************************************************************
  * Exported Variables
  *******************************************************************************/
-
+/** @defgroup MAX11046_Exported_Variables Variables
+  * @{
+  */
+/** Contains the latest values of the acquired ADC readings
+ */
+extern adc_measures_t adcVals;
+/**
+ * @}
+ */
 /********************************************************************************
  * Global Function Prototypes
  *******************************************************************************/
+/** @defgroup MAX11046_Exported_Functions Functions
+  * @{
+  */
 /**
  * @brief Initializes the MAX11046 drivers
  * @param type- ADC_MODE_SINGLE or ADC_MODE_CONT for single or continuous conversions respectively
@@ -96,9 +142,20 @@ extern void BSP_MAX11046_DeInit(void);
  *******************************************************************************/
 
 
+/**
+ * @}
+ */
 #ifdef __cplusplus
 }
 #endif
-
+/**
+ * @}
+ */
+/**
+ * @}
+ */
+/**
+ * @}
+ */
 #endif 
 /* EOF */

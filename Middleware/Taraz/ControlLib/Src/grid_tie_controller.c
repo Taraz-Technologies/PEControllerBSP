@@ -88,7 +88,6 @@ void GridTieControl_GetDuties(grid_tie_t* gridTie, float* duties)
 		iCoor->dq0.d *= (2.f/(gridTie->vdc));
 		iCoor->dq0.q *= (2.f/(gridTie->vdc));
 		Transform_abc_dq0(&abc, &iCoor->dq0, &iCoor->trigno, SRC_DQ0, PARK_SINE);
-
 		// get duty cycles based on ABC coordinates
 /*
 		duties[0] = (abc.a / gridTie->vdc) + .5f;

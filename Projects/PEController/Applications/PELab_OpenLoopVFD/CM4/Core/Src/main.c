@@ -25,6 +25,7 @@
 #include "max11046_drivers.h"
 #include "shared_memory.h"
 #include "pecontroller_display.h"
+#include "logo_display.h"
 #include <string.h>
 /* USER CODE END Includes */
 
@@ -121,6 +122,7 @@ int main(void)
   MX_I2C2_Init();
   /* USER CODE BEGIN 2 */
   BSP_Display_Init();
+  DisplayDefaultImage();
   HAL_TIM_PWM_Start(&htim17,TIM_CHANNEL_1);			// LCD PWM channel
   adc_cont_config_t adcConfig = {
 		  .callback = DataProcessingCallback,

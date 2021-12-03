@@ -30,7 +30,7 @@ extern "C" {
  * @{
  */
 
-/** @defgroup Transformation Coordinate Transformations
+/** @defgroup Transforms Transforms
  * @brief This module contains the functionality and definitions for different transformations
  * @details Following is the list of available transformations
  * 	-# <b>Clarke Transformation:</b> @ref Transform_abc_alBe0() with source = @ref SRC_ABC
@@ -51,6 +51,9 @@ extern "C" {
 /********************************************************************************
  * Defines
  *******************************************************************************/
+/** @defgroup Transforms_Exported_Macros Macros
+  * @{
+  */
 /**
  * @brief Value of sin of 120 degrees
  */
@@ -66,9 +69,15 @@ extern "C" {
  * This setting will slow down the conversions considerably
  */
 #define USE_PRECOMPUTED_TRIG		(1)
+/**
+ * @}
+ */
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
+/** @defgroup Transforms_Exported_Typedefs Type Definitions
+  * @{
+  */
 /** @brief Transformation source definitions */
 typedef enum
 {
@@ -88,17 +97,35 @@ typedef enum
 	PARK_SINE,  	/**< Rotating frame aligned 90 degrees behind A axis.
 		 	 	 	 	 This type of Park transformation is also known as the cosine-based Park transformation. */
 } park_transform_type_t;
+/**
+ * @}
+ */
 /********************************************************************************
  * Structures
  *******************************************************************************/
+/** @defgroup Transforms_Exported_Structures Structures
+  * @{
+  */
 
+/**
+ * @}
+ */
 /********************************************************************************
  * Exported Variables
  *******************************************************************************/
+/** @defgroup Transforms_Exported_Variables Variables
+  * @{
+  */
 
+/**
+ * @}
+ */
 /********************************************************************************
  * Global Function Prototypes
  *******************************************************************************/
+/** @defgroup Transforms_Exported_Functions Functions
+  * @{
+  */
 /**
  * @brief Performs the Clarke and inverse Clarke transformations
  * @param *abc Pointer to the abc coordinates structure
@@ -165,6 +192,7 @@ extern void Transform_wt_sincos(LIB_3COOR_TRIGNO_t *trigno);
  * @return float transformed value of theta
  */
 extern float Transform_Theta_0to2pi(float theta);
+
 /********************************************************************************
  * Code
  *******************************************************************************/
@@ -179,7 +207,9 @@ static inline float ShiftTheta_0to2pi(float theta, float shift)
 	theta += shift;
 	return Transform_Theta_0to2pi(theta);
 }
-
+/**
+ * @}
+ */
 #ifdef __cplusplus
 }
 #endif

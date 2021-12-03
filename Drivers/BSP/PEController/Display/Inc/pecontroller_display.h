@@ -1,10 +1,10 @@
 /**
  ********************************************************************************
- * @file 		DisplayDriver.h
+ * @file 		pecontroller_display.h
  * @author 		Waqas Ehsan Butt
- * @date 		Nov 26, 2021
+ * @date 		November 26, 2021
  *
- * @brief    
+ * @brief    Header file for the PEController display module
  ********************************************************************************
  * @attention
  *
@@ -19,8 +19,8 @@
  ********************************************************************************
  */
 
-#ifndef DISPLAYDRIVER_H_
-#define DISPLAYDRIVER_H_
+#ifndef PEONTROLLER_DISPLAY_H
+#define PEONTROLLER_DISPLAY_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -30,15 +30,17 @@ extern "C" {
  * @{
  */
 
-/** @addtogroup Components
+/** @defgroup Display Display
+ * @brief This module defines the display
  * @{
  */
 
-/** @defgroup DisplayDriver Display
- * @brief This module contains the base functionality and definitions for Display
+/** @defgroup DisplayDriver Driver
+ * @brief This is the base module for the display driver
  * @details List of functions
  * 	-# <b>@ref BSP_Display_Init()</b> Initializes the display module
  * 	-# <b>@ref BSP_Display_DeInit()</b> De-initializes the display module
+ * 	-# <b>@ref BSP_Display_ShowLayer()</b> Shows the configured layer on the LCD
  * @{
  */
 /********************************************************************************
@@ -48,22 +50,49 @@ extern "C" {
 /********************************************************************************
  * Defines
  *******************************************************************************/
+/** @defgroup PEDISPLAY_Exported_Macros Macros
+  * @{
+  */
 
+/**
+ * @}
+ */
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
+/** @defgroup PEDISPLAY_Exported_Typedefs Type Definitions
+  * @{
+  */
 
+/**
+ * @}
+ */
 /********************************************************************************
  * Structures
  *******************************************************************************/
+/** @defgroup PEDISPLAY_Exported_Structures Structures
+  * @{
+  */
 
+/**
+ * @}
+ */
 /********************************************************************************
  * Exported Variables
  *******************************************************************************/
+/** @defgroup PEDISPLAY_Exported_Variables Variables
+  * @{
+  */
 
+/**
+ * @}
+ */
 /********************************************************************************
  * Global Function Prototypes
  *******************************************************************************/
+/** @defgroup PEDISPLAY_Exported_Functions Functions
+  * @{
+  */
 /**
  * @brief Initializes the display module
  */
@@ -72,14 +101,32 @@ extern void BSP_Display_Init(void);
  * @brief De-initializes the display module
  */
 extern void BSP_Display_DeInit(void);
+/**
+ * @brief Shows the configured layer on the LCD
+ * @param *pLayerCfg Layer configuration to be applied to the LTDC module
+ */
+extern void BSP_Display_ShowLayer(LTDC_LayerCfgTypeDef* pLayerCfg);
 /********************************************************************************
  * Code
  *******************************************************************************/
 
 
+
+/**
+ * @}
+ */
 #ifdef __cplusplus
 }
 #endif
 
+/**
+ * @}
+ */
+/**
+ * @}
+ */
+/**
+ * @}
+ */
 #endif 
 /* EOF */

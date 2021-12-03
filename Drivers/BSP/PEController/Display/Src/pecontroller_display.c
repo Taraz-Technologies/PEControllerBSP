@@ -1,44 +1,61 @@
-/*!
-@file LCDDisplay.c
-@brief
-@details
-
-@author Waqas Ehsan Butt
-@copyright Taraz Technologies Pvt. Ltd.
+/**
+ ********************************************************************************
+ * @file    	pecontroller_display.c
+ * @author 		Waqas Ehsan Butt
+ * @date    	December 3, 2021
+ *
+ * @brief
+ ********************************************************************************
+ * @attention
+ *
+ * <h2><center>&copy; Copyright (c) 2021 Taraz Technologies Pvt. Ltd.</center></h2>
+ * <h3><center>All rights reserved.</center></h3>
+ *
+ * <center>This software component is licensed by Taraz Technologies under BSD 3-Clause license,
+ * the "License"; You may not use this file except in compliance with the License. You may obtain
+ * a copy of the License at:
+ *                        www.opensource.org/licenses/BSD-3-Clause</center>
+ *
+ ********************************************************************************
  */
-/*******************************************************************************
+
+/********************************************************************************
  * Includes
- ******************************************************************************/
+ *******************************************************************************/
 #include "pecontroller_display.h"
 #include "user_config.h"
 #if DISPLAY == LCD_AFY800480A0 || DISPLAY == LCD_AFY800480B0
 #include "LCD_AFY800480A0_B0.h"
 #endif
-#include "RGB565_480x272.h"
-
-/*******************************************************************************
+/********************************************************************************
  * Defines
- ******************************************************************************/
+ *******************************************************************************/
 
-/*******************************************************************************
- * Enums
- ******************************************************************************/
+/********************************************************************************
+ * Typedefs
+ *******************************************************************************/
 
-/*******************************************************************************
- * Structs
- ******************************************************************************/
+/********************************************************************************
+ * Structures
+ *******************************************************************************/
 
-/*******************************************************************************
- * Prototypes
- ******************************************************************************/
-
-/*******************************************************************************
- * Variables
- ******************************************************************************/
+/********************************************************************************
+ * Static Variables
+ *******************************************************************************/
+/** Handle for the LTDC module
+ */
 static LTDC_HandleTypeDef hltdc;
-/*******************************************************************************
+/********************************************************************************
+ * Global Variables
+ *******************************************************************************/
+
+/********************************************************************************
+ * Function Prototypes
+ *******************************************************************************/
+
+/********************************************************************************
  * Code
- ******************************************************************************/
+ *******************************************************************************/
 /**
  * @brief Configure the clock for LTDC module
  * @retval None
@@ -150,9 +167,18 @@ static void ConfigIO(void)
 	HAL_GPIO_Init(GPIOG, &GPIO_InitStruct);
 }
 
+/**
+ * @brief Shows the configured layer on the LCD
+ * @param *pLayerCfg Layer configuration to be applied to the LTDC module
+ */
+void BSP_Display_ShowLayer(LTDC_LayerCfgTypeDef* pLayerCfg)
+{
+	if (HAL_LTDC_ConfigLayer(&hltdc, pLayerCfg, 0) != HAL_OK)
+		Error_Handler();
+}
+
 void ConfigLTDC(void)
 {
-	LTDC_LayerCfgTypeDef pLayerCfg = {0};
 	hltdc.Instance = LTDC;
 	hltdc.Init.HSPolarity = LTDC_HSPOLARITY_AL;
 	hltdc.Init.VSPolarity = LTDC_VSPOLARITY_AL;
@@ -171,43 +197,6 @@ void ConfigLTDC(void)
 	hltdc.Init.Backcolor.Red = 0;
 	if (HAL_LTDC_Init(&hltdc) != HAL_OK)
 		Error_Handler();
-	/* Layer1 Configuration ------------------------------------------------------*/
-	/* Windowing configuration */
-	/* In this case all the active display area is used to display a picture then :
-	       Horizontal start = horizontal synchronization + Horizontal back porch = 43
-	       Vertical start   = vertical synchronization + vertical back porch     = 12
-	       Horizontal stop = Horizontal start + window width -1 = 43 + 480 -1
-	       Vertical stop   = Vertical start + window height -1  = 12 + 272 -1      */
-	pLayerCfg.WindowX0 = 0;
-	pLayerCfg.WindowX1 = 800;
-	pLayerCfg.WindowY0 = 0;
-	pLayerCfg.WindowY1 = 320;
-
-	/* Pixel Format configuration*/
-	pLayerCfg.PixelFormat = LTDC_PIXEL_FORMAT_RGB888;
-
-	/* Start Address configuration : frame buffer is located at FLASH memory */
-	pLayerCfg.FBStartAdress = (uint32_t)&image_lcd;
-
-	/* Alpha constant (255 == totally opaque) */
-	pLayerCfg.Alpha = 255;
-
-	/* Default Color configuration (configure A,R,G,B component values) : no background color */
-	pLayerCfg.Alpha0 = 255; /* fully transparent */
-	pLayerCfg.Backcolor.Blue = 255;
-	pLayerCfg.Backcolor.Green = 255;
-	pLayerCfg.Backcolor.Red = 255;
-
-	/* Configure blending factors */
-	pLayerCfg.BlendingFactor1 = LTDC_BLENDING_FACTOR1_CA;
-	pLayerCfg.BlendingFactor2 = LTDC_BLENDING_FACTOR2_CA;
-
-	/* Configure the number of lines and number of pixels per line */
-	pLayerCfg.ImageWidth  = 800;
-	pLayerCfg.ImageHeight = 320;
-	if (HAL_LTDC_ConfigLayer(&hltdc, &pLayerCfg, 0) != HAL_OK)
-		Error_Handler();
-	/* USER CODE END LTDC_Init 2 */
 }
 
 /**
@@ -247,3 +236,4 @@ void BSP_Display_DeInit(void)
 
 
 /* EOF */
+

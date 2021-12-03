@@ -32,7 +32,8 @@ extern "C" {
 
 /** @defgroup SVPWM SVPWM
  * @brief This module contains the functionality and definitions for SVPWM generation
- * @details Following is the list of available functions
+ * @details List of functions
+ * 	-# <b>@ref ComputeDuty_SVPWM_FromAlBe0() :</b> Get duty cycles of each leg using space vector PWM from LIB_3COOR_ALBE0_t
  * @{
  */
 /********************************************************************************
@@ -42,23 +43,58 @@ extern "C" {
 /********************************************************************************
  * Defines
  *******************************************************************************/
+/** @defgroup SVPWM_Exported_Macros Macros
+  * @{
+  */
 
+/**
+ * @}
+ */
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
+/** @defgroup SVPWM_Exported_Typedefs Type Definitions
+  * @{
+  */
 
+/**
+ * @}
+ */
 /********************************************************************************
  * Structures
  *******************************************************************************/
+/** @defgroup SVPWM_Exported_Structures Structures
+  * @{
+  */
 
+/**
+ * @}
+ */
 /********************************************************************************
  * Exported Variables
  *******************************************************************************/
+/** @defgroup SVPWM_Exported_Variables Variables
+  * @{
+  */
 
+/**
+ * @}
+ */
 /********************************************************************************
  * Global Function Prototypes
  *******************************************************************************/
-
+/** @defgroup SVPWM_Exported_Functions Functions
+  * @{
+  */
+/**
+ * @brief Get duty cycles of each leg using space vector PWM from LIB_3COOR_ALBE0_t
+ * @param *alBe0 Alpha Beta Coordinates
+ * @param *duties Pointer to the array where duty cycles need to be updated
+ */
+extern void ComputeDuty_SVPWM_FromAlBe0(LIB_3COOR_ALBE0_t *alBe0, float* duties);
+/**
+ * @}
+ */
 /********************************************************************************
  * Code
  *******************************************************************************/
