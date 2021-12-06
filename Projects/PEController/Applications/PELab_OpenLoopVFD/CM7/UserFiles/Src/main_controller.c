@@ -20,12 +20,15 @@
 #define OPEN_LOOP_VF_CONTROL			(1)
 #define GRID_TIE_CONTROL				(2)
 
-#define CONTROL_TYPE					(OPEN_LOOP_VF_CONTROL)
+#define CONTROL_TYPE					(GRID_TIE_CONTROL)
 
 #define PWM_PERIOD_Us					(40)
 #define PWM_PERIOD_s					(PWM_PERIOD_Us/1000000.f)
 #define PWM_FREQ_KHz					(1000.f/PWM_PERIOD_Us)
 #define PWM_FREQ_Hz						(1.f/PWM_PERIOD_s)
+
+
+#define PLL_FILT_SIZE					(8)
 /*******************************************************************************
  * Enums
  ******************************************************************************/
@@ -116,11 +119,17 @@ static openloopvf_config_t vfConfig = {
 /**
  * @brief Grid Tie Control Parameters
  */
-static grid_tie_t gridTie = { .vCoor = {0}, .iCoor = {0}, .pll = {0},
+static grid_tie_t gridTie = {0};
+/*{
+		.pll = {
+				.coor = &gridTie.vCoor,
+				.qFilt = { .avg = 0, .count = 8, .stable = 0 },
+				.dFilt = { .avg = 0, .count = 8, .stable = 0 },
+		},
 		.qCompensator = { .Integral = 0, .Kp = 7.f, .Ki = 40.f, .dt = PWM_PERIOD_s },
 		.dCompensator = { .Integral = 0, .Kp = 7.f, .Ki = 40.f, .dt = PWM_PERIOD_s },
 		.iRef = 0.1f,
-};
+};*/
 #endif
 /*******************************************************************************
  * Code
@@ -138,6 +147,34 @@ void MainControl_Init(void)
 	inverterPWMModuleConfig.interruptEnabled = false;
 	Inverter3Ph_Init(&inverterConfig2);
 #else
+
+	/***************** Configure Inverter *********************/
+	// configure PLL
+	static float vDFiltData[PLL_FILT_SIZE] = {0};
+	static float vQFiltData[PLL_FILT_SIZE] = {0};
+	gridTie.pll.coords = &gridTie.vCoor;
+	gridTie.pll.dFilt.dataPtr = vDFiltData;
+	gridTie.pll.qFilt.dataPtr = vQFiltData;
+	gridTie.pll.dFilt.count = PLL_FILT_SIZE;
+	gridTie.pll.qFilt.count = PLL_FILT_SIZE;
+	gridTie.pll.compensator.Kp = .001f;
+	gridTie.pll.compensator.Ki = .8f;
+	gridTie.pll.compensator.dt = PWM_PERIOD_s;
+	gridTie.pll.qLockMax = 20;
+	gridTie.pll.dLockMin = gridTie.pll.qLockMax * 10;
+	gridTie.pll.cycleCount = 25000;//(int)((1 / PWM_PERIOD_s) * 10);
+
+	// configure Grid Tie Parameters
+	gridTie.qCompensator.Kp = 7.0f;
+	gridTie.qCompensator.Ki = 40.f;
+	gridTie.qCompensator.dt = PWM_PERIOD_s;
+	gridTie.dCompensator.Kp = 7.0f;
+	gridTie.dCompensator.Ki = 40.f;
+	gridTie.dCompensator.dt = PWM_PERIOD_s;
+	gridTie.iRef = .1f;
+	/***************** Configure Inverter *********************/
+
+
 	boostConfig.dutyUpdateFnc = BSP_PWM_ConfigChannel(boostConfig.pinNo, &boostConfig.pwmConfig);
 	boostConfig.dutyUpdateFnc(boostConfig.pinNo, 0.f, &boostConfig.pwmConfig);
 	BSP_Dout_SetAsIOPin(7, GPIO_PIN_RESET);
@@ -203,9 +240,9 @@ void MainControl_Loop(void)
 		/* compensator */
 		static bool vdcCorrect = false;
 		static float data_avg[8];
-		static low_pass_filter_t filt = {.data = data_avg, .size=8, .filt = {.avg = 0, .count = 8, .dataPtr = data_avg}};
+		static mov_avg_t filt = {.avg = 0, .count = 8, .dataPtr = data_avg};
 		static pi_compensator_t boostPI = {.has_lmt = true, .Kp = .01f, .Ki = 1.1f, .dt = PWM_PERIOD_s, .Integral = 0, .max = 0.45f, .min = 0.f };
-		float errAvg = MovingAverage_Compute(&filt.filt, 700.f - gridTie.vdc);
+		float errAvg = MovingAverage_Compute(&filt, 700.f - gridTie.vdc);
 		float duty = PI_Compensate(&boostPI, errAvg);
 
 		if (vdcCorrect == false && fabsf(700 - gridTie.vdc) < 20)

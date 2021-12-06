@@ -1,19 +1,27 @@
 /**
  ********************************************************************************
- * @file    	Pll.c
+ * @file    	pll.c
  * @author 		Waqas Ehsan Butt
- * @date    	Oct 7, 2021
- * @copyright 	TarazTechnologies Pvt. Ltd.
+ * @date    	October 7, 2021
  *
  * @brief   
  ********************************************************************************
+ * @attention
+ *
+ * <h2><center>&copy; Copyright (c) 2021 Taraz Technologies Pvt. Ltd.</center></h2>
+ * <h3><center>All rights reserved.</center></h3>
+ *
+ * <center>This software component is licensed by Taraz Technologies under BSD 3-Clause license,
+ * the "License"; You may not use this file except in compliance with the License. You may obtain
+ * a copy of the License at:
+ *                        www.opensource.org/licenses/BSD-3-Clause</center>
+ *
+ ********************************************************************************
  */
-#pragma GCC push_options
-#pragma GCC optimize ("-Ofast")
 /********************************************************************************
  * Includes
  *******************************************************************************/
-#include "Pll.h"
+#include "pll.h"
 /********************************************************************************
  * Defines
  *******************************************************************************/
@@ -29,16 +37,11 @@
 /********************************************************************************
  * Static Variables
  *******************************************************************************/
-static float dataBufferMemory[FILTER_COUNT * FILTER_MAX_SIZE] = {0};
-static float* lastBuffPtr = &dataBufferMemory[FILTER_COUNT * FILTER_MAX_SIZE - 1];
-static float* nextBuffPtr = dataBufferMemory;
-static pi_compensator_t qPI = { .Integral = 0, .Kp = 0.001f, .Ki = 0.8f, .dt = 0.00004f };
+
 /********************************************************************************
  * Global Variables
  *******************************************************************************/
-float thetaShift;
-float wtOld = 0;
-float wtDiffMax = 0;
+
 /********************************************************************************
  * Function Prototypes
  *******************************************************************************/
@@ -47,135 +50,50 @@ float wtDiffMax = 0;
  * Code
  *******************************************************************************/
 /**
- * @brief Get pointer to the acquired buffer of given size
- * @param size Size of the buffer
- * @return float* Pointer to the buffer location
+ * @brief Checks if the PLL is currently locked
+ * @param *pll Pointer to the PLL structure
+ * @return pll_states_t state of the PLL in this cycle
  */
-static float* GetBufferPtr(int size)
-{
-	if (lastBuffPtr < (nextBuffPtr + size - 1))
-		return NULL;
-	float* result = nextBuffPtr;
-	nextBuffPtr += size;
-	return result;
-}
-
-/**
- * @brief Initializes the low pass filter
- *
- * @param *filt pointer to the low pass filter
- */
-static void InitFilterIfNeeded(low_pass_filter_t* filt)
-{
-	// initialize data buffer if not already initialized
-	if (filt->data == NULL)
-	{
-		// filter size should be between limits
-		if (filt->size <= 0)
-			filt->size = FILTER_DEFAULT_SIZE;
-		if (filt->size > FILTER_MAX_SIZE)
-			filt->size = FILTER_MAX_SIZE;
-
-		// get the filter buffer
-		filt->data = GetBufferPtr(filt->size);
-		if (filt->data == NULL)
-			Error_Handler();
-
-		filt->filt.count = filt->size;
-		filt->filt.dataPtr = filt->data;
-	}
-}
-
-/**
- * @brief Initializes the low pass filter
- *
- * @param *comp pointer to the PI compensator
- */
-static void InitCompensatorIfNeeded(pi_compensator_t* comp)
-{
-	if (comp->Ki == 0 && comp->Kp == 0)
-	{
-		comp->Ki = qPI.Ki;
-		comp->Kp = qPI.Kp;
-	}
-	if(comp->dt <= 0)
-		comp->dt = qPI.dt;
-}
-
-/**
- * @brief Apply low pass filters on the DQ parameters to normalize them
- *
- * @param pll pointer to the PLL configuration
- */
-static void ApplyLowPassFilters_DQ(pll_lock_t* pll)
-{
-	pll->coords->dq0.q = MovingAverage_Compute(&pll->qFilt.filt, pll->coords->dq0.q);
-	pll->coords->dq0.d = MovingAverage_Compute(&pll->dFilt.filt, pll->coords->dq0.d);
-}
-
-
 static pll_states_t IsPLLSynched(pll_lock_t* pll)
 {
 	pll_info_t* info = &pll->info;
 	pll->prevStatus = pll->status;
 
-	if(info->acceptableMax <= 0)
-		info->acceptableMax = ACCEPTABLE_Q;
-	if(info->maxIndex <= 0)
-		info->maxIndex = MAX_Q_DATA_INDEX;
-
+	// replace temporary max of Q is exceeds
 	float absQ = fabsf(pll->coords->dq0.q);
-	if(absQ > info->tempCycleMax)
-		info->tempCycleMax = absQ;
+	if(absQ > info->tempQMax)
+		info->tempQMax = absQ;
 
-#if EVALUATE_D_STATS
-	if (pll->coords->dq0.d < info->dMin)
-		info->dMin = pll->coords->dq0.d;
-	if (pll->coords->dq0.d > info->dMax)
-		info->dMax = pll->coords->dq0.d;
-#endif
+	// replace temporary min of D is exceeds
+	if (pll->coords->dq0.d < info->tempDMin)
+		info->tempDMin = pll->coords->dq0.d;
 
+	// increase index
 	info->index++;
 
-	if(info->index > info->maxIndex && pll->status != PLL_LOCKED)
+	// check PLL status
+	if(info->index > pll->cycleCount && pll->status != PLL_LOCKED)
 	{
-		info->cycleMax = info->tempCycleMax;
-		if(info->cycleMax < info->acceptableMax)
-			pll->status = PLL_PENDING;
-		info->index = 0;
-		info->tempCycleMax = 0;
-#if EVALUATE_D_STATS
-		info->dDiff = info->dMax - info->dMin;
-		info->dMid = (info->dMax + info->dMin) / 2.f;
-		info->dMax = -200000;
-		info->dMin = 200000;
+#if MONITOR_PLL
+		info->qMax = info->tempQMax;
+		info->dMin = info->tempDMin;
 #endif
+		if (info->tempQMax < pll->qLockMax && info->tempDMin > pll->dLockMin)
+			pll->status = pll->status == PLL_LOCKED ? PLL_LOCKED : PLL_PENDING;
+		else
+			pll->status = PLL_INVALID;
+
+		info->index = 0;
+		info->tempQMax = 0;
+		info->tempDMin = 200000;
 	}
 
 	// lock to the phase once the phase is very low
 	if(pll->status == PLL_PENDING)
 	{
-		if (fabsf(pll->coords->abc.a) < (pll->dFilt.filt.avg) / 40)
+		if (fabsf(pll->coords->abc.a) < (pll->dFilt.avg) / 40)
 			pll->status = PLL_LOCKED;
 	}
-#if CHECK_PLL
-	else if (pll->status == PLL_LOCKED)
-	{
-		if (pll->coords->trigno.wt > (PI / 2 - 0.1f) && pll->coords->trigno.wt < (PI / 2 + 0.1f))
-			pll->info.th = pll->coords->abc.a;
-
-		pll->info.inc = pll->coords->trigno.wt > pll->info.thOld ? 1 : 0;
-		pll->info.thOld = pll->coords->trigno.wt;
-
-		if(((wtOld > TWO_PI - .2f && pll->coords->trigno.wt < .2f) || (pll->coords->trigno.wt > TWO_PI - .2f && wtOld < .2f)) == false)
-		{
-			float diff = fabsf(wtOld - pll->coords->trigno.wt);
-			if (diff > wtDiffMax)
-				wtDiffMax = diff;
-		}
-		wtOld = pll->coords->trigno.wt;
-	}
-#endif
 
 	return pll->status;
 }
@@ -188,25 +106,41 @@ static pll_states_t IsPLLSynched(pll_lock_t* pll)
  */
 pll_states_t Pll_LockGrid(pll_lock_t* pll)
 {
-	LIB_COOR_ALL_t* coords = pll->coords;
+	// should point to valid pll structure
+	if(pll == NULL)
+		Error_Handler();
 
-	// Initialize the filters and Compensator if not already initialized
-	InitFilterIfNeeded(&pll->dFilt);
-	InitFilterIfNeeded(&pll->qFilt);
-	InitCompensatorIfNeeded(&pll->compensator);
+	// should point to valid coordinates
+	LIB_COOR_ALL_t* coords = pll->coords;
+	if (coords == NULL)
+		Error_Handler();
+
+	// Assign data locations for filters if not already assigned
+	if (pll->dFilt.dataPtr == NULL)
+	{
+		pll->dFilt.dataPtr = (float*)malloc(sizeof(pll->dFilt.count));
+		pll->qFilt.dataPtr = (float*)malloc(sizeof(pll->qFilt.count));
+
+		if (pll->dFilt.dataPtr == NULL || pll->qFilt.dataPtr == NULL)
+			Error_Handler();
+	}
+
+	// Fault if compensator time interval not set
+	if (pll->compensator.dt <= 0)
+		Error_Handler();
 
 	// evaluate DQ0 coordinates from the ABC coordinates
 	Transform_abc_dq0(&coords->abc, &coords->dq0, &coords->trigno, SRC_ABC, PARK_SINE);
 
-	ApplyLowPassFilters_DQ(pll);
+	// apply low pass filters
+	pll->coords->dq0.q = MovingAverage_Compute(&pll->qFilt, pll->coords->dq0.q);
+	pll->coords->dq0.d = MovingAverage_Compute(&pll->dFilt, pll->coords->dq0.d);
 
-	thetaShift = PI_Compensate(&pll->compensator, -coords->dq0.q);
+	float thetaShift = PI_Compensate(&pll->compensator, -coords->dq0.q);
 	coords->trigno.wt = ShiftTheta_0to2pi(coords->trigno.wt, -thetaShift);
-
 	Transform_wt_sincos(&coords->trigno);
 
 	return IsPLLSynched(pll);
 }
 
-#pragma GCC pop_options
 /* EOF */

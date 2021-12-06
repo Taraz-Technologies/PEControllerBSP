@@ -139,7 +139,7 @@ void Inverter3Ph_UpdateDuty(inverter3Ph_config_t* config, float* duties)
 void Inverter3Ph_UpdateSPWM(inverter3Ph_config_t* config, float theta, float modulationIndex)
 {
 	float duties[3];
-	GenerateSPWM(theta, modulationIndex, duties);
+	ComputeDuty_SPWM(theta, modulationIndex, duties);
 	Inverter3Ph_UpdateDuty(config, duties);
 }
 

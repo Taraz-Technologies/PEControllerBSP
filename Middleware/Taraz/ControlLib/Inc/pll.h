@@ -16,6 +16,15 @@
 extern "C" {
 #endif
 
+/** @addtogroup Control_Library
+ * @{
+ */
+
+/** @defgroup PLL	Phase Locked Loop
+ * @brief Contains the declarations and procedures to implement all Phase Locked Loop
+ * @{
+ */
+
 /********************************************************************************
  * Includes
  *******************************************************************************/
@@ -25,61 +34,56 @@ extern "C" {
 /********************************************************************************
  * Defines
  *******************************************************************************/
-#define FILTER_DEFAULT_SIZE				(8)
-#define FILTER_MAX_SIZE					(32)
-#define FILTER_COUNT					(10)
-#define ACCEPTABLE_Q					(20.f)
-#define MAX_Q_DATA_INDEX				(25000)
+//#define FILTER_DEFAULT_SIZE				(8)
+//#define FILTER_MAX_SIZE					(32)
+//#define FILTER_COUNT					(10)
+//#define ACCEPTABLE_Q					(20.f)
+//#define MAX_Q_DATA_INDEX				(25000)
 
-#define EVALUATE_D_STATS				(0)
-#define CHECK_PLL						(0)
+//#define MONITOR_PLL						(0)
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
+/**
+ * @brief PLL state definitions
+ */
 typedef enum
 {
-	PLL_INVALID,
-	PLL_PENDING,
-	PLL_LOCKED
+	PLL_INVALID,/**< Grid phase not detected */
+	PLL_PENDING,/**< Grid phase detected but the conditions for lock not yet achieved */
+	PLL_LOCKED  /**< Grid phase detection completed */
 } pll_states_t;
 /********************************************************************************
  * Structures
  *******************************************************************************/
 typedef struct
 {
-	float* data;
-	mov_avg_t filt;
-	int size;
-} low_pass_filter_t;
-typedef struct
-{
-	float tempCycleMax;
-	float acceptableMax;
-	float cycleMax;
-	int index;
-	int maxIndex;
-#if EVALUATE_D_STATS
+#if	MONITOR_PLL
 	float dMin;
-	float dMax;
-	float dDiff;
-	float dMid;
+	float qMax;
 #endif
-#if CHECK_PLL
-	float th;
-	float thOld;
-	uint8_t inc;
-#endif
+	float tempQMax;
+	int index;
+	float tempDMin;
 } pll_info_t;
 
+/**
+ * @brief Defines the parameters required by the PLL
+ */
 typedef struct
 {
-	LIB_COOR_ALL_t* coords;
-	low_pass_filter_t dFilt;
-	low_pass_filter_t qFilt;
-	pi_compensator_t compensator;
-	pll_info_t info;
-	pll_states_t status;
-	pll_states_t prevStatus;
+	LIB_COOR_ALL_t* coords;			/**< @brief Grid voltage coordinates in different coordinate systems */
+	mov_avg_t dFilt;				/**< @brief Filter for the D coordinate of DQ0 coordinates */
+	mov_avg_t qFilt;				/**< @brief Filter for the Q coordinate of DQ0 coordinates */
+	pi_compensator_t compensator;	/**< @brief PI compensator for Q adjustment */
+	pll_info_t info;				/**< @brief PLL info internaly used by the system */
+	pll_states_t status;			/**< @brief Current status of PLL */
+	pll_states_t prevStatus;		/**< @brief Previous cycle status of PLL */
+	float qLockMax;					/**< @brief Maximum value of Q. If in a cycle defined by @ref cycleCount the value
+									remains less than this value the PLL will be considered locked */
+	float dLockMin;					/**< @brief Minimum value of D. If in a cycle defined by @ref cycleCount the value
+									remains greater only than the PLL locking will be enabled */
+	int cycleCount;					/**< @brief If the PLL remains lock for this many control loops than it will be considered locked */
 } pll_lock_t;
 /********************************************************************************
  * Exported Variables

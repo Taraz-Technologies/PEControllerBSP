@@ -57,9 +57,6 @@ void GridTieControl_GetDuties(grid_tie_t* gridTie, float* duties)
 	pll_lock_t* pll = &gridTie->pll;
 	LIB_COOR_ALL_t* vCoor = &gridTie->vCoor;
 	LIB_COOR_ALL_t* iCoor = &gridTie->iCoor;
-	// the PLL voltages should point to the main voltages
-	if (pll->coords == NULL)
-		pll->coords = vCoor;
 
 	// lock the voltage phase, if locked turn on relay
 	if (Pll_LockGrid(pll) == PLL_LOCKED)
@@ -94,7 +91,6 @@ void GridTieControl_GetDuties(grid_tie_t* gridTie, float* duties)
 		duties[1] = (abc.b / gridTie->vdc) + .5f;
 		duties[2] = (abc.c / gridTie->vdc) + .5f;
 */
-
 		duties[0] = (abc.a + 1) * .5f;
 		duties[1] = (abc.b + 1) * .5f;
 		duties[2] = (abc.c + 1) * .5f;
@@ -103,7 +99,7 @@ void GridTieControl_GetDuties(grid_tie_t* gridTie, float* duties)
 	{
 		if(pll->prevStatus == PLL_LOCKED)
 			BSP_Dout_SetAsIOPin(GRID_RELAY_IO, GPIO_PIN_RESET);
-		duties[0] = 0.5f; duties[1] = 0.5f; duties[2] = 0.5f;
+		duties[0] = .5f; duties[1] = .5f; duties[2] = .5f;
 	}
 }
 
