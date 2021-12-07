@@ -29,30 +29,23 @@ extern "C" {
  */
 
 /** @defgroup DigitalPins Digital Pins
- * @brief This module contains the functionality and definitions for the digital pins
+ * @brief Contains the declaration and procedures for the digital pins
  * @note DigitalPins_Init() should be called before using any of the digital pins functionality
  * @{
  */
 
 /** @defgroup DigitalPinsBase Digital Pins Info
- * @brief This module contains the base functionality and definitions for the digital pins
+ * @brief Contains the declaration and procedures for the digital pins
  * @{
  */
 /*******************************************************************************
  * Includes
  ******************************************************************************/
-#include "stm32h7xx_hal.h"
-#include <stdbool.h>
+#include "general_header.h"
 /*******************************************************************************
  * Defines
  ******************************************************************************/
-/** @defgroup DPINS_Exported_Macros Macros
-  * @{
-  */
 
-/**
- * @}
- */
 /*******************************************************************************
  * Typedefs
  ******************************************************************************/
@@ -90,13 +83,7 @@ typedef struct
 /*******************************************************************************
  * Exported Variables
  ******************************************************************************/
-/** @defgroup DPINS_Exported_Variables Variables
-  * @{
-  */
 
-/**
- * @}
- */
 /*******************************************************************************
  * Global Function Prototypes
  ******************************************************************************/

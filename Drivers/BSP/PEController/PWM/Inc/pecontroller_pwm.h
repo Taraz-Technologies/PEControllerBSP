@@ -31,7 +31,7 @@ extern "C" {
  */
 
 /** @defgroup PWM PWM
- * @brief This module contains all the relevant functions and definitions relating the PWM drivers
+ * @brief Contains the declaration and procedures relating the PWM drivers
  * @details The available drivers are currently only supported for PWMs (1-16).
  * The drivers are further subdivided in the following groups based upon the governing timer modules.
  * 	-# <b>PWM (1-10):</b>	HRTIM<br>
@@ -52,7 +52,7 @@ extern "C" {
  */
 
 /** @defgroup PWMBase PWM Info
- * @brief This module contains all the relevant functions and definitions relating the base PWM drivers
+ * @brief Contains the declaration and procedures relating the base PWM drivers
  * @details The PWM channels can be configured in individual / inverted pair form
  * 		-# <b>Individual PWM:</b><br>
  * 		To configure the channel for Individual PWM use @ref BSP_PWM_ConfigChannel().
@@ -70,23 +70,11 @@ extern "C" {
 /*******************************************************************************
  * Defines
  ******************************************************************************/
-/** @addtogroup PWM_Exported_Macros
-  * @{
-  */
 
-/**
- * @}
- */
 /*******************************************************************************
  * Typedefs
  ******************************************************************************/
-/** @addtogroup PWM_Exported_Typedefs
-  * @{
-  */
 
-/**
- * @}
- */
 /*******************************************************************************
  * Structures
  ******************************************************************************/
@@ -109,13 +97,7 @@ typedef struct
 /*******************************************************************************
  * Exported Variables
  ******************************************************************************/
-/** @addtogroup PWM_Exported_Variables
-  * @{
-  */
 
-/**
- * @}
- */
 /*******************************************************************************
  * Global Function Prototypes
  ******************************************************************************/

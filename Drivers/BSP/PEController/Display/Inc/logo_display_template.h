@@ -35,7 +35,7 @@ extern "C" {
  */
 
 /** @defgroup DisplayDriverLogo Logo
- * @brief This module contains the base functionality and definitions for displaying static image as logo
+ * @brief Contains the declaration and procedures for displaying static image as logo
  * @details Use @ref DisplayDefaultImage() to display the default image.
  * This function can be modified to display custom images as per requirement
  * @{

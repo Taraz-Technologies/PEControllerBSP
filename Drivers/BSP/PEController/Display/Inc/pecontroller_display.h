@@ -36,7 +36,7 @@ extern "C" {
  */
 
 /** @defgroup DisplayDriver Driver
- * @brief This is the base module for the display driver
+ * @brief Contains the declaration and procedures for the display driver
  * @details List of functions
  * 	-# <b>@ref BSP_Display_Init()</b> Initializes the display module
  * 	-# <b>@ref BSP_Display_DeInit()</b> De-initializes the display module
@@ -50,43 +50,19 @@ extern "C" {
 /********************************************************************************
  * Defines
  *******************************************************************************/
-/** @defgroup PEDISPLAY_Exported_Macros Macros
-  * @{
-  */
 
-/**
- * @}
- */
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
-/** @defgroup PEDISPLAY_Exported_Typedefs Type Definitions
-  * @{
-  */
 
-/**
- * @}
- */
 /********************************************************************************
  * Structures
  *******************************************************************************/
-/** @defgroup PEDISPLAY_Exported_Structures Structures
-  * @{
-  */
 
-/**
- * @}
- */
 /********************************************************************************
  * Exported Variables
  *******************************************************************************/
-/** @defgroup PEDISPLAY_Exported_Variables Variables
-  * @{
-  */
 
-/**
- * @}
- */
 /********************************************************************************
  * Global Function Prototypes
  *******************************************************************************/

@@ -33,7 +33,7 @@ extern "C" {
  */
 
 /** @addtogroup DinPorts Digital Input Port
- * @brief This module contains the functionality and definitions for the digital input pins
+ * @brief Contains the declaration and procedures for the digital input pins
  * @details List of functions
  * 	-# <b>@ref BSP_Din_SetAsIOPin() :</b> Sets the pin as input pin
  * 	-# <b>@ref BSP_Din_SetPinAlternateFunction() :</b> Selects the Alternate Input Functionality.
@@ -49,43 +49,19 @@ extern "C" {
 /*******************************************************************************
  * Defines
  ******************************************************************************/
-/** @defgroup DIN_Exported_Macros Macros
-  * @{
-  */
 
-/**
- * @}
- */
 /*******************************************************************************
  * Typedefs
  ******************************************************************************/
-/** @defgroup DIN_Exported_Typedefs Type Definitions
-  * @{
-  */
 
-/**
- * @}
- */
 /*******************************************************************************
  * Structures
  ******************************************************************************/
-/** @defgroup DIN_Exported_Structures Structures
-  * @{
-  */
 
-/**
- * @}
- */
  /*******************************************************************************
  * Exported Variables
  ******************************************************************************/
-/** @defgroup DIN_Exported_Variables Variables
-  * @{
-  */
 
-/**
- * @}
- */
 /*******************************************************************************
  * Global Function Prototypes
  ******************************************************************************/

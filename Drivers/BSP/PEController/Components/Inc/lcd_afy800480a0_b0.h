@@ -35,7 +35,7 @@ extern "C" {
  */
 
 /** @defgroup LCD_AFY800480A0_B0 LCD_AFY800480A0/B0
- * @brief This module contains the base functionality and definitions for LCDs LCD_AFY800480A0 & LCD_AFY800480B0
+ * @brief Contains the declaration and procedures for LCDs LCD_AFY800480A0 & LCD_AFY800480B0
  * @{
  */
 

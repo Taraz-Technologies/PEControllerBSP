@@ -33,7 +33,7 @@ extern "C" {
  */
 
 /** @addtogroup DoutPorts Digital Output Port
- * @brief This module contains the functionality and definitions for the digital output pins
+ * @brief Contains the declaration and procedures for the digital output pins
  * @details List of functions
  * 	-# <b>@ref BSP_Dout_SetAsIOPin() :</b> Set the Dout pin as GPIO
  * 	-# <b>@ref BSP_Dout_SetAsPWMPin() :</b> Set the Dout pin as PWM
@@ -51,43 +51,19 @@ extern "C" {
 /*******************************************************************************
  * Defines
  ******************************************************************************/
-/** @defgroup DOUT_Exported_Macros Macros
-  * @{
-  */
 
-/**
- * @}
- */
 /*******************************************************************************
  * Typedefs
  ******************************************************************************/
-/** @defgroup DOUT_Exported_Typedefs Type Definitions
-  * @{
-  */
 
-/**
- * @}
- */
 /*******************************************************************************
  * Structures
  ******************************************************************************/
-/** @defgroup DOUT_Exported_Structures Structures
-  * @{
-  */
 
-/**
- * @}
- */
 /*******************************************************************************
  * Exported Variables
  ******************************************************************************/
-/** @defgroup DOUT_Exported_Variables Variables
-  * @{
-  */
 
-/**
- * @}
- */
  /*******************************************************************************
  * Global Function Prototypes
  ******************************************************************************/

@@ -31,7 +31,7 @@ extern "C" {
  */
 
 /** @defgroup DSP_Library DSP Library
- * @brief This module contains the functionality and definitions for Digital Signal Processing Library
+ * @brief Contains the declaration and procedures for Digital Signal Processing Library
  * @details The following digital signal processing units are currently available in this library
  * 	-# <b>Moving Average Filter:</b> @ref mov_avg_t defines the filter unit. Use @ref MovingAverage_Compute()
  * 									to compute the moving average and @ref MovingAverage_Reset() to reset the filter
@@ -68,13 +68,7 @@ extern "C" {
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
-/** @defgroup DSPLib_Exported_Typedef Type definitions
-  * @{
-  */
 
-/**
- * @}
- */
 /********************************************************************************
  * Structures
  *******************************************************************************/
@@ -117,13 +111,7 @@ typedef struct
 /********************************************************************************
  * Exported Variables
  *******************************************************************************/
-/** @addtogroup DSPLib_Exported_Variables Variables
-  * @{
-  */
 
-/**
- * @}
- */
 /********************************************************************************
  * Global Function Prototypes
  *******************************************************************************/

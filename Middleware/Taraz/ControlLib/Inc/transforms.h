@@ -31,7 +31,7 @@ extern "C" {
  */
 
 /** @defgroup Transforms Transforms
- * @brief This module contains the functionality and definitions for different transformations
+ * @brief Contains the declaration and procedures for different transformations
  * @details Following is the list of available transformations
  * 	-# <b>Clarke Transformation:</b> @ref Transform_abc_alBe0() with source = @ref SRC_ABC
  * 	-# <b>Inverse Clarke Transformation:</b> @ref Transform_abc_alBe0() with source = @ref SRC_ALBE0
@@ -103,23 +103,11 @@ typedef enum
 /********************************************************************************
  * Structures
  *******************************************************************************/
-/** @defgroup Transforms_Exported_Structures Structures
-  * @{
-  */
 
-/**
- * @}
- */
 /********************************************************************************
  * Exported Variables
  *******************************************************************************/
-/** @defgroup Transforms_Exported_Variables Variables
-  * @{
-  */
 
-/**
- * @}
- */
 /********************************************************************************
  * Global Function Prototypes
  *******************************************************************************/

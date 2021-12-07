@@ -36,7 +36,7 @@ extern "C" {
  */
 
 /** @defgroup ADC_Config Configuration
- * @brief This module contains the configurations for the PEController ADC
+ * @brief Contains the declaration and procedures for the PEController ADC
  * @details The following definitions are required by the user
  * 	-# <b>@ref adc_measures_t :</b> Measurement structure definition
  * 	-# <b>@ref adcMultipiers :</b> Defines the multipliers for each member of the ADC measurement
@@ -52,13 +52,7 @@ extern "C" {
 /********************************************************************************
  * Defines
  *******************************************************************************/
-/** @defgroup ADCConfig_Exported_Macros Macros
-  * @{
-  */
 
-/**
- * @}
- */
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
@@ -93,13 +87,7 @@ typedef struct
 /********************************************************************************
  * Structures
  *******************************************************************************/
-/** @defgroup ADCConfig_Exported_Structures Structures
-  * @{
-  */
 
-/**
- * @}
- */
 /********************************************************************************
  * Exported Variables
  *******************************************************************************/
@@ -132,18 +120,14 @@ static const adc_measures_t adcOffsets = {
 /********************************************************************************
  * Global Function Prototypes
  *******************************************************************************/
-/** @defgroup ADCConfig_Exported_Functions Functions
-  * @{
-  */
+
 /********************************************************************************
  * Code
  *******************************************************************************/
 
 
 
-/**
- * @}
- */
+
 #ifdef __cplusplus
 }
 #endif

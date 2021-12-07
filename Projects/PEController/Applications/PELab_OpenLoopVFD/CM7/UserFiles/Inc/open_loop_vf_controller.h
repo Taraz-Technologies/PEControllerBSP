@@ -1,8 +1,8 @@
 /**
  ********************************************************************************
- * @file 		ControlLib.h
+ * @file 		open_loop_vf_controller.h
  * @author 		Waqas Ehsan Butt
- * @date 		Nov 25, 2021
+ * @date 		December 7, 2021
  *
  * @brief    
  ********************************************************************************
@@ -19,28 +19,17 @@
  ********************************************************************************
  */
 
-#ifndef CONTROL_LIB_H_
-#define CONTROL_LIB_H_
+#ifndef OPEN_LOOP_VF_CONTROLLER_H_
+#define OPEN_LOOP_VF_CONTROLLER_H_
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/** @defgroup Control_Library Control Library
- * @brief Contains the declaration and procedures for different control theories
- * @{
- */
 /********************************************************************************
  * Includes
  *******************************************************************************/
-#include "transforms.h"
-#include "dsp_library.h"
-#include "pll.h"
-#include "spwm.h"
-#include "svpwm.h"
-#include "inverter_3phase.h"
-#include "open_loop_vf_controller.h"
-#include "grid_tie_controller.h"
+
 /********************************************************************************
  * Defines
  *******************************************************************************/
@@ -52,7 +41,27 @@ extern "C" {
 /********************************************************************************
  * Structures
  *******************************************************************************/
-
+/** @defgroup OPENLOOPVF_Exported_Structures Structures
+  * @{
+  */
+/**
+ * @brief Defines the parameters required by the open loop v/f controller
+ */
+typedef struct
+{
+	float pwmFreq;							/**< @brief PWM frequency used by the inverter */
+	float nominalFreq;						/**< @brief Nominal frequency is used to compute modulation index at different frequencies */
+	float nominalModulationIndex;			/**< @brief Nominal modulation index is used to compute modulation index at different frequencies */
+	float outputFreq;						/**< @brief Required output frequency at which the program needs to settle */
+	float acceleration;						/**< @brief Acceleration with which the frequency should be changed */
+	float wt;								/**< @brief Current angle of phase U used internally (measured in radians) */
+	float currentFreq;						/**< @brief Current frequency output at the inverter. Computed internally */
+	float currentModulationIndex;			/**< @brief Current modulation index output at the inverter. Computed internally */
+	inverter3Ph_config_t inverterConfig;	/**< @brief Output inverter configuration */
+} openloopvf_config_t;
+/**
+ * @}
+ */
 /********************************************************************************
  * Exported Variables
  *******************************************************************************/
@@ -60,19 +69,34 @@ extern "C" {
 /********************************************************************************
  * Global Function Prototypes
  *******************************************************************************/
-
+/** @defgroup OPENLOOPVF_Exported_Functions Functions
+  * @{
+  */
+/**
+ * @brief Initialize the grid tie controller
+ * @param gridTie Pointer to the grid tie structure
+ * @param pwmResetCallback Function callback issued after each PWM completion
+ */
+void OpenLoopVfControl_Init(openloopvf_config_t* config, PWMResetCallback pwmResetCallback);
+/**
+ * @brief This function computes new duty cycles for the inverter in each cycle
+ * @param config Pointer to the inverter structure
+ * @details Here the frequency starts from the @ref INITIAL_FREQ and keeps increasing till
+ * 	it reaches the @ref OUTPUT_FREQ value with constant @ref ACCELERATION. The @ref  currentModulationIndex
+ * 	is acquired by @ref nominalModulationIndex / @ref nominalFreq
+ */
+void OpenLoopVfControl_Loop(openloopvf_config_t* config);
 /********************************************************************************
  * Code
  *******************************************************************************/
 
 
-#ifdef __cplusplus
-}
-#endif
-
 /**
  * @}
  */
+#ifdef __cplusplus
+}
+#endif
 
 #endif 
 /* EOF */

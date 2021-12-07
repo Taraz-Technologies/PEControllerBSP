@@ -1,11 +1,21 @@
 /**
  ********************************************************************************
- * @file 		Pll.h
+ * @file 		pll.h
  * @author 		Waqas Ehsan Butt
- * @date 		Oct 5, 2021
- * @copyright 	Taraz Technologies Pvt. Ltd.
+ * @date 		Dec 6, 2021
  *
  * @brief
+ ********************************************************************************
+ * @attention
+ *
+ * <h2><center>&copy; Copyright (c) 2021 Taraz Technologies Pvt. Ltd.</center></h2>
+ * <h3><center>All rights reserved.</center></h3>
+ *
+ * <center>This software component is licensed by Taraz Technologies under BSD 3-Clause license,
+ * the "License"; You may not use this file except in compliance with the License. You may obtain
+ * a copy of the License at:
+ *                        www.opensource.org/licenses/BSD-3-Clause</center>
+ *
  ********************************************************************************
  */
 
@@ -21,7 +31,46 @@ extern "C" {
  */
 
 /** @defgroup PLL	Phase Locked Loop
- * @brief Contains the declarations and procedures to implement all Phase Locked Loop
+ * @brief Contains the declarations and procedures to implement Phase Locked Loop
+ * @details
+ * The first step for grid phase detection is to assign suitable filters and
+ * compensator values and phase detection error settings for the PLL structure.
+ * Once configured the PLL should be run in every cycle to detect the voltage phase.
+ * Below programming example further describes the module usage
+ *
+ * ==============================================================================
+ *                Grid Voltage Phase Detection
+ * ==============================================================================
+ * @code
+	pll_lock_t pll = {0};
+
+	// Initializes the PLL module
+	void Init (void)
+	{
+		static float vDFiltData[PLL_FILT_SIZE] = {0};
+		static float vQFiltData[PLL_FILT_SIZE] = {0};
+		pll.coords = &gridTie.vCoor;
+		pll.dFilt.dataPtr = vDFiltData;
+		pll.qFilt.dataPtr = vQFiltData;
+		pll.dFilt.count = PLL_FILT_SIZE;
+		pll.qFilt.count = PLL_FILT_SIZE;
+		pll.compensator.Kp = .001f;
+		pll.compensator.Ki = .8f;
+		pll.compensator.dt = PWM_PERIOD_s;
+		pll.qLockMax = 10;
+		pll.dLockMin = gridTie.pll.qLockMax * 10;
+		pll.cycleCount = (int)((1 / PWM_PERIOD_s) * 10);
+	}
+
+	// Poll the PLL module on every cycle and connect to the output if PLL is locked else disconnect
+	void Poll(void)
+	{
+		if (Pll_LockGrid(&pll) == PLL_LOCKED)
+			GenerateOutput();
+		else
+			DisconnectOutput();
+	}
+ @endcode
  * @{
  */
 
@@ -34,16 +83,22 @@ extern "C" {
 /********************************************************************************
  * Defines
  *******************************************************************************/
-//#define FILTER_DEFAULT_SIZE				(8)
-//#define FILTER_MAX_SIZE					(32)
-//#define FILTER_COUNT					(10)
-//#define ACCEPTABLE_Q					(20.f)
-//#define MAX_Q_DATA_INDEX				(25000)
-
-//#define MONITOR_PLL						(0)
+/** @defgroup PLL_Exported_Macros Macros
+  * @{
+  */
+/**
+ * @brief Set this to 1 if PLL monitoring is required
+ */
+#define MONITOR_PLL						(0)
+/**
+ * @}
+ */
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
+/** @defgroup PLL_Exported_Typedefs Type Definitions
+  * @{
+  */
 /**
  * @brief PLL state definitions
  */
@@ -53,18 +108,27 @@ typedef enum
 	PLL_PENDING,/**< Grid phase detected but the conditions for lock not yet achieved */
 	PLL_LOCKED  /**< Grid phase detection completed */
 } pll_states_t;
+/**
+ * @}
+ */
 /********************************************************************************
  * Structures
  *******************************************************************************/
+/** @defgroup PLL_Exported_Structures Structures
+  * @{
+  */
+/**
+ * @brief Defines the internal parameters used buy the PLL module
+ */
 typedef struct
 {
 #if	MONITOR_PLL
-	float dMin;
-	float qMax;
+	float dMin;						/**< @brief Minimum D in the previous cycle */
+	float qMax;						/**< @brief Maximum q in the previous cycle */
 #endif
-	float tempQMax;
-	int index;
-	float tempDMin;
+	float tempQMax;					/**< @brief Temporary variable for evaluating cycle maximum for Q */
+	float tempDMin;					/**< @brief Temporary variable for evaluating cycle minimum for D */
+	int index;						/**< @brief Current index of the cycle */
 } pll_info_t;
 
 /**
@@ -85,6 +149,9 @@ typedef struct
 									remains greater only than the PLL locking will be enabled */
 	int cycleCount;					/**< @brief If the PLL remains lock for this many control loops than it will be considered locked */
 } pll_lock_t;
+/**
+ * @}
+ */
 /********************************************************************************
  * Exported Variables
  *******************************************************************************/
@@ -92,21 +159,34 @@ typedef struct
 /********************************************************************************
  * Global Function Prototypes
  *******************************************************************************/
+/** @defgroup PLL_Exported_Functions Functions
+  * @{
+  */
 /**
  * @brief Lock the grid voltages using Pll
  *
  * @param pll Pointer to the data structure
  * @return pll_states_t PLL_LOCKED if grid phase successfully locked
  */
-pll_states_t Pll_LockGrid(pll_lock_t* pll);
+extern pll_states_t Pll_LockGrid(pll_lock_t* pll);
 /********************************************************************************
  * Code
  *******************************************************************************/
 
-
+/**
+ * @}
+ */
 #ifdef __cplusplus
 }
 #endif
+
+/**
+ * @}
+ */
+
+/**
+ * @}
+ */
 
 #endif 
 /* EOF */

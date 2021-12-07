@@ -33,7 +33,7 @@ extern "C" {
  */
 
 /** @addtogroup DioPorts Digital Input Output Port
- * @brief This module contains the functionality and definitions for the digital input/output pins
+ * @brief Contains the declaration and procedures for the digital input/output pins
  * @details This port can either be input only or output only at a given time.
  * The port direction can be changed by the functions @ref BSP_Dio_SetAsInputPort() and @ref BSP_Dio_SetAsOutputPort().<br>
  * List of functions
@@ -53,13 +53,7 @@ extern "C" {
 /*******************************************************************************
  * Defines
  ******************************************************************************/
-/** @defgroup DIO_Exported_Macros Macros
-  * @{
-  */
 
-/**
- * @}
- */
 /*******************************************************************************
  * Typedefs
  ******************************************************************************/
@@ -80,23 +74,11 @@ typedef enum
 /*******************************************************************************
  * Structures
  ******************************************************************************/
-/** @defgroup DIO_Exported_Structures Structures
-  * @{
-  */
 
-/**
- * @}
- */
  /*******************************************************************************
  * Exported Variables
  ******************************************************************************/
-/** @defgroup DIO_Exported_Variables Variables
-  * @{
-  */
 
-/**
- * @}
- */
 /*******************************************************************************
  * Global Function Prototypes
  ******************************************************************************/

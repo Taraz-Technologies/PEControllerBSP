@@ -31,12 +31,12 @@ extern "C" {
  */
 
 /** @defgroup Common Common
- * @brief This module contains the base functionality and definitions for common files
+ * @brief Contains the declaration and procedures for common files
  * @{
  */
 
 /** @defgroup SharedMemory Shared Memory
- * @brief This module contains the base functionality and definitions for shared memory between both cores
+ * @brief Contains the declaration and procedures for shared memory between both cores
  * @{
  */
 /********************************************************************************

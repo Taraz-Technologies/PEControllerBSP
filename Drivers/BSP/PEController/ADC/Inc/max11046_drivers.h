@@ -35,7 +35,7 @@ extern "C" {
  */
 
 /** @defgroup MAX11046 Max11046
- * @brief This module contains the base functionality and definitions for MAX11046 ADC
+ * @brief Contains the declaration and procedures for MAX11046 ADC
  * @details List of functions
  * 	-# <b>@ref BSP_MAX11046_Init() :</b> Initializes the MAX11046 drivers
  * 	-# <b>@ref BSP_MAX11046_DeInit() :</b> De-initialize the MAX11046 drivers
@@ -51,13 +51,7 @@ extern "C" {
 /********************************************************************************
  * Defines
  *******************************************************************************/
-/** @defgroup MAX11046_Exported_Macros Macros
-  * @{
-  */
 
-/**
- * @}
- */
 /********************************************************************************
  * Typedefs
  *******************************************************************************/

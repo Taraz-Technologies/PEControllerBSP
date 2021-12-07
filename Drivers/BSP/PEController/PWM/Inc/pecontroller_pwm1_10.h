@@ -33,7 +33,7 @@ extern "C" {
  */
 
 /** @defgroup PWM1-10 PWM 1-10
- * @brief This module contains the functionality and definitions for the PWMs (1-10)
+ * @brief Contains the declaration and procedures for the PWMs (1-10)
  * @details This module has five separate time bases available for each paired PWM.
  * 	-# <b>PWM (1,2):</b> HRTIM_TIMERA
  * 	-# <b>PWM (3,4):</b> HRTIM_TIMERB
@@ -57,43 +57,19 @@ extern "C" {
 /********************************************************************************
  * Defines
  *******************************************************************************/
-/** @defgroup PWM1_10_Exported_Macros Macros
-  * @{
-  */
 
-/**
- * @}
- */
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
-/** @defgroup PWM1_10_Exported_Typedefs Type Definitions
-  * @{
-  */
 
-/**
- * @}
- */
 /********************************************************************************
  * Structures
  *******************************************************************************/
-/** @defgroup PWM1_10_Exported_Structures Structures
-  * @{
-  */
 
-/**
- * @}
- */
 /********************************************************************************
  * Exported Variables
  *******************************************************************************/
-/** @defgroup PWM1_10_Exported_Variables Variables
-  * @{
-  */
 
-/**
- * @}
- */
 /********************************************************************************
  * Global Function Prototypes
  *******************************************************************************/

@@ -22,10 +22,9 @@
 #define GENERAL_HEADER_H
 
 /** @defgroup BSP
- * @brief This module defines the Board Support Driver Package for PEController
+ * @brief Defines the Board Support Driver Package for PEController
  * @{
  */
-
 
 /*******************************************************************************
  * Includes

@@ -31,7 +31,7 @@ extern "C" {
  */
 
 /** @defgroup SPWM SPWM
- * @brief This module contains the functionality and definitions for SPWM generation
+ * @brief Contains the declaration and procedures for Sinouisidal PWM generation
  * @details List of functions
  * 	-# <b>@ref ComputeDuty_SPWM() :</b> Get duty cycles of each leg using sinousidal PWM
  * @{
@@ -43,43 +43,19 @@ extern "C" {
 /********************************************************************************
  * Defines
  *******************************************************************************/
-/** @defgroup SPWM_Exported_Macros Macros
-  * @{
-  */
 
-/**
- * @}
- */
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
-/** @defgroup SPWM_Exported_Typedefs Type Definitions
-  * @{
-  */
 
-/**
- * @}
- */
 /********************************************************************************
  * Structures
  *******************************************************************************/
-/** @defgroup SPWM_Exported_Structures Structures
-  * @{
-  */
 
-/**
- * @}
- */
 /********************************************************************************
  * Exported Variables
  *******************************************************************************/
-/** @defgroup SPWM_Exported_Variables Variables
-  * @{
-  */
 
-/**
- * @}
- */
 /********************************************************************************
  * Global Function Prototypes
  *******************************************************************************/
@@ -93,14 +69,14 @@ extern "C" {
  * @param *duties Pointer to the array where duty cycles need to be updated.
  */
 extern void ComputeDuty_SPWM(float theta, float modulationIndex, float* duties);
-/**
- * @}
- */
+
 /********************************************************************************
  * Code
  *******************************************************************************/
 
-
+/**
+ * @}
+ */
 #ifdef __cplusplus
 }
 #endif

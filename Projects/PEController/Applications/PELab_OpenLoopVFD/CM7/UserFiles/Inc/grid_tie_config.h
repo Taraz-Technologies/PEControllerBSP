@@ -1,16 +1,26 @@
 /**
  ********************************************************************************
- * @file 		GridTieControl.h
+ * @file 		grid_tie_config.h
  * @author 		Waqas Ehsan Butt
- * @date 		Oct 13, 2021
- * @copyright 	Taraz Technologies Pvt. Ltd.
+ * @date 		December 7, 2021
  *
- * @brief   
+ * @brief    
+ ********************************************************************************
+ * @attention
+ *
+ * <h2><center>&copy; Copyright (c) 2021 Taraz Technologies Pvt. Ltd.</center></h2>
+ * <h3><center>All rights reserved.</center></h3>
+ *
+ * <center>This software component is licensed by Taraz Technologies under BSD 3-Clause license,
+ * the "License"; You may not use this file except in compliance with the License. You may obtain 
+ * a copy of the License at:
+ *                        www.opensource.org/licenses/BSD-3-Clause</center>
+ *
  ********************************************************************************
  */
 
-#ifndef GRIDTIECONTROL_H_
-#define GRIDTIECONTROL_H_
+#ifndef GRID_TIE_CONFIG_H_
+#define GRID_TIE_CONFIG_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -19,35 +29,35 @@ extern "C" {
 /********************************************************************************
  * Includes
  *******************************************************************************/
-#include "transforms.h"
-#include "pll.h"
+
 /********************************************************************************
  * Defines
  *******************************************************************************/
+#define PWM_PERIOD_Us					(40)
+#define PWM_PERIOD_s					(PWM_PERIOD_Us/1000000.f)
+#define PWM_FREQ_KHz					(1000.f/PWM_PERIOD_Us)
+#define PWM_FREQ_Hz						(1.f/PWM_PERIOD_s)
+#define GRID_RELAY_IO					(15)
+#define GRID_FREQ						(50)
+#define L_OUT							(.0025f)
+#define RELAY_TURN_ON_VBST				(650.f)
+#define RELAY_TURN_OFF_VBST				(550.f)
+#define VBST_SET						(720.f)
+#define BOOST_DUTYCYCLE_MAX				(.5f)
+#define INVERTER_DEADTIME_ns			(500)
 
+#define BOOST_IO						(8)
+#define UH_IO							(1)
+#define VH_IO							(3)
+#define WH_IO							(5)
+#define MIN_MAX_BALANCING_INVERTER		(true)
+#define INVERTER_DUTY_MODE				OUTPUT_DUTY_MINUS_DEADTIME_AT_PWMH
+
+#define PLL_FILT_SIZE					(8)
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
-/**
- * @brief Data structure used by the Grid Tie Control
- */
-typedef struct
-{
-	/*! @brief Voltage level of DC Link */
-	float vdc;
-	/*! @brief Reference current to be used by the Grid Tie Control */
-	float iRef;
-	/** @brief Coordinates for the Phase to Phase Voltages */
-	LIB_COOR_ALL_t vCoor;
-	/** @brief Coordinates for the Phase Currents */
-	LIB_COOR_ALL_t iCoor;
-	/** @brief DQ compensator for Q Value */
-	pi_compensator_t qCompensator;
-	/** @brief DQ compensator for D Value */
-	pi_compensator_t dCompensator;
-	/*! @brief PLL structure used by the Grid Tie Control */
-	pll_lock_t pll;
-} grid_tie_t;
+
 /********************************************************************************
  * Structures
  *******************************************************************************/
@@ -59,13 +69,7 @@ typedef struct
 /********************************************************************************
  * Global Function Prototypes
  *******************************************************************************/
-/**
- * @brief Evaluates the Duty Cycle Values for the Grid Tie Control
- *
- * @param *gridTie Pointer to the parameter structure
- * @param *duties resultant duty cycles for the inverter (Range 0 - 1)
- */
-void GridTieControl_GetDuties(grid_tie_t* gridTie, float* duties);
+
 /********************************************************************************
  * Code
  *******************************************************************************/

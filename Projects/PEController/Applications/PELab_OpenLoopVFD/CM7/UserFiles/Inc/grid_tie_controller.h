@@ -1,8 +1,8 @@
 /**
  ********************************************************************************
- * @file 		ControlLib.h
+ * @file 		grid_tie_controller.h
  * @author 		Waqas Ehsan Butt
- * @date 		Nov 25, 2021
+ * @date 		December 7, 2021
  *
  * @brief    
  ********************************************************************************
@@ -19,28 +19,18 @@
  ********************************************************************************
  */
 
-#ifndef CONTROL_LIB_H_
-#define CONTROL_LIB_H_
+#ifndef GRID_TIE_CONTROLLER_H_
+#define GRID_TIE_CONTROLLER_H_
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/** @defgroup Control_Library Control Library
- * @brief Contains the declaration and procedures for different control theories
- * @{
- */
 /********************************************************************************
  * Includes
  *******************************************************************************/
-#include "transforms.h"
-#include "dsp_library.h"
-#include "pll.h"
-#include "spwm.h"
-#include "svpwm.h"
-#include "inverter_3phase.h"
-#include "open_loop_vf_controller.h"
-#include "grid_tie_controller.h"
+#include "control_library.h"
+#include "grid_tie_config.h"
 /********************************************************************************
  * Defines
  *******************************************************************************/
@@ -48,11 +38,46 @@ extern "C" {
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
-
+/** @defgroup GRIDTIE_Exported_Typedefs Type Definitions
+  * @{
+  */
+/**
+ * @brief Defines the states for the grid tie controller
+ */
+typedef enum
+{
+	GRID_TIE_INACTIVE,      /**< Grid tie non functional */
+	GRID_TIE_ACTIVE,        /**< Grid tie functional */
+} grid_tie_state_t;
+/**
+ * @}
+ */
 /********************************************************************************
  * Structures
  *******************************************************************************/
-
+/** @defgroup GRIDTIE_Exported_Structures Structures
+  * @{
+  */
+/**
+ * @brief Defines the parameters for grid tie controller
+ */
+typedef struct
+{
+	float vdc;								/**< @brief DC link voltage */
+	float iRef;								/**< @brief Constant reference current for output */
+	LIB_COOR_ALL_t vCoor;					/**< @brief Phase voltage coordinates */
+	LIB_COOR_ALL_t iCoor;					/**< @brief Phase current coordinates */
+	pi_compensator_t iQComp;				/**< @brief Compensator for Q value of DQ transform for grid currents */
+	pi_compensator_t iDComp;				/**< @brief Compensator for D value of DQ transform for grid currents */
+	pll_lock_t pll;							/**< @brief PLL structure used by the grid tie controller */
+	inverter3Ph_config_t inverterConfig;	/**< @brief Output inverter configuration */
+	independent_pwm_config_t boostConfig;	/**< @brief Boost configuration for developing DC link */
+	grid_tie_state_t state;					/**< @brief Current state of the grid tie controller */
+	float tempIndex;						/**< @brief Temporary variable */
+} grid_tie_t;
+/**
+ * @}
+ */
 /********************************************************************************
  * Exported Variables
  *******************************************************************************/
@@ -60,19 +85,31 @@ extern "C" {
 /********************************************************************************
  * Global Function Prototypes
  *******************************************************************************/
-
+/** @defgroup GRIDTIE_Exported_Functions Functions
+  * @{
+  */
+/**
+ * @brief Initialize the grid tie controller
+ * @param gridTie Pointer to the grid tie structure
+ * @param pwmResetCallback Function callback issued after each PWM completion
+ */
+extern void GridTieControl_Init(grid_tie_t* gridTie, PWMResetCallback pwmResetCallback);
+/**
+ * @brief This function computes new duty cycles for the inverter and boost in each cycle
+ * @param gridTie Pointer to the grid tie structure
+ */
+extern void GridTieControl_Loop(grid_tie_t* gridTie);
 /********************************************************************************
  * Code
  *******************************************************************************/
 
 
-#ifdef __cplusplus
-}
-#endif
-
 /**
  * @}
  */
+#ifdef __cplusplus
+}
+#endif
 
 #endif 
 /* EOF */

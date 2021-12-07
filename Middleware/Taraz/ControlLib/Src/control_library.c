@@ -31,8 +31,6 @@
 #include "svpwm.c"
 #include "pll.c"
 #include "inverter_3phase.c"
-#include "open_loop_vf_controller.c"
-#include "grid_tie_controller.c"
 /********************************************************************************
  * Defines
  *******************************************************************************/
