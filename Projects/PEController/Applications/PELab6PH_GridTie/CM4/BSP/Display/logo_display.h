@@ -1,10 +1,10 @@
 /**
  ********************************************************************************
- * @file 		grid_tie_config.h
+ * @file 		logo_display.h
  * @author 		Waqas Ehsan Butt
- * @date 		December 7, 2021
+ * @date 		December 3, 2021
  *
- * @brief    
+ * @brief	Header file for the image display
  ********************************************************************************
  * @attention
  *
@@ -12,48 +12,43 @@
  * <h3><center>All rights reserved.</center></h3>
  *
  * <center>This software component is licensed by Taraz Technologies under BSD 3-Clause license,
- * the "License"; You may not use this file except in compliance with the License. You may obtain 
+ * the "License"; You may not use this file except in compliance with the License. You may obtain
  * a copy of the License at:
  *                        www.opensource.org/licenses/BSD-3-Clause</center>
  *
  ********************************************************************************
  */
 
-#ifndef GRID_TIE_CONFIG_H_
-#define GRID_TIE_CONFIG_H_
+#ifndef LOGO_DISPLAY_H
+#define LOGO_DISPLAY_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+/** @addtogroup BSP
+ * @{
+ */
+
+/** @addtogroup Display Display
+ * @{
+ */
+
+/** @defgroup DisplayDriverImage Logo
+ * @brief This module contains the base functionality and definitions for displaying static image as logo
+ * @details Use @ref DisplayDefaultImage() to display the default image.
+ * This function can be modified to display custom images as per requirement
+ * @{
+ */
 /********************************************************************************
  * Includes
  *******************************************************************************/
-
+#include "pecontroller_display.h"
+#include "taraz_logo.h"
 /********************************************************************************
  * Defines
  *******************************************************************************/
-#define PWM_PERIOD_Us					(40)
-#define PWM_PERIOD_s					(PWM_PERIOD_Us/1000000.f)
-#define PWM_FREQ_KHz					(1000.f/PWM_PERIOD_Us)
-#define PWM_FREQ_Hz						(1.f/PWM_PERIOD_s)
-#define GRID_RELAY_IO					(15)
-#define GRID_FREQ						(50)
-#define L_OUT							(.0025f)
-#define RELAY_TURN_ON_VBST				(650.f)
-#define RELAY_TURN_OFF_VBST				(550.f)
-#define VBST_SET						(720.f)
-#define BOOST_DUTYCYCLE_MAX				(.5f)
-#define INVERTER_DEADTIME_ns			(500)
 
-#define BOOST_IO						(8)
-#define UH_IO							(1)
-#define VH_IO							(3)
-#define WH_IO							(5)
-#define MIN_MAX_BALANCING_INVERTER		(true)
-#define INVERTER_DUTY_MODE				OUTPUT_DUTY_MINUS_DEADTIME_AT_PWMH
-
-#define PLL_FILT_SIZE					(8)
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
@@ -73,11 +68,55 @@ extern "C" {
 /********************************************************************************
  * Code
  *******************************************************************************/
+/**
+ * @brief Displays the default image. Call this function after calling @ref BSP_Display_Init()
+ */
+static void DisplayDefaultImage(void)
+{
+	LTDC_LayerCfgTypeDef pLayerCfg = {0};
+	pLayerCfg.WindowX0 = 0;
+	pLayerCfg.WindowX1 = 800;
+	pLayerCfg.WindowY0 = 0;
+	pLayerCfg.WindowY1 = 320;
 
+	/* Pixel Format configuration*/
+	pLayerCfg.PixelFormat = LTDC_PIXEL_FORMAT_RGB888;
+
+	/* Start Address configuration : frame buffer is located at FLASH memory */
+	pLayerCfg.FBStartAdress = (uint32_t)&taraz_logo;
+
+	/* Alpha constant (255 == totally opaque) */
+	pLayerCfg.Alpha = 255;
+
+	/* Default Color configuration (configure A,R,G,B component values) : no background color */
+	pLayerCfg.Alpha0 = 255; /* fully transparent */
+	pLayerCfg.Backcolor.Blue = 255;
+	pLayerCfg.Backcolor.Green = 255;
+	pLayerCfg.Backcolor.Red = 255;
+
+	/* Configure blending factors */
+	pLayerCfg.BlendingFactor1 = LTDC_BLENDING_FACTOR1_CA;
+	pLayerCfg.BlendingFactor2 = LTDC_BLENDING_FACTOR2_CA;
+
+	/* Configure the number of lines and number of pixels per line */
+	pLayerCfg.ImageWidth  = 800;
+	pLayerCfg.ImageHeight = 320;
+	BSP_Display_ShowLayer(&pLayerCfg);
+}
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif 
+/**
+ * @}
+ */
+/**
+ * @}
+ */
+/**
+ * @}
+ */
+
+#endif
 /* EOF */

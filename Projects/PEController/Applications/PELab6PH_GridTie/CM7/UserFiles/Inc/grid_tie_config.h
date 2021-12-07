@@ -1,8 +1,8 @@
 /**
  ********************************************************************************
- * @file 		ControlLib.h
+ * @file 		grid_tie_config.h
  * @author 		Waqas Ehsan Butt
- * @date 		Nov 25, 2021
+ * @date 		December 7, 2021
  *
  * @brief    
  ********************************************************************************
@@ -19,30 +19,36 @@
  ********************************************************************************
  */
 
-#ifndef CONTROL_LIB_H_
-#define CONTROL_LIB_H_
+#ifndef GRID_TIE_CONFIG_H_
+#define GRID_TIE_CONFIG_H_
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/** @defgroup Control_Library Control Library
- * @brief Contains the declaration and procedures for different control theories
- * @{
- */
 /********************************************************************************
  * Includes
  *******************************************************************************/
-#include "transforms.h"
-#include "dsp_library.h"
-#include "pll.h"
-#include "spwm.h"
-#include "svpwm.h"
-#include "inverter_3phase.h"
+
 /********************************************************************************
  * Defines
  *******************************************************************************/
+#define PWM_PERIOD_Us					(40)
+#define PWM_PERIOD_s					(PWM_PERIOD_Us/1000000.f)
+#define PWM_FREQ_KHz					(1000.f/PWM_PERIOD_Us)
+#define PWM_FREQ_Hz						(1.f/PWM_PERIOD_s)
+#define GRID_RELAY_IO					(15)
+#define GRID_FREQ						(50)
+#define L_OUT							(.0025f)
+#define RELAY_TURN_ON_VBST				(650.f)
+#define RELAY_TURN_OFF_VBST				(550.f)
+#define VBST_SET						(720.f)
+#define BOOST_DUTYCYCLE_MAX				(.5f)
+#define INVERTER_DEADTIME_ns			(500)
+#define MIN_MAX_BALANCING_INVERTER		(true)
+#define INVERTER_DUTY_MODE				OUTPUT_DUTY_AT_PWMH
 
+#define PLL_FILT_SIZE					(8)
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
@@ -67,10 +73,6 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
-
-/**
- * @}
- */
 
 #endif 
 /* EOF */

@@ -71,10 +71,6 @@ void OpenLoopVfControl_Init(openloopvf_config_t* config, PWMResetCallback pwmRes
 	inverterPWMModuleConfig.callback = pwmResetCallback;
 	inverterPWMModuleConfig.interruptEnabled = pwmResetCallback == NULL ? true : false;
 	inverter3Ph_config_t* inverterConfig = &config->inverterConfig;
-	inverterConfig->s1PinNos[0] = UH_IO;
-	inverterConfig->s1PinNos[1] = VH_IO;
-	inverterConfig->s1PinNos[2] = WH_IO;
-	inverterConfig->dsblPinCount = 0;
 	inverterConfig->legType = LEG_DEFAULT;
 	inverterConfig->pwmConfig.lim.min = 0;
 	inverterConfig->pwmConfig.lim.max = 1;

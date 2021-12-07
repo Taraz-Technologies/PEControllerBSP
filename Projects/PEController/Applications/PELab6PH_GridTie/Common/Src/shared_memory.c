@@ -1,10 +1,10 @@
 /**
  ********************************************************************************
- * @file 		ControlLib.h
+ * @file    	shared_memory.c
  * @author 		Waqas Ehsan Butt
- * @date 		Nov 25, 2021
+ * @date    	December 3, 2021
  *
- * @brief    
+ * @brief   Contains shared memory structures for the PEController
  ********************************************************************************
  * @attention
  *
@@ -12,33 +12,17 @@
  * <h3><center>All rights reserved.</center></h3>
  *
  * <center>This software component is licensed by Taraz Technologies under BSD 3-Clause license,
- * the "License"; You may not use this file except in compliance with the License. You may obtain 
+ * the "License"; You may not use this file except in compliance with the License. You may obtain
  * a copy of the License at:
  *                        www.opensource.org/licenses/BSD-3-Clause</center>
  *
  ********************************************************************************
  */
 
-#ifndef CONTROL_LIB_H_
-#define CONTROL_LIB_H_
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/** @defgroup Control_Library Control Library
- * @brief Contains the declaration and procedures for different control theories
- * @{
- */
 /********************************************************************************
  * Includes
  *******************************************************************************/
-#include "transforms.h"
-#include "dsp_library.h"
-#include "pll.h"
-#include "spwm.h"
-#include "svpwm.h"
-#include "inverter_3phase.h"
+#include "shared_memory.h"
 /********************************************************************************
  * Defines
  *******************************************************************************/
@@ -52,25 +36,33 @@ extern "C" {
  *******************************************************************************/
 
 /********************************************************************************
- * Exported Variables
+ * Static Variables
  *******************************************************************************/
 
 /********************************************************************************
- * Global Function Prototypes
+ * Global Variables
+ *******************************************************************************/
+/** Pointer to the shared data variable
+ */
+volatile shared_data_t * const sharedData = (shared_data_t *)0x38001000;
+/********************************************************************************
+ * Function Prototypes
  *******************************************************************************/
 
 /********************************************************************************
  * Code
  *******************************************************************************/
-
-
-#ifdef __cplusplus
-}
-#endif
-
 /**
- * @}
+ * @brief Get values for the recent measurements from the shared memory
+ * @param *adc Pointer to the ADC values to be filled
  */
+void SharedMemory_GetRecentMeasurements(adc_measures_t* adc)
+{
+	if(sharedData->m4Tom7.lastDataPointer != NULL)
+		memcpy((void*)adc, (void*)sharedData->m4Tom7.lastDataPointer, sizeof(adc_measures_t));
+}
 
-#endif 
+
 /* EOF */
+
+

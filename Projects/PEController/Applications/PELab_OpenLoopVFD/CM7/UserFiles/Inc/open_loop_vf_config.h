@@ -43,6 +43,9 @@ extern "C" {
 #define ACCELERATION					(1.00001f)
 #define INITIAL_FREQ					(1.f)
 #define OUTPUT_FREQ						(25)
+#define MIN_MAX_BALANCING_INVERTER		(false)
+#define INVERTER_DUTY_MODE				OUTPUT_DUTY_AT_PWMH
+#define INVERTER_DEADTIME_ns			(500)
 /********************************************************************************
  * Typedefs
  *******************************************************************************/

@@ -79,10 +79,6 @@ void GridTieControl_Init(grid_tie_t* gridTie, PWMResetCallback pwmResetCallback)
 	/***************** Configure Inverter *********************/
 	inverterPWMModuleConfig.callback = pwmResetCallback;
 	inverter3Ph_config_t* inverterConfig = &gridTie->inverterConfig;
-	inverterConfig->s1PinNos[0] = UH_IO;
-	inverterConfig->s1PinNos[1] = VH_IO;
-	inverterConfig->s1PinNos[2] = WH_IO;
-	inverterConfig->dsblPinCount = 0;
 	inverterConfig->legType = LEG_DEFAULT;
 	inverterConfig->pwmConfig.lim.min = 0;
 	inverterConfig->pwmConfig.lim.max = 1;
@@ -118,14 +114,12 @@ void GridTieControl_Init(grid_tie_t* gridTie, PWMResetCallback pwmResetCallback)
 
 	/***************** Configure Boost *********************/
 	independent_pwm_config_t* boostConfig = &gridTie->boostConfig;
-	boostConfig->pinNo = BOOST_IO;
 	boostConfig->pwmConfig.lim.min = 0;
 	boostConfig->pwmConfig.lim.max = BOOST_DUTYCYCLE_MAX;
 	boostConfig->pwmConfig.module = &boostPWMConfig;
-	boostConfig->dutyUpdateFnc = BSP_PWM_ConfigChannel(BOOST_IO, &boostConfig->pwmConfig);
-	boostConfig->dutyUpdateFnc(BOOST_IO, 0.f, &boostConfig->pwmConfig);
-	BSP_Dout_SetAsIOPin(BOOST_IO - 1, GPIO_PIN_RESET);
-	BSP_Dout_SetAsPWMPin(BOOST_IO);
+	boostConfig->dutyUpdateFnc = BSP_PWM_ConfigChannel(boostConfig->pinNo, &boostConfig->pwmConfig);
+	boostConfig->dutyUpdateFnc(boostConfig->pinNo, 0.f, &boostConfig->pwmConfig);
+	BSP_Dout_SetAsPWMPin(boostConfig->pinNo);
 	/***************** Configure Boost *********************/
 
 	BSP_Dout_SetAsIOPin(GRID_RELAY_IO, GPIO_PIN_RESET);
