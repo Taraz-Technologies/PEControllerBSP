@@ -45,7 +45,7 @@ static bool moduleEnabled = false;
  */
 static TIM_OC_InitTypeDef sConfigOC =
 {
-		.OCMode = TIM_OCMODE_PWM2,
+		.OCMode = TIM_OCMODE_PWM1,
 		.Pulse = 0,
 		.OCPolarity = TIM_OCPOLARITY_HIGH,
 		.OCNPolarity = TIM_OCNPOLARITY_HIGH,
@@ -53,6 +53,7 @@ static TIM_OC_InitTypeDef sConfigOC =
 		.OCIdleState = TIM_OCIDLESTATE_RESET,
 		.OCNIdleState = TIM_OCNIDLESTATE_SET,
 };
+static float dutyDeadTime = 0;
 /********************************************************************************
  * Global Variables
  *******************************************************************************/
@@ -82,12 +83,12 @@ static void Drivers_Init(pwm_config_t* config)
 	if(config->module->alignment == CENTER_ALIGNED)
 	{
 		htim1.Init.CounterMode = TIM_COUNTERMODE_CENTERALIGNED2;
-		htim1.Init.Period = (config->module->periodInUsec * 120);		// --todo-- centralize
+		htim1.Init.Period = (int)(config->module->periodInUsec * (TIM1_FREQ_MHz / 2.f));
 	}
 	else
 	{
 		htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
-		htim1.Init.Period = (config->module->periodInUsec * 240) - 1;  // --todo-- centralize
+		htim1.Init.Period = (config->module->periodInUsec * TIM1_FREQ_MHz) - 1;
 	}
 	htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
 	htim1.Init.RepetitionCounter = 0;
@@ -110,7 +111,34 @@ static void Drivers_Init(pwm_config_t* config)
 	sBreakDeadTimeConfig.OffStateRunMode = TIM_OSSR_DISABLE;
 	sBreakDeadTimeConfig.OffStateIDLEMode = TIM_OSSI_DISABLE;
 	sBreakDeadTimeConfig.LockLevel = TIM_LOCKLEVEL_OFF;
-	sBreakDeadTimeConfig.DeadTime = 185;
+	if (IsDeadtimeEnabled(&config->module->deadtime))
+	{
+		int valBase = (int)((config->module->deadtime.nanoSec * TIM1_FREQ_MHz) / 1000.f);
+		if (valBase < 128)
+			sBreakDeadTimeConfig.DeadTime = valBase;
+		else
+		{
+			int val = (int)(valBase / 2 - 64);
+			if (val < 64)
+				sBreakDeadTimeConfig.DeadTime = val | 0x80;
+			else
+			{
+				val = (int)(valBase / 8 - 32);
+				if (val < 32)
+					sBreakDeadTimeConfig.DeadTime = val | 0xC0;
+				else
+				{
+					val = (int)(valBase / 16 - 32);
+					if (val < 32)
+						sBreakDeadTimeConfig.DeadTime = val | 0xE0;
+				}
+			}
+		}
+		sBreakDeadTimeConfig.AutomaticOutput = TIM_AUTOMATICOUTPUT_ENABLE;
+		dutyDeadTime = config->module->deadtime.nanoSec / (config->module->periodInUsec * 1000.f);
+	}
+	else
+		sBreakDeadTimeConfig.AutomaticOutput = TIM_AUTOMATICOUTPUT_DISABLE;
 	sBreakDeadTimeConfig.BreakState = TIM_BREAK_DISABLE;
 	sBreakDeadTimeConfig.BreakPolarity = TIM_BREAKPOLARITY_HIGH;
 	sBreakDeadTimeConfig.BreakFilter = 0;
@@ -120,6 +148,18 @@ static void Drivers_Init(pwm_config_t* config)
 	sBreakDeadTimeConfig.AutomaticOutput = IsDeadtimeEnabled(&config->module->deadtime) ? TIM_AUTOMATICOUTPUT_ENABLE : TIM_AUTOMATICOUTPUT_DISABLE;
 	if (HAL_TIMEx_ConfigBreakDeadTime(&htim1, &sBreakDeadTimeConfig) != HAL_OK)
 		Error_Handler();
+
+	float oldMax = config->lim.max;
+	if (IsDeadtimeEnabled(&config->module->deadtime))
+	{
+		config->lim.max = 1 - dutyDeadTime;
+		if (oldMax < config->lim.max && oldMax != 0)
+			config->lim.max = oldMax;
+	}
+
+	if (config->lim.minMaxDutyCycleBalancing  && config->lim.max > .5f)
+		config->lim.min = 1 - config->lim.max;
+
 	moduleEnabled = true;
 }
 /**
@@ -133,7 +173,17 @@ static void Drivers_Init(pwm_config_t* config)
  */
 void BSP_PWM11_16_UpdatePairDuty(uint32_t pwmNo, float duty, pwm_config_t* config)
 {
+	/* check for duty cycle limits */
+	if (duty > config->lim.max)
+		duty = config->lim.max;
+	else if (duty < config->lim.min)
+		duty = config->lim.min;
 
+	if (IsDeadtimeEnabled(&config->module->deadtime) && config->dutyMode == OUTPUT_DUTY_AT_PWMH)
+		duty += dutyDeadTime;
+
+	uint32_t ch = (pwmNo - 11) / 2;
+	*(((uint32_t*)&(TIM1->CCR1)) + ch) = duty * TIM1->ARR;
 }
 
 /**
@@ -186,7 +236,17 @@ DutyCycleUpdateFnc BSP_PWM11_16_ConfigInvertedPairs(uint32_t pwmNo, pwm_config_t
  */
 void BSP_PWM11_16_UpdateChannelDuty(uint32_t pwmNo, float duty, pwm_config_t* config)
 {
+	/* check for duty cycle limits */
+	// no need of minimum limit because it may cause confusion as timer is constant
+	if (duty > config->lim.max)
+		duty = config->lim.max;
 
+	// always OUTPUT_DUTY_AT_PWMH MODE because dead time will be always added if due to common timer
+	if (IsDeadtimeEnabled(&config->module->deadtime))
+		duty += dutyDeadTime;
+
+	uint32_t ch = (pwmNo - 11) / 2;
+	*(((uint32_t*)&(TIM1->CCR1)) + ch) = duty * TIM1->ARR;
 }
 /**
  * @brief Configures a single PWM channel

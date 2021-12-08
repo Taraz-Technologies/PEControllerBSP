@@ -290,8 +290,12 @@ static void ConfigInvertedPair(uint32_t pwmNo, pwm_config_t* config)
 	else
 		deadTicks++;
 
-	config->lim.min = config->lim.minMaxDutyCycleBalancing ? ((deadTicks / HRTIM_FREQ) / mod->periodInUsec) : 0;
+	float oldMax = config->lim.max;
 	config->lim.max = 1 - ((deadTicks / HRTIM_FREQ) / mod->periodInUsec);
+	if (oldMax < config->lim.max && oldMax != 0)
+		config->lim.max = oldMax;
+	if (config->lim.minMaxDutyCycleBalancing && config->lim.max > .5f)
+			config->lim.min = 1 - config->lim.max;
 }
 
 /**
@@ -334,8 +338,6 @@ void BSP_PWM1_10_UpdateChannelDuty(uint32_t pwmNo, float duty, pwm_config_t* con
 	/* check for duty cycle limits */
 	if (duty > config->lim.max)
 		duty = config->lim.max;
-	else if (duty < config->lim.min)
-		duty = config->lim.min;
 
 	uint32_t onTime = duty * period;
 	if(mod->alignment == CENTER_ALIGNED)
@@ -440,8 +442,10 @@ static void ConfigChannel(uint32_t pwmNo, pwm_config_t* config)
 	else
 		deadTicks++;
 
-	if (config->lim.max == 0)
-		config->lim.max = 1 - ((deadTicks / HRTIM_FREQ) / mod->periodInUsec);
+	float oldMax = config->lim.max;
+	config->lim.max = 1 - ((deadTicks / HRTIM_FREQ) / mod->periodInUsec);
+	if (oldMax < config->lim.max && oldMax != 0)
+		config->lim.max = oldMax;
 }
 
 /**
