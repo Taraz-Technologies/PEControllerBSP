@@ -118,8 +118,8 @@ pll_states_t Pll_LockGrid(pll_lock_t* pll)
 	// Assign data locations for filters if not already assigned
 	if (pll->dFilt.dataPtr == NULL)
 	{
-		pll->dFilt.dataPtr = (float*)malloc(sizeof(pll->dFilt.count));
-		pll->qFilt.dataPtr = (float*)malloc(sizeof(pll->qFilt.count));
+		pll->dFilt.dataPtr = (float*)malloc(pll->dFilt.count);
+		pll->qFilt.dataPtr = (float*)malloc(pll->qFilt.count);
 
 		if (pll->dFilt.dataPtr == NULL || pll->qFilt.dataPtr == NULL)
 			Error_Handler();

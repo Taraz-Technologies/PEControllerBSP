@@ -100,21 +100,16 @@ void Inverter3Ph_Init(inverter3Ph_config_t* config)
 	if((config->s1PinNos[0] % 2 == 0) || (config->s1PinNos[1] % 2 == 0) || (config->s1PinNos[2] % 2 == 0))
 		return;
 
-	bool interruptState = config->pwmConfig.module->interruptEnabled;
-
 	// configure PWM
 	for (int i = 0; i < 3; i++)
 	{
 		config->updateCallbacks[i] = ConfigSingleLeg(config->s1PinNos[i], config);
 		config->updateCallbacks[i](config->s1PinNos[i], 0.5f, &config->pwmConfig);
-		config->pwmConfig.module->interruptEnabled = false;
 	}
 
 	// enable the pwm signals by disabling any disable feature. Disable is by default active high
 	for (int i = 0; i < config->dsblPinCount; i++)
 		BSP_Dout_SetAsIOPin(config->dsblPinNo + i, GPIO_PIN_RESET);
-
-	config->pwmConfig.module->interruptEnabled = interruptState;
 }
 
 /**

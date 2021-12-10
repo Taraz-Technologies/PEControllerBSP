@@ -26,6 +26,22 @@
 extern "C" {
 #endif
 
+/** @addtogroup PELab6PH_GridTie
+ * @{
+ */
+
+/** @addtogroup PELab6PH_GridTie_CM7
+ * @{
+ */
+
+/** @addtogroup PELab6PH_GridTie_CM7_Configs
+ * @{
+ */
+
+/** @defgroup PELab6PH_GridTie_CM7_ControlConfigs Control Configurations
+ * @brief Defines the configurations used by the control system
+ * @{
+ */
 /********************************************************************************
  * Includes
  *******************************************************************************/
@@ -73,6 +89,19 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
+
+/**
+ * @}
+ */
+/**
+ * @}
+ */
+/**
+ * @}
+ */
+/**
+ * @}
+ */
 
 #endif 
 /* EOF */

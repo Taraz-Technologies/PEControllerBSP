@@ -55,14 +55,9 @@
 			<locationURI>PARENT-5-PROJECT_LOC/Drivers/BSP/PEController/DigitalPins/Src/pecontroller_digital_pins.c</locationURI>
 		</link>
 		<link>
-			<name>BSP/PWM/pecontroller_pwm11_16.c</name>
+			<name>BSP/PWM/pecontroller_pwm.c</name>
 			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/Drivers/BSP/PEController/PWM/Src/pecontroller_pwm11_16.c</locationURI>
-		</link>
-		<link>
-			<name>BSP/PWM/pecontroller_pwm1_10.c</name>
-			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/Drivers/BSP/PEController/PWM/Src/pecontroller_pwm1_10.c</locationURI>
+			<locationURI>PARENT-5-PROJECT_LOC/Drivers/BSP/PEController/PWM/Src/pecontroller_pwm.c</locationURI>
 		</link>
 		<link>
 			<name>Drivers/STM32H7xx_HAL_Driver/stm32h7xx_hal.c</name>

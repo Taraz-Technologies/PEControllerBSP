@@ -26,6 +26,22 @@
 extern "C" {
 #endif
 
+/** @addtogroup PELab_OpenLoopVFD
+ * @{
+ */
+
+/** @addtogroup PELab_OpenLoopVFD_CM7
+ * @{
+ */
+
+/** @addtogroup PELab_OpenLoopVFD_CM7_Configs
+ * @{
+ */
+
+/** @defgroup PELab_OpenLoopVFD_CM7_ControlConfigs Control Configurations
+ * @brief Defines the configurations used by the control system
+ * @{
+ */
 /********************************************************************************
  * Includes
  *******************************************************************************/
@@ -71,5 +87,17 @@ extern "C" {
 }
 #endif
 
+/**
+ * @}
+ */
+/**
+ * @}
+ */
+/**
+ * @}
+ */
+/**
+ * @}
+ */
 #endif 
 /* EOF */

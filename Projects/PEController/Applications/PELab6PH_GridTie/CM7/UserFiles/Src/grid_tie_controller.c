@@ -42,7 +42,6 @@
  *******************************************************************************/
 static pwm_module_config_t inverterPWMModuleConfig =
 {
-		.interruptEnabled = true,
 		.alignment = CENTER_ALIGNED,
 		.periodInUsec = PWM_PERIOD_Us,
 		.deadtime = {
@@ -52,11 +51,9 @@ static pwm_module_config_t inverterPWMModuleConfig =
 };
 static pwm_module_config_t boostPWMConfig =
 {
-		.interruptEnabled = false,
 		.alignment = EDGE_ALIGNED,
 		.periodInUsec = PWM_PERIOD_Us,
-		.deadtime = NULL,
-		.callback = NULL,
+		.deadtime = {0},
 };
 /********************************************************************************
  * Global Variables
@@ -77,7 +74,6 @@ static pwm_module_config_t boostPWMConfig =
 void GridTieControl_Init(grid_tie_t* gridTie, PWMResetCallback pwmResetCallback)
 {
 	/***************** Configure Inverter *********************/
-	inverterPWMModuleConfig.callback = pwmResetCallback;
 	inverter3Ph_config_t* inverterConfig = &gridTie->inverterConfig;
 	inverterConfig->legType = LEG_DEFAULT;
 	inverterConfig->pwmConfig.lim.min = 0;
@@ -123,6 +119,9 @@ void GridTieControl_Init(grid_tie_t* gridTie, PWMResetCallback pwmResetCallback)
 	/***************** Configure Boost *********************/
 
 	BSP_Dout_SetAsIOPin(GRID_RELAY_IO, GPIO_PIN_RESET);
+
+	// Configure the interrupt for PWM Channel with highest priority
+	BSP_PWM_Config_Interrupt(1, true, pwmResetCallback, 0);
 }
 
 static float GridTie_BoostControl(grid_tie_t* gridTie)

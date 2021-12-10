@@ -126,6 +126,13 @@ extern DutyCycleUpdateFnc BSP_PWM11_16_ConfigChannels(uint32_t pwmNo, pwm_config
  * 				   parameters for the PWM channel
  */
 extern void BSP_PWM11_16_UpdateChannelDuty(uint32_t pwmNo, float duty, pwm_config_t* config);
+/**
+ * @brief Enable / Disable interrupt for a PWM channel as per requirement
+ * @param enable If enable interrupt set this parameter to <c>true</>
+ * @param callback Specifies the function to be called when the PWM is reset
+ * @param priority Interrupt priority. Range (0-15). Here 0 is the highest priority
+ */
+extern void BSP_PWM11_16_Config_Interrupt(bool enable, PWMResetCallback callback, int priority);
 /********************************************************************************
  * Code
  *******************************************************************************/

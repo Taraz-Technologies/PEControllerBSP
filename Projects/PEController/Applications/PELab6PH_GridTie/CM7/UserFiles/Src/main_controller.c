@@ -37,6 +37,8 @@ static void Inverter3Ph_ResetSignal(void);
 extern adc_measures_t adcVals;
 static volatile bool recompute = false;
 extern HRTIM_HandleTypeDef hhrtim;
+extern TIM_HandleTypeDef htim1;;
+pwm_config_t pwmConfig = {0};
 /**
  * @brief Grid Tie Control Parameters
  */
@@ -51,6 +53,7 @@ void MainControl_Init(void)
 {
 	BSP_DigitalPins_Init();
 
+
 	BSP_Dout_SetAsIOPin(7, GPIO_PIN_RESET);		// should be zero because this switch behaves as a diode
 
 	gridTieConfig.inverterConfig.s1PinNos[0] = 1;
@@ -64,6 +67,46 @@ void MainControl_Init(void)
 	BSP_Dout_SetAsIOPin(14, GPIO_PIN_RESET);
 	BSP_Dout_SetAsIOPin(15, GPIO_PIN_RESET);
 	BSP_Dout_SetAsIOPin(16, GPIO_PIN_RESET);
+	BSP_Dout_SetAsIOPin(11, GPIO_PIN_RESET);
+	BSP_Dout_SetAsIOPin(12, GPIO_PIN_RESET);
+	BSP_Dout_SetAsIOPin(9, GPIO_PIN_RESET);
+	BSP_Dout_SetAsIOPin(10, GPIO_PIN_RESET);
+
+	/*
+	pwmConfig.dutyMode = OUTPUT_DUTY_AT_PWMH;
+	pwmConfig.lim.min = 0;
+	pwmConfig.lim.max = 0.6;
+	pwmConfig.lim.minMaxDutyCycleBalancing = false;
+	static pwm_module_config_t moduleConfig = {0};
+	pwmConfig.module = &moduleConfig;
+	pwmConfig.module->alignment = CENTER_ALIGNED;
+	pwmConfig.module->deadtime.nanoSec = 1000;
+	pwmConfig.module->deadtime.on = true;
+	pwmConfig.module->periodInUsec = 40;
+	BSP_PWM_ConfigInvertedPair(1, &pwmConfig);
+	BSP_PWM_UpdatePairDuty(1, .3f, &pwmConfig);
+	BSP_Dout_SetAsPWMPin(1);
+	BSP_Dout_SetAsPWMPin(2);
+	*/
+
+	/*
+	pwmConfig.dutyMode = OUTPUT_DUTY_MINUS_DEADTIME_AT_PWMH;
+	pwmConfig.lim.min = 0;
+	pwmConfig.lim.max = .6f;
+	pwmConfig.lim.minMaxDutyCycleBalancing = true;
+	static pwm_module_config_t moduleConfig = {0};
+	pwmConfig.module = &moduleConfig;
+	pwmConfig.module->alignment = CENTER_ALIGNED;
+	pwmConfig.module->deadtime.nanoSec = 1000;
+	pwmConfig.module->deadtime.on = true;
+	pwmConfig.module->periodInUsec = 40;
+	BSP_PWM_ConfigChannel(12, &pwmConfig);
+	BSP_PWM_UpdateChannelDuty(12, .8f, &pwmConfig);
+	BSP_Dout_SetAsPWMPin(12);
+	BSP_Dout_SetAsPWMPin(11);
+	//BSP_Dout_SetAsIOPin(11, GPIO_PIN_RESET);
+	*/
+
 }
 
 /**
@@ -71,21 +114,8 @@ void MainControl_Init(void)
  */
 void MainControl_Run(void)
 {
-	HAL_HRTIM_WaveformOutputStart(&hhrtim,HRTIM_OUTPUT_TA1 | HRTIM_OUTPUT_TA2 | HRTIM_OUTPUT_TB1 | HRTIM_OUTPUT_TB2 | HRTIM_OUTPUT_TC1 | HRTIM_OUTPUT_TC2 | HRTIM_OUTPUT_TD1 | HRTIM_OUTPUT_TD2 | HRTIM_OUTPUT_TE1 | HRTIM_OUTPUT_TE2);																	
-	HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_1);
-	HAL_TIMEx_PWMN_Start(&htim1,TIM_CHANNEL_1);	
-	HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_2);
-	HAL_TIMEx_PWMN_Start(&htim1,TIM_CHANNEL_2);	
-	HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_3);
-	HAL_TIMEx_PWMN_Start(&htim1,TIM_CHANNEL_3);		
-	HAL_HRTIM_WaveformCountStart_IT(&hhrtim,HRTIM_TIMERID_TIMER_A | HRTIM_TIMERID_TIMER_B | HRTIM_TIMERID_TIMER_C | HRTIM_TIMERID_TIMER_D | HRTIM_TIMERID_TIMER_E);	
-
-	hhrtim.Instance->sMasterRegs.MCR &= ~(HRTIM_TIMERID_TIMER_A | HRTIM_TIMERID_TIMER_B | HRTIM_TIMERID_TIMER_C | HRTIM_TIMERID_TIMER_D | HRTIM_TIMERID_TIMER_E);
-	htim1.Instance->CR1 &= ~(TIM_CR1_CEN);
-	htim1.Instance->CNT = 0;
-
-	htim1.Instance->CR1 |= (TIM_CR1_CEN);
-	hhrtim.Instance->sMasterRegs.MCR |= (HRTIM_TIMERID_TIMER_A | HRTIM_TIMERID_TIMER_B | HRTIM_TIMERID_TIMER_C | HRTIM_TIMERID_TIMER_D | HRTIM_TIMERID_TIMER_E);
+	BSP_PWM_Start(0x0Bf);
+	//BSP_PWM_Start(0x083f);
 }
 
 /**
@@ -93,10 +123,8 @@ void MainControl_Run(void)
  */
 void MainControl_Stop(void)
 {
-	HAL_HRTIM_WaveformOutputStop(&hhrtim,HRTIM_OUTPUT_TA1 | HRTIM_OUTPUT_TA2 | HRTIM_OUTPUT_TB1 | HRTIM_OUTPUT_TB2 | HRTIM_OUTPUT_TC1 | HRTIM_OUTPUT_TC2 | HRTIM_OUTPUT_TD1 | HRTIM_OUTPUT_TD2 | HRTIM_OUTPUT_TE1 | HRTIM_OUTPUT_TE2);
-	HAL_TIM_PWM_Stop(&htim1,TIM_CHANNEL_1);
-	HAL_TIMEx_PWMN_Stop(&htim1,TIM_CHANNEL_1);
-	HAL_HRTIM_WaveformCountStop_IT(&hhrtim,HRTIM_TIMERID_TIMER_A | HRTIM_TIMERID_TIMER_B | HRTIM_TIMERID_TIMER_C | HRTIM_TIMERID_TIMER_D | HRTIM_TIMERID_TIMER_E);
+	BSP_PWM_Stop(0x0Bf);
+	//BSP_PWM_Stop(0x083f);
 }
 
 static void Inverter3Ph_ResetSignal(void)

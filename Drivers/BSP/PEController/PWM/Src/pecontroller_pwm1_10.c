@@ -40,7 +40,7 @@
  *******************************************************************************/
 /** <c>true</c> if module previously initialized
  */
-static bool moduleEnabled = false;
+static bool pwm1_10_enabled = false;
 /** keeps the callback functions of all PWM sub-modules
  */
 static PWMResetCallback callbacks[5] = {0};
@@ -146,9 +146,9 @@ static IRQn_Type GetIRQn(uint32_t TimerIdx)
 /**
  * @brief  Initialize the relevant PWM modules (High Precision Timers)
  */
-static void Drivers_Init(void)
+static void PWM1_10_Drivers_Init(void)
 {
-	if(moduleEnabled)
+	if(pwm1_10_enabled)
 		return;
 	RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
 	PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_HRTIM1;
@@ -162,7 +162,7 @@ static void Drivers_Init(void)
 	hhrtim.Init.SyncOptions = HRTIM_SYNCOPTION_NONE;
 	if (HAL_HRTIM_Init(&hhrtim) != HAL_OK)
 		Error_Handler();
-	moduleEnabled = true;
+	pwm1_10_enabled = true;
 }
 
 /**
@@ -222,7 +222,7 @@ void BSP_PWM1_10_UpdatePairDuty(uint32_t pwmNo, float duty, pwm_config_t* config
  * @param *config Pointer to a  pwm_config_t structure that contains the configuration
  * 				   parameters for the PWM pair
  */
-static void ConfigInvertedPair(uint32_t pwmNo, pwm_config_t* config)
+static void PWM1_10_ConfigInvertedPair(uint32_t pwmNo, pwm_config_t* config)
 {
 	// get timer module references
 	uint32_t TimerIdx = (pwmNo - 1) / 2;
@@ -232,19 +232,6 @@ static void ConfigInvertedPair(uint32_t pwmNo, pwm_config_t* config)
 
 	/* timer configuration */
 	HRTIM_TimerCfgTypeDef pTimerCfg = GetDefaultTimerConfig(mod->periodInUsec, TimerIdx);
-	if (mod->interruptEnabled)
-	{
-		pTimerCfg.InterruptRequests = HRTIM_TIM_IT_RST;
-		IRQn_Type irq = GetIRQn(TimerIdx);
-		HAL_NVIC_SetPriority(irq, 0, 0);
-		HAL_NVIC_EnableIRQ(irq);
-		callbacks[TimerIdx] = mod->callback;
-	}
-	else
-	{
-		pTimerCfg.InterruptRequests = HRTIM_TIM_IT_NONE;
-		HAL_NVIC_DisableIRQ(GetIRQn(TimerIdx));
-	}
 	pTimerCfg.DeadTimeInsertion = IsDeadtimeEnabled(&mod->deadtime) ? HRTIM_TIMDEADTIMEINSERTION_ENABLED : HRTIM_TIMDEADTIMEINSERTION_DISABLED;
 	if (HAL_HRTIM_WaveformTimerConfig(&hhrtim, TimerIdx, &pTimerCfg) != HAL_OK)
 		Error_Handler();
@@ -261,7 +248,7 @@ static void ConfigInvertedPair(uint32_t pwmNo, pwm_config_t* config)
 	if (IsDeadtimeEnabled(&mod->deadtime))
 	{
 		HRTIM_DeadTimeCfgTypeDef pDeadTimeCfg = GetDefaultDeadtimeConfig();
-		pDeadTimeCfg.FallingValue = pDeadTimeCfg.RisingValue = (mod->deadtime.nanoSec * HRTIM_FREQ) / (16000);  // --todo-- centeralize
+		pDeadTimeCfg.FallingValue = pDeadTimeCfg.RisingValue = (mod->deadtime.nanoSec * HRTIM_FREQ) / (16000);
 		if (HAL_HRTIM_DeadTimeConfig(&hhrtim, TimerIdx, &pDeadTimeCfg) != HAL_OK)
 			Error_Handler();
 
@@ -295,7 +282,7 @@ static void ConfigInvertedPair(uint32_t pwmNo, pwm_config_t* config)
 	if (oldMax < config->lim.max && oldMax != 0)
 		config->lim.max = oldMax;
 	if (config->lim.minMaxDutyCycleBalancing && config->lim.max > .5f)
-			config->lim.min = 1 - config->lim.max;
+		config->lim.min = 1 - config->lim.max;
 }
 
 /**
@@ -311,11 +298,11 @@ static void ConfigInvertedPair(uint32_t pwmNo, pwm_config_t* config)
  */
 DutyCycleUpdateFnc BSP_PWM1_10_ConfigInvertedPairs(uint32_t pwmNo, pwm_config_t* config, int pairCount)
 {
-	if(!moduleEnabled)
-		Drivers_Init();
+	if(!pwm1_10_enabled)
+		PWM1_10_Drivers_Init();
 	while (pairCount--)
 	{
-		ConfigInvertedPair(pwmNo, config);
+		PWM1_10_ConfigInvertedPair(pwmNo, config);
 		pwmNo += 2;
 	}
 	return BSP_PWM1_10_UpdatePairDuty;
@@ -377,7 +364,7 @@ void BSP_PWM1_10_UpdateChannelDuty(uint32_t pwmNo, float duty, pwm_config_t* con
  * @param *config Pointer to a  pwm_config_t structure that contains the configuration
  * 				   parameters for the PWM channels
  */
-static void ConfigChannel(uint32_t pwmNo, pwm_config_t* config)
+static void PWM1_10_ConfigChannel(uint32_t pwmNo, pwm_config_t* config)
 {
 	// get timer module references
 	uint32_t TimerIdx = (pwmNo - 1) / 2;
@@ -387,19 +374,6 @@ static void ConfigChannel(uint32_t pwmNo, pwm_config_t* config)
 
 	/* timer configuration */
 	HRTIM_TimerCfgTypeDef pTimerCfg = GetDefaultTimerConfig(mod->periodInUsec, TimerIdx);
-	if (mod->interruptEnabled)
-	{
-		pTimerCfg.InterruptRequests = HRTIM_TIM_IT_RST;
-		IRQn_Type irq = GetIRQn(TimerIdx);
-		HAL_NVIC_SetPriority(irq, 0, 0);
-		HAL_NVIC_EnableIRQ(irq);
-		callbacks[TimerIdx] = mod->callback;
-	}
-	else
-	{
-		pTimerCfg.InterruptRequests = HRTIM_TIM_IT_NONE;
-		HAL_NVIC_DisableIRQ(GetIRQn(TimerIdx));
-	}
 	pTimerCfg.DeadTimeInsertion = HRTIM_TIMDEADTIMEINSERTION_DISABLED;
 	if (HAL_HRTIM_WaveformTimerConfig(&hhrtim, TimerIdx, &pTimerCfg) != HAL_OK)
 		Error_Handler();
@@ -459,11 +433,40 @@ static void ConfigChannel(uint32_t pwmNo, pwm_config_t* config)
  */
 DutyCycleUpdateFnc BSP_PWM1_10_ConfigChannels(uint32_t pwmNo, pwm_config_t* config, int chCount)
 {
-	if(!moduleEnabled)
-		Drivers_Init();
+	if(!pwm1_10_enabled)
+		PWM1_10_Drivers_Init();
 	while (chCount--)
-		ConfigChannel(pwmNo++, config);
+		PWM1_10_ConfigChannel(pwmNo++, config);
 	return BSP_PWM1_10_UpdateChannelDuty;
+}
+
+/**
+ * @brief Enable / Disable interrupt for a PWM channel as per requirement
+ * @param pwmNo Channel no of the PWM Channel (Range 1-10)
+ * @param enable If enable interrupt set this parameter to <c>true</>
+ * @param callback Specifies the function to be called when the PWM is reset
+ * @param priority Interrupt priority. Range (0-15). Here 0 is the highest priority
+ */
+void BSP_PWM1_10_Config_Interrupt(uint32_t pwmNo, bool enable, PWMResetCallback callback, int priority)
+{
+	uint32_t TimerIdx = (pwmNo - 1) / 2;
+	__HAL_HRTIM_ENABLE_IT(&hhrtim, hhrtim.Init.HRTIMInterruptResquests);
+	if (enable)
+	{
+		callbacks[TimerIdx] = callback;
+		hhrtim.TimerParam[TimerIdx].InterruptRequests = HRTIM_TIM_IT_RST;
+		__HAL_HRTIM_TIMER_ENABLE_IT(&hhrtim, TimerIdx, hhrtim.TimerParam[TimerIdx].InterruptRequests);
+		IRQn_Type irq = GetIRQn(TimerIdx);
+		HAL_NVIC_SetPriority(irq, priority, 0);
+		HAL_NVIC_EnableIRQ(irq);
+	}
+	else
+	{
+		hhrtim.TimerParam[TimerIdx].InterruptRequests = HRTIM_TIM_IT_NONE;
+		__HAL_HRTIM_TIMER_DISABLE_IT(&hhrtim, TimerIdx, hhrtim.TimerParam[TimerIdx].InterruptRequests);
+		HAL_NVIC_DisableIRQ(GetIRQn(TimerIdx));
+		callbacks[TimerIdx] = NULL;
+	}
 }
 
 /**

@@ -40,7 +40,7 @@
  *******************************************************************************/
 /** <c>true</c> if module previously initialized
  */
-static bool moduleEnabled = false;
+static bool pwm11_16_enabled = false;
 /** Timer configurations
  */
 static TIM_OC_InitTypeDef sConfigOC =
@@ -60,6 +60,9 @@ static float dutyDeadTime = 0;
 /** Timer 1 handle
  */
 TIM_HandleTypeDef htim1;
+/** keeps the callback function of all PWM module
+ */
+static PWMResetCallback resetCallback = NULL;
 /********************************************************************************
  * Function Prototypes
  *******************************************************************************/
@@ -73,9 +76,9 @@ TIM_HandleTypeDef htim1;
  * @param *config Pointer to a structure that contains the configuration
  * 				   parameters for the PWM pair
  */
-static void Drivers_Init(pwm_config_t* config)
+static void PWM11_16_Drivers_Init(pwm_config_t* config)
 {
-	if(moduleEnabled)
+	if(pwm11_16_enabled)
 		return;
 	__HAL_RCC_TIM1_CLK_ENABLE();
 	htim1.Instance = TIM1;
@@ -160,7 +163,7 @@ static void Drivers_Init(pwm_config_t* config)
 	if (config->lim.minMaxDutyCycleBalancing  && config->lim.max > .5f)
 		config->lim.min = 1 - config->lim.max;
 
-	moduleEnabled = true;
+	pwm11_16_enabled = true;
 }
 /**
  * @brief Update the Duty Cycle of an Inverted Pair
@@ -194,7 +197,7 @@ void BSP_PWM11_16_UpdatePairDuty(uint32_t pwmNo, float duty, pwm_config_t* confi
  * @param *config Pointer to a  pwm_config_t structure that contains the configuration
  * 				   parameters for the PWM pair
  */
-static void ConfigInvertedPair(uint32_t pwmNo, pwm_config_t* config)
+static void PWM11_16_ConfigInvertedPair(uint32_t pwmNo, pwm_config_t* config)
 {
 	uint32_t ch = (pwmNo - 11);
 	// If pair not selected correctly report as error
@@ -217,11 +220,11 @@ static void ConfigInvertedPair(uint32_t pwmNo, pwm_config_t* config)
  */
 DutyCycleUpdateFnc BSP_PWM11_16_ConfigInvertedPairs(uint32_t pwmNo, pwm_config_t* config, int pairCount)
 {
-	if(!moduleEnabled)
-		Drivers_Init(config);
+	if(!pwm11_16_enabled)
+		PWM11_16_Drivers_Init(config);
 	while (pairCount--)
 	{
-		ConfigInvertedPair(pwmNo, config);
+		PWM11_16_ConfigInvertedPair(pwmNo, config);
 		pwmNo += 2;
 	}
 	return BSP_PWM11_16_UpdatePairDuty;
@@ -254,14 +257,16 @@ void BSP_PWM11_16_UpdateChannelDuty(uint32_t pwmNo, float duty, pwm_config_t* co
  * @param *config Pointer to a  pwm_config_t structure that contains the configuration
  * 				   parameters for the PWM channels
  */
-static void ConfigChannel(uint32_t pwmNo, pwm_config_t* config)
+static void PWM11_16_ConfigChannel(uint32_t pwmNo, pwm_config_t* config)
 {
 	uint32_t ch = (pwmNo - 11);
 	// Even pairs may only be selected as inverted channels
+	TIM_OC_InitTypeDef sConfigOCLocal;
+	memcpy((void*)&sConfigOCLocal, (void*)&sConfigOC, sizeof(TIM_OC_InitTypeDef));
 	if(ch % 2 != 0)
-		Error_Handler();
-	ch = ch == 0 ? TIM_CHANNEL_1 : (ch == 2 ? TIM_CHANNEL_2 : TIM_CHANNEL_3);
-	if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, ch) != HAL_OK)
+		sConfigOCLocal.OCMode = TIM_OCMODE_PWM2;
+	ch = ((ch & 0x3c) == 0) ? TIM_CHANNEL_1 : ((ch & 0xc) ? TIM_CHANNEL_2 : TIM_CHANNEL_3);
+	if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOCLocal, ch) != HAL_OK)
 		Error_Handler();
 }
 
@@ -277,13 +282,52 @@ static void ConfigChannel(uint32_t pwmNo, pwm_config_t* config)
  */
 DutyCycleUpdateFnc BSP_PWM11_16_ConfigChannels(uint32_t pwmNo, pwm_config_t* config, int chCount)
 {
-	if(!moduleEnabled)
-		Drivers_Init(config);
+	if(!pwm11_16_enabled)
+		PWM11_16_Drivers_Init(config);
 	while (chCount--)
 	{
-		ConfigChannel(pwmNo, config);
+		PWM11_16_ConfigChannel(pwmNo, config);
 		pwmNo += 2;						// No need to configure the other
 	}
 	return BSP_PWM11_16_UpdateChannelDuty;
+}
+
+/**
+ * @brief Enable / Disable interrupt for a PWM channel as per requirement
+ * @param enable If enable interrupt set this parameter to <c>true</>
+ * @param callback Specifies the function to be called when the PWM is reset
+ * @param priority Interrupt priority. Range (0-15). Here 0 is the highest priority
+ */
+void BSP_PWM11_16_Config_Interrupt(bool enable, PWMResetCallback callback, int priority)
+{
+	if (enable)
+	{
+		resetCallback = callback;
+		__HAL_TIM_ENABLE_IT(&htim1, TIM_IT_UPDATE);
+		HAL_NVIC_SetPriority(TIM1_UP_IRQn, priority, 0);
+		HAL_NVIC_EnableIRQ(TIM1_UP_IRQn);
+	}
+	else
+	{
+		__HAL_TIM_DISABLE_IT(&htim1, TIM_IT_UPDATE);
+		HAL_NVIC_DisableIRQ(TIM1_UP_IRQn);
+		resetCallback = NULL;
+	}
+}
+
+/**
+ * @brief Timer1 update IRQ Handler to process Timer 1 interrupts
+ */
+void TIM1_UP_IRQHandler(void)
+{
+	/* TIM Update event */
+	if (__HAL_TIM_GET_FLAG(&htim1, TIM_FLAG_UPDATE) != RESET)
+	{
+		if (__HAL_TIM_GET_IT_SOURCE(&htim1, TIM_IT_UPDATE) != RESET)
+		{
+			resetCallback();
+			__HAL_TIM_CLEAR_IT(&htim1, TIM_IT_UPDATE);
+		}
+	}
 }
 /* EOF */

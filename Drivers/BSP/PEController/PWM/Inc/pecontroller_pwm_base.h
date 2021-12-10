@@ -45,13 +45,7 @@ extern "C" {
 /********************************************************************************
  * Defines
  *******************************************************************************/
-/** @defgroup PWM_Exported_Macros Macros
-  * @{
-  */
 #define HRTIM_FREQ					(480)					// --todo-- centralize
-/**
- * @}
- */
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
@@ -120,12 +114,10 @@ typedef struct
  */
 typedef struct
 {
-	bool interruptEnabled;			/**< @brief Controls interrupt callback at PWM reset */
 	pwm_alignment_t alignment;		/**< @brief Specifies the alignment of PWM */
 	uint32_t periodInUsec;			/**< @brief Specifies the period of the PWM in micro-seconds */
 	deadtime_t deadtime;			/**< @brief The dead time parameter for the paired inverted PWM.
 										For individual PWMs this value should be NULL */
-	PWMResetCallback callback;		/**< @brief Specifies the function to be called when the PWM is reset */
 } pwm_module_config_t;
 /**
  * @brief Defines the parameters for specific PWM configuration

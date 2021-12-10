@@ -65,8 +65,7 @@ extern "C" {
 /*******************************************************************************
  * Includes
  ******************************************************************************/
-#include "pecontroller_pwm1_10.h"
-#include "pecontroller_pwm11_16.h"
+#include "pecontroller_pwm_base.h"
 /*******************************************************************************
  * Defines
  ******************************************************************************/
@@ -104,10 +103,6 @@ typedef struct
 /** @addtogroup PWM_Exported_Functions
   * @{
   */
-
-/*******************************************************************************
- * Code
- ******************************************************************************/
 /**
  * @brief Configures an PWM pair as inverted pair
  * @param pwmNo Channel no of the first PWM Channel in the pair (Valid Values 1,3,5,7,9,11,13,15)
@@ -118,14 +113,7 @@ typedef struct
  * @return DutyCycleUpdateFnc Returns the function pointer of the type DutyCycleUpdateFnc which needs to be called
  * 						  whenever the duty cycles of the pair need to be updated
  */
-static DutyCycleUpdateFnc BSP_PWM_ConfigInvertedPair(uint16_t pwmNo, pwm_config_t *config)
-{
-	if (pwmNo <= 10)
-		return BSP_PWM1_10_ConfigInvertedPairs(pwmNo, config, 1);
-	else if (pwmNo <= 16)
-		return BSP_PWM11_16_ConfigInvertedPairs(pwmNo, config, 1);
-	return NULL;
-}
+extern DutyCycleUpdateFnc BSP_PWM_ConfigInvertedPair(uint16_t pwmNo, pwm_config_t *config);
 /**
  * @brief Configures a PWM channel
  * @param pwmNo PWM channel to be configured (Valid Values 1-10,11,13,15)
@@ -134,14 +122,7 @@ static DutyCycleUpdateFnc BSP_PWM_ConfigInvertedPair(uint16_t pwmNo, pwm_config_
  * @return DutyCycleUpdateFnc Returns the function pointer of the type DutyCycleUpdateFnc which needs to be called
  * 						  whenever the duty cycles of the pair need to be updated
  */
-static DutyCycleUpdateFnc BSP_PWM_ConfigChannel(uint16_t pwmNo, pwm_config_t *config)
-{
-	if (pwmNo <= 10)
-		return BSP_PWM1_10_ConfigChannels(pwmNo, config, 1);
-	else if (pwmNo <= 16)
-		return BSP_PWM11_16_ConfigChannels(pwmNo, config, 1);
-	return NULL;
-}
+extern DutyCycleUpdateFnc BSP_PWM_ConfigChannel(uint16_t pwmNo, pwm_config_t *config);
 
 /**
  * @brief Update the Duty Cycle of an Inverted Pair
@@ -152,13 +133,7 @@ static DutyCycleUpdateFnc BSP_PWM_ConfigChannel(uint16_t pwmNo, pwm_config_t *co
  * @param *config Pointer to a  pwm_config_t structure that contains the configuration
  * 				   parameters for the PWM pair
  */
-static void BSP_PWM_UpdatePairDuty(uint32_t pwmNo, float duty, pwm_config_t* config)
-{
-	if (pwmNo <= 10)
-		BSP_PWM1_10_UpdatePairDuty(pwmNo, duty, config);
-	else if (pwmNo <= 16)
-		BSP_PWM11_16_UpdatePairDuty(pwmNo, duty, config);
-}
+extern void BSP_PWM_UpdatePairDuty(uint32_t pwmNo, float duty, pwm_config_t* config);
 
 /**
  * @brief Update the Duty Cycle of a channel
@@ -167,13 +142,48 @@ static void BSP_PWM_UpdatePairDuty(uint32_t pwmNo, float duty, pwm_config_t* con
  * @param *config Pointer to a  pwm_config_t structure that contains the configuration
  * 				   parameters for the PWM channel
  */
-static void BSP_PWM_UpdateChannelDuty(uint32_t pwmNo, float duty, pwm_config_t* config)
-{
-	if (pwmNo <= 10)
-		BSP_PWM1_10_UpdateChannelDuty(pwmNo, duty, config);
-	else if (pwmNo <= 16)
-		BSP_PWM11_16_UpdateChannelDuty(pwmNo, duty, config);
-}
+extern void BSP_PWM_UpdateChannelDuty(uint32_t pwmNo, float duty, pwm_config_t* config);
+
+/**
+ * @brief Enable / Disable interrupt for a PWM channel as per requirement
+ * @param pwmNo Channel no of the PWM Channel (Range 1-16)
+ * @param enable If enable interrupt set this parameter to <c>true</>
+ * @param callback Specifies the function to be called when the PWM is reset
+ * @param priority Interrupt priority. Range (0-15). Here 0 is the highest priority
+ */
+extern void BSP_PWM_Config_Interrupt(uint32_t pwmNo, bool enable, PWMResetCallback callback, int priority);
+/**
+ * @brief Starts the PWM on required PWM pins
+ * @param pwmMask Set the PWM channels needed to be run.<br>
+ * 				<b>Valid Range</b> =  (0x0001 - 0xffff)
+ * @code
+ * // Start PWM for channel 1
+ * BSP_PWM_Start(0x1);
+ * // Start PWM for channel 1 and channel 2
+ * BSP_PWM_Start(0x3);
+ * // Start PWM for channel n and channel m, where n & m are between 1 & 16
+ * BSP_PWM_Start((1U << (n - 1)) | (1U << (m - 1)));
+ * @endcode
+ */
+extern void BSP_PWM_Start(uint32_t pwmMask);
+/**
+ * @brief Stops the PWM on required PWM pins
+ * @param pwmMask Set the PWM channels needed to be stopped.<br>
+ * 				<b>Valid Range</b> =  (0x0001 - 0xffff)
+ * @code
+ * // Stop PWM for channel 1
+ * BSP_PWM_Stop(0x1);
+ * // Stop PWM for channel 1 and channel 2
+ * BSP_PWM_Stop(0x3);
+ * // Stop PWM for channel n and channel m, where n & m are between 1 & 16
+ * BSP_PWM_Stop((1U << (n - 1)) | (1U << (m - 1)));
+ * @endcode
+ */
+extern void BSP_PWM_Stop(uint32_t pwmMask);
+/*******************************************************************************
+ * Code
+ ******************************************************************************/
+
 
 #endif
 
