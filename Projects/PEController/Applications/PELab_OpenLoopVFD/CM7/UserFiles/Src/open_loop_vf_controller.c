@@ -41,7 +41,6 @@
  *******************************************************************************/
 static pwm_module_config_t inverterPWMModuleConfig =
 {
-		.interruptEnabled = true,
 		.alignment = CENTER_ALIGNED,
 		.periodInUsec = PWM_PERIOD_Us,
 		.deadtime = {
@@ -68,8 +67,6 @@ static pwm_module_config_t inverterPWMModuleConfig =
 void OpenLoopVfControl_Init(openloopvf_config_t* config, PWMResetCallback pwmResetCallback)
 {
 	/***************** Configure Inverter *********************/
-	inverterPWMModuleConfig.callback = pwmResetCallback;
-	inverterPWMModuleConfig.interruptEnabled = pwmResetCallback == NULL ? true : false;
 	inverter3Ph_config_t* inverterConfig = &config->inverterConfig;
 	inverterConfig->legType = LEG_DEFAULT;
 	inverterConfig->pwmConfig.lim.min = 0;
@@ -89,6 +86,9 @@ void OpenLoopVfControl_Init(openloopvf_config_t* config, PWMResetCallback pwmRes
 	config->wt = 0;
 	config->currentFreq = INITIAL_FREQ;
 	/***************** Configure Control *********************/
+
+	if(pwmResetCallback != NULL)
+		BSP_PWM_Config_Interrupt(inverterConfig->s1PinNos[0], true, pwmResetCallback, 0);
 }
 
 /**

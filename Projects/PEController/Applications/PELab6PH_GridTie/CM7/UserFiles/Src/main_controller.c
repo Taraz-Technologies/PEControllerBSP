@@ -37,7 +37,7 @@ static void Inverter3Ph_ResetSignal(void);
 extern adc_measures_t adcVals;
 static volatile bool recompute = false;
 extern HRTIM_HandleTypeDef hhrtim;
-extern TIM_HandleTypeDef htim1;;
+extern TIM_HandleTypeDef htim1;
 pwm_config_t pwmConfig = {0};
 /**
  * @brief Grid Tie Control Parameters

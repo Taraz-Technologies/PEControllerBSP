@@ -154,8 +154,6 @@ extern void BSP_PWM_UpdateChannelDuty(uint32_t pwmNo, float duty, pwm_config_t* 
 extern void BSP_PWM_Config_Interrupt(uint32_t pwmNo, bool enable, PWMResetCallback callback, int priority);
 /**
  * @brief Starts the PWM on required PWM pins
- * @param pwmMask Set the PWM channels needed to be run.<br>
- * 				<b>Valid Range</b> =  (0x0001 - 0xffff)
  * @code
  * // Start PWM for channel 1
  * BSP_PWM_Start(0x1);
@@ -164,12 +162,12 @@ extern void BSP_PWM_Config_Interrupt(uint32_t pwmNo, bool enable, PWMResetCallba
  * // Start PWM for channel n and channel m, where n & m are between 1 & 16
  * BSP_PWM_Start((1U << (n - 1)) | (1U << (m - 1)));
  * @endcode
+ * @param pwmMask Set the PWM channels needed to be run.<br>
+ * 				<b>Valid Range</b> =  (0x0001 - 0xffff)
  */
 extern void BSP_PWM_Start(uint32_t pwmMask);
 /**
  * @brief Stops the PWM on required PWM pins
- * @param pwmMask Set the PWM channels needed to be stopped.<br>
- * 				<b>Valid Range</b> =  (0x0001 - 0xffff)
  * @code
  * // Stop PWM for channel 1
  * BSP_PWM_Stop(0x1);
@@ -178,6 +176,8 @@ extern void BSP_PWM_Start(uint32_t pwmMask);
  * // Stop PWM for channel n and channel m, where n & m are between 1 & 16
  * BSP_PWM_Stop((1U << (n - 1)) | (1U << (m - 1)));
  * @endcode
+ * @param pwmMask Set the PWM channels needed to be stopped.<br>
+ * 				<b>Valid Range</b> =  (0x0001 - 0xffff)
  */
 extern void BSP_PWM_Stop(uint32_t pwmMask);
 /*******************************************************************************

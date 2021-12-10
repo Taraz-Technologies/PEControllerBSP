@@ -47,6 +47,7 @@ openloopvf_config_t openLoopVfConfig1 = {0};
 openloopvf_config_t openLoopVfConfig2 = {0};
 static volatile bool recompute = false;
 extern HRTIM_HandleTypeDef hhrtim;
+extern TIM_HandleTypeDef htim1;
 /*******************************************************************************
  * Code
  ******************************************************************************/
@@ -80,21 +81,7 @@ void MainControl_Init(void)
  */
 void MainControl_Run(void)
 {
-	HAL_HRTIM_WaveformOutputStart(&hhrtim,HRTIM_OUTPUT_TA1 | HRTIM_OUTPUT_TA2 | HRTIM_OUTPUT_TB1 | HRTIM_OUTPUT_TB2 | HRTIM_OUTPUT_TC1 | HRTIM_OUTPUT_TC2 | HRTIM_OUTPUT_TD1 | HRTIM_OUTPUT_TD2 | HRTIM_OUTPUT_TE1 | HRTIM_OUTPUT_TE2);																	
-	HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_1);
-	HAL_TIMEx_PWMN_Start(&htim1,TIM_CHANNEL_1);	
-	HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_2);
-	HAL_TIMEx_PWMN_Start(&htim1,TIM_CHANNEL_2);	
-	HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_3);
-	HAL_TIMEx_PWMN_Start(&htim1,TIM_CHANNEL_3);		
-	HAL_HRTIM_WaveformCountStart_IT(&hhrtim,HRTIM_TIMERID_TIMER_A | HRTIM_TIMERID_TIMER_B | HRTIM_TIMERID_TIMER_C | HRTIM_TIMERID_TIMER_D | HRTIM_TIMERID_TIMER_E);	
-
-	hhrtim.Instance->sMasterRegs.MCR &= ~(HRTIM_TIMERID_TIMER_A | HRTIM_TIMERID_TIMER_B | HRTIM_TIMERID_TIMER_C | HRTIM_TIMERID_TIMER_D | HRTIM_TIMERID_TIMER_E);
-	htim1.Instance->CR1 &= ~(TIM_CR1_CEN);
-	htim1.Instance->CNT = 0;
-
-	htim1.Instance->CR1 |= (TIM_CR1_CEN);
-	hhrtim.Instance->sMasterRegs.MCR |= (HRTIM_TIMERID_TIMER_A | HRTIM_TIMERID_TIMER_B | HRTIM_TIMERID_TIMER_C | HRTIM_TIMERID_TIMER_D | HRTIM_TIMERID_TIMER_E);
+	BSP_PWM_Start(0xfff);
 }
 
 /**
@@ -102,10 +89,7 @@ void MainControl_Run(void)
  */
 void MainControl_Stop(void)
 {
-	HAL_HRTIM_WaveformOutputStop(&hhrtim,HRTIM_OUTPUT_TA1 | HRTIM_OUTPUT_TA2 | HRTIM_OUTPUT_TB1 | HRTIM_OUTPUT_TB2 | HRTIM_OUTPUT_TC1 | HRTIM_OUTPUT_TC2 | HRTIM_OUTPUT_TD1 | HRTIM_OUTPUT_TD2 | HRTIM_OUTPUT_TE1 | HRTIM_OUTPUT_TE2);
-	HAL_TIM_PWM_Stop(&htim1,TIM_CHANNEL_1);
-	HAL_TIMEx_PWMN_Stop(&htim1,TIM_CHANNEL_1);
-	HAL_HRTIM_WaveformCountStop_IT(&hhrtim,HRTIM_TIMERID_TIMER_A | HRTIM_TIMERID_TIMER_B | HRTIM_TIMERID_TIMER_C | HRTIM_TIMERID_TIMER_D | HRTIM_TIMERID_TIMER_E);
+	BSP_PWM_Stop(0xfff);
 }
 
 static void Inverter3Ph_ResetSignal(void)
