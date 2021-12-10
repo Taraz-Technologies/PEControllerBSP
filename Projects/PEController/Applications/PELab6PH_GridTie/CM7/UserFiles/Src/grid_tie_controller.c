@@ -121,7 +121,7 @@ void GridTieControl_Init(grid_tie_t* gridTie, PWMResetCallback pwmResetCallback)
 	BSP_Dout_SetAsIOPin(GRID_RELAY_IO, GPIO_PIN_RESET);
 
 	// Configure the interrupt for PWM Channel with highest priority
-	BSP_PWM_Config_Interrupt(1, true, pwmResetCallback, 0);
+	BSP_PWM_Config_Interrupt(inverterConfig->s1PinNos[0], true, pwmResetCallback, 0);
 }
 
 static float GridTie_BoostControl(grid_tie_t* gridTie)

@@ -53,7 +53,6 @@ void MainControl_Init(void)
 {
 	BSP_DigitalPins_Init();
 
-
 	BSP_Dout_SetAsIOPin(7, GPIO_PIN_RESET);		// should be zero because this switch behaves as a diode
 
 	gridTieConfig.inverterConfig.s1PinNos[0] = 1;
