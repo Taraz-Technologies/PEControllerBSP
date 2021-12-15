@@ -64,7 +64,10 @@ typedef enum
 typedef struct
 {
 	float vdc;								/**< @brief DC link voltage */
+	float vpv;								/**< @brief Input voltage for the boost inductor */
+	float idc;								/**< @brief Input current for the DC link */
 	float iRef;								/**< @brief Constant reference current for output */
+	float boostD0;							/**< @brief Duty cycle applied in the last cycle */
 	LIB_COOR_ALL_t vCoor;					/**< @brief Phase voltage coordinates */
 	LIB_COOR_ALL_t iCoor;					/**< @brief Phase current coordinates */
 	pi_compensator_t iQComp;				/**< @brief Compensator for Q value of DQ transform for grid currents */
