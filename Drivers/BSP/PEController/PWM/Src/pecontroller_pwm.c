@@ -94,13 +94,15 @@ DutyCycleUpdateFnc BSP_PWM_ConfigChannel(uint16_t pwmNo, pwm_config_t *config)
  * @param duty duty cycle to be applied to the pair (Range 0-1 or given in the config parameter)
  * @param *config Pointer to a  pwm_config_t structure that contains the configuration
  * 				   parameters for the PWM pair
+ * @return float Duty cycle applied in this cycle. May differ from the @ref duty variable if outside permitted limits
  */
-void BSP_PWM_UpdatePairDuty(uint32_t pwmNo, float duty, pwm_config_t* config)
+float BSP_PWM_UpdatePairDuty(uint32_t pwmNo, float duty, pwm_config_t* config)
 {
 	if (pwmNo <= 10)
-		BSP_PWM1_10_UpdatePairDuty(pwmNo, duty, config);
+		return BSP_PWM1_10_UpdatePairDuty(pwmNo, duty, config);
 	else if (pwmNo <= 16)
-		BSP_PWM11_16_UpdatePairDuty(pwmNo, duty, config);
+		return BSP_PWM11_16_UpdatePairDuty(pwmNo, duty, config);
+	return 0;
 }
 
 /**
@@ -109,13 +111,15 @@ void BSP_PWM_UpdatePairDuty(uint32_t pwmNo, float duty, pwm_config_t* config)
  * @param duty duty cycle to be applied to the channel (Range 0-1 or given in the config parameter)
  * @param *config Pointer to a  pwm_config_t structure that contains the configuration
  * 				   parameters for the PWM channel
+ * @return float Duty cycle applied in this cycle. May differ from the @ref duty variable if outside permitted limits
  */
-void BSP_PWM_UpdateChannelDuty(uint32_t pwmNo, float duty, pwm_config_t* config)
+float BSP_PWM_UpdateChannelDuty(uint32_t pwmNo, float duty, pwm_config_t* config)
 {
 	if (pwmNo <= 10)
-		BSP_PWM1_10_UpdateChannelDuty(pwmNo, duty, config);
+		return BSP_PWM1_10_UpdateChannelDuty(pwmNo, duty, config);
 	else if (pwmNo <= 16)
-		BSP_PWM11_16_UpdateChannelDuty(pwmNo, duty, config);
+		return BSP_PWM11_16_UpdateChannelDuty(pwmNo, duty, config);
+	return 0;
 }
 
 /**
@@ -203,7 +207,7 @@ void BSP_PWM_Start(uint32_t pwmMask)
 			(pwmMask & 0x300 ? HRTIM_TIMERID_TIMER_E : 0);
 
 	// enable timer
-	if (pwmMask & 0xffff)
+	if ((pwmMask & 0xfc00) && (pwmMask & 0x2ff))
 	{
 		__HAL_TIM_MOE_ENABLE(&htim1);
 		hhrtim.Instance->sMasterRegs.MCR |= (th_tim_sel);

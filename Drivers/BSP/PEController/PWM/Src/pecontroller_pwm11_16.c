@@ -173,8 +173,9 @@ static void PWM11_16_Drivers_Init(pwm_config_t* config)
  * @param duty duty cycle to be applied to the pair (Range 0-1 or given in the config parameter)
  * @param *config Pointer to a  pwm_config_t structure that contains the configuration
  * 				   parameters for the PWM pair
+ * @return float Duty cycle applied in this cycle. May differ from the @ref duty variable if outside permitted limits
  */
-void BSP_PWM11_16_UpdatePairDuty(uint32_t pwmNo, float duty, pwm_config_t* config)
+float BSP_PWM11_16_UpdatePairDuty(uint32_t pwmNo, float duty, pwm_config_t* config)
 {
 	/* check for duty cycle limits */
 	if (duty > config->lim.max)
@@ -182,11 +183,15 @@ void BSP_PWM11_16_UpdatePairDuty(uint32_t pwmNo, float duty, pwm_config_t* confi
 	else if (duty < config->lim.min)
 		duty = config->lim.min;
 
+	float dutyUse = duty;
+
 	if (IsDeadtimeEnabled(&config->module->deadtime) && config->dutyMode == OUTPUT_DUTY_AT_PWMH)
-		duty += dutyDeadTime;
+		dutyUse += dutyDeadTime;
 
 	uint32_t ch = (pwmNo - 11) / 2;
-	*(((uint32_t*)&(TIM1->CCR1)) + ch) = duty * TIM1->ARR;
+	*(((uint32_t*)&(TIM1->CCR1)) + ch) = dutyUse * TIM1->ARR;
+
+	return duty;
 }
 
 /**
@@ -236,20 +241,25 @@ DutyCycleUpdateFnc BSP_PWM11_16_ConfigInvertedPairs(uint32_t pwmNo, pwm_config_t
  * @param duty duty cycle to be applied to the channel (Range 0-1 or given in the config parameter)
  * @param *config Pointer to a  pwm_config_t structure that contains the configuration
  * 				   parameters for the PWM channel
+ * @return float Duty cycle applied in this cycle. May differ from the @ref duty variable if outside permitted limits
  */
-void BSP_PWM11_16_UpdateChannelDuty(uint32_t pwmNo, float duty, pwm_config_t* config)
+float BSP_PWM11_16_UpdateChannelDuty(uint32_t pwmNo, float duty, pwm_config_t* config)
 {
 	/* check for duty cycle limits */
 	// no need of minimum limit because it may cause confusion as timer is constant
 	if (duty > config->lim.max)
 		duty = config->lim.max;
 
+	float dutyUse = duty;
+
 	// always OUTPUT_DUTY_AT_PWMH MODE because dead time will be always added if due to common timer
 	if (IsDeadtimeEnabled(&config->module->deadtime))
-		duty += dutyDeadTime;
+		dutyUse += dutyDeadTime;
 
 	uint32_t ch = (pwmNo - 11) / 2;
-	*(((uint32_t*)&(TIM1->CCR1)) + ch) = duty * TIM1->ARR;
+	*(((uint32_t*)&(TIM1->CCR1)) + ch) = dutyUse * TIM1->ARR;
+
+	return duty;
 }
 /**
  * @brief Configures a single PWM channel
@@ -264,8 +274,11 @@ static void PWM11_16_ConfigChannel(uint32_t pwmNo, pwm_config_t* config)
 	TIM_OC_InitTypeDef sConfigOCLocal;
 	memcpy((void*)&sConfigOCLocal, (void*)&sConfigOC, sizeof(TIM_OC_InitTypeDef));
 	if(ch % 2 != 0)
+	{
 		sConfigOCLocal.OCMode = TIM_OCMODE_PWM2;
-	ch = ((ch & 0x3c) == 0) ? TIM_CHANNEL_1 : ((ch & 0xc) ? TIM_CHANNEL_2 : TIM_CHANNEL_3);
+		//sConfigOCLocal.OCNIdleState = TIM_OCNIDLESTATE_RESET;
+	}
+	ch = (ch & 0x6) ? ((ch & 2) ? TIM_CHANNEL_2 : TIM_CHANNEL_3) : TIM_CHANNEL_1;
 	if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOCLocal, ch) != HAL_OK)
 		Error_Handler();
 }

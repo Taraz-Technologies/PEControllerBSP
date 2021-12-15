@@ -132,8 +132,9 @@ extern DutyCycleUpdateFnc BSP_PWM_ConfigChannel(uint16_t pwmNo, pwm_config_t *co
  * @param duty duty cycle to be applied to the pair (Range 0-1 or given in the config parameter)
  * @param *config Pointer to a  pwm_config_t structure that contains the configuration
  * 				   parameters for the PWM pair
+ * @return float Duty cycle applied in this cycle. May differ from the @ref duty variable if outside permitted limits
  */
-extern void BSP_PWM_UpdatePairDuty(uint32_t pwmNo, float duty, pwm_config_t* config);
+extern float BSP_PWM_UpdatePairDuty(uint32_t pwmNo, float duty, pwm_config_t* config);
 
 /**
  * @brief Update the Duty Cycle of a channel
@@ -141,8 +142,9 @@ extern void BSP_PWM_UpdatePairDuty(uint32_t pwmNo, float duty, pwm_config_t* con
  * @param duty duty cycle to be applied to the channel (Range 0-1 or given in the config parameter)
  * @param *config Pointer to a  pwm_config_t structure that contains the configuration
  * 				   parameters for the PWM channel
+ * @return float Duty cycle applied in this cycle. May differ from the @ref duty variable if outside permitted limits
  */
-extern void BSP_PWM_UpdateChannelDuty(uint32_t pwmNo, float duty, pwm_config_t* config);
+extern float BSP_PWM_UpdateChannelDuty(uint32_t pwmNo, float duty, pwm_config_t* config);
 
 /**
  * @brief Enable / Disable interrupt for a PWM channel as per requirement

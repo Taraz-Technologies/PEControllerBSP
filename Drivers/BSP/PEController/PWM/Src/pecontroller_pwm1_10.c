@@ -173,8 +173,9 @@ static void PWM1_10_Drivers_Init(void)
  * @param duty duty cycle to be applied to the pair (Range 0-1 or given in the config parameter)
  * @param *config Pointer to a  pwm_config_t structure that contains the configuration
  * 				   parameters for the PWM pair
+ * @return float Duty cycle applied in this cycle. May differ from the @ref duty variable if outside permitted limits
  */
-void BSP_PWM1_10_UpdatePairDuty(uint32_t pwmNo, float duty, pwm_config_t* config)
+float BSP_PWM1_10_UpdatePairDuty(uint32_t pwmNo, float duty, pwm_config_t* config)
 {
 	// get copies of parameters
 	uint32_t TimerIdx = (pwmNo - 1) / 2;
@@ -212,6 +213,7 @@ void BSP_PWM1_10_UpdatePairDuty(uint32_t pwmNo, float duty, pwm_config_t* config
 		hhrtim.Instance->sTimerxRegs[TimerIdx].CMP1xR = onTime + dt;
 		MODIFY_REG(hhrtim.Instance->sTimerxRegs[TimerIdx].TIMxCR, HRTIM_TIMCR_DELCMP2, 0U);
 	}
+	return duty;
 }
 
 /**
@@ -314,8 +316,9 @@ DutyCycleUpdateFnc BSP_PWM1_10_ConfigInvertedPairs(uint32_t pwmNo, pwm_config_t*
  * @param duty duty cycle to be applied to the channel (Range 0-1 or given in the config parameter)
  * @param *config Pointer to a  pwm_config_t structure that contains the configuration
  * 				   parameters for the PWM channel
+ * @return float Duty cycle applied in this cycle. May differ from the @ref duty variable if outside permitted limits
  */
-void BSP_PWM1_10_UpdateChannelDuty(uint32_t pwmNo, float duty, pwm_config_t* config)
+float BSP_PWM1_10_UpdateChannelDuty(uint32_t pwmNo, float duty, pwm_config_t* config)
 {
 	// get copies of parameters
 	uint32_t TimerIdx = (pwmNo - 1) / 2;
@@ -357,6 +360,7 @@ void BSP_PWM1_10_UpdateChannelDuty(uint32_t pwmNo, float duty, pwm_config_t* con
 		hhrtim.Instance->sTimerxRegs[TimerIdx].CMP4xR = onTime + 3;
 		MODIFY_REG(hhrtim.Instance->sTimerxRegs[TimerIdx].TIMxCR, HRTIM_TIMCR_DELCMP4, 0U);
 	}
+	return duty;
 }
 /**
  * @brief Configures a single PWM channel
