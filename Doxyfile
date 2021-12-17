@@ -972,10 +972,8 @@ RECURSIVE              = YES
 # Note that relative paths are relative to the directory from which doxygen is
 # run.
 
-EXCLUDE                = Projects/PEController/Applications/PELab_OpenLoopVFD/Drivers \
-                         Projects/PEController/Applications/PELab_OpenLoopVFD/Docs \
-                         Projects/PEController/Applications/PELab6PH_GridTie/Drivers \
-                         Projects/PEController/Applications/PELab6PH_GridTie/Docs
+EXCLUDE                = Projects/PEController/Applications/PELab_OpenLoopVFD/Common/Src/system_stm32h7xx_dualcore_boot_cm4_cm7.c \
+                         Projects/PEController/Applications/PELab6PH_GridTie/Common/Src/system_stm32h7xx_dualcore_boot_cm4_cm7.c
 
 # The EXCLUDE_SYMLINKS tag can be used to select whether or not files or
 # directories that are symbolic links (a Unix file system feature) are excluded

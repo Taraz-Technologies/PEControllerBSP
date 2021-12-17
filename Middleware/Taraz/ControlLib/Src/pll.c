@@ -71,8 +71,19 @@ static pll_states_t IsPLLSynched(pll_lock_t* pll)
 	// increase index
 	info->index++;
 
+	if (pll->status == PLL_LOCKED)
+	{
+		// if grid is lost disable pll lock
+		if (info->tempQMax > (pll->qLockMax * 2.f) ||  info->tempDMin < (pll->dLockMin/3.f))
+		{
+			pll->status = PLL_INVALID;
+			info->index = 0;
+			info->tempQMax = 0;
+			info->tempDMin = 200000;
+		}
+	}
 	// check PLL status
-	if(info->index > pll->cycleCount && pll->status != PLL_LOCKED)
+	else if(info->index > pll->cycleCount && pll->status != PLL_LOCKED)
 	{
 #if MONITOR_PLL
 		info->qMax = info->tempQMax;

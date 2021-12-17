@@ -15,6 +15,7 @@
 #include "control_library.h"
 #include "adc_config.h"
 #include "grid_tie_controller.h"
+#include "pecontroller_digital_in.h"
 /*******************************************************************************
  * Defines
  ******************************************************************************/
@@ -52,14 +53,15 @@ static grid_tie_t gridTieConfig = {0};
 void MainControl_Init(void)
 {
 	BSP_DigitalPins_Init();
+	BSP_Din_SetPortGPIO();
 
-	BSP_Dout_SetAsIOPin(5, GPIO_PIN_RESET);		// should be zero because this switch behaves as a diode
+	BSP_Dout_SetAsIOPin(11, GPIO_PIN_RESET);		// should be zero because this switch behaves as a diode
 
-	gridTieConfig.inverterConfig.s1PinNos[0] = 7;
-	gridTieConfig.inverterConfig.s1PinNos[1] = 9;
-	gridTieConfig.inverterConfig.s1PinNos[2] = 11;
+	gridTieConfig.inverterConfig.s1PinNos[0] = 1;
+	gridTieConfig.inverterConfig.s1PinNos[1] = 3;
+	gridTieConfig.inverterConfig.s1PinNos[2] = 5;
 	gridTieConfig.inverterConfig.dsblPinCount = 0;
-	gridTieConfig.boostConfig.pinNo = 6;
+	gridTieConfig.boostConfig.pinNo = 12;
 	GridTieControl_Init(&gridTieConfig, Inverter3Ph_ResetSignal);
 	//BSP_Dout_SetAsPWMPin(5);						// should be zero because this switch behaves as a diode
 	//BSP_Dout_SetAsPWMPin(12);
@@ -68,10 +70,10 @@ void MainControl_Init(void)
 	BSP_Dout_SetAsIOPin(14, GPIO_PIN_RESET);
 	BSP_Dout_SetAsIOPin(15, GPIO_PIN_RESET);
 	BSP_Dout_SetAsIOPin(16, GPIO_PIN_SET);
-	BSP_Dout_SetAsIOPin(3, GPIO_PIN_RESET);
-	BSP_Dout_SetAsIOPin(4, GPIO_PIN_RESET);
-	BSP_Dout_SetAsIOPin(1, GPIO_PIN_RESET);
-	BSP_Dout_SetAsIOPin(2, GPIO_PIN_RESET);
+	BSP_Dout_SetAsIOPin(7, GPIO_PIN_RESET);
+	BSP_Dout_SetAsIOPin(8, GPIO_PIN_RESET);
+	BSP_Dout_SetAsIOPin(9, GPIO_PIN_RESET);
+	BSP_Dout_SetAsIOPin(10, GPIO_PIN_RESET);
 
 	/*
 	pwmConfig.dutyMode = OUTPUT_DUTY_AT_PWMH;
@@ -145,21 +147,19 @@ void MainControl_Loop(void)
 		gridTieConfig.vCoor.abc.c = adcVals.V3;
 		gridTieConfig.vdc = adcVals.Vdc1;
 		gridTieConfig.vpv = adcVals.V4;
-		/*
 		gridTieConfig.idc = -adcVals.Ih3;
 		gridTieConfig.iCoor.abc.a = adcVals.Ie1;
 		gridTieConfig.iCoor.abc.b = adcVals.Ie2;
 		gridTieConfig.iCoor.abc.c = adcVals.Ie3;
-		*/
-
+		/*
 		gridTieConfig.idc = -adcVals.Ie3;
 		gridTieConfig.iCoor.abc.a = adcVals.Ih1;
 		gridTieConfig.iCoor.abc.b = adcVals.Ih2;
 		gridTieConfig.iCoor.abc.c = adcVals.Ih3;
-
+		*/
 		if (gridTieConfig.state == GRID_TIE_INACTIVE)
 			gridTieConfig.iRef = .1f;
-		else if (gridTieConfig.iRef < 5.f)
+		else if (gridTieConfig.iRef < 1.f)
 			gridTieConfig.iRef += .0001f;
 
 		GridTieControl_Loop(&gridTieConfig);

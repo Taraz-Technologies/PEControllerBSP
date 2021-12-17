@@ -137,5 +137,16 @@ uint32_t BSP_Din_GetPortValue(void)
 	return val;
 }
 
+/**
+ * @brief Get the value of the input pins
+ * @param pinNo Pin no from (1-16)
+ *
+ * @return uint32_t Value of pin should be either 0 or not 0
+ */
+uint32_t BSP_Din_GetPinState(uint32_t pinNo)
+{
+	return (uint32_t)HAL_GPIO_ReadPin(dinPins[pinNo-1].GPIO, dinPins[pinNo-1].pinMask);
+}
+
 
 /* EOF */

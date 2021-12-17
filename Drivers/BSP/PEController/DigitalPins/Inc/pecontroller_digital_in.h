@@ -90,6 +90,13 @@ extern void BSP_Din_SetPortGPIO(void);
  * @return uint32_t Current Port Input Value
  */
 extern uint32_t BSP_Din_GetPortValue(void);
+/**
+ * @brief Get the value of the input pins
+ * @param pinNo Pin no from (1-16)
+ *
+ * @return uint32_t Value of pin should be either 0 or not 0
+ */
+extern uint32_t BSP_Din_GetPinState(uint32_t pinNo);
 /*******************************************************************************
  * Code
  ******************************************************************************/
