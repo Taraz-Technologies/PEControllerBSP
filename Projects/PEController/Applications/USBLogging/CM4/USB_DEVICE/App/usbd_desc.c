@@ -63,11 +63,11 @@
   * @{
   */
 
-#define USBD_VID     1155
+#define USBD_VID     0x2504
 #define USBD_LANGID_STRING     1033
-#define USBD_MANUFACTURER_STRING     "TarazTech"
-#define USBD_PID_HS     22315
-#define USBD_PRODUCT_STRING_HS     "TarazMouse"
+#define USBD_MANUFACTURER_STRING     "Taraz Technologies Pvt. Ltd."
+#define USBD_PID_HS     0x100
+#define USBD_PRODUCT_STRING_HS     "intelliSENS-PEController"
 #define USBD_CONFIGURATION_STRING_HS     "HID Config"
 #define USBD_INTERFACE_STRING_HS     "HID Interface"
 
@@ -160,8 +160,8 @@ __ALIGN_BEGIN uint8_t USBD_HS_DeviceDesc[USB_LEN_DEV_DESC] __ALIGN_END =
   HIBYTE(USBD_VID),           /*idVendor*/
   LOBYTE(USBD_PID_HS),        /*idProduct*/
   HIBYTE(USBD_PID_HS),        /*idProduct*/
-  0x00,                       /*bcdDevice rel. 2.00*/
-  0x02,
+  0x02,                       /*bcdDevice rel. 2.00*/
+  0x00,
   USBD_IDX_MFC_STR,           /*Index of manufacturer  string*/
   USBD_IDX_PRODUCT_STR,       /*Index of product string*/
   USBD_IDX_SERIAL_STR,        /*Index of serial number string*/
@@ -352,6 +352,7 @@ uint8_t * USBD_HS_USR_BOSDescriptor(USBD_SpeedTypeDef speed, uint16_t *length)
   */
 static void Get_SerialNum(void)
 {
+/*
   uint32_t deviceserial0, deviceserial1, deviceserial2;
 
   deviceserial0 = 10; //*(uint32_t *) DEVICE_ID1;
@@ -365,6 +366,33 @@ static void Get_SerialNum(void)
     IntToUnicode(deviceserial0, &USBD_StringSerial[2], 8);
     IntToUnicode(deviceserial1, &USBD_StringSerial[18], 4);
   }
+*/
+	USBD_StringSerial[2] = 'I'; USBD_StringSerial[3] = 0;
+	USBD_StringSerial[4] = 'N'; USBD_StringSerial[5] = 0;
+	USBD_StringSerial[6] = 'T'; USBD_StringSerial[7] = 0;
+	USBD_StringSerial[8] = 'C'; USBD_StringSerial[9] = 0;
+	USBD_StringSerial[10] = 'o'; USBD_StringSerial[11] = 0;
+	USBD_StringSerial[12] = 'n'; USBD_StringSerial[13] = 0;
+	USBD_StringSerial[14] = 't'; USBD_StringSerial[15] = 0;
+	USBD_StringSerial[16] = 'r'; USBD_StringSerial[17] = 0;
+	USBD_StringSerial[18] = 'o'; USBD_StringSerial[19] = 0;
+	USBD_StringSerial[20] = 'l'; USBD_StringSerial[21] = 0;
+	USBD_StringSerial[22] = 'l'; USBD_StringSerial[23] = 0;
+	USBD_StringSerial[24] = 'e'; USBD_StringSerial[25] = 0;
+	USBD_StringSerial[26] = 'r'; USBD_StringSerial[27] = 0;
+	USBD_StringSerial[28] = '/'; USBD_StringSerial[29] = 0;
+	USBD_StringSerial[30] = '1'; USBD_StringSerial[31] = 0;
+	USBD_StringSerial[32] = '7'; USBD_StringSerial[33] = 0;
+	USBD_StringSerial[34] = '0'; USBD_StringSerial[35] = 0;
+	USBD_StringSerial[36] = '8'; USBD_StringSerial[37] = 0;
+	USBD_StringSerial[38] = '/'; USBD_StringSerial[39] = 0;
+	USBD_StringSerial[40] = '0'; USBD_StringSerial[41] = 0;
+	USBD_StringSerial[42] = '0'; USBD_StringSerial[43] = 0;
+	USBD_StringSerial[44] = '0'; USBD_StringSerial[45] = 0;
+	USBD_StringSerial[46] = '0'; USBD_StringSerial[47] = 0;
+	USBD_StringSerial[48] = '3'; USBD_StringSerial[49] = 0;
+	USBD_StringSerial[50] = '/'; USBD_StringSerial[51] = 0;
+	USBD_StringSerial[52] = 'D'; USBD_StringSerial[53] = 0;
 }
 
 /**
