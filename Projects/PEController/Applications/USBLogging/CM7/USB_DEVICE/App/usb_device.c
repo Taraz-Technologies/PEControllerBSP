@@ -32,7 +32,7 @@
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
-
+uint8_t dataUSB[1024];
 /* USER CODE END PV */
 
 /* USER CODE BEGIN PFP */
@@ -54,7 +54,17 @@ USBD_HandleTypeDef hUsbDeviceHS;
  * -- Insert your external function declaration here --
  */
 /* USER CODE BEGIN 1 */
-
+void MX_USB_DEVICE_Poll(void)
+{
+	if(hUsbDeviceHS.dev_state == 3)
+	{
+		if(USBD_HID_SendReport(&hUsbDeviceHS, dataUSB, 1024) == USBD_OK)
+		{
+			for (int i = 0; i < 1024; i++)
+				dataUSB[i]++;
+		}
+	}
+}
 /* USER CODE END 1 */
 
 /**
@@ -83,7 +93,8 @@ void MX_USB_DEVICE_Init(void)
 
   /* USER CODE BEGIN USB_DEVICE_Init_PostTreatment */
   HAL_PWREx_EnableUSBVoltageDetector();
-
+  for (int i = 0; i < 1024; i++)
+	dataUSB[i] = (uint8_t)(i & 0xff);
   /* USER CODE END USB_DEVICE_Init_PostTreatment */
 }
 

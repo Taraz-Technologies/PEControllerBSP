@@ -352,47 +352,34 @@ uint8_t * USBD_HS_USR_BOSDescriptor(USBD_SpeedTypeDef speed, uint16_t *length)
   */
 static void Get_SerialNum(void)
 {
-/*
-  uint32_t deviceserial0, deviceserial1, deviceserial2;
-
-  deviceserial0 = 10; //*(uint32_t *) DEVICE_ID1;
-  deviceserial1 = 10; //*(uint32_t *) DEVICE_ID2;
-  deviceserial2 = 10; //*(uint32_t *) DEVICE_ID3;
-
-  deviceserial0 += deviceserial2;
-
-  if (deviceserial0 != 0)
-  {
-    IntToUnicode(deviceserial0, &USBD_StringSerial[2], 8);
-    IntToUnicode(deviceserial1, &USBD_StringSerial[18], 4);
-  }
-*/
-	USBD_StringSerial[2] = 'I'; USBD_StringSerial[3] = 0;
-	USBD_StringSerial[4] = 'N'; USBD_StringSerial[5] = 0;
-	USBD_StringSerial[6] = 'T'; USBD_StringSerial[7] = 0;
-	USBD_StringSerial[8] = 'C'; USBD_StringSerial[9] = 0;
-	USBD_StringSerial[10] = 'o'; USBD_StringSerial[11] = 0;
-	USBD_StringSerial[12] = 'n'; USBD_StringSerial[13] = 0;
-	USBD_StringSerial[14] = 't'; USBD_StringSerial[15] = 0;
-	USBD_StringSerial[16] = 'r'; USBD_StringSerial[17] = 0;
-	USBD_StringSerial[18] = 'o'; USBD_StringSerial[19] = 0;
-	USBD_StringSerial[20] = 'l'; USBD_StringSerial[21] = 0;
-	USBD_StringSerial[22] = 'l'; USBD_StringSerial[23] = 0;
-	USBD_StringSerial[24] = 'e'; USBD_StringSerial[25] = 0;
-	USBD_StringSerial[26] = 'r'; USBD_StringSerial[27] = 0;
-	USBD_StringSerial[28] = '/'; USBD_StringSerial[29] = 0;
-	USBD_StringSerial[30] = '1'; USBD_StringSerial[31] = 0;
-	USBD_StringSerial[32] = '7'; USBD_StringSerial[33] = 0;
-	USBD_StringSerial[34] = '0'; USBD_StringSerial[35] = 0;
-	USBD_StringSerial[36] = '8'; USBD_StringSerial[37] = 0;
-	USBD_StringSerial[38] = '/'; USBD_StringSerial[39] = 0;
-	USBD_StringSerial[40] = '0'; USBD_StringSerial[41] = 0;
-	USBD_StringSerial[42] = '0'; USBD_StringSerial[43] = 0;
-	USBD_StringSerial[44] = '0'; USBD_StringSerial[45] = 0;
-	USBD_StringSerial[46] = '0'; USBD_StringSerial[47] = 0;
-	USBD_StringSerial[48] = '3'; USBD_StringSerial[49] = 0;
-	USBD_StringSerial[50] = '/'; USBD_StringSerial[51] = 0;
-	USBD_StringSerial[52] = 'D'; USBD_StringSerial[53] = 0;
+	USBD_StringSerial[2] = 'I';
+	USBD_StringSerial[4] = 'N';
+	USBD_StringSerial[6] = 'T';
+	USBD_StringSerial[8] = 'C';
+	USBD_StringSerial[10] = 'o';
+	USBD_StringSerial[12] = 'n';
+	USBD_StringSerial[14] = 't';
+	USBD_StringSerial[16] = 'r';
+	USBD_StringSerial[18] = 'o';
+	USBD_StringSerial[20] = 'l';
+	USBD_StringSerial[22] = 'l';
+	USBD_StringSerial[24] = 'e';
+	USBD_StringSerial[26] = 'r';
+	USBD_StringSerial[28] = '/';
+	USBD_StringSerial[30] = '1';
+	USBD_StringSerial[32] = '7';
+	USBD_StringSerial[34] = '0';
+	USBD_StringSerial[36] = '8';
+	USBD_StringSerial[38] = '/';
+	USBD_StringSerial[40] = '0';
+	USBD_StringSerial[42] = '0';
+	USBD_StringSerial[44] = '0';
+	USBD_StringSerial[46] = '0';
+	USBD_StringSerial[48] = '3';
+	USBD_StringSerial[50] = '/';
+	USBD_StringSerial[52] = 'D';
+	for (int i = 3; i < 54; i += 2)
+		 USBD_StringSerial[i] = 0;
 }
 
 /**

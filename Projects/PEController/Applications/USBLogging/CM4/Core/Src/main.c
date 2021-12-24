@@ -19,7 +19,6 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "usb_device.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -63,7 +62,7 @@ static void MX_GPIO_Init(void);
 static void MX_TIM17_Init(void);
 static void MX_I2C2_Init(void);
 /* USER CODE BEGIN PFP */
-
+void MX_USB_DEVICE_Poll(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -121,7 +120,6 @@ int main(void)
   MX_GPIO_Init();
   MX_TIM17_Init();
   MX_I2C2_Init();
-  MX_USB_DEVICE_Init();
   /* USER CODE BEGIN 2 */
   BSP_Display_Init();
   DisplayDefaultImage();
@@ -137,6 +135,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  //MX_USB_DEVICE_Poll();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -268,7 +267,6 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOF_CLK_ENABLE();
   __HAL_RCC_GPIOH_CLK_ENABLE();
-  __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOD_CLK_ENABLE();
   __HAL_RCC_GPIOK_CLK_ENABLE();
