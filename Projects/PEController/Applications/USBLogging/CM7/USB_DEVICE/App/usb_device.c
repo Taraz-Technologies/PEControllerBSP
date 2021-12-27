@@ -56,7 +56,7 @@ USBD_HandleTypeDef hUsbDeviceHS;
 /* USER CODE BEGIN 1 */
 void MX_USB_DEVICE_Poll(void)
 {
-	if(hUsbDeviceHS.dev_state == 3)
+	if(hUsbDeviceHS.dev_state == USBD_STATE_CONFIGURED)
 	{
 		if(USBD_HID_SendReport(&hUsbDeviceHS, dataUSB, 1024) == USBD_OK)
 		{
@@ -65,6 +65,7 @@ void MX_USB_DEVICE_Poll(void)
 		}
 	}
 }
+
 /* USER CODE END 1 */
 
 /**

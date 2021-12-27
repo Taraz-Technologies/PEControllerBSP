@@ -91,6 +91,7 @@ static uint8_t USBD_HID_Init(USBD_HandleTypeDef *pdev, uint8_t cfgidx);
 static uint8_t USBD_HID_DeInit(USBD_HandleTypeDef *pdev, uint8_t cfgidx);
 static uint8_t USBD_HID_Setup(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef *req);
 static uint8_t USBD_HID_DataIn(USBD_HandleTypeDef *pdev, uint8_t epnum);
+static uint8_t USBD_HID_DataOut(USBD_HandleTypeDef *pdev, uint8_t epnum);
 
 static uint8_t *USBD_HID_GetFSCfgDesc(uint16_t *length);
 static uint8_t *USBD_HID_GetHSCfgDesc(uint16_t *length);
@@ -118,7 +119,7 @@ USBD_ClassTypeDef USBD_HID =
   NULL,              /* EP0_TxSent */
   NULL,              /* EP0_RxReady */
   USBD_HID_DataIn,   /* DataIn */
-  NULL,              /* DataOut */
+  USBD_HID_DataOut,  /* DataOut */
   NULL,              /* SOF */
   NULL,
   NULL,
@@ -252,39 +253,42 @@ __ALIGN_BEGIN static uint8_t USBD_HID_OtherSpeedCfgDesc[USB_HID_CONFIG_DESC_SIZ]
 #endif
   USBD_MAX_POWER,                                     /* MaxPower 100 mA: this current is used for detecting Vbus */
 
-  /************** Descriptor of Joystick Mouse interface ****************/
+  /************** Interface descriptor ****************/
   /* 09 */
   0x09,                                               /* bLength: Interface Descriptor size */
   USB_DESC_TYPE_INTERFACE,                            /* bDescriptorType: Interface descriptor type */
   0x00,                                               /* bInterfaceNumber: Number of Interface */
   0x00,                                               /* bAlternateSetting: Alternate setting */
-  0x01,                                               /* bNumEndpoints */
+  0x02,                                               /* bNumEndpoints */
   0x03,                                               /* bInterfaceClass: HID */
   0x01,                                               /* bInterfaceSubClass : 1=BOOT, 0=no boot */
   0x02,                                               /* nInterfaceProtocol : 0=none, 1=keyboard, 2=mouse */
   0,                                                  /* iInterface: Index of string descriptor */
-  /******************** Descriptor of Joystick Mouse HID ********************/
+  /******************** HID descriptor ********************/
   /* 18 */
   0x09,                                               /* bLength: HID Descriptor size */
   HID_DESCRIPTOR_TYPE,                                /* bDescriptorType: HID */
-  0x11,                                               /* bcdHID: HID Class Spec release number */
+  0x00,                                               /* bcdHID: HID Class Spec release number */
   0x01,
   0x00,                                               /* bCountryCode: Hardware target country */
   0x01,                                               /* bNumDescriptors: Number of HID class descriptors to follow */
   0x22,                                               /* bDescriptorType */
   HID_MOUSE_REPORT_DESC_SIZE,                         /* wItemLength: Total length of Report descriptor */
   0x00,
-  /******************** Descriptor of Mouse endpoint ********************/
-  /* 27 */
-  0x07,                                               /* bLength: Endpoint Descriptor size */
-  USB_DESC_TYPE_ENDPOINT,                             /* bDescriptorType: */
+  /******************** Endpoint descriptors ********************/
+  7,
+  USB_DESC_TYPE_ENDPOINT,
+  HID_EPIN_ADDR|(1 << 7),
+  0x03,
+  HID_BUFFER_SIZE_LOW_IN, HID_BUFFER_SIZE_HIGH_IN,
+  HID_HS_BINTERVAL,
 
-  HID_EPIN_ADDR,                                      /* bEndpointAddress: Endpoint Address (IN) */
-  0x03,                                               /* bmAttributes: Interrupt endpoint */
-  HID_EPIN_SIZE,                                      /* wMaxPacketSize: 4 Byte max */
-  0x00,
-  HID_FS_BINTERVAL,                                   /* bInterval: Polling Interval */
-  /* 34 */
+  7,
+  USB_DESC_TYPE_ENDPOINT,
+  2|(0 << 7),
+  0x03,
+  HID_BUFFER_SIZE_LOW_OUT, HID_BUFFER_SIZE_HIGH_OUT,
+  HID_HS_BINTERVAL
 };
 
 
@@ -385,7 +389,7 @@ static uint8_t USBD_HID_Init(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
   }
 
   /* Open EP IN */
-  (void)USBD_LL_OpenEP(pdev, HID_EPIN_ADDR, USBD_EP_TYPE_INTR, HID_EPIN_SIZE);
+  (void)USBD_LL_OpenEP(pdev, HID_EPIN_ADDR, USBD_EP_TYPE_INTR, 1024);
   pdev->ep_in[HID_EPIN_ADDR & 0xFU].is_used = 1U;
 
   hhid->state = HID_IDLE;
@@ -659,6 +663,22 @@ static uint8_t USBD_HID_DataIn(USBD_HandleTypeDef *pdev, uint8_t epnum)
   return (uint8_t)USBD_OK;
 }
 
+/**
+  * @brief  USBD_HID_DataOut
+  *         handle data IN Stage
+  * @param  pdev: device instance
+  * @param  epnum: endpoint index
+  * @retval status
+  */
+static uint8_t USBD_HID_DataOut(USBD_HandleTypeDef *pdev, uint8_t epnum)
+{
+  UNUSED(epnum);
+  /* Ensure that the FIFO is empty before a new transfer, this condition could
+  be caused by  a new transfer before the end of the previous transfer */
+  USBD_LL_PrepareReceive(pdev, HID_EPOUT_ADDR, HID_Rx_Buffer, HID_EPOUT_SIZE) ;
+
+  return (uint8_t)USBD_OK;
+}
 
 /**
   * @brief  DeviceQualifierDescriptor

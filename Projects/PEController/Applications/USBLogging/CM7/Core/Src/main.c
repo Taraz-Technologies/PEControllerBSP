@@ -134,6 +134,7 @@ int main(void)
 
 	while (1)
 	{
+		/*
 		uint32_t ticks = HAL_GetTick();
 		uint32_t t1 = SysTick->VAL;
 		SharedMemory_GetRecentMeasurements(&adcVals);
@@ -142,14 +143,14 @@ int main(void)
 			pollTicks = t1 - t2;
 		ticks = HAL_GetTick();
 		t1 = SysTick->VAL;
-		//MainControl_Loop();
+		//MainControl_Loop(); */
 		MX_USB_DEVICE_Poll();
-		t2 = SysTick->VAL;
+		/*t2 = SysTick->VAL;
 		if (ticks == HAL_GetTick())
 		{
 			if(t1 - t2 > loopTicks)
 				loopTicks = t1 - t2;
-		}
+		}*/
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
