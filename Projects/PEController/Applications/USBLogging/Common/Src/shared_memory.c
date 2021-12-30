@@ -74,6 +74,7 @@ void SharedMemory_GetRecentMeasurements_Blocking(adc_measures_t* adc)
 		{
 			// wait for new measurement
 		}
+		sharedData->m4Tom7.sts = false;
 		memcpy((void*)adc, (void*)sharedData->m4Tom7.lastDataPointer, sizeof(adc_measures_t));
 	}
 }

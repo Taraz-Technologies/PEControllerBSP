@@ -111,7 +111,7 @@ int main(void)
   MX_GPIO_Init();
   intelliSENS_Init(40, (const float*)&adcMultipiers, (const float*)&adcOffsets);
   /* USER CODE BEGIN 2 */
-	sharedData->m7Tom4.periodUs = 40;
+	sharedData->m7Tom4.periodUs = 10;
 	MainControl_Init();
 	MainControl_Run();
 	/* When system initialization is finished, Cortex-M7 will release Cortex-M4 by means of
@@ -136,7 +136,7 @@ int main(void)
 
 	while (1)
 	{
-
+		/*
 		uint32_t ticks = HAL_GetTick();
 		uint32_t t1 = SysTick->VAL;
 		SharedMemory_GetRecentMeasurements(&adcVals);
@@ -158,13 +158,13 @@ int main(void)
 			if(t1 - t2 > loopTicks)
 				loopTicks = t1 - t2;
 		}
-		SharedMemory_GetRecentMeasurements(&adcVals);
-		uint16_t vals[] = { (adcVals.Ie1 * (32768.f / 25))+32768, (adcVals.Ie2 * (32768.f / 25))+32768, (adcVals.Ie3 * (32768.f / 25))+32768,
-				(adcVals.Vdc1 * (32768.f / 1000))+32768, (adcVals.V1 * (32768.f / 1000))+32768, (adcVals.V2 * (32768.f / 1000))+32768,
-				32768, 32768 };
-		intelliSENS_SetADCData(vals);
-		intelliSENS_Poll();
 		*/
+	SharedMemory_GetRecentMeasurements_Blocking(&adcVals);
+	uint16_t vals[] = { (adcVals.Ie1 * (32768.f / 25))+32768, (adcVals.Ie2 * (32768.f / 25))+32768, (adcVals.Ie3 * (32768.f / 25))+32768,
+			(adcVals.V1 * (32768.f / 1000))+32768, (adcVals.V2 * (32768.f / 1000))+32768, (adcVals.V3 * (32768.f / 1000))+32768,
+			32768, 32768 };
+	intelliSENS_SetADCData(vals);
+	intelliSENS_Poll();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

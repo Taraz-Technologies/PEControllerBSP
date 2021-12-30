@@ -74,7 +74,7 @@ static void DataProcessingCallback(adc_measures_t* result)
 	memcpy((void*)&(data->dataRecord[index]), result, sizeof(adc_measures_t));
 	data->recordIndex = index;
 	data->lastDataPointer = &data->dataRecord[index];
-	//data->sts = true;
+	data->sts = true;
 }
 /* USER CODE END 0 */
 
