@@ -25,6 +25,8 @@
 /* USER CODE BEGIN Includes */
 #include "shared_memory.h"
 #include "main_controller.h"
+#include "intelliSENS_drivers.h"
+#include "adc_config.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -107,7 +109,7 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_USB_DEVICE_Init();
+  intelliSENS_Init(40, (const float*)&adcMultipiers, (const float*)&adcOffsets);
   /* USER CODE BEGIN 2 */
 	sharedData->m7Tom4.periodUs = 40;
 	MainControl_Init();
@@ -134,7 +136,7 @@ int main(void)
 
 	while (1)
 	{
-		/*
+
 		uint32_t ticks = HAL_GetTick();
 		uint32_t t1 = SysTick->VAL;
 		SharedMemory_GetRecentMeasurements(&adcVals);
@@ -143,14 +145,26 @@ int main(void)
 			pollTicks = t1 - t2;
 		ticks = HAL_GetTick();
 		t1 = SysTick->VAL;
-		//MainControl_Loop(); */
-		MX_USB_DEVICE_Poll();
-		/*t2 = SysTick->VAL;
+		MainControl_Loop();
+		uint16_t vals[] = { (adcVals.Ie1 * (32768.f / 25))+32768, (adcVals.Ie2 * (32768.f / 25))+32768, (adcVals.Ie3 * (32768.f / 25))+32768,
+				(adcVals.V4 * (32768.f / 1000))+32768, (adcVals.V1 * (32768.f / 1000))+32768, (adcVals.V2 * (32768.f / 1000))+32768,
+				32768, 32768 };
+		intelliSENS_SetADCData(vals);
+		intelliSENS_Poll();
+		/*
+		t2 = SysTick->VAL;
 		if (ticks == HAL_GetTick())
 		{
 			if(t1 - t2 > loopTicks)
 				loopTicks = t1 - t2;
-		}*/
+		}
+		SharedMemory_GetRecentMeasurements(&adcVals);
+		uint16_t vals[] = { (adcVals.Ie1 * (32768.f / 25))+32768, (adcVals.Ie2 * (32768.f / 25))+32768, (adcVals.Ie3 * (32768.f / 25))+32768,
+				(adcVals.Vdc1 * (32768.f / 1000))+32768, (adcVals.V1 * (32768.f / 1000))+32768, (adcVals.V2 * (32768.f / 1000))+32768,
+				32768, 32768 };
+		intelliSENS_SetADCData(vals);
+		intelliSENS_Poll();
+		*/
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

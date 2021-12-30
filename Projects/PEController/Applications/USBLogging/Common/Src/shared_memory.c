@@ -62,6 +62,22 @@ void SharedMemory_GetRecentMeasurements(adc_measures_t* adc)
 		memcpy((void*)adc, (void*)sharedData->m4Tom7.lastDataPointer, sizeof(adc_measures_t));
 }
 
+/**
+ * @brief Get values for the recent measurements from the shared memory, wait till measurement pending
+ * @param adc Pointer to the ADC values to be filled
+ */
+void SharedMemory_GetRecentMeasurements_Blocking(adc_measures_t* adc)
+{
+	if(sharedData->m4Tom7.lastDataPointer != NULL)
+	{
+		while(sharedData->m4Tom7.sts == 0)
+		{
+			// wait for new measurement
+		}
+		memcpy((void*)adc, (void*)sharedData->m4Tom7.lastDataPointer, sizeof(adc_measures_t));
+	}
+}
+
 
 /* EOF */
 

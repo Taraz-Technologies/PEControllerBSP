@@ -67,7 +67,7 @@
 #define USBD_LANGID_STRING     1033
 #define USBD_MANUFACTURER_STRING     "Taraz Technologies Pvt. Ltd."
 #define USBD_PID_HS     0x100
-#define USBD_PRODUCT_STRING_HS     "intelliSENS-Bridge"
+#define USBD_PRODUCT_STRING_HS     "intelliSENS-DAQ"
 #define USBD_CONFIGURATION_STRING_HS     "HID Config"
 #define USBD_INTERFACE_STRING_HS     "HID Interface"
 
@@ -355,29 +355,26 @@ static void Get_SerialNum(void)
 	USBD_StringSerial[2] = 'I';
 	USBD_StringSerial[4] = 'N';
 	USBD_StringSerial[6] = 'T';
-	USBD_StringSerial[8] = 'B';
-	USBD_StringSerial[10] = 'r';
-	USBD_StringSerial[12] = 'i';
-	USBD_StringSerial[14] = 'd';
-	USBD_StringSerial[16] = 'g';
-	USBD_StringSerial[18] = 'e';
-	USBD_StringSerial[20] = '-';
-	USBD_StringSerial[22] = 'A';
-	USBD_StringSerial[24] = '1';
-	USBD_StringSerial[26] = '/';
-	USBD_StringSerial[28] = '1';
-	USBD_StringSerial[30] = '7';
+	USBD_StringSerial[8] = 'D';
+	USBD_StringSerial[10] = 'A';
+	USBD_StringSerial[12] = 'Q';
+	USBD_StringSerial[14] = '-';
+	USBD_StringSerial[16] = 'A';
+	USBD_StringSerial[18] = '1';
+	USBD_StringSerial[20] = '/';
+	USBD_StringSerial[22] = '1';
+	USBD_StringSerial[24] = '7';
+	USBD_StringSerial[26] = '0';
+	USBD_StringSerial[28] = '8';
+	USBD_StringSerial[30] = '/';
 	USBD_StringSerial[32] = '0';
-	USBD_StringSerial[34] = '8';
-	USBD_StringSerial[36] = '/';
+	USBD_StringSerial[34] = '0';
+	USBD_StringSerial[36] = '0';
 	USBD_StringSerial[38] = '0';
 	USBD_StringSerial[40] = '0';
-	USBD_StringSerial[42] = '0';
-	USBD_StringSerial[44] = '0';
-	USBD_StringSerial[46] = '0';
-	USBD_StringSerial[48] = '3';
-	USBD_StringSerial[50] = '/';
-	USBD_StringSerial[52] = 'D';
+	USBD_StringSerial[42] = '3';
+	USBD_StringSerial[44] = '/';
+	USBD_StringSerial[46] = 'D';
 	for (int i = 3; i < USB_SIZ_STRING_SERIAL; i += 2)
 		 USBD_StringSerial[i] = 0;
 }

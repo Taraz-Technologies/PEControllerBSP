@@ -129,6 +129,11 @@ extern volatile shared_data_t * const sharedData;
  * @param *adc Pointer to the ADC values to be filled
  */
 extern void SharedMemory_GetRecentMeasurements(adc_measures_t* adc);
+/**
+ * @brief Get values for the recent measurements from the shared memory, wait till measurement pending
+ * @param adc Pointer to the ADC values to be filled
+ */
+extern void SharedMemory_GetRecentMeasurements_Blocking(adc_measures_t* adc);
 /********************************************************************************
  * Code
  *******************************************************************************/

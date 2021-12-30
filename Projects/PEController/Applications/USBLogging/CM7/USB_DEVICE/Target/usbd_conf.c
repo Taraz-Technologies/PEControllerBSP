@@ -27,7 +27,7 @@
 #include "usbd_hid.h"
 
 /* USER CODE BEGIN Includes */
-
+#include "intelliSENS_drivers.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -249,6 +249,10 @@ void HAL_PCD_ResetCallback(PCD_HandleTypeDef *hpcd)
 {
   USBD_SpeedTypeDef speed = USBD_SPEED_FULL;
 
+  intelliSENS_ResetDataSystem();
+  intelliSENSData.isCmdPending = false;
+  intelliSENSData.state = STATE_STOP;
+
   if ( hpcd->Init.speed == PCD_SPEED_HIGH)
   {
     speed = USBD_SPEED_HIGH;
@@ -280,6 +284,7 @@ static void PCD_SuspendCallback(PCD_HandleTypeDef *hpcd)
 void HAL_PCD_SuspendCallback(PCD_HandleTypeDef *hpcd)
 #endif /* USE_HAL_PCD_REGISTER_CALLBACKS */
 {
+	return;
   /* Inform USB library that core enters in suspend Mode. */
   USBD_LL_Suspend((USBD_HandleTypeDef*)hpcd->pData);
   __HAL_PCD_GATE_PHYCLOCK(hpcd);
@@ -290,6 +295,9 @@ void HAL_PCD_SuspendCallback(PCD_HandleTypeDef *hpcd)
     /* Set SLEEPDEEP bit and SleepOnExit of Cortex System Control Register. */
     SCB->SCR |= (uint32_t)((uint32_t)(SCB_SCR_SLEEPDEEP_Msk | SCB_SCR_SLEEPONEXIT_Msk));
   }
+  intelliSENS_ResetDataSystem();
+  intelliSENSData.isCmdPending = false;
+  intelliSENSData.state = STATE_STOP;
   /* USER CODE END 2 */
 }
 
@@ -306,7 +314,7 @@ void HAL_PCD_ResumeCallback(PCD_HandleTypeDef *hpcd)
 #endif /* USE_HAL_PCD_REGISTER_CALLBACKS */
 {
   /* USER CODE BEGIN 3 */
-
+return;
   /* USER CODE END 3 */
   USBD_LL_Resume((USBD_HandleTypeDef*)hpcd->pData);
 }
@@ -367,6 +375,9 @@ void HAL_PCD_DisconnectCallback(PCD_HandleTypeDef *hpcd)
 #endif /* USE_HAL_PCD_REGISTER_CALLBACKS */
 {
   USBD_LL_DevDisconnected((USBD_HandleTypeDef*)hpcd->pData);
+  intelliSENS_ResetDataSystem();
+  intelliSENSData.isCmdPending = false;
+  intelliSENSData.state = STATE_STOP;
 }
 
 /*******************************************************************************

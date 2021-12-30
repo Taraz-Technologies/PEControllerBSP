@@ -74,6 +74,7 @@ static void DataProcessingCallback(adc_measures_t* result)
 	memcpy((void*)&(data->dataRecord[index]), result, sizeof(adc_measures_t));
 	data->recordIndex = index;
 	data->lastDataPointer = &data->dataRecord[index];
+	//data->sts = true;
 }
 /* USER CODE END 0 */
 
@@ -305,6 +306,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(maxRead_GPIO_Port, &GPIO_InitStruct);
 
+  /*Configure GPIO pin : maxBusy1_Pin */
+  GPIO_InitStruct.Pin = maxBusy1_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(maxBusy1_GPIO_Port, &GPIO_InitStruct);
+
   /*Configure GPIO pin : maxBusy2_Pin */
   GPIO_InitStruct.Pin = maxBusy2_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
@@ -330,6 +337,9 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(CTP_RST_GPIO_Port, &GPIO_InitStruct);
 
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 }
 
 /* USER CODE BEGIN 4 */

@@ -46,6 +46,7 @@ EndBSPDependencies */
 /* Includes ------------------------------------------------------------------*/
 #include "usbd_hid.h"
 #include "usbd_ctlreq.h"
+#include "intelliSENS_drivers.h"
 
 
 /** @addtogroup STM32_USB_DEVICE_LIBRARY
@@ -382,15 +383,23 @@ static uint8_t USBD_HID_Init(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
   if (pdev->dev_speed == USBD_SPEED_HIGH)
   {
     pdev->ep_in[HID_EPIN_ADDR & 0xFU].bInterval = HID_HS_BINTERVAL;
+    pdev->ep_out[HID_EPOUT_ADDR & 0xFU].bInterval = HID_HS_BINTERVAL;
   }
   else   /* LOW and FULL-speed endpoints */
   {
     pdev->ep_in[HID_EPIN_ADDR & 0xFU].bInterval = HID_FS_BINTERVAL;
+    pdev->ep_out[HID_EPOUT_ADDR & 0xFU].bInterval = HID_FS_BINTERVAL;
   }
 
   /* Open EP IN */
-  (void)USBD_LL_OpenEP(pdev, HID_EPIN_ADDR, USBD_EP_TYPE_INTR, 1024);
+  (void)USBD_LL_OpenEP(pdev, HID_EPIN_ADDR, USBD_EP_TYPE_INTR, HID_EPIN_SIZE);
   pdev->ep_in[HID_EPIN_ADDR & 0xFU].is_used = 1U;
+
+  /* Open EP OUT */
+  (void)USBD_LL_OpenEP(pdev, HID_EPOUT_ADDR, USBD_EP_TYPE_INTR, HID_EPOUT_SIZE);
+  pdev->ep_in[HID_EPOUT_ADDR & 0xFU].is_used = 1U;
+
+  USBD_LL_PrepareReceive(pdev, HID_EPOUT_ADDR, intelliSENSData.rcvBuff, HID_EPOUT_SIZE) ;
 
   hhid->state = HID_IDLE;
 
@@ -412,6 +421,10 @@ static uint8_t USBD_HID_DeInit(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
   (void)USBD_LL_CloseEP(pdev, HID_EPIN_ADDR);
   pdev->ep_in[HID_EPIN_ADDR & 0xFU].is_used = 0U;
   pdev->ep_in[HID_EPIN_ADDR & 0xFU].bInterval = 0U;
+
+  (void)USBD_LL_CloseEP(pdev, HID_EPOUT_ADDR);
+  pdev->ep_out[HID_EPOUT_ADDR & 0xFU].is_used = 0U;
+  pdev->ep_out[HID_EPOUT_ADDR & 0xFU].bInterval = 0U;
 
   /* Free allocated memory */
   if (pdev->pClassData != NULL)
@@ -673,9 +686,10 @@ static uint8_t USBD_HID_DataIn(USBD_HandleTypeDef *pdev, uint8_t epnum)
 static uint8_t USBD_HID_DataOut(USBD_HandleTypeDef *pdev, uint8_t epnum)
 {
   UNUSED(epnum);
+  intelliSENSData.isCmdPending = true;
   /* Ensure that the FIFO is empty before a new transfer, this condition could
   be caused by  a new transfer before the end of the previous transfer */
-  USBD_LL_PrepareReceive(pdev, HID_EPOUT_ADDR, HID_Rx_Buffer, HID_EPOUT_SIZE) ;
+  USBD_LL_PrepareReceive(pdev, HID_EPOUT_ADDR, intelliSENSData.rcvBuff, HID_EPOUT_SIZE) ;
 
   return (uint8_t)USBD_OK;
 }
