@@ -351,12 +351,13 @@ static void USB_TrySendData(void)
 		USBD_HID_SendReport(&hUsbDeviceHS, dataPtr, 1024);
 	}
 }
-
+volatile int pollingCount = 0;
 /**
  * @brief Poll the intelliSENS library to send any pending data
  */
 void intelliSENS_Poll(void)
 {
+	pollingCount++;
 	if (hUsbDeviceHS.dev_state == USBD_STATE_CONFIGURED && ((USBD_HID_HandleTypeDef *)(hUsbDeviceHS.pClassData))->state == HID_IDLE)
 	{
 		if(intelliSENSData.isCmdPending)

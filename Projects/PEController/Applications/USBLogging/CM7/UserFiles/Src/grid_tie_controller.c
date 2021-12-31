@@ -292,7 +292,7 @@ void GridTieControl_Loop(grid_tie_t* gridTie)
 			else if (++gridTie->tempIndex == (int)PWM_FREQ_Hz)
 			{
 				gridTie->state = GRID_TIE_ACTIVE;
-				BSP_Dout_SetAsIOPin(GRID_RELAY_IO, GPIO_PIN_SET);
+				BSP_Dout_SetPin(GRID_RELAY_IO);
 				BSP_Dout_SetAsPWMPin(gridTie->inverterConfig.s1PinNos[0]);
 				BSP_Dout_SetAsPWMPin(gridTie->inverterConfig.s1PinNos[0] + 1);
 				BSP_Dout_SetAsPWMPin(gridTie->inverterConfig.s1PinNos[1]);
@@ -307,7 +307,7 @@ void GridTieControl_Loop(grid_tie_t* gridTie)
 		else if (gridTie->vdc < RELAY_TURN_OFF_VBST)
 		{
 			gridTie->state = GRID_TIE_INACTIVE;
-			BSP_Dout_SetAsIOPin(GRID_RELAY_IO, GPIO_PIN_RESET);
+			BSP_Dout_ClearPin(GRID_RELAY_IO);
 			gridTie->tempIndex = 0;
 		}
 		else
@@ -320,7 +320,7 @@ void GridTieControl_Loop(grid_tie_t* gridTie)
 	{
 		if (gridTie->state != GRID_TIE_INACTIVE)
 			gridTie->state = GRID_TIE_INACTIVE;
-		BSP_Dout_SetAsIOPin(GRID_RELAY_IO, GPIO_PIN_RESET);
+		BSP_Dout_ClearPin(GRID_RELAY_IO);
 		gridTie->tempIndex = 0;
 	}
 	BSP_Dout_SetAsIOPin(gridTie->inverterConfig.s1PinNos[0], GPIO_PIN_RESET);

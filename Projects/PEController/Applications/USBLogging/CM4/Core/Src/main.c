@@ -27,6 +27,7 @@
 #include "shared_memory.h"
 #include "pecontroller_display.h"
 #include "logo_display.h"
+#include "intelliSENS_drivers.h"
 #include <string.h>
 /* USER CODE END Includes */
 
@@ -63,7 +64,7 @@ static void MX_GPIO_Init(void);
 static void MX_TIM17_Init(void);
 static void MX_I2C2_Init(void);
 /* USER CODE BEGIN PFP */
-void MX_USB_DEVICE_Poll(void);
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -122,23 +123,26 @@ int main(void)
   MX_GPIO_Init();
   MX_TIM17_Init();
   MX_I2C2_Init();
-  MX_USB_DEVICE_Init();
+  //MX_USB_DEVICE_Init();
   /* USER CODE BEGIN 2 */
   BSP_Display_Init();
   DisplayDefaultImage();
   HAL_TIM_PWM_Start(&htim17,TIM_CHANNEL_1);			// LCD PWM channel
+  intelliSENS_Init(sharedData->m7Tom4.periodUs, (const float*)&adcMultipiers, (const float*)&adcOffsets);
   adc_cont_config_t adcConfig = {
 		  .callback = DataProcessingCallback,
 		  .conversionCycleTimeUs = sharedData->m7Tom4.periodUs };
   BSP_MAX11046_Init(ADC_MODE_CONT, &adcConfig);
-  BSP_MAX11046_Run();
+  //BSP_MAX11046_Run();
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  //MX_USB_DEVICE_Poll();
+	uint16_t adcData[8] = { 0 };
+	intelliSENS_SetADCData(adcData);
+	intelliSENS_Poll();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

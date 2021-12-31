@@ -24,6 +24,10 @@
  * Includes
  *******************************************************************************/
 #include "max11046_drivers.h"
+#define ENABLE_INTELLISENS					(1)
+#if ENABLE_INTELLISENS
+#include "intelliSENS_drivers.h"
+#endif
 /********************************************************************************
  * Defines
  *******************************************************************************/
@@ -88,6 +92,9 @@ static inline void Measure_SingleADC(GPIO_TypeDef* csGPIO, uint16_t csPin, uint1
 static inline void Measure_BothADCs(uint16_t* dataPtr)
 {
 	int i = 8;
+#if ENABLE_INTELLISENS
+	uint16_t* intelliSENSDataPtr = dataPtr;
+#endif
 	maxCS1_GPIO_Port->BSRR = (uint32_t)maxCS1_Pin << 16U;
 	do
 	{
@@ -104,6 +111,9 @@ static inline void Measure_BothADCs(uint16_t* dataPtr)
 		*dataPtr++ = (uint16_t)MAX11046_GPIO->IDR;
 		maxRead_GPIO_Port->BSRR = maxRead_Pin;
 	}	while (--i);
+#if ENABLE_INTELLISENS
+	intelliSENS_SetADCData(intelliSENSDataPtr);
+#endif
 	maxCS2_GPIO_Port->BSRR = maxCS2_Pin;
 }
 
@@ -116,13 +126,14 @@ static inline void Measure_BothADCs(uint16_t* dataPtr)
 static inline void MeasureConvert_BothADCs(float* dataPtr, const float* mults, const float* offsets)
 {
 	int i = 8;
-	uint16_t temp;
+	uint16_t intelliSENSDataPtr[16];
+	uint16_t* tempData = intelliSENSDataPtr;
 	maxCS1_GPIO_Port->BSRR = (uint32_t)maxCS1_Pin << 16U;
 	do
 	{
 		maxRead_GPIO_Port->BSRR = (uint32_t)maxRead_Pin << 16U;
-		temp = (uint16_t)MAX11046_GPIO->IDR;
-		*dataPtr++ = (temp - *offsets++) * (*mults++);
+		*tempData = (uint16_t)MAX11046_GPIO->IDR;
+		*dataPtr++ = (*tempData++ - *offsets++) * (*mults++);
 		maxRead_GPIO_Port->BSRR = maxRead_Pin;
 	}	while (--i);
 	maxCS1_GPIO_Port->BSRR = maxCS1_Pin;
@@ -131,10 +142,13 @@ static inline void MeasureConvert_BothADCs(float* dataPtr, const float* mults, c
 	do
 	{
 		maxRead_GPIO_Port->BSRR = (uint32_t)maxRead_Pin << 16U;
-		temp = (uint16_t)MAX11046_GPIO->IDR;
-		*dataPtr++ = (temp - *offsets++) * (*mults++);
+		*tempData = (uint16_t)MAX11046_GPIO->IDR;
+		*dataPtr++ = (*tempData++ - *offsets++) * (*mults++);
 		maxRead_GPIO_Port->BSRR = maxRead_Pin;
 	}	while (--i);
+#if ENABLE_INTELLISENS
+	intelliSENS_SetADCData(intelliSENSDataPtr);
+#endif
 	maxCS2_GPIO_Port->BSRR = maxCS2_Pin;
 }
 

@@ -104,6 +104,16 @@ extern void BSP_Dout_SetPortValue(uint32_t val);
  * @param pinNo Dout Pin No (Range 1-16)
  */
 extern void BSP_Dout_TogglePin(int pinNo);
+/**
+ * @brief Set the desired pin value to 1 for DOUT port
+ * @param pinNo Dout Pin No (Range 1-16)
+ */
+extern void BSP_Dout_SetPin(int pinNo);
+/**
+ * @brief Set the desired pin value to 0 for DOUT port
+ * @param pinNo Dout Pin No (Range 1-16)
+ */
+extern void BSP_Dout_ClearPin(int pinNo);
 /*******************************************************************************
  * Code
  ******************************************************************************/
