@@ -283,7 +283,7 @@ adc_measures_t* BSP_MAX11046_Run(void)
 	/* EXTI interrupt init*/
 	__HAL_GPIO_EXTI_CLEAR_IT(maxBusy1_Pin);
 	__HAL_GPIO_EXTI_CLEAR_IT(maxBusy2_Pin);
-	HAL_NVIC_SetPriority(EXTI15_10_IRQn, 1, 0);
+	HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
 	HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
 	if(acqType == ADC_MODE_SINGLE)

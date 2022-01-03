@@ -141,9 +141,9 @@ __ALIGN_BEGIN static uint8_t USBD_HID_CfgFSDesc[USB_HID_CONFIG_DESC_SIZ] __ALIGN
   0x01,                                               /* bConfigurationValue: Configuration value */
   0x00,                                               /* iConfiguration: Index of string descriptor describing the configuration */
 #if (USBD_SELF_POWERED == 1U)
-  0xE0,                                               /* bmAttributes: Bus Powered according to user configuration */
+  0xC0,                                               /* bmAttributes: Bus Powered according to user configuration */
 #else
-  0xA0,                                               /* bmAttributes: Bus Powered according to user configuration */
+  0x80,                                               /* bmAttributes: Bus Powered according to user configuration */
 #endif
   USBD_MAX_POWER,                                     /* MaxPower 100 mA: this current is used for detecting Vbus */
 
@@ -193,9 +193,9 @@ __ALIGN_BEGIN static uint8_t USBD_HID_CfgHSDesc[USB_HID_CONFIG_DESC_SIZ] __ALIGN
   0x01,                                               /* bConfigurationValue: Configuration value */
   0x00,                                               /* iConfiguration: Index of string descriptor describing the configuration */
 #if (USBD_SELF_POWERED == 1U)
-  0xE0,                                               /* bmAttributes: Bus Powered according to user configuration */
+  0xC0,                                               /* bmAttributes: Bus Powered according to user configuration */
 #else
-  0xA0,                                               /* bmAttributes: Bus Powered according to user configuration */
+  0x80,                                               /* bmAttributes: Bus Powered according to user configuration */
 #endif
   USBD_MAX_POWER,                                     /* MaxPower 100 mA: this current is used for detecting Vbus */
 

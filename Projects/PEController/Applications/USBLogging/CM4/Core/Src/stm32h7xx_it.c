@@ -198,18 +198,20 @@ void SysTick_Handler(void)
 /* For the available peripheral interrupt handler names,                      */
 /* please refer to the startup file (startup_stm32h7xx.s).                    */
 /******************************************************************************/
-
+volatile uint32_t tempDiff1, tEnd;
 /**
   * @brief This function handles EXTI line[15:10] interrupts.
   */
 void EXTI15_10_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI15_10_IRQn 0 */
-
+volatile uint32_t t1 = SysTick->VAL;
+if (t1 < tEnd)
+	tempDiff1 = tEnd - t1;
   /* USER CODE END EXTI15_10_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_14);
   /* USER CODE BEGIN EXTI15_10_IRQn 1 */
-
+	tEnd = SysTick->VAL;
   /* USER CODE END EXTI15_10_IRQn 1 */
 }
 
