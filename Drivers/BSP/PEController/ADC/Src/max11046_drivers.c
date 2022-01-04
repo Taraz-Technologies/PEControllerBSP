@@ -112,18 +112,19 @@ static inline void Measure_BothADCs(uint16_t* dataPtr)
 		maxRead_GPIO_Port->BSRR = maxRead_Pin;
 	}	while (--i);
 #if ENABLE_INTELLISENS
-	intelliSENS_SetADCData(intelliSENSDataPtr);
+	intelliSENS_SetADCData(intelliSENSDataPtr + 8);
 #endif
 	maxCS2_GPIO_Port->BSRR = maxCS2_Pin;
 }
 
+// 8849____8237
 /**
  * @brief Acquire measurements and convert to meaningful data for both ADCs
  * @param *dataPtr Pointer to where the data needs to be stored
  * @param *mults Pointer to the multiplier information
  * @param *offsets Pointer to the offset information
  */
-static inline void MeasureConvert_BothADCs(float* dataPtr, const float* mults, const float* offsets)
+static inline void MeasureConvert_BothADCs____(float* dataPtr, const float* mults, const float* offsets)
 {
 	int i = 8;
 	uint16_t intelliSENSDataPtr[16];
@@ -146,11 +147,133 @@ static inline void MeasureConvert_BothADCs(float* dataPtr, const float* mults, c
 		*dataPtr++ = (*tempData++ - *offsets++) * (*mults++);
 		maxRead_GPIO_Port->BSRR = maxRead_Pin;
 	}	while (--i);
+	maxCS2_GPIO_Port->BSRR = maxCS2_Pin;
+#if ENABLE_INTELLISENS
+	intelliSENS_SetADCData(intelliSENSDataPtr + 8);
+#endif
+}
+
+//int i = 8, j = 8;
+
+/* 731
+	volatile uint32_t t1 = SysTick->VAL;
+	int i = 8;
+	uint16_t intelliSENSDataPtr[16];
+	uint16_t* tempData = intelliSENSDataPtr;
+	maxCS1_GPIO_Port->BSRR = (uint32_t)maxCS1_Pin << 16U;
+	do
+	{
+		maxRead_GPIO_Port->BSRR = (uint32_t)maxRead_Pin << 16U;
+ *tempData++ = (uint16_t)MAX11046_GPIO->IDR;
+		maxRead_GPIO_Port->BSRR = maxRead_Pin;
+	}	while (--i);
+	maxCS1_GPIO_Port->BSRR = maxCS1_Pin;
+	i = 8;
+	maxCS2_GPIO_Port->BSRR = (uint32_t)maxCS2_Pin << 16U;
+	do
+	{
+		maxRead_GPIO_Port->BSRR = (uint32_t)maxRead_Pin << 16U;
+ *tempData++ = (uint16_t)MAX11046_GPIO->IDR;
+		maxRead_GPIO_Port->BSRR = maxRead_Pin;
+	}	while (--i);
+	maxCS2_GPIO_Port->BSRR = maxCS2_Pin;
+	tEnd = SysTick->VAL;
+	if (t1 > tEnd)
+		tempDiff1 = t1 - tEnd;
 #if ENABLE_INTELLISENS
 	intelliSENS_SetADCData(intelliSENSDataPtr);
 #endif
+
+ */
+
+/* 877
+	volatile uint32_t t1 = SysTick->VAL;
+	static int i = 8;
+	static int j = 8;
+	uint16_t intelliSENSDataPtr[16];
+	uint16_t* tempData = intelliSENSDataPtr;
+	maxCS1_GPIO_Port->BSRR = (uint32_t)maxCS1_Pin << 16U;
+	do
+	{
+		maxRead_GPIO_Port->BSRR = (uint32_t)maxRead_Pin << 16U;
+ *tempData++ = (uint16_t)MAX11046_GPIO->IDR;
+		maxRead_GPIO_Port->BSRR = maxRead_Pin;
+	}	while (--i);
+	maxCS1_GPIO_Port->BSRR = maxCS1_Pin;
+	maxCS2_GPIO_Port->BSRR = (uint32_t)maxCS2_Pin << 16U;
+	do
+	{
+		maxRead_GPIO_Port->BSRR = (uint32_t)maxRead_Pin << 16U;
+ *tempData++ = (uint16_t)MAX11046_GPIO->IDR;
+		maxRead_GPIO_Port->BSRR = maxRead_Pin;
+	}	while (--j);
+	maxCS2_GPIO_Port->BSRR = maxCS2_Pin;
+	tEnd = SysTick->VAL;
+	if (t1 > tEnd)
+		tempDiff1 = t1 - tEnd;
+#if ENABLE_INTELLISENS
+	intelliSENS_SetADCData(intelliSENSDataPtr);
+#endif
+	i = j = 8;
+ */
+#define READ_ADC_CH(tempData)			maxRead_GPIO_Port->BSRR = (uint32_t)maxRead_Pin << 16U; \
+		*tempData++ = (uint16_t)MAX11046_GPIO->IDR; \
+		maxRead_GPIO_Port->BSRR = maxRead_Pin;
+
+static inline void Measure_JJJ(uint16_t* tempData)
+{
+	// ADC1
+	maxCS1_GPIO_Port->BSRR = (uint32_t)maxCS1_Pin << 16U;
+
+	READ_ADC_CH(tempData);
+	READ_ADC_CH(tempData);
+	READ_ADC_CH(tempData);
+	READ_ADC_CH(tempData);
+	READ_ADC_CH(tempData);
+	READ_ADC_CH(tempData);
+	READ_ADC_CH(tempData);
+	READ_ADC_CH(tempData);
+
+	// as CS1 and CS2 port is same in this case
+	maxCS1_GPIO_Port->BSRR = (uint32_t)maxCS2_Pin << 16U | maxCS1_Pin;
+
+	READ_ADC_CH(tempData);
+	READ_ADC_CH(tempData);
+	READ_ADC_CH(tempData);
+	READ_ADC_CH(tempData);
+	READ_ADC_CH(tempData);
+	READ_ADC_CH(tempData);
+	READ_ADC_CH(tempData);
+	READ_ADC_CH(tempData);
+
 	maxCS2_GPIO_Port->BSRR = maxCS2_Pin;
 }
+
+#pragma GCC push_options
+#pragma GCC optimize ("-Ofast")
+/**
+ * @brief Acquire measurements and convert to meaningful data for both ADCs
+ * @param *dataPtr Pointer to where the data needs to be stored
+ * @param *mults Pointer to the multiplier information
+ * @param *offsets Pointer to the offset information
+ */
+static inline void MeasureConvert_BothADCs(float* dataPtr, const float* mults, const float* offsets)
+{
+	uint16_t intelliSENSDataPtr[16];
+	uint16_t* tempData = intelliSENSDataPtr;
+	Measure_JJJ(intelliSENSDataPtr);
+
+#if ENABLE_INTELLISENS
+	intelliSENS_SetADCData(intelliSENSDataPtr + 8);
+#endif
+
+	int i = 15;
+	do
+	{
+		*dataPtr++ =  (*tempData++ - *offsets++) * (*mults++);
+	} while (i--);
+}
+#pragma GCC pop_options
 
 static void Timer_Config(void)
 {
@@ -318,7 +441,7 @@ void BSP_MAX11046_Stop(void)
 		HAL_TIM_OnePulse_Stop(&maxTimerHandle,TIM_CHANNEL_1);
 		HAL_TIM_OnePulse_Stop(&maxTimerHandle,TIM_CHANNEL_2);
 	}
-		// clear the flag
+	// clear the flag
 	__HAL_GPIO_EXTI_CLEAR_IT(maxBusy1_Pin);
 	__HAL_GPIO_EXTI_CLEAR_IT(maxBusy2_Pin);
 }

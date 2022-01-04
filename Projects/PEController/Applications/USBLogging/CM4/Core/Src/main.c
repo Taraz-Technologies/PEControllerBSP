@@ -126,15 +126,87 @@ void SystemClock_Config(void)
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+// memcpy 552
+/* 590
+	uint32_t* resultU32 = (uint32_t*)result;
+	uint32_t* copyU32 = (uint32_t*)&data->dataRecord[index];
+	for (int i = 0; i < 16; i++)
+		copyU32[i] = resultU32[i];
+ */
+/* 518
+	uint32_t* resultU32 = (uint32_t*)result;
+	uint32_t* copyU32 = (uint32_t*)&data->dataRecord[index];
+	int i = 16;
+	do
+	{
+		*copyU32++ = *resultU32++;
+	} while(--i);
+ */
+/* 326
+	uint32_t* resultU32 = (uint32_t*)result;
+	uint32_t* copyU32 = (uint32_t*)&data->dataRecord[index];
+	*copyU32++ = *resultU32++;
+	*copyU32++ = *resultU32++;
+	*copyU32++ = *resultU32++;
+	*copyU32++ = *resultU32++;
+	*copyU32++ = *resultU32++;
+	*copyU32++ = *resultU32++;
+	*copyU32++ = *resultU32++;
+	*copyU32++ = *resultU32++;
+	*copyU32++ = *resultU32++;
+	*copyU32++ = *resultU32++;
+	*copyU32++ = *resultU32++;
+	*copyU32++ = *resultU32++;
+	*copyU32++ = *resultU32++;
+	*copyU32++ = *resultU32++;
+	*copyU32++ = *resultU32++;
+	*copyU32++ = *resultU32++;
+ */
+/* 190
+	uint64_t* resultU64 = (uint64_t*)result;
+	uint64_t* copyU64 = (uint64_t*)&data->dataRecord[index];
+	*copyU64++ = *resultU64++;
+	*copyU64++ = *resultU64++;
+	*copyU64++ = *resultU64++;
+	*copyU64++ = *resultU64++;
+	*copyU64++ = *resultU64++;
+	*copyU64++ = *resultU64++;
+	*copyU64++ = *resultU64++;
+	*copyU64++ = *resultU64++;
+*/
+/* 184
+	uint64_t* resultU64 = (uint64_t*)result;
+	uint64_t* copyU64 = (uint64_t*)&data->dataRecord[index];
+	*copyU64++ = *resultU64++;
+	*copyU64++ = *resultU64++;
+	*copyU64++ = *resultU64++;
+	*copyU64++ = *resultU64++;
+	*copyU64++ = *resultU64++;
+	*copyU64++ = *resultU64++;
+	*copyU64++ = *resultU64++;
+	*copyU64 = *resultU64;
+*/
+#pragma GCC push_options
+#pragma GCC optimize ("-Ofast")
 static void DataProcessingCallback(adc_measures_t* result)
 {
 	volatile m4_to_m7_data_t* data = &sharedData->m4Tom7;
 	int index = (data->recordIndex + 1) & (MEASURE_SAVE_COUNT - 1);
-	memcpy((void*)&(data->dataRecord[index]), result, sizeof(adc_measures_t));
+	uint64_t* resultU64 = (uint64_t*)result;
+	uint64_t* copyU64 = (uint64_t*)&data->dataRecord[index];
+	*copyU64++ = *resultU64++;
+	*copyU64++ = *resultU64++;
+	*copyU64++ = *resultU64++;
+	*copyU64++ = *resultU64++;
+	*copyU64++ = *resultU64++;
+	*copyU64++ = *resultU64++;
+	*copyU64++ = *resultU64++;
+	*copyU64 = *resultU64;
 	data->recordIndex = index;
 	data->lastDataPointer = &data->dataRecord[index];
 	data->sts = true;
 }
+#pragma GCC pop_options
 /* USER CODE END 0 */
 
 /**
@@ -146,7 +218,7 @@ int main(void)
   /* USER CODE BEGIN 1 */
 	memset((void*)&(sharedData->m4Tom7), 0, sizeof(m4_to_m7_data_t));
 	sharedData->m4Tom7.lastDataPointer = sharedData->m4Tom7.dataRecord;
-	sharedData->m7Tom4.periodUs = 40;
+	sharedData->m7Tom4.periodUs = 10;
   /* USER CODE END 1 */
 
 /* USER CODE BEGIN Boot_Mode_Sequence_1 */
