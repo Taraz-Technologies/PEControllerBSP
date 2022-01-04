@@ -29,7 +29,7 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-
+#define CM4_ONLY				(0)
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -71,7 +71,9 @@ adc_measures_t adcVals;
 int main(void)
 {
   /* USER CODE BEGIN 1 */
+#if CM4_ONLY
 	while(1);
+#endif
   /* USER CODE END 1 */
 /* USER CODE BEGIN Boot_Mode_Sequence_0 */
 	int32_t timeout;
@@ -108,7 +110,7 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   /* USER CODE BEGIN 2 */
-	sharedData->m7Tom4.periodUs = 40;
+	sharedData->m7Tom4.periodUs = 8;
 	MainControl_Init();
 	MainControl_Run();
 	/* When system initialization is finished, Cortex-M7 will release Cortex-M4 by means of

@@ -33,7 +33,7 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-
+#define CM4_ONLY				(0)
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -64,7 +64,7 @@ static void MX_GPIO_Init(void);
 static void MX_TIM17_Init(void);
 static void MX_I2C2_Init(void);
 /* USER CODE BEGIN PFP */
-#if 1
+#if CM4_ONLY
 /**
   * @brief System Clock Configuration
   * @retval None
@@ -222,7 +222,7 @@ int main(void)
 	sharedData->m4Tom7.lastDataPointer = sharedData->m4Tom7.dataRecord;
 	sharedData->m7Tom4.periodUs = 8;
   /* USER CODE END 1 */
-#if 0
+#if CM4_ONLY == 0
 	/* USER CODE BEGIN Boot_Mode_Sequence_1 */
   /*HW semaphore Clock enable*/
   __HAL_RCC_HSEM_CLK_ENABLE();
@@ -244,7 +244,9 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
+#if CM4_ONLY
   SystemClock_Config();
+#endif
   /* USER CODE END Init */
 
   /* USER CODE BEGIN SysInit */
@@ -272,7 +274,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	uint16_t adcData[8] = { 0 };
+	//uint16_t adcData[8] = { 0 };
 	//intelliSENS_SetADCData(adcData);
 	intelliSENS_Poll();
     /* USER CODE END WHILE */
