@@ -116,7 +116,7 @@ extern intelliSENS_data_t intelliSENSData;
  * @param data pointer to the measurement data
  * @return bool <c>true</c> if added successfully else <c>false</c>. This function will not add data if not requested by the intelliSENS Application
  */
-bool intelliSENS_SetADCData(uint16_t* data);
+bool intelliSENS_SetADCData(uint64_t* data);
 /**
  * @brief Initialize the intelliSENS library
  * @param periodInUs ADC conversion interval in micro-seconds

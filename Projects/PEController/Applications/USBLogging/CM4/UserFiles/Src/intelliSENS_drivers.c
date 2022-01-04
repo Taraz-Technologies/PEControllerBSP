@@ -133,14 +133,14 @@ static void intelliSENS_DeInit(void)
  * @param data pointer to the measurement data
  * @return bool <c>true</c> if added successfully else <c>false</c>. This function will not add data if not requested by the intelliSENS Application
  */
-bool intelliSENS_SetADCData(uint16_t* data)
+bool intelliSENS_SetADCData(uint64_t* data)
 {
 	if (intelliSENSData.state != STATE_START)
 		return false;
 
-	uint16_t* dataPtr = &intelliSENSDataBuffers[ringBuff.wrIndex][intelliSENSData.dataIndex];
-	for (int i = 0; i < ADC_COUNT; i++)
-		dataPtr[i] = data[i];
+	uint64_t* dataPtr = (uint64_t*)&intelliSENSDataBuffers[ringBuff.wrIndex][intelliSENSData.dataIndex];
+	*dataPtr++ = *data++;
+	*dataPtr = *data;
 
 	intelliSENSData.dataIndex += ADC_COUNT;
 	if (intelliSENSData.dataIndex > REPORT_UINT16_COUNT - 1)

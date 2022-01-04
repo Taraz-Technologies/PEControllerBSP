@@ -264,7 +264,7 @@ static inline void MeasureConvert_BothADCs(float* dataPtr, const float* mults, c
 	Measure_JJJ(intelliSENSDataPtr);
 
 #if ENABLE_INTELLISENS
-	intelliSENS_SetADCData(intelliSENSDataPtr + 8);
+	intelliSENS_SetADCData((uint64_t*)(intelliSENSDataPtr + 8));
 #endif
 
 	int i = 15;
