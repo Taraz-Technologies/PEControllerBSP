@@ -64,11 +64,12 @@ static void MX_GPIO_Init(void);
 static void MX_TIM17_Init(void);
 static void MX_I2C2_Init(void);
 /* USER CODE BEGIN PFP */
-
+#if 1
 /**
   * @brief System Clock Configuration
   * @retval None
   */
+
 void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
@@ -122,6 +123,7 @@ void SystemClock_Config(void)
     Error_Handler();
   }
 }
+#endif
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/

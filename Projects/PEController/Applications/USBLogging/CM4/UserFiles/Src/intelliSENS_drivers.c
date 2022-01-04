@@ -127,7 +127,8 @@ static void intelliSENS_DeInit(void)
 	//--todo-- while removing static remove usb also
 	intelliSENS_ResetDataSystem();
 }
-
+#pragma GCC push_options
+#pragma GCC optimize ("-Ofast")
 /**
  * @brief Add the ADC data to USB buffer for logging
  * @param data pointer to the measurement data
@@ -151,7 +152,7 @@ bool intelliSENS_SetADCData(uint64_t* data)
 	}
 	return true;
 }
-
+#pragma GCC pop_options
 static user_errors_t ProcesSetCmd(app_cmds_t reg)
 {
 	user_errors_t err = UERR_FAIL;
