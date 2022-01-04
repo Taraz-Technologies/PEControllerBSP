@@ -222,22 +222,22 @@ int main(void)
 	sharedData->m4Tom7.lastDataPointer = sharedData->m4Tom7.dataRecord;
 	sharedData->m7Tom4.periodUs = 8;
   /* USER CODE END 1 */
-
-/* USER CODE BEGIN Boot_Mode_Sequence_1 */
+#if 0
+	/* USER CODE BEGIN Boot_Mode_Sequence_1 */
   /*HW semaphore Clock enable*/
-  //__HAL_RCC_HSEM_CLK_ENABLE();
+  __HAL_RCC_HSEM_CLK_ENABLE();
   /* Activate HSEM notification for Cortex-M4*/
-  //HAL_HSEM_ActivateNotification(__HAL_HSEM_SEMID_TO_MASK(HSEM_ID_0));
+  HAL_HSEM_ActivateNotification(__HAL_HSEM_SEMID_TO_MASK(HSEM_ID_0));
   /*
   Domain D2 goes to STOP mode (Cortex-M4 in deep-sleep) waiting for Cortex-M7 to
   perform system initialization (system clock config, external memory configuration.. )
   */
-  //HAL_PWREx_ClearPendingEvent();
-  //HAL_PWREx_EnterSTOPMode(PWR_MAINREGULATOR_ON, PWR_STOPENTRY_WFE, PWR_D2_DOMAIN);
+  HAL_PWREx_ClearPendingEvent();
+  HAL_PWREx_EnterSTOPMode(PWR_MAINREGULATOR_ON, PWR_STOPENTRY_WFE, PWR_D2_DOMAIN);
   /* Clear HSEM flag */
-  //__HAL_HSEM_CLEAR_FLAG(__HAL_HSEM_SEMID_TO_MASK(HSEM_ID_0));
-
-/* USER CODE END Boot_Mode_Sequence_1 */
+  __HAL_HSEM_CLEAR_FLAG(__HAL_HSEM_SEMID_TO_MASK(HSEM_ID_0));
+#endif
+  /* USER CODE END Boot_Mode_Sequence_1 */
   /* MCU Configuration--------------------------------------------------------*/
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
@@ -257,8 +257,8 @@ int main(void)
   MX_I2C2_Init();
   //MX_USB_DEVICE_Init();
   /* USER CODE BEGIN 2 */
-  //BSP_Display_Init();
-  //DisplayDefaultImage();
+  BSP_Display_Init();
+  DisplayDefaultImage();
   HAL_TIM_PWM_Start(&htim17,TIM_CHANNEL_1);			// LCD PWM channel
   intelliSENS_Init(sharedData->m7Tom4.periodUs, (const float*)&adcMultipiers, (const float*)&adcOffsets);
   adc_cont_config_t adcConfig = {
