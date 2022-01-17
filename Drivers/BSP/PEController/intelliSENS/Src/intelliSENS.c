@@ -52,10 +52,10 @@ intelliSENS_t intelliSENS;
  *******************************************************************************/
 void intelliSENS_Configure(void)
 {
-	intelliSENS.Init = 0x00000000081f6c50;
-	intelliSENS.Poll = 0x00000000081f70bc;
-	intelliSENS.SetADCData = 0x00000000081f6c78;
-	intelliSENS.SetADCTicks = 0x00000000081f7110;
+	intelliSENS.Init = 0x00000000081f6c48;//0x00000000081f6c50;
+	intelliSENS.Poll = 0x00000000081f70b4;//0x00000000081f70bc;
+	intelliSENS.SetADCData = 0x00000000081f6c70;//0x00000000081f6c78;
+	intelliSENS.SetADCTicks = 0x00000000081f7108;//0x00000000081f7110;
 }
 
 /**
