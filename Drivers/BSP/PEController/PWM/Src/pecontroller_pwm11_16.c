@@ -209,8 +209,18 @@ static void PWM11_16_ConfigInvertedPair(uint32_t pwmNo, pwm_config_t* config)
 	if(ch % 2 != 0)
 		Error_Handler();
 	ch = ch == 0 ? TIM_CHANNEL_1 : (ch == 2 ? TIM_CHANNEL_2 : TIM_CHANNEL_3);
+	/*if (config->invertPol)
+	{
+		sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+		sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
+	}*/
 	if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, ch) != HAL_OK)
 		Error_Handler();
+	/*if (config->invertPol)
+	{
+		sConfigOC.OCPolarity = TIM_OCPOLARITY_LOW;
+		sConfigOC.OCNPolarity = TIM_OCNPOLARITY_LOW;
+	}*/
 }
 /**
  * @brief Configures consecutive inverted pairs for PWM

@@ -100,8 +100,6 @@ void OpenLoopVfControl_Init(openloopvf_config_t* config, PWMResetCallback pwmRes
  */
 void OpenLoopVfControl_Loop(openloopvf_config_t* config)
 {
-	float duties[3];
-
 	// adjust the frequency with given acceleration
 	if(config->currentFreq < config->outputFreq)
 	{
@@ -123,8 +121,8 @@ void OpenLoopVfControl_Loop(openloopvf_config_t* config)
 	if(config->wt > TWO_PI)
 		config->wt -= TWO_PI;
 
-	// generate SPWM according to the theta and modulation index
-	ComputeDuty_SPWM(config->wt, config->currentModulationIndex, duties);
+	// generate and apply SPWM according to the theta and modulation index
+	Inverter3Ph_UpdateSPWM(&config->inverterConfig, config->wt, config->currentModulationIndex);
 }
 #pragma GCC pop_options
 /* EOF */

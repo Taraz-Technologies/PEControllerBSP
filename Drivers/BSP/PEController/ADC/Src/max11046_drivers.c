@@ -287,6 +287,7 @@ static void Timer_Config(void)
 	maxTimerHandle.Init.CounterMode = TIM_COUNTERMODE_UP;
 	maxTimerHandle.Init.Period = (uint16_t)(MAX11046_CLK_Us * adcContConfig.conversionCycleTimeUs);
 #if ENABLE_INTELLISENS
+	intelliSENS.Init(adcContConfig.conversionCycleTimeUs, (const float*)&adcMultipiers, (const float*)&adcOffsets);
 	intelliSENS.SetADCTicks(adcContConfig.conversionCycleTimeUs * 240);
 #endif
 	maxTimerHandle.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -337,6 +338,10 @@ void BSP_MAX11046_Init(adc_acq_mode_t type, adc_cont_config_t* contConfig)
 	// DeInitialize if already initialized
 	if(moduleActive)
 		BSP_MAX11046_DeInit();
+
+#if ENABLE_INTELLISENS
+	intelliSENS_Configure();
+#endif
 
 	acqType = type;
 	adcContConfig.conversionCycleTimeUs = contConfig->conversionCycleTimeUs;
@@ -394,10 +399,6 @@ void BSP_MAX11046_Init(adc_acq_mode_t type, adc_cont_config_t* contConfig)
 	HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
 
 	Timer_Config();
-
-#if ENABLE_INTELLISENS
-	intelliSENS_Configure();
-#endif
 
 	moduleActive = true;
 }

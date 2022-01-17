@@ -19,7 +19,6 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "usb_device.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -27,7 +26,7 @@
 #include "shared_memory.h"
 #include "pecontroller_display.h"
 #include "logo_display.h"
-#include "intelliSENS_drivers.h"
+#include "intelliSENS.h"
 #include <string.h>
 /* USER CODE END Includes */
 
@@ -224,8 +223,9 @@ int main(void)
 	sharedData->m7Tom4.periodUs = 8;
 #endif
   /* USER CODE END 1 */
+
+/* USER CODE BEGIN Boot_Mode_Sequence_1 */
 #if CM4_ONLY == 0
-	/* USER CODE BEGIN Boot_Mode_Sequence_1 */
   /*HW semaphore Clock enable*/
   __HAL_RCC_HSEM_CLK_ENABLE();
   /* Activate HSEM notification for Cortex-M4*/
@@ -239,7 +239,7 @@ int main(void)
   /* Clear HSEM flag */
   __HAL_HSEM_CLEAR_FLAG(__HAL_HSEM_SEMID_TO_MASK(HSEM_ID_0));
 #endif
-  /* USER CODE END Boot_Mode_Sequence_1 */
+/* USER CODE END Boot_Mode_Sequence_1 */
   /* MCU Configuration--------------------------------------------------------*/
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
@@ -259,12 +259,10 @@ int main(void)
   MX_GPIO_Init();
   MX_TIM17_Init();
   MX_I2C2_Init();
-  //MX_USB_DEVICE_Init();
   /* USER CODE BEGIN 2 */
   BSP_Display_Init();
   DisplayDefaultImage();
   HAL_TIM_PWM_Start(&htim17,TIM_CHANNEL_1);			// LCD PWM channel
-  intelliSENS_Init(sharedData->m7Tom4.periodUs, (const float*)&adcMultipiers, (const float*)&adcOffsets);
   adc_cont_config_t adcConfig = {
 		  .callback = DataProcessingCallback,
 		  .conversionCycleTimeUs = sharedData->m7Tom4.periodUs };
@@ -278,7 +276,7 @@ int main(void)
   {
 	//uint16_t adcData[8] = { 0 };
 	//intelliSENS_SetADCData(adcData);
-	intelliSENS_Poll();
+	//intelliSENS.Poll();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -410,7 +408,6 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOF_CLK_ENABLE();
   __HAL_RCC_GPIOH_CLK_ENABLE();
-  __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOD_CLK_ENABLE();
   __HAL_RCC_GPIOK_CLK_ENABLE();
@@ -482,7 +479,7 @@ static void MX_GPIO_Init(void)
 
   /* EXTI interrupt init*/
   HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
-  //HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
+  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
 }
 

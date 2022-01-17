@@ -99,7 +99,7 @@ int main(void)
 
   /* Configure the system clock */
   SystemClock_Config();
-  /* USER CODE BEGIN Boot_Mode_Sequence_2 */
+/* USER CODE BEGIN Boot_Mode_Sequence_2 */
 
 /* USER CODE END Boot_Mode_Sequence_2 */
 
