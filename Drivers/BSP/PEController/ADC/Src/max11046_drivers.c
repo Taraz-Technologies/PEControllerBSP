@@ -24,9 +24,9 @@
  * Includes
  *******************************************************************************/
 #include "max11046_drivers.h"
-#define ENABLE_INTELLISENS					(1)
+#define ENABLE_INTELLISENS					(0)
 #if ENABLE_INTELLISENS
-#include "intelliSENS_drivers.h"
+#include "intelliSENS.h"
 #endif
 /********************************************************************************
  * Defines
@@ -112,7 +112,7 @@ static inline void Measure_BothADCs(uint16_t* dataPtr)
 		maxRead_GPIO_Port->BSRR = maxRead_Pin;
 	}	while (--i);
 #if ENABLE_INTELLISENS
-	intelliSENS_SetADCData(intelliSENSDataPtr + 8);
+	intelliSENS.SetADCData(intelliSENSDataPtr);
 #endif
 	maxCS2_GPIO_Port->BSRR = maxCS2_Pin;
 }
@@ -149,7 +149,7 @@ static inline void MeasureConvert_BothADCs____(float* dataPtr, const float* mult
 	}	while (--i);
 	maxCS2_GPIO_Port->BSRR = maxCS2_Pin;
 #if ENABLE_INTELLISENS
-	intelliSENS_SetADCData(intelliSENSDataPtr + 8);
+	intelliSENS.SetADCData(intelliSENSDataPtr);
 #endif
 }
 
@@ -181,7 +181,7 @@ static inline void MeasureConvert_BothADCs____(float* dataPtr, const float* mult
 	if (t1 > tEnd)
 		tempDiff1 = t1 - tEnd;
 #if ENABLE_INTELLISENS
-	intelliSENS_SetADCData(intelliSENSDataPtr);
+	intelliSENS.SetADCData(intelliSENSDataPtr);
 #endif
 
  */
@@ -212,7 +212,7 @@ static inline void MeasureConvert_BothADCs____(float* dataPtr, const float* mult
 	if (t1 > tEnd)
 		tempDiff1 = t1 - tEnd;
 #if ENABLE_INTELLISENS
-	intelliSENS_SetADCData(intelliSENSDataPtr);
+	intelliSENS.SetADCData(intelliSENSDataPtr);
 #endif
 	i = j = 8;
  */
@@ -264,7 +264,7 @@ static inline void MeasureConvert_BothADCs(float* dataPtr, const float* mults, c
 	Measure_JJJ(intelliSENSDataPtr);
 
 #if ENABLE_INTELLISENS
-	intelliSENS_SetADCData((uint64_t*)(intelliSENSDataPtr + 8));
+	intelliSENS.SetADCData((uint64_t*)(intelliSENSDataPtr));
 #endif
 
 	int i = 15;
@@ -286,6 +286,9 @@ static void Timer_Config(void)
 	maxTimerHandle.Init.Prescaler = 0;
 	maxTimerHandle.Init.CounterMode = TIM_COUNTERMODE_UP;
 	maxTimerHandle.Init.Period = (uint16_t)(MAX11046_CLK_Us * adcContConfig.conversionCycleTimeUs);
+#if ENABLE_INTELLISENS
+	intelliSENS.SetADCTicks(adcContConfig.conversionCycleTimeUs * 240);
+#endif
 	maxTimerHandle.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
 	maxTimerHandle.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
 	if (HAL_TIM_PWM_Init(&maxTimerHandle) != HAL_OK)
@@ -391,6 +394,10 @@ void BSP_MAX11046_Init(adc_acq_mode_t type, adc_cont_config_t* contConfig)
 	HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
 
 	Timer_Config();
+
+#if ENABLE_INTELLISENS
+	intelliSENS_Configure();
+#endif
 
 	moduleActive = true;
 }

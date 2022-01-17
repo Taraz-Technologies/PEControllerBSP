@@ -34,7 +34,6 @@
 /*******************************************************************************
  * Code
  ******************************************************************************/
-#if 0
 /**
  * @brief
  *
@@ -47,21 +46,20 @@
  * @param *config Pointer to a  pwm_pair_config_t structure that contains the configuration
  * 				   parameters for the PWM pair
  */
-static void TnpcPWM_UpdatePair(uint32_t pwmNo, float duty, pwm_pair_config_t *config)
+static void TnpcPWM_UpdatePair(uint32_t pwmNo, float duty, pwm_config_t *config)
 {
 	duty = (fabsf(duty - 0.5f)) * 2;
 	if(duty < 0)
 	{
-		PWMDriver_UpdatePair(pwmNo, 0, config);
-		PWMDriver_UpdatePair(pwmNo + 2, duty, config);
+		BSP_PWM_UpdatePairDuty(pwmNo, 0, config);
+		BSP_PWM_UpdatePairDuty(pwmNo + 2, duty, config);
 	}
 	else
 	{
-		PWMDriver_UpdatePair(pwmNo, duty, config);
-		PWMDriver_UpdatePair(pwmNo + 2, 0, config);
+		BSP_PWM_UpdatePairDuty(pwmNo, duty, config);
+		BSP_PWM_UpdatePairDuty(pwmNo + 2, 0, config);
 	}
 }
-#endif
 /**
  * @brief Configure the PWMs for a single leg of the inverter
  *
@@ -76,15 +74,14 @@ static DutyCycleUpdateFnc ConfigSingleLeg(uint16_t pwmNo, inverter3Ph_config_t* 
 	BSP_Dout_SetAsPWMPin(pwmNo);
 	BSP_Dout_SetAsPWMPin(pwmNo + 1);
 	/* for Tnpc use four switches */
-#if 0
-	if (initConfig->legType == LEG_TNPC)
+	if (config->legType == LEG_TNPC)
 	{
-		BSP_PWM_ConfigInvertedPair(pwmNo + 2, &handle->pairConfig);
+		BSP_PWM_ConfigInvertedPair(pwmNo + 2, &config->pwmConfig);
 		callback = TnpcPWM_UpdatePair; 				/* use this function to update all 4 switch duty cycles */
 		BSP_Dout_SetAsPWMPin(pwmNo + 2);
 		BSP_Dout_SetAsPWMPin(pwmNo + 3);
 	}
-#endif
+
 	return callback;
 }
 

@@ -38,7 +38,7 @@
 /**
  * @brief No of ADCs used bu the system
  */
-#define ADC_COUNT						(8)
+#define ADC_COUNT						(16)
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
@@ -61,6 +61,7 @@ static float adcOffsets[ADC_COUNT] = {0};
 intelliSENS_data_t intelliSENSData = {0};
 uint16_t conf2;
 uint16_t conf3;
+uint16_t adcTicks;
 /********************************************************************************
  * Function Prototypes
  *******************************************************************************/
@@ -68,11 +69,6 @@ extern void MX_USB_DEVICE_Init(void);
 /********************************************************************************
  * Code
  *******************************************************************************/
-static inline void ReceiveCmd(void)
-{
-
-}
-
 /**
  * @brief Reset the data system for the intelliSENS buffers
  */
@@ -141,10 +137,12 @@ bool intelliSENS_SetADCData(uint64_t* data)
 
 	uint64_t* dataPtr = (uint64_t*)&intelliSENSDataBuffers[ringBuff.wrIndex][intelliSENSData.dataIndex];
 	*dataPtr++ = *data++;
+	*dataPtr++ = *data++;
+	*dataPtr++ = *data++;
 	*dataPtr = *data;
 
 	intelliSENSData.dataIndex += ADC_COUNT;
-	if (intelliSENSData.dataIndex > REPORT_UINT16_COUNT - 1)
+	if (intelliSENSData.dataIndex > REPORT_UINT16_COUNT - ADC_COUNT)
 	{
 		intelliSENSData.dataIndex = REPORT_UINT16_FIRST_SAMPLE_INDEX;
 		intelliSENSData.prepCounter++;
@@ -211,6 +209,11 @@ static user_errors_t ProcesGetCmd(app_cmds_t reg)
 	case CMD_CONF3:
 		//sendBuff[RegisterValueIndex] = deviceRegs.regU16[REGI_PWM];
 		sendBuff = conf3;
+		err = UERR_OK;
+		break;
+	case CMD_SAMPLE_RATE:
+		sendBuff[RegisterValueIndex] = (uint8_t)(adcTicks & 0xff);
+		sendBuff[RegisterValueIndex + 1] = (uint8_t)((adcTicks & 0xff00) >> 8);
 		err = UERR_OK;
 		break;
 	default:
@@ -366,6 +369,11 @@ void intelliSENS_Poll(void)
 		else if (intelliSENSData.state == STATE_START)
 			USB_TrySendData();
 	}
+}
+
+void intelliSENS_SetADCTicks(uint16_t ticks)
+{
+	adcTicks = ticks;
 }
 
 /* EOF */

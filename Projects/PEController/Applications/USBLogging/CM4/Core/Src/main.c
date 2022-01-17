@@ -220,7 +220,9 @@ int main(void)
   /* USER CODE BEGIN 1 */
 	memset((void*)&(sharedData->m4Tom7), 0, sizeof(m4_to_m7_data_t));
 	sharedData->m4Tom7.lastDataPointer = sharedData->m4Tom7.dataRecord;
+#if CM4_ONLY
 	sharedData->m7Tom4.periodUs = 8;
+#endif
   /* USER CODE END 1 */
 #if CM4_ONLY == 0
 	/* USER CODE BEGIN Boot_Mode_Sequence_1 */

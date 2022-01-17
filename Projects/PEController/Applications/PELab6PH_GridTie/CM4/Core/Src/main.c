@@ -26,6 +26,7 @@
 #include "shared_memory.h"
 #include "pecontroller_display.h"
 #include "logo_display.h"
+#include "intelliSENS.h"
 #include <string.h>
 /* USER CODE END Includes */
 
@@ -127,6 +128,7 @@ int main(void)
   adc_cont_config_t adcConfig = {
 		  .callback = DataProcessingCallback,
 		  .conversionCycleTimeUs = sharedData->m7Tom4.periodUs };
+  intelliSENS.Init(10, (const float*)&adcVals, (const float*)&adcVals);
   BSP_MAX11046_Init(ADC_MODE_CONT, &adcConfig);
   BSP_MAX11046_Run();
   /* USER CODE END 2 */
@@ -135,6 +137,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	intelliSENS.Poll();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

@@ -88,6 +88,10 @@ typedef enum
 	CMD_RESET_TO_FIRMWARE = 0x19,
 	/* bootloader commands */
 } app_cmds_t;
+typedef enum
+{
+	CMD_SAMPLE_RATE = 0x20,
+} app_cmds_local_t;
 /********************************************************************************
  * Structures
  *******************************************************************************/
@@ -132,6 +136,7 @@ void intelliSENS_ResetDataSystem(void);
  * @brief Poll the intelliSENS library to send any pending data
  */
 void intelliSENS_Poll(void);
+void intelliSENS_SetADCTicks(uint16_t ticks);
 /********************************************************************************
  * Code
  *******************************************************************************/
