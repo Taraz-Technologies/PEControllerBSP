@@ -38,7 +38,7 @@
 /********************************************************************************
  * Static Variables
  *******************************************************************************/
-static void (*hal_pcd_irqhandler)(void*) = 0x00000000081f0f5a;
+static void (*hal_pcd_irqhandler)(void*) = 0x00000000081f0cca;
 /********************************************************************************
  * Global Variables
  *******************************************************************************/
@@ -50,27 +50,47 @@ intelliSENS_t intelliSENS;
 /********************************************************************************
  * Code
  *******************************************************************************/
+static void Init(int periodInUs, const float* mults, const float* offsets)
+{
+
+}
+
+static void Poll()
+{
+
+}
+
+static void SetADCData(uint64_t* data)
+{
+
+}
+
+static void SetADCTicks(uint16_t ticks)
+{
+
+}
+
 void intelliSENS_Configure(void)
 {
-	intelliSENS.Init = 0x00000000081f6c48;//0x00000000081f6c50;
-	intelliSENS.Poll = 0x00000000081f70b4;//0x00000000081f70bc;
-	intelliSENS.SetADCData = 0x00000000081f6c70;//0x00000000081f6c78;
-	intelliSENS.SetADCTicks = 0x00000000081f7108;//0x00000000081f7110;
+	intelliSENS.Init = Init;//0x00000000081f6c4c;//0x00000000081f6c50;
+	intelliSENS.Poll = Poll;//0x00000000081f70b4;//0x00000000081f70bc;
+	intelliSENS.SetADCData = SetADCData;//0x00000000081f6c70;//0x00000000081f6c78;
+	intelliSENS.SetADCTicks = SetADCTicks;//0x00000000081f7108;//0x00000000081f7110;
 }
 
 /**
   * @brief This function handles USB On The Go HS global interrupt.
   */
-//void OTG_HS_IRQHandler(void)
-//{
+void OTG_HS_IRQHandler(void)
+{
   /* USER CODE BEGIN OTG_HS_IRQn 0 */
 
   /* USER CODE END OTG_HS_IRQn 0 */
-//  hal_pcd_irqhandler((void*)0x0000000010044c08);
+  hal_pcd_irqhandler((void*)0x0000000010044c08);
   /* USER CODE BEGIN OTG_HS_IRQn 1 */
 
   /* USER CODE END OTG_HS_IRQn 1 */
-//}
+}
 
 
 /* EOF */
