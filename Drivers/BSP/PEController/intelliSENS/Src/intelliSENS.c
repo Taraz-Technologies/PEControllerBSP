@@ -38,7 +38,7 @@
 /********************************************************************************
  * Static Variables
  *******************************************************************************/
-static void (*hal_pcd_irqhandler)(void*) = 0x00000000081f0cca;
+static void (*hal_pcd_irqhandler)(void*) = 0x00000000081f0cc6;
 /********************************************************************************
  * Global Variables
  *******************************************************************************/
@@ -72,10 +72,10 @@ static void SetADCTicks(uint16_t ticks)
 
 void intelliSENS_Configure(void)
 {
-	intelliSENS.Init = Init;//0x00000000081f6c4c;//0x00000000081f6c50;
-	intelliSENS.Poll = Poll;//0x00000000081f70b4;//0x00000000081f70bc;
-	intelliSENS.SetADCData = SetADCData;//0x00000000081f6c70;//0x00000000081f6c78;
-	intelliSENS.SetADCTicks = SetADCTicks;//0x00000000081f7108;//0x00000000081f7110;
+	intelliSENS.Init = 0x00000000081f6c48;//Init;//0x00000000081f6c4c;//0x00000000081f6c50;
+	intelliSENS.Poll = 0x00000000081f70b4;//Poll;//0x00000000081f70b4;//0x00000000081f70bc;
+	intelliSENS.SetADCData = 0x00000000081f6c70;//SetADCData;//0x00000000081f6c70;//0x00000000081f6c78;
+	intelliSENS.SetADCTicks = 0x00000000081f7108;//SetADCTicks;//0x00000000081f7108;//0x00000000081f7110;
 }
 
 /**
