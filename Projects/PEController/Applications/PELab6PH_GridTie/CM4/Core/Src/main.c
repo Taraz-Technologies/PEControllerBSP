@@ -130,6 +130,7 @@ int main(void)
 		  .conversionCycleTimeUs = sharedData->m7Tom4.periodUs };
   BSP_MAX11046_Init(ADC_MODE_CONT, &adcConfig);
   BSP_MAX11046_Run();
+  __enable_irq();
   /* USER CODE END 2 */
 
   /* Infinite loop */

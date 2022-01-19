@@ -213,6 +213,11 @@ static void PWM11_16_ConfigInvertedPair(uint32_t pwmNo, pwm_config_t* config)
 	{
 		sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
 		sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
+	}
+	else
+	{
+		sConfigOC.OCPolarity = TIM_OCPOLARITY_LOW;
+		sConfigOC.OCNPolarity = TIM_OCNPOLARITY_LOW;
 	}*/
 	if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, ch) != HAL_OK)
 		Error_Handler();
