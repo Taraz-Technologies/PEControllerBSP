@@ -102,13 +102,14 @@ int main(void)
   HAL_PWREx_EnterSTOPMode(PWR_MAINREGULATOR_ON, PWR_STOPENTRY_WFE, PWR_D2_DOMAIN);
   /* Clear HSEM flag */
   __HAL_HSEM_CLEAR_FLAG(__HAL_HSEM_SEMID_TO_MASK(HSEM_ID_0));
+  __enable_irq();
 
 /* USER CODE END Boot_Mode_Sequence_1 */
   /* MCU Configuration--------------------------------------------------------*/
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
-
+  ((void (*)(void))0x0000000008100575)();
   /* USER CODE BEGIN Init */
 
   /* USER CODE END Init */
@@ -130,7 +131,6 @@ int main(void)
 		  .conversionCycleTimeUs = sharedData->m7Tom4.periodUs };
   BSP_MAX11046_Init(ADC_MODE_CONT, &adcConfig);
   BSP_MAX11046_Run();
-  __enable_irq();
   /* USER CODE END 2 */
 
   /* Infinite loop */

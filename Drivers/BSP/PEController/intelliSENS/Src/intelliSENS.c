@@ -38,7 +38,8 @@
 /********************************************************************************
  * Static Variables
  *******************************************************************************/
-static void (*hal_pcd_irqhandler)(void*) = 0x0000000008100f9a;
+static void* hpcd_USB_OTG_HS = 0x0000000010044c08;
+static void (*hal_pcd_irqhandler)(void*) = 0x0000000008100f9f;
 /********************************************************************************
  * Global Variables
  *******************************************************************************/
@@ -72,11 +73,19 @@ static void SetADCTicks(uint16_t ticks)
 
 void intelliSENS_Configure(void)
 {
-	intelliSENS.Init = Init;//0x8106f1c;//Init;//0x00000000081f3f80;//Init;//0x00000000081f6c4c;//0x00000000081f6c50;
-	intelliSENS.Poll = Poll;//0x0000000008107388;//Poll;//0x00000000081f70b4;//0x00000000081f70bc;
-	intelliSENS.SetADCData = SetADCData;//(bool (*)(uint16_t*))0x0000000008106f44;//SetADCData;//0x00000000081f3fa4;//SetADCData;//0x00000000081f6c70;//0x00000000081f6c78;
-	intelliSENS.SetADCTicks = SetADCTicks;//0x00000000081073dc;//SetADCTicks;//0x00000000081f7108;//0x00000000081f7110;
+	intelliSENS.Init = 0x0000000008106f21;//Init;//0x00000000081f3f80;//Init;//0x00000000081f6c4c;//0x00000000081f6c50;
+	intelliSENS.Poll = 0x000000000810738d;//Poll;//0x00000000081f70b4;//0x00000000081f70bc;
+	intelliSENS.SetADCData = 0x0000000008106f49;//0x0000000008106f47;//(bool (*)(uint64_t*))0x0000000008106fa7;//SetADCData;//0x00000000081f3fa4;//SetADCData;//0x00000000081f6c70;//0x00000000081f6c78;
+	intelliSENS.SetADCTicks = 0x00000000081073e1;//0x000000000810743f;//SetADCTicks;//0x00000000081f7108;//0x00000000081f7110;
 }
+
+
+void HAL_IncTick(void)
+{
+  uwTick += (uint32_t)uwTickFreq;
+  ((void (*)(void))0x000000000810069d)();
+}
+
 
 /**
   * @brief This function handles USB On The Go HS global interrupt.
@@ -86,7 +95,7 @@ void OTG_HS_IRQHandler(void)
   /* USER CODE BEGIN OTG_HS_IRQn 0 */
 
   /* USER CODE END OTG_HS_IRQn 0 */
-  hal_pcd_irqhandler((void*)0x0000000010044c08);
+  hal_pcd_irqhandler(hpcd_USB_OTG_HS);
   /* USER CODE BEGIN OTG_HS_IRQn 1 */
 
   /* USER CODE END OTG_HS_IRQn 1 */

@@ -249,8 +249,10 @@ static inline void Measure_JJJ(uint16_t* tempData)
 	maxCS2_GPIO_Port->BSRR = maxCS2_Pin;
 }
 
-#pragma GCC push_options
-#pragma GCC optimize ("-Ofast")
+//#pragma GCC push_options
+//#pragma GCC optimize ("-Ofast")
+
+uint64_t intelliSENSDataPtr[4];
 /**
  * @brief Acquire measurements and convert to meaningful data for both ADCs
  * @param *dataPtr Pointer to where the data needs to be stored
@@ -259,9 +261,8 @@ static inline void Measure_JJJ(uint16_t* tempData)
  */
 static inline void MeasureConvert_BothADCs(float* dataPtr, const float* mults, const float* offsets)
 {
-	uint16_t intelliSENSDataPtr[16];
-	uint16_t* tempData = intelliSENSDataPtr;
-	Measure_JJJ(intelliSENSDataPtr);
+	uint16_t* tempData = (uint16_t*)intelliSENSDataPtr;
+	Measure_JJJ(tempData);
 
 #if ENABLE_INTELLISENS
 	intelliSENS.SetADCData((uint64_t*)(intelliSENSDataPtr));
@@ -273,7 +274,7 @@ static inline void MeasureConvert_BothADCs(float* dataPtr, const float* mults, c
 		*dataPtr++ =  (*tempData++ - *offsets++) * (*mults++);
 	} while (i--);
 }
-#pragma GCC pop_options
+//#pragma GCC pop_options
 
 static void Timer_Config(void)
 {
