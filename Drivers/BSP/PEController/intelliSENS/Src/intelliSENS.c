@@ -26,16 +26,16 @@
 /********************************************************************************
  * Defines
  *******************************************************************************/
-#define INIT_FNC			((void (*) (int periodInUs, const float* mults, const float* offsets))0x0000000008106f21)
-#define SET_DATA_FNC		((bool (*) (uint64_t* data))0x0000000008106f49)
-#define POLL_FNC			((void (*) (void))0x000000000810738d)
-#define SET_TICKS_FNC		((void (*) (uint16_t ticks))0x00000000081073e1)
+#define INIT_FNC			((void (*) (int periodInUs, const float* mults, const float* offsets))0x0000000008103b51)
+#define SET_DATA_FNC		((bool (*) (uint64_t* data))0x0000000008103b61)
+#define POLL_FNC			((void (*) (void))0x0000000008103bf9)
+#define SET_TICKS_FNC		((void (*) (uint16_t ticks))0x0000000008103dad)
 
-#define HAL_INIT_FNC		((void (*) (void))0x0000000008100575)
-#define HAL_TICK_FNC		((void (*) (void))0x000000000810069d)
+#define HAL_INIT_FNC		((void (*) (void))0x000000000810052d)
+#define HAL_TICK_FNC		((void (*) (void))0x000000000810060d)
 
-#define USB_IRQ_FNC			((void (*) (void* handle))0x0000000008100f9f)
-#define USB_IRQ_HANDLE		((void*)0x0000000010044c08)
+#define USB_IRQ_FNC			((void (*) (void* handle))0x0000000008100c15)
+#define USB_IRQ_HANDLE		((void*)0x0000000010044b94)
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
