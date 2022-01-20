@@ -27,6 +27,7 @@
 #include "pecontroller_display.h"
 #include "logo_display.h"
 #include <string.h>
+#include "intelliSENS.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -148,6 +149,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  intelliSENS.Poll();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
