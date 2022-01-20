@@ -26,10 +26,10 @@
 /********************************************************************************
  * Defines
  *******************************************************************************/
-#define INIT_FNC			((void (*) (int periodInUs, const float* mults, const float* offsets))0x0000000008103b51)
-#define SET_DATA_FNC		((bool (*) (uint64_t* data))0x0000000008103b61)
-#define POLL_FNC			((void (*) (void))0x0000000008103bf9)
-#define SET_TICKS_FNC		((void (*) (uint16_t ticks))0x0000000008103dad)
+#define INIT_FNC			((void (*) (int periodInUs, const float* mults, const float* offsets))0x0000000008103b5d)
+#define SET_DATA_FNC		((bool (*) (uint64_t* data))0x0000000008103b6d)
+#define POLL_FNC			((void (*) (void))0x0000000008103c01)
+#define SET_TICKS_FNC		((void (*) (uint16_t ticks))0x0000000008103dc1)
 
 #define HAL_INIT_FNC		((void (*) (void))0x000000000810052d)
 #define HAL_TICK_FNC		((void (*) (void))0x000000000810060d)
