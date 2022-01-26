@@ -55,4 +55,3 @@ dkms.conf
 **/Release/
 **/Docs/
 *.prefs
-*.launch

@@ -77,6 +77,10 @@ void MainControl_Init(void)
 {
 	BSP_DigitalPins_Init();
 #if RUN_ALL_FULL_BRIDGE == 0
+	BSP_Dout_SetAsIOPin(7, GPIO_PIN_RESET);
+	BSP_Dout_SetAsIOPin(8, GPIO_PIN_RESET);
+	BSP_Dout_SetAsIOPin(15, GPIO_PIN_RESET);
+	BSP_Dout_SetAsIOPin(16, GPIO_PIN_RESET);
 	openLoopVfConfig1.inverterConfig.s1PinNos[0] = 1;
 	openLoopVfConfig1.inverterConfig.s1PinNos[1] = 3;
 	openLoopVfConfig1.inverterConfig.s1PinNos[2] = 5;
@@ -90,10 +94,6 @@ void MainControl_Init(void)
 	OpenLoopVfControl_Init(&openLoopVfConfig2, NULL);
 
 	// turn off relays and disable pins
-	BSP_Dout_SetAsIOPin(7, GPIO_PIN_RESET);
-	BSP_Dout_SetAsIOPin(8, GPIO_PIN_RESET);
-	BSP_Dout_SetAsIOPin(15, GPIO_PIN_RESET);
-	BSP_Dout_SetAsIOPin(16, GPIO_PIN_RESET);
 #else
 	for (int i = 1; i < 16; i+=4)
 	{
