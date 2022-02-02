@@ -182,6 +182,29 @@ extern void BSP_PWM_Start(uint32_t pwmMask);
  * 				<b>Valid Range</b> =  (0x0001 - 0xffff)
  */
 extern void BSP_PWM_Stop(uint32_t pwmMask);
+/**
+ * @brief Populates the @ref moduleConfig parameter with the default configuration
+ * @details <b>Default Configuration</b>:
+ * -# alignment = CENTER_ALIGNED
+ * -# deadtime.on = false
+ * -# deadtime.nanoSec = 1000
+ * -# periodInUsec = 40
+ * @param moduleConfig module configuration to be updated
+ */
+extern void BSP_PWM_GetDafaultModuleConfig(pwm_module_config_t* moduleConfig);
+/**
+ * @brief Populates the @ref pwmConfig parameter with the default configuration
+ * @details <b>Default Configuration</b>:
+ * -# dutyMode = OUTPUT_DUTY_AT_PWMH
+ * -# refCh = REF_PWM_CH1
+ * -# lim.min = 0
+ * -# lim.max = 1
+ * -# lim.minMaxDutyCycleBalancing = false
+ * @param pwmConfig PWM configuration structure to be updated
+ * @param moduleConfig module configuration used by this module. Make sure to call
+ * @ref BSP_PWM_GetDafaultModuleConfig() before calling this function
+ */
+extern void BSP_PWM_GetDefaultConfig(pwm_config_t* pwmConfig, pwm_module_config_t* moduleConfig);
 /*******************************************************************************
  * Code
  ******************************************************************************/

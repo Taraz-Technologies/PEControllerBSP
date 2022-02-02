@@ -195,8 +195,6 @@ float BSP_PWM1_10_UpdatePairDuty(uint32_t pwmNo, float duty, pwm_config_t* confi
 		{
 			int dt = (mod->deadtime.nanoSec * HRTIM_FREQ) / 1000;
 			onTime += dt;
-			//t0 -= dt/2;
-			//tEnd += dt/2;
 		}
 		int t0 = (period - onTime) / 2; 		// half time
 		int tEnd = t0 + onTime;					// last edge at this time
@@ -232,6 +230,7 @@ static void PWM1_10_ConfigInvertedPair(uint32_t pwmNo, pwm_config_t* config)
 	uint32_t TimerIdx = (pwmNo - 1) / 2;
 	uint32_t out1 = 1U << (TimerIdx * 2);
 	uint32_t out2 = 1U << (TimerIdx * 2 + 1);
+	//uint32_t isCh2 = (pwmNo - 1) % 2;
 	pwm_module_config_t* mod = config->module;
 
 	/* timer configuration */
@@ -252,7 +251,7 @@ static void PWM1_10_ConfigInvertedPair(uint32_t pwmNo, pwm_config_t* config)
 	if (IsDeadtimeEnabled(&mod->deadtime))
 	{
 		HRTIM_DeadTimeCfgTypeDef pDeadTimeCfg = GetDefaultDeadtimeConfig();
-		if(config->invertPol)
+		if(config->refCh == REF_PWM_CH2)
 		{
 			pDeadTimeCfg.RisingSign = HRTIM_TIMDEADTIME_RISINGSIGN_NEGATIVE;
 			pDeadTimeCfg.FallingSign = HRTIM_TIMDEADTIME_FALLINGSIGN_NEGATIVE;
@@ -266,7 +265,7 @@ static void PWM1_10_ConfigInvertedPair(uint32_t pwmNo, pwm_config_t* config)
 
 	/* output configuration */
 	HRTIM_OutputCfgTypeDef pOutputCfg = GetDefaultOutputConfig();
-	if(config->invertPol)
+	if(config->refCh == REF_PWM_CH2)
 	{
 		pOutputCfg.Polarity = HRTIM_OUTPUTPOLARITY_LOW;
 	}

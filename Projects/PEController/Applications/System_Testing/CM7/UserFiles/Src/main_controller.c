@@ -55,43 +55,42 @@
  * Code
  *******************************************************************************/
 
-static void PWM_S12switch(pwm_alignment_t align, duty_mode_t dutyMode)
+static void PWM_S12switch(pwm_alignment_t align, duty_mode_t dutyMode, bool dt)
 {
-	static pwm_module_config_t moduleConfig1 = {0};
-	moduleConfig1.alignment = align;
-	moduleConfig1.deadtime.on = true;
-	moduleConfig1.deadtime.nanoSec = 1000;
-	moduleConfig1.periodInUsec = 40;
-	static pwm_config_t pwmConfig1 = {0};
-	pwmConfig1.module = &moduleConfig1;
-	pwmConfig1.dutyMode = dutyMode;
-	pwmConfig1.invertPol = false;
-	pwmConfig1.lim.min = 0;
-	pwmConfig1.lim.max = 1;
-	pwmConfig1.lim.minMaxDutyCycleBalancing = false;
+	static pwm_module_config_t moduleConfig = {0};
+	static pwm_config_t pwmConfig = {0};
+	BSP_PWM_GetDafaultModuleConfig(&moduleConfig);
+	BSP_PWM_GetDefaultConfig(&pwmConfig, &moduleConfig);
+	moduleConfig.alignment = align;
+	moduleConfig.deadtime.on = dt;
+	pwmConfig.dutyMode = dutyMode;
 
-	DutyCycleUpdateFnc fnc = BSP_PWM_ConfigInvertedPair(1, &pwmConfig1);
-	fnc(1, 0.2f, &pwmConfig1);
-	fnc = BSP_PWM_ConfigInvertedPair(9, &pwmConfig1);
-	fnc(9, 0.2f, &pwmConfig1);
-	fnc = BSP_PWM_ConfigInvertedPair(13, &pwmConfig1);
-	fnc(13, 0.2f, &pwmConfig1);
+	DutyCycleUpdateFnc fnc = BSP_PWM_ConfigInvertedPair(1, &pwmConfig);
+	fnc(1, 0.2f, &pwmConfig);
+	fnc = BSP_PWM_ConfigInvertedPair(9, &pwmConfig);
+	fnc(9, 0.2f, &pwmConfig);
+	fnc = BSP_PWM_ConfigInvertedPair(13, &pwmConfig);
+	fnc(13, 0.2f, &pwmConfig);
 
-	pwmConfig1.invertPol = true;
-	fnc = BSP_PWM_ConfigInvertedPair(3, &pwmConfig1);
-	fnc(3, 0.2f, &pwmConfig1);
-	fnc = BSP_PWM_ConfigInvertedPair(11, &pwmConfig1);
-	fnc(11, 0.2f, &pwmConfig1);
-	fnc = BSP_PWM_ConfigInvertedPair(15, &pwmConfig1);
-	fnc(15, 0.2f, &pwmConfig1);
+	pwmConfig.refCh = REF_PWM_CH2;
+	fnc = BSP_PWM_ConfigInvertedPair(3, &pwmConfig);
+	fnc(3, 0.2f, &pwmConfig);
+	fnc = BSP_PWM_ConfigInvertedPair(11, &pwmConfig);
+	fnc(11, 0.2f, &pwmConfig);
+	fnc = BSP_PWM_ConfigInvertedPair(15, &pwmConfig);
+	fnc(15, 0.2f, &pwmConfig);
 }
 
 void MainControl_Init(void)
 {
-	PWM_S12switch(CENTER_ALIGNED, OUTPUT_DUTY_MINUS_DEADTIME_AT_PWMH);
-	//PWM_S12switch(EDGE_ALIGNED, OUTPUT_DUTY_MINUS_DEADTIME_AT_PWMH);
-	//PWM_S12switch(CENTER_ALIGNED, OUTPUT_DUTY_AT_PWMH);
-	//PWM_S12switch(EDGE_ALIGNED, OUTPUT_DUTY_AT_PWMH);
+	PWM_S12switch(CENTER_ALIGNED, OUTPUT_DUTY_MINUS_DEADTIME_AT_PWMH, false);
+	//PWM_S12switch(EDGE_ALIGNED, OUTPUT_DUTY_MINUS_DEADTIME_AT_PWMH, false);
+	//PWM_S12switch(CENTER_ALIGNED, OUTPUT_DUTY_AT_PWMH, false);
+	//PWM_S12switch(EDGE_ALIGNED, OUTPUT_DUTY_AT_PWMH, false);
+	//PWM_S12switch(CENTER_ALIGNED, OUTPUT_DUTY_MINUS_DEADTIME_AT_PWMH, true);
+	//PWM_S12switch(EDGE_ALIGNED, OUTPUT_DUTY_MINUS_DEADTIME_AT_PWMH, true);
+	//PWM_S12switch(CENTER_ALIGNED, OUTPUT_DUTY_AT_PWMH, true);
+	//PWM_S12switch(EDGE_ALIGNED, OUTPUT_DUTY_AT_PWMH, true);
 
 	BSP_PWM_Start(0xffff);
 
