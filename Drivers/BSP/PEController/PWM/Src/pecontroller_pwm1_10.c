@@ -191,13 +191,15 @@ float BSP_PWM1_10_UpdatePairDuty(uint32_t pwmNo, float duty, pwm_config_t* confi
 	uint32_t onTime = duty * period;
 	if(mod->alignment == CENTER_ALIGNED)
 	{
-		int t0 = (period - onTime) / 2; 		// half time
-		int tEnd = t0 + onTime;					// last edge at this time
 		if(config->dutyMode == OUTPUT_DUTY_AT_PWMH && IsDeadtimeEnabled(&mod->deadtime))
 		{
 			int dt = (mod->deadtime.nanoSec * HRTIM_FREQ) / 1000;
-			t0 -= dt;
+			onTime += dt;
+			//t0 -= dt/2;
+			//tEnd += dt/2;
 		}
+		int t0 = (period - onTime) / 2; 		// half time
+		int tEnd = t0 + onTime;					// last edge at this time
 		if (t0 < 3)
 			t0 = 3;
 		hhrtim.Instance->sTimerxRegs[TimerIdx].CMP1xR = t0;

@@ -24,7 +24,7 @@
  * Includes
  *******************************************************************************/
 #include "max11046_drivers.h"
-#define ENABLE_INTELLISENS					(1)
+#define ENABLE_INTELLISENS					(0)
 #if ENABLE_INTELLISENS
 #include "intelliSENS.h"
 #endif

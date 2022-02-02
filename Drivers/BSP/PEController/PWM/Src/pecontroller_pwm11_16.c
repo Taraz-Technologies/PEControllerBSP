@@ -54,6 +54,7 @@ static TIM_OC_InitTypeDef sConfigOC =
 		.OCNIdleState = TIM_OCNIDLESTATE_SET,
 };
 static float dutyDeadTime = 0;
+static bool isEdgeAligned;
 /********************************************************************************
  * Global Variables
  *******************************************************************************/
@@ -87,11 +88,13 @@ static void PWM11_16_Drivers_Init(pwm_config_t* config)
 	{
 		htim1.Init.CounterMode = TIM_COUNTERMODE_CENTERALIGNED2;
 		htim1.Init.Period = (int)(config->module->periodInUsec * (TIM1_FREQ_MHz / 2.f));
+		isEdgeAligned = false;
 	}
 	else
 	{
 		htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
 		htim1.Init.Period = (config->module->periodInUsec * TIM1_FREQ_MHz) - 1;
+		isEdgeAligned = true;
 	}
 	htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
 	htim1.Init.RepetitionCounter = 0;
@@ -189,7 +192,7 @@ float BSP_PWM11_16_UpdatePairDuty(uint32_t pwmNo, float duty, pwm_config_t* conf
 		dutyUse += dutyDeadTime;
 
 	uint32_t ch = (pwmNo - 11) / 2;
-	*(((uint32_t*)&(TIM1->CCR1)) + ch) = dutyUse * TIM1->ARR;
+	*(((uint32_t*)&(TIM1->CCR1)) + ch) = (isEdgeAligned ? dutyUse : (1 - dutyUse)) * TIM1->ARR;
 
 	return duty;
 }
@@ -209,23 +212,11 @@ static void PWM11_16_ConfigInvertedPair(uint32_t pwmNo, pwm_config_t* config)
 	if(ch % 2 != 0)
 		Error_Handler();
 	ch = ch == 0 ? TIM_CHANNEL_1 : (ch == 2 ? TIM_CHANNEL_2 : TIM_CHANNEL_3);
-	/*if (config->invertPol)
-	{
-		sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
-		sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
-	}
-	else
-	{
-		sConfigOC.OCPolarity = TIM_OCPOLARITY_LOW;
-		sConfigOC.OCNPolarity = TIM_OCNPOLARITY_LOW;
-	}*/
-	if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, ch) != HAL_OK)
+	TIM_OC_InitTypeDef sConfigOCLocal;
+	memcpy((void*)&sConfigOCLocal, (void*)&sConfigOC, sizeof(TIM_OC_InitTypeDef));
+	sConfigOCLocal.OCMode = (config->invertPol ^ isEdgeAligned) ? TIM_OCMODE_PWM1 : TIM_OCMODE_PWM2;
+	if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOCLocal, ch) != HAL_OK)
 		Error_Handler();
-	/*if (config->invertPol)
-	{
-		sConfigOC.OCPolarity = TIM_OCPOLARITY_LOW;
-		sConfigOC.OCNPolarity = TIM_OCNPOLARITY_LOW;
-	}*/
 }
 /**
  * @brief Configures consecutive inverted pairs for PWM
