@@ -74,14 +74,6 @@ typedef enum
 											on the other edge duty cycle will be removed from the lower side switch */
 } duty_mode_t;
 /**
- * @brief Reference PWM channel selection definitions for inverted PWM signals
- */
-typedef enum
-{
-	REF_PWM_CH1,						/**< @brief Selects the first channel for PWM reference */
-	REF_PWM_CH2,						/**< @brief Selects the second channel for PWM reference */
-} ref_pwm_ch_t;
-/**
  * @brief Defines the PWM reset callback,
  * The drivers will call this function whenever the timer for the PWM is reset if enabled in configuration
  */
@@ -135,10 +127,6 @@ typedef struct
 	duty_limits_t lim;				/**< @brief Defines the duty cycle limits for the specified channels */
 	duty_mode_t dutyMode;			/**< @brief Controls the duty cycle computation mode.
 										This parameter is used only when the dead time is enabled */
-	ref_pwm_ch_t refCh;				/**< @brief Defines the reference channel to use.
-									Normally this should be @ref REF_PWM_CH1 as we generally equate
-									the reference to first channel but if second channel
-									should be matched to reference select @ref REF_PWM_CH2*/
 	pwm_module_config_t* module;	/**< @brief Define the module configuration */
 } pwm_config_t;
 /**

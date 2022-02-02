@@ -207,14 +207,15 @@ float BSP_PWM11_16_UpdatePairDuty(uint32_t pwmNo, float duty, pwm_config_t* conf
  */
 static void PWM11_16_ConfigInvertedPair(uint32_t pwmNo, pwm_config_t* config)
 {
-	uint32_t ch = (pwmNo - 11);
-	// If pair not selected correctly report as error
-	if(ch % 2 != 0)
-		Error_Handler();
-	ch = ch == 0 ? TIM_CHANNEL_1 : (ch == 2 ? TIM_CHANNEL_2 : TIM_CHANNEL_3);
+	uint32_t ch = (pwmNo - 11) / 2;
+	uint32_t isCh2 = (pwmNo - 11) % 2;
+
+	ch = ch == 0 ? TIM_CHANNEL_1 : (ch == 1 ? TIM_CHANNEL_2 : TIM_CHANNEL_3);
+
 	TIM_OC_InitTypeDef sConfigOCLocal;
 	memcpy((void*)&sConfigOCLocal, (void*)&sConfigOC, sizeof(TIM_OC_InitTypeDef));
-	sConfigOCLocal.OCMode = ((config->refCh == REF_PWM_CH2) ^ isEdgeAligned) ? TIM_OCMODE_PWM1 : TIM_OCMODE_PWM2;
+
+	sConfigOCLocal.OCMode = (isCh2 ^ isEdgeAligned) ? TIM_OCMODE_PWM1 : TIM_OCMODE_PWM2;
 	if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOCLocal, ch) != HAL_OK)
 		Error_Handler();
 }

@@ -311,7 +311,6 @@ void BSP_PWM_GetDefaultConfig(pwm_config_t* pwmConfig, pwm_module_config_t* modu
 {
 	pwmConfig->module = moduleConfig;
 	pwmConfig->dutyMode = OUTPUT_DUTY_AT_PWMH;
-	pwmConfig->refCh = REF_PWM_CH1;
 	pwmConfig->lim.min = 0;
 	pwmConfig->lim.max = 1;
 	pwmConfig->lim.minMaxDutyCycleBalancing = false;

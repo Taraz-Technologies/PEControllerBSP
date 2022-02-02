@@ -230,7 +230,7 @@ static void PWM1_10_ConfigInvertedPair(uint32_t pwmNo, pwm_config_t* config)
 	uint32_t TimerIdx = (pwmNo - 1) / 2;
 	uint32_t out1 = 1U << (TimerIdx * 2);
 	uint32_t out2 = 1U << (TimerIdx * 2 + 1);
-	//uint32_t isCh2 = (pwmNo - 1) % 2;
+	uint32_t isCh2 = (pwmNo - 1) % 2;
 	pwm_module_config_t* mod = config->module;
 
 	/* timer configuration */
@@ -251,7 +251,7 @@ static void PWM1_10_ConfigInvertedPair(uint32_t pwmNo, pwm_config_t* config)
 	if (IsDeadtimeEnabled(&mod->deadtime))
 	{
 		HRTIM_DeadTimeCfgTypeDef pDeadTimeCfg = GetDefaultDeadtimeConfig();
-		if(config->refCh == REF_PWM_CH2)
+		if(isCh2)
 		{
 			pDeadTimeCfg.RisingSign = HRTIM_TIMDEADTIME_RISINGSIGN_NEGATIVE;
 			pDeadTimeCfg.FallingSign = HRTIM_TIMDEADTIME_FALLINGSIGN_NEGATIVE;
@@ -265,10 +265,8 @@ static void PWM1_10_ConfigInvertedPair(uint32_t pwmNo, pwm_config_t* config)
 
 	/* output configuration */
 	HRTIM_OutputCfgTypeDef pOutputCfg = GetDefaultOutputConfig();
-	if(config->refCh == REF_PWM_CH2)
-	{
+	if(isCh2)
 		pOutputCfg.Polarity = HRTIM_OUTPUTPOLARITY_LOW;
-	}
 	if (HAL_HRTIM_WaveformOutputConfig(&hhrtim, TimerIdx, out1, &pOutputCfg) != HAL_OK)
 		Error_Handler();
 	if(IsDeadtimeEnabled(&mod->deadtime))
