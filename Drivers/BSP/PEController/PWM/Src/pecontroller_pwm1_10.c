@@ -206,9 +206,9 @@ float BSP_PWM1_10_UpdatePairDuty(uint32_t pwmNo, float duty, pwm_config_t* confi
 	}
 	else
 	{
-		uint32_t dt = 0;
+		uint32_t dt = 3;
 		if(config->dutyMode == OUTPUT_DUTY_AT_PWMH && IsDeadtimeEnabled(&mod->deadtime))
-			dt = (mod->deadtime.nanoSec * HRTIM_FREQ) / 1000;
+			dt += (mod->deadtime.nanoSec * HRTIM_FREQ) / 1000;
 		hhrtim.Instance->sTimerxRegs[TimerIdx].CMP1xR = 3;
 		hhrtim.Instance->sTimerxRegs[TimerIdx].CMP2xR = onTime + dt;
 		MODIFY_REG(hhrtim.Instance->sTimerxRegs[TimerIdx].TIMxCR, HRTIM_TIMCR_DELCMP2, 0U);
