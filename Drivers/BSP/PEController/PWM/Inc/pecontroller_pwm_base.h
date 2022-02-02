@@ -127,7 +127,10 @@ typedef struct
 	duty_limits_t lim;				/**< @brief Defines the duty cycle limits for the specified channels */
 	duty_mode_t dutyMode;			/**< @brief Controls the duty cycle computation mode.
 										This parameter is used only when the dead time is enabled */
-	bool invertPol;
+	bool invertPol;					/**< @brief Defines if the polarity of the signal is inverted.
+										If <c>true</c> duty cycle = %age of low time
+										else dutye cycle = %age of high time
+	 	 	 	 	 	 	 	 	 	 */
 	pwm_module_config_t* module;	/**< @brief Define the module configuration */
 } pwm_config_t;
 /**
