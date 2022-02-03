@@ -41,6 +41,9 @@ extern "C" {
 /********************************************************************************
  * Structures
  *******************************************************************************/
+/**
+ * @brief Defines the parameters required for using the device with intelliSENS software
+ */
 typedef struct
 {
 	/**
@@ -60,9 +63,12 @@ typedef struct
 	 * @brief Poll the intelliSENS library to send any pending data
 	 */
 	void (*Poll)(void);
+	/**
+	 * @brief Sets the tick interval for the ADC conversion. Used by the intelliSENS software to workout the sampling rate
+	 * @param ticks Tick interval for the ADC
+	 */
 	void (*SetADCTicks)(uint16_t ticks);
 }intelliSENS_t;
-
 /********************************************************************************
  * Exported Variables
  *******************************************************************************/

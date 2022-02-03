@@ -24,6 +24,7 @@
  *******************************************************************************/
 #include "pecontroller_pwm1_10.c"
 #include "pecontroller_pwm11_16.c"
+#include "pecontroller_pwm.h"
 /********************************************************************************
  * Defines
  *******************************************************************************/
@@ -53,9 +54,10 @@
  *******************************************************************************/
 /**
  * @brief Configures an PWM pair as inverted pair
- * @param pwmNo Channel no of the first PWM Channel in the pair (Valid Values 1,3,5,7,9,11,13,15)
- * 				 Channel1 = pwmNo
- * 				 Channel2 = pwmNo + 1
+ * @param pwmNo Channel no of reference channel is the PWM pair (Valid Values 1-16). <br>
+ * 				<b>Pairs are classified as :</b>
+ * 				-# CH1 = Reference channel available at pin @ref pwmNo
+ * 				-# CH2 = Inverted Channel from reference available at pin @ref pwmNo + 1 if @ref pwmNo is odd else @ref pwmNo - 1
  * @param *config Pointer to a  pwm_config_t structure that contains the configuration
  * 				   parameters for the PWM pair
  * @return DutyCycleUpdateFnc Returns the function pointer of the type DutyCycleUpdateFnc which needs to be called
@@ -71,7 +73,7 @@ DutyCycleUpdateFnc BSP_PWM_ConfigInvertedPair(uint16_t pwmNo, pwm_config_t *conf
 }
 /**
  * @brief Configures a PWM channel
- * @param pwmNo PWM channel to be configured (Valid Values 1-10,11,13,15)
+ * @param pwmNo PWM channel to be configured (Valid Values 1-16)
  * @param *config Pointer to a  pwm_config_t structure that contains the configuration
  * 				   parameters for the PWM pair
  * @return DutyCycleUpdateFnc Returns the function pointer of the type DutyCycleUpdateFnc which needs to be called
@@ -88,9 +90,10 @@ DutyCycleUpdateFnc BSP_PWM_ConfigChannel(uint16_t pwmNo, pwm_config_t *config)
 
 /**
  * @brief Update the Duty Cycle of an Inverted Pair
- * @param pwmNo Channel no of the first PWM Channel in the pair (Valid Values 1,3,5,7,9,11,13,15)
- * 				 Channel1 = pwmNo
- * 				 Channel2 = pwmNo + 1
+ * @param pwmNo Channel no of reference channel is the PWM pair (Valid Values 1-16). <br>
+ * 				<b>Pairs are classified as :</b>
+ * 				-# CH1 = Reference channel available at pin @ref pwmNo
+ * 				-# CH2 = Inverted Channel from reference available at pin @ref pwmNo + 1 if @ref pwmNo is odd else @ref pwmNo - 1
  * @param duty duty cycle to be applied to the pair (Range 0-1 or given in the config parameter)
  * @param *config Pointer to a  pwm_config_t structure that contains the configuration
  * 				   parameters for the PWM pair
@@ -107,7 +110,7 @@ float BSP_PWM_UpdatePairDuty(uint32_t pwmNo, float duty, pwm_config_t* config)
 
 /**
  * @brief Update the Duty Cycle of a channel
- * @param pwmNo PWM channel to be configured (Valid Values 1-10, 11, 13, 15)
+ * @param pwmNo PWM channel to be configured (Valid Values 1-16)
  * @param duty duty cycle to be applied to the channel (Range 0-1 or given in the config parameter)
  * @param *config Pointer to a  pwm_config_t structure that contains the configuration
  * 				   parameters for the PWM channel
@@ -299,7 +302,6 @@ void BSP_PWM_GetDafaultModuleConfig(pwm_module_config_t* moduleConfig)
  * @brief Populates the @ref pwmConfig parameter with the default configuration
  * @details <b>Default Configuration</b>:
  * -# dutyMode = OUTPUT_DUTY_AT_PWMH
- * -# refCh = REF_PWM_CH1
  * -# lim.min = 0
  * -# lim.max = 1
  * -# lim.minMaxDutyCycleBalancing = false
