@@ -15,9 +15,6 @@
  ******************************************************************************/
 #define PI    										(3.141593f)
 #define TWO_PI 										(2 * PI)
-
-
-#define TEST_INVERTER_4TH_LEG						(1)
 /*******************************************************************************
  * Enums
  ******************************************************************************/
@@ -49,7 +46,7 @@
  * @param *config Pointer to a  pwm_pair_config_t structure that contains the configuration
  * 				   parameters for the PWM pair
  */
-static void Tnpc_PWM_UpdatePair(uint32_t pwmNo, float duty, pwm_config_t *config)
+static float Tnpc_PWM_UpdatePair(uint32_t pwmNo, float duty, pwm_config_t *config)
 {
 	duty = (fabsf(duty - 0.5f)) * 2;
 	if(duty < 0)
@@ -106,11 +103,6 @@ void Inverter3Ph_Init(inverter3Ph_config_t* config)
 		config->updateCallbacks[i] = ConfigSingleLeg(config->s1PinNos[i], config);
 		config->updateCallbacks[i](config->s1PinNos[i], 0.5f, &config->pwmConfig);
 	}
-
-#if TEST_INVERTER_4TH_LEG
-	ConfigSingleLeg(config->s1PinNos[2]+2, config);
-	config->updateCallbacks[2](config->s1PinNos[2]+2, 0.5f, &config->pwmConfig);
-#endif
 	// enable the pwm signals by disabling any disable feature. Disable is by default active high
 	for (int i = 0; i < config->dsblPinCount; i++)
 		BSP_Dout_SetAsIOPin(config->dsblPinNo + i, GPIO_PIN_RESET);
@@ -126,9 +118,6 @@ void Inverter3Ph_UpdateDuty(inverter3Ph_config_t* config, float* duties)
 {
 	for (int i = 0; i < 3; i++)
 		config->updateCallbacks[i](config->s1PinNos[i], duties[i], &config->pwmConfig);
-#if TEST_INVERTER_4TH_LEG
-	config->updateCallbacks[2](config->s1PinNos[2]+2, duties[2], &config->pwmConfig);
-#endif
 }
 
 /**

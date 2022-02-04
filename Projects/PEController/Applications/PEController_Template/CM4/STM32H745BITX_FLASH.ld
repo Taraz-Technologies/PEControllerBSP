@@ -32,6 +32,8 @@
 ****************************************************************************
 */
 
+//INCLUDE user_config.h
+
 /* Entry Point */
 ENTRY(Reset_Handler)
 
@@ -44,7 +46,11 @@ _Min_Stack_Size = 0x800 ; /* required amount of stack */
 /* Specify the memory areas */
 MEMORY
 {
-FLASH (rx)      : ORIGIN = 0x08120000, LENGTH = 896K
+//#if ENABLE_INTELLISENS
+//FLASH (rx)      : ORIGIN = 0x08120000, LENGTH = 896K
+//#else
+FLASH (rx)      : ORIGIN = 0x08100000, LENGTH = 896K
+//#endif
 RAM (xrw)      : ORIGIN = 0x10000000, LENGTH = 256K
 }
 

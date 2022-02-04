@@ -27,8 +27,6 @@
 #define PWM_PERIOD_s					(PWM_PERIOD_Us/1000000.f)
 #define PWM_FREQ_KHz					(1000.f/PWM_PERIOD_Us)
 #define PWM_FREQ_Hz						(1.f/PWM_PERIOD_s)
-
-#define RUN_ALL_FULL_BRIDGE				(0)
 /*******************************************************************************
  * Enums
  ******************************************************************************/
@@ -50,23 +48,6 @@ openloopvf_config_t openLoopVfConfig2 = {0};
 static volatile bool recompute = false;
 extern HRTIM_HandleTypeDef hhrtim;
 extern TIM_HandleTypeDef htim1;
-#if RUN_ALL_FULL_BRIDGE
-static pwm_module_config_t inverterPWMModuleConfig =
-{
-		.alignment = CENTER_ALIGNED,
-		.periodInUsec = PWM_PERIOD_Us,
-		.deadtime = {
-				.on = true,
-				.nanoSec = INVERTER_DEADTIME_ns,
-		},
-};
-static pwm_config_t config =
-{
-		.dutyMode = OUTPUT_DUTY_MINUS_DEADTIME_AT_PWMH,
-		.module = &inverterPWMModuleConfig,
-		.lim = { .min = 0, .max = 1, .minMaxDutyCycleBalancing = false }
-};
-#endif
 /*******************************************************************************
  * Code
  ******************************************************************************/
@@ -76,40 +57,21 @@ static pwm_config_t config =
 void MainControl_Init(void)
 {
 	BSP_DigitalPins_Init();
-#if RUN_ALL_FULL_BRIDGE == 0
-	BSP_Dout_SetAsIOPin(7, GPIO_PIN_RESET);
-	BSP_Dout_SetAsIOPin(8, GPIO_PIN_RESET);
-	BSP_Dout_SetAsIOPin(15, GPIO_PIN_RESET);
-	BSP_Dout_SetAsIOPin(16, GPIO_PIN_RESET);
+	BSP_Dout_SetAsIOPin(13, GPIO_PIN_SET);
+	BSP_Dout_SetAsIOPin(14, GPIO_PIN_SET);
+	BSP_Dout_SetAsIOPin(15, GPIO_PIN_SET);
+	BSP_Dout_SetAsIOPin(16, GPIO_PIN_SET);
 	openLoopVfConfig1.inverterConfig.s1PinNos[0] = 1;
 	openLoopVfConfig1.inverterConfig.s1PinNos[1] = 3;
 	openLoopVfConfig1.inverterConfig.s1PinNos[2] = 5;
 	openLoopVfConfig1.inverterConfig.dsblPinCount = 0;
 	OpenLoopVfControl_Init(&openLoopVfConfig1, Inverter3Ph_ResetSignal);
 
-	openLoopVfConfig2.inverterConfig.s1PinNos[0] = 9;
-	openLoopVfConfig2.inverterConfig.s1PinNos[1] = 11;
-	openLoopVfConfig2.inverterConfig.s1PinNos[2] = 13;
+	openLoopVfConfig2.inverterConfig.s1PinNos[0] = 7;
+	openLoopVfConfig2.inverterConfig.s1PinNos[1] = 9;
+	openLoopVfConfig2.inverterConfig.s1PinNos[2] = 11;
 	openLoopVfConfig2.inverterConfig.dsblPinCount = 0;
 	OpenLoopVfControl_Init(&openLoopVfConfig2, NULL);
-
-	// turn off relays and disable pins
-#else
-	for (int i = 1; i < 16; i+=4)
-	{
-		config.invertPol = false;
-		DutyCycleUpdateFnc callback = BSP_PWM_ConfigInvertedPair(i, &config);
-		callback(i, 0.5f, &config);
-		config.invertPol = true;
-		callback = BSP_PWM_ConfigInvertedPair(i+2, &config);
-		callback(i+2, 0.5f, &config);
-		BSP_Dout_SetAsPWMPin(i);
-		BSP_Dout_SetAsPWMPin(i+1);
-		BSP_Dout_SetAsPWMPin(i+2);
-		BSP_Dout_SetAsPWMPin(i+3);
-	}
-#endif
-
 }
 
 /**
@@ -141,10 +103,8 @@ void MainControl_Loop(void)
 {
 	if(recompute)
 	{
-#if RUN_ALL_FULL_BRIDGE == 0
 		OpenLoopVfControl_Loop(&openLoopVfConfig1);
 		OpenLoopVfControl_Loop(&openLoopVfConfig2);
-#endif
 		recompute = false;
 	}
 }
