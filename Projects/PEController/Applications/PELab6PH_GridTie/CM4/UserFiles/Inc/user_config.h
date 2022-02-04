@@ -45,6 +45,9 @@ extern "C" {
 #define PELAB_CUSTOM		(4)
 #define MEASUREMENT_UNIT	(PELAB_6PH)
 
+// Make sure to load the intelliSENS firmware also if this option is enabled
+#define ENABLE_INTELLISENS	(0)
+
 #ifdef __cplusplus
 }
 #endif

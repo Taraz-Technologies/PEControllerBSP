@@ -48,6 +48,7 @@
  */
 static float Tnpc_PWM_UpdatePair(uint32_t pwmNo, float duty, pwm_config_t *config)
 {
+	float d1 = duty;
 	duty = (fabsf(duty - 0.5f)) * 2;
 	if(duty < 0)
 	{
@@ -59,6 +60,7 @@ static float Tnpc_PWM_UpdatePair(uint32_t pwmNo, float duty, pwm_config_t *confi
 		BSP_PWM_UpdatePairDuty(pwmNo, duty, config);
 		BSP_PWM_UpdatePairDuty(pwmNo + 2, 0, config);
 	}
+	return d1;
 }
 /**
  * @brief Configure the PWMs for a single leg of the inverter
