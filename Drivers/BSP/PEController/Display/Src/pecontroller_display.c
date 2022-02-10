@@ -22,11 +22,12 @@
 /********************************************************************************
  * Includes
  *******************************************************************************/
-#include "pecontroller_display.h"
 #include "user_config.h"
+#include "pecontroller_display.h"
 #if DISPLAY == LCD_AFY800480A0 || DISPLAY == LCD_AFY800480B0
 #include "LCD_AFY800480A0_B0.h"
 #endif
+#include "logo.h"
 /********************************************************************************
  * Defines
  *******************************************************************************/
@@ -171,13 +172,69 @@ static void ConfigIO(void)
  * @brief Shows the configured layer on the LCD
  * @param *pLayerCfg Layer configuration to be applied to the LTDC module
  */
-void BSP_Display_ShowLayer(LTDC_LayerCfgTypeDef* pLayerCfg)
+static void BSP_Display_ShowLayer(LTDC_LayerCfgTypeDef* pLayerCfg)
 {
 	if (HAL_LTDC_ConfigLayer(&hltdc, pLayerCfg, 0) != HAL_OK)
 		Error_Handler();
 }
 
-void ConfigLTDC(void)
+/**
+ * @brief Displays the first layer after applying configuration
+ * @param framePtr Pointer to the frame to be displayed
+ * @param config Pointer to the configurations for the layer
+ */
+void BSP_Display_ShowFirstLayer(const uint8_t* framePtr, image_config_t* config)
+{
+	LTDC_LayerCfgTypeDef pLayerCfg = {0};
+	pLayerCfg.WindowX0 = config->xAlign == ALIGN_RIGHT_X ? 0 :
+			(config->xAlign == ALIGN_LEFT_X ? DISPLAY_WIDTH - config->ImageWidth :
+					(DISPLAY_WIDTH - config->ImageWidth) / 2);
+	pLayerCfg.WindowX1 = pLayerCfg.WindowX0 + config->ImageWidth;
+	pLayerCfg.WindowY0 = config->yAlign == ALIGN_DOWN_Y ? 0 :
+			(config->yAlign == ALIGN_UP_Y ? DISPLAY_HEIGHT - config->ImageHeight :
+					(DISPLAY_HEIGHT - config->ImageHeight) / 2);
+	pLayerCfg.WindowY1 = pLayerCfg.WindowY0 + config->ImageHeight;
+
+	/* Pixel Format configuration*/
+	pLayerCfg.PixelFormat = config->PixelFormat;
+
+	/* Start Address configuration : frame buffer is located at FLASH memory */
+	pLayerCfg.FBStartAdress = (uint32_t)framePtr;
+
+	/* Alpha constant (255 == totally opaque) */
+	pLayerCfg.Alpha = 255;
+
+	/* Default Color configuration (configure A,R,G,B component values) : no background color */
+	pLayerCfg.Alpha0 = 255; /* fully transparent */
+	pLayerCfg.Backcolor.Blue = LOGO_BACK_BLUE;
+	pLayerCfg.Backcolor.Green = LOGO_BACK_GREEN;
+	pLayerCfg.Backcolor.Red = LOGO_BACK_RED;
+
+	/* Configure blending factors */
+	pLayerCfg.BlendingFactor1 = LTDC_BLENDING_FACTOR1_CA;
+	pLayerCfg.BlendingFactor2 = LTDC_BLENDING_FACTOR2_CA;
+
+	/* Configure the number of lines and number of pixels per line */
+	pLayerCfg.ImageWidth  = config->ImageWidth;
+	pLayerCfg.ImageHeight = config->ImageHeight;
+	BSP_Display_ShowLayer(&pLayerCfg);
+}
+
+/**
+ * @brief Display the selected LOGO. Use the user_config.h file to select appropriate LOGO
+ */
+void BSP_Display_ShowLogo(void)
+{
+	image_config_t config = {0};
+	config.xAlign = LOGO_ALIGN_X;
+	config.yAlign = LOGO_ALIGN_Y;
+	config.ImageHeight = LOGO_HEIGHT;
+	config.ImageWidth = LOGO_WIDTH;
+	config.PixelFormat = LOGO_FORMAT;
+	BSP_Display_ShowFirstLayer(logo, &config);
+}
+
+static void ConfigLTDC(void)
 {
 	hltdc.Instance = LTDC;
 	hltdc.Init.HSPolarity = LTDC_HSPOLARITY_AL;
@@ -192,9 +249,9 @@ void ConfigLTDC(void)
 	hltdc.Init.AccumulatedActiveH = ACCUMULATED_ACTIVE_H;
 	hltdc.Init.TotalWidth = TOTAL_WIDTH;
 	hltdc.Init.TotalHeigh = TOTAL_HEIGHT;
-	hltdc.Init.Backcolor.Blue = 0;
+	hltdc.Init.Backcolor.Blue = 255;
 	hltdc.Init.Backcolor.Green = 255;
-	hltdc.Init.Backcolor.Red = 0;
+	hltdc.Init.Backcolor.Red = 255;
 	if (HAL_LTDC_Init(&hltdc) != HAL_OK)
 		Error_Handler();
 }

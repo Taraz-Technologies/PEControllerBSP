@@ -38,6 +38,10 @@ extern "C" {
 #define LCD_AFY800480B0		(1)
 #define DISPLAY				(LCD_AFY800480B0)
 
+#define LOGO_DEFAULT		(0)
+#define LOGO_CUSTOM			(1)
+#define LOGO_TYPE			(LOGO_DEFAULT)
+
 #define PELAB_3PH			(0)
 #define PELAB_6PH			(1)
 #define PELAB_TNPC			(2)
