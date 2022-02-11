@@ -34,23 +34,48 @@ extern "C" {
 /********************************************************************************
  * Defines
  *******************************************************************************/
-#define LCD_AFY800480A0 	(0)
-#define LCD_AFY800480B0		(1)
-#define DISPLAY				(LCD_AFY800480B0)
+/********** SYSTEM CONFIGURATION *************/
+#define PEC_CUSTOM				(0)
+#define PLB_MMC					(1)
+#define PLB_TNPC				(2)
+#define PLB_6PH					(3)
+#define PLB_3PH					(4)
+/**
+ * @brief Defines the Configuration for the PEController. Select @ref PEC_CUSTOM for independent PEControllers
+ */
+#define PECONTROLLER_CONFIG		(PLB_6PH)
 
-#define LOGO_DEFAULT		(0)
-#define LOGO_CUSTOM			(1)
-#define LOGO_TYPE			(LOGO_CUSTOM)
+#if PECONTROLLER_CONFIG != PEC_CUSTOM
+/**
+ * @brief Select the correct version of PELAB for your configuration
+ */
+#define PELAB_VERSION			(4)
+#endif
+/********** SYSTEM CONFIGURATION *************/
 
-#define PELAB_3PH			(0)
-#define PELAB_6PH			(1)
-#define PELAB_TNPC			(2)
-#define PELAB_MMC			(3)
-#define PELAB_CUSTOM		(4)
-#define MEASUREMENT_UNIT	(PELAB_6PH)
+/********** DISPLAY CONFIGURATION ************/
+#define LCD_AFY800480A0 		(0)
+#define LCD_AFY800480B0			(1)
+/**
+ * @brief Select LCD variant installed on PEController
+ */
+#define DISPLAY					(LCD_AFY800480B0)
 
-// Make sure to load the intelliSENS firmware also if this option is enabled
-#define ENABLE_INTELLISENS	(0)
+#define LOGO_DEFAULT			(0)
+#define LOGO_CUSTOM				(1)
+/**
+ * @brief Select the LOGO to be displayed on PEController
+ */
+#define LOGO_TYPE				(LOGO_DEFAULT)
+/********** DISPLAY CONFIGURATION ************/
+
+/******** MEASUREMENT CONFIGURATION ***********/
+/**
+ * @brief Enable intelliSENS support for PEController
+ * @note Make sure that the binary intelliSENS.elf is also loaded in run configuration and correct linker file is selected
+ */
+#define ENABLE_INTELLISENS		(0)
+/******** MEASUREMENT CONFIGURATION ***********/
 
 #ifdef __cplusplus
 }
