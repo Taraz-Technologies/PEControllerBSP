@@ -100,6 +100,14 @@ typedef struct
 /** Contains the latest values of the acquired ADC readings
  */
 extern adc_measures_t adcVals;
+/** Defines the multipliers for each member of the ADC measurement
+ * These values are used to convert ADC data to meaningful measurements according to the formula <b>value = (adcData - adcOffsets) * adcMultipiers</b>
+ */
+extern adc_measures_t adcMultipiers;
+/** Defines the offsets for each member of the ADC measurement.
+ * These values are used to convert ADC data to meaningful measurements according to the formula <b>value = (adcData - adcOffsets) * adcMultipiers</b>
+ */
+extern adc_measures_t adcOffsets;
 /**
  * @}
  */

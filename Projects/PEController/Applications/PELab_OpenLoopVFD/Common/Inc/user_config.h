@@ -43,16 +43,17 @@ extern "C" {
 /**
  * @brief Defines the Configuration for the PEController. Select @ref PEC_CUSTOM for independent PEControllers
  */
-#define PECONTROLLER_CONFIG		(PLB_TNPC)
+#define PECONTROLLER_CONFIG		(PLB_3PH)
 
-/**
- * @brief Select the correct version of PELAB for your configuration
- */
 #if PECONTROLLER_CONFIG != PEC_CUSTOM
 /**
  * @brief Select the correct version of PELAB for your configuration
  */
 #define PELAB_VERSION			(3)
+/**
+ * @brief For correct measurement value this value should be configured according to the system
+ */
+#define CURRENT_MEASUREMENT_RANGE	(50)
 #endif
 /********** SYSTEM CONFIGURATION *************/
 

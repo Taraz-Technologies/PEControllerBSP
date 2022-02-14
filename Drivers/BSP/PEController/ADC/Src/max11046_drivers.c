@@ -61,6 +61,14 @@ TIM_HandleTypeDef maxTimerHandle;
 /** Contains the latest values of the acquired ADC readings
  */
 adc_measures_t adcVals;
+/** Defines the multipliers for each member of the ADC measurement
+ * These values are used to convert ADC data to meaningful measurements according to the formula <b>value = (adcData - adcOffsets) * adcMultipiers</b>
+ */
+adc_measures_t adcMultipiers = {0};
+/** Defines the offsets for each member of the ADC measurement.
+ * These values are used to convert ADC data to meaningful measurements according to the formula <b>value = (adcData - adcOffsets) * adcMultipiers</b>
+ */
+adc_measures_t adcOffsets = {0};
 /********************************************************************************
  * Function Prototypes
  *******************************************************************************/
@@ -114,7 +122,7 @@ static inline void Measure_BothADCs(uint16_t* dataPtr)
 		maxRead_GPIO_Port->BSRR = maxRead_Pin;
 	}	while (--i);
 #if ENABLE_INTELLISENS
-	intelliSENS.SetADCData(intelliSENSDataPtr);
+	intelliSENS.SetADCData((uint64_t*)intelliSENSDataPtr);
 #endif
 	maxCS2_GPIO_Port->BSRR = maxCS2_Pin;
 }
@@ -232,6 +240,23 @@ static void Timer_Config(void)
 }
 
 /**
+ * @brief Configures the sensitivities and offsets for all measurements
+ */
+static void ConfigureMeasurements(void)
+{
+#if	PECONTROLLER_CONFIG != PEC_CUSTOM
+	float* mults = (float*)&adcMultipiers;
+	float* offsets = (float*)&adcOffsets;
+	 for (int i = 0; i < MEASUREMENT_COUNT_CURRENT; i++)
+		mults[i] = CURRENT_MEASUREMENT_RANGE / 32768.f;
+	for (int i = 0; i < MEASUREMENT_COUNT_VOLTAGE; i++)
+		mults[i + 8] = 1000 / 32768.f;
+	for (int i = 0; i < 16; i++)
+		offsets[i] = 32768;
+#endif
+}
+
+/**
  * @brief Initializes the MAX11046 drivers
  * @param type- ADC_MODE_SINGLE or ADC_MODE_CONT for single or continuous conversions respectively
  * @param *contConfig- adc_cont_config_t contains the continuous transfer configuration
@@ -241,6 +266,7 @@ void BSP_MAX11046_Init(adc_acq_mode_t type, adc_cont_config_t* contConfig)
 	// DeInitialize if already initialized
 	if(moduleActive)
 		BSP_MAX11046_DeInit();
+	ConfigureMeasurements();
 
 #if ENABLE_INTELLISENS
 	intelliSENS_Configure();
