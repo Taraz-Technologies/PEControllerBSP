@@ -50,7 +50,7 @@ static float Tnpc_PWM_UpdatePair(uint32_t pwmNo, float duty, pwm_config_t *confi
 {
 	float d1 = duty;
 	duty = (fabsf(duty - 0.5f)) * 2;
-	if(duty < 0)
+	if(d1 < .5f)
 	{
 		BSP_PWM_UpdatePairDuty(pwmNo, 0, config);
 		BSP_PWM_UpdatePairDuty(pwmNo + 2, duty, config);

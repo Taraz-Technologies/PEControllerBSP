@@ -258,7 +258,9 @@ static void MX_TIM17_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN TIM17_Init 2 */
-
+  sConfigOC.Pulse = (htim17.Init.Prescaler - 1) * LCD_BRIGHTNESS;
+  if (HAL_TIM_PWM_ConfigChannel(&htim17, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+    Error_Handler();
   /* USER CODE END TIM17_Init 2 */
   HAL_TIM_MspPostInit(&htim17);
 

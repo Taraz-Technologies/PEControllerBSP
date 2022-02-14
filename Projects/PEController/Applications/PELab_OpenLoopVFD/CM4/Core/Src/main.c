@@ -139,7 +139,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
   BSP_Display_Init();
   BSP_Display_ShowLogo();
-  HAL_TIM_PWM_Start(&htim17,TIM_CHANNEL_1);			// LCD PWM channel
+  HAL_TIM_PWM_Start(&htim17,TIM_CHANNEL_1);			// LCD Brightness
   adc_cont_config_t adcConfig = {
 		  .callback = DataProcessingCallback,
 		  .conversionCycleTimeUs = sharedData->m7Tom4.periodUs };
@@ -264,7 +264,9 @@ static void MX_TIM17_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN TIM17_Init 2 */
-
+  sConfigOC.Pulse = (htim17.Init.Prescaler - 1) * LCD_BRIGHTNESS;
+  if (HAL_TIM_PWM_ConfigChannel(&htim17, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+    Error_Handler();
   /* USER CODE END TIM17_Init 2 */
   HAL_TIM_MspPostInit(&htim17);
 

@@ -23,6 +23,7 @@
 /********************************************************************************
  * Includes
  *******************************************************************************/
+#include "user_config.h"
 #include "open_loop_vf_controller.h"
 /********************************************************************************
  * Defines
@@ -68,7 +69,11 @@ void OpenLoopVfControl_Init(openloopvf_config_t* config, PWMResetCallback pwmRes
 {
 	/***************** Configure Inverter *********************/
 	inverter3Ph_config_t* inverterConfig = &config->inverterConfig;
+#if PECONTROLLER_CONFIG == PLB_TNPC
+	inverterConfig->legType = LEG_TNPC;
+#else
 	inverterConfig->legType = LEG_DEFAULT;
+#endif
 	inverterConfig->pwmConfig.lim.min = 0;
 	inverterConfig->pwmConfig.lim.max = 1;
 	inverterConfig->pwmConfig.lim.minMaxDutyCycleBalancing = MIN_MAX_BALANCING_INVERTER;

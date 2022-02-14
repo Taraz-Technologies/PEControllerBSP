@@ -43,13 +43,16 @@ extern "C" {
 /**
  * @brief Defines the Configuration for the PEController. Select @ref PEC_CUSTOM for independent PEControllers
  */
-#define PECONTROLLER_CONFIG		(PLB_6PH)
+#define PECONTROLLER_CONFIG		(PLB_TNPC)
 
+/**
+ * @brief Select the correct version of PELAB for your configuration
+ */
 #if PECONTROLLER_CONFIG != PEC_CUSTOM
 /**
  * @brief Select the correct version of PELAB for your configuration
  */
-#define PELAB_VERSION			(4)
+#define PELAB_VERSION			(3)
 #endif
 /********** SYSTEM CONFIGURATION *************/
 
@@ -66,7 +69,12 @@ extern "C" {
 /**
  * @brief Select the LOGO to be displayed on PEController
  */
-#define LOGO_TYPE				(LOGO_DEFAULT)
+#define LOGO_TYPE				(LOGO_CUSTOM)
+
+/**
+ * @brief Selects the display brightness value between 0-100
+ */
+#define LCD_BRIGHTNESS			(100)
 /********** DISPLAY CONFIGURATION ************/
 
 /******** MEASUREMENT CONFIGURATION ***********/
@@ -74,7 +82,7 @@ extern "C" {
  * @brief Enable intelliSENS support for PEController
  * @note Make sure that the binary intelliSENS.elf is also loaded in run configuration and correct linker file is selected
  */
-#define ENABLE_INTELLISENS		(0)
+#define ENABLE_INTELLISENS		(1)
 /******** MEASUREMENT CONFIGURATION ***********/
 
 #ifdef __cplusplus

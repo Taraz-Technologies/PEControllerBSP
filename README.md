@@ -25,6 +25,9 @@ Board Support Package for PEController module made by Taraz Technologies
 1. STM32CubeIDE
 
 ## Examples
-1. **PELab_OpenLoopVFD**
+1. **PEController_Template**
+     - Location: Projects/Applications/
+	 - Description- Template project for creating new quick projects
+2. **PELab_OpenLoopVFD**
      - Location: Projects/Applications/
      - Description- Example for the PELab in 6 Phase Configuration where both the inverters are run simultaneously @ 25Hz with an initial acceleration. The example provides the basic understating to operate the PWM Outputs and accessing the analog data acquired. Refer to the example of an Open Loop VFD Controller in Projects/Applications/PELab_OpenLoopVFD/ for further information
