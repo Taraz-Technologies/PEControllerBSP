@@ -19,15 +19,7 @@
 /*******************************************************************************
  * Defines
  ******************************************************************************/
-#define OPEN_LOOP_VF_CONTROL			(1)
-#define GRID_TIE_CONTROL				(2)
 
-#define CONTROL_TYPE					(GRID_TIE_CONTROL)
-
-#define PWM_PERIOD_Us					(40)
-#define PWM_PERIOD_s					(PWM_PERIOD_Us/1000000.f)
-#define PWM_FREQ_KHz					(1000.f/PWM_PERIOD_Us)
-#define PWM_FREQ_Hz						(1.f/PWM_PERIOD_s)
 /*******************************************************************************
  * Enums
  ******************************************************************************/
@@ -128,7 +120,7 @@ void MainControl_Stop(void)
 }
 
 /**
- * @brief Used to signal the computaiton for new duty cycle
+ * @brief Used to signal the computation for new duty cycle
  */
 static void Inverter3Ph_ResetSignal(void)
 {

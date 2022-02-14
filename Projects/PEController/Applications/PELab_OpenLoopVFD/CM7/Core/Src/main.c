@@ -107,7 +107,7 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   /* USER CODE BEGIN 2 */
-	sharedData->m7Tom4.periodUs = 20;
+	sharedData->m7Tom4.periodUs = MEASUREMENT_INTERVAL_Us;
 	MainControl_Init();
 	MainControl_Run();
 	/* When system initialization is finished, Cortex-M7 will release Cortex-M4 by means of

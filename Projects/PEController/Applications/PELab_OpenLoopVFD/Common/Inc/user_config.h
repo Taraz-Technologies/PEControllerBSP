@@ -43,7 +43,7 @@ extern "C" {
 /**
  * @brief Defines the Configuration for the PEController. Select @ref PEC_CUSTOM for independent PEControllers
  */
-#define PECONTROLLER_CONFIG		(PLB_3PH)
+#define PECONTROLLER_CONFIG		(PLB_TNPC)
 
 #if PECONTROLLER_CONFIG != PEC_CUSTOM
 /**
@@ -51,9 +51,9 @@ extern "C" {
  */
 #define PELAB_VERSION			(3)
 /**
- * @brief For correct measurement value this value should be configured according to the system
+ * @brief For correct measurement sensitivity of channels in mV/A should be provided here
  */
-#define CURRENT_MEASUREMENT_RANGE	(50)
+#define CURRENT_SENSITIVITY_mVA	(400)
 #endif
 /********** SYSTEM CONFIGURATION *************/
 
@@ -84,6 +84,12 @@ extern "C" {
  * @note Make sure that the binary intelliSENS.elf is also loaded in run configuration and correct linker file is selected
  */
 #define ENABLE_INTELLISENS		(1)
+/**
+ * @brief Measurement interval for the system.
+ * @note Minimum setting value is 10 (100KHz) with intelliSENS but may vary if additional logic is added.
+ * Minimum setting value is 8 (125KHz) without intelliSENS software
+ */
+#define MEASUREMENT_INTERVAL_Us		(20)
 /******** MEASUREMENT CONFIGURATION ***********/
 
 #ifdef __cplusplus

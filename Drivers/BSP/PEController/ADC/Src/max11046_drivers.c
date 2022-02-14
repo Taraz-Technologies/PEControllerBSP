@@ -32,8 +32,8 @@
  * Defines
  *******************************************************************************/
 #define READ_ADC_CH(tempData)			maxRead_GPIO_Port->BSRR = (uint32_t)maxRead_Pin << 16U; \
-									*tempData++ = (uint16_t)MAX11046_GPIO->IDR; \
-									maxRead_GPIO_Port->BSRR = maxRead_Pin;
+		*tempData++ = (uint16_t)MAX11046_GPIO->IDR; \
+		maxRead_GPIO_Port->BSRR = maxRead_Pin;
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
@@ -244,15 +244,28 @@ static void Timer_Config(void)
  */
 static void ConfigureMeasurements(void)
 {
+	// implementation of Custom PEControllers is user controlled
 #if	PECONTROLLER_CONFIG != PEC_CUSTOM
 	float* mults = (float*)&adcMultipiers;
 	float* offsets = (float*)&adcOffsets;
-	 for (int i = 0; i < MEASUREMENT_COUNT_CURRENT; i++)
-		mults[i] = CURRENT_MEASUREMENT_RANGE / 32768.f;
-	for (int i = 0; i < MEASUREMENT_COUNT_VOLTAGE; i++)
-		mults[i + 8] = 1000 / 32768.f;
 	for (int i = 0; i < 16; i++)
+	{
+		mults[i] = 1000.f / (32768.f);
 		offsets[i] = 32768;
+	}
+#else
+	float* mults = (float*)&adcMultipiers;
+	float* offsets = (float*)&adcOffsets;
+	for (int i = 0; i < MEASUREMENT_COUNT_CURRENT; i++)
+	{
+		mults[i] = 10000.f / (CURRENT_SENSITIVITY_mVA * 32768.f);
+		offsets[i] = 32768;
+	}
+	for (int i = 0; i < MEASUREMENT_COUNT_VOLTAGE; i++)
+	{
+		mults[i + 8] = 1000 / 32768.f;
+		offsets[i + 8] = 32768;
+	}
 #endif
 }
 
