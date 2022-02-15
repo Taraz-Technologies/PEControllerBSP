@@ -34,12 +34,12 @@ Board Support Package for PEController module made by Taraz Technologies
 
 ## Making new project from template project
 To make a new project for personal development follow the following steps
-	- Create a copy of the template folder "PEController_Template" in location Projects/PEController/Applications
-	- Rename the copied folder to a custom name such as "TestProject"
-	- Select the folder as workspace in Notepad++
-	- Select find in files and replace all instances of "PEController_Template" with "TestProject"
-	- Rename the following files
-		- PEController_Template.ioc to TestProject.ioc in Projects/PEController/Applications/TestProject
-		- PEController_Template_CM7.launch to TestProject_CM7.launch in Projects/PEController/Applications/TestProject/CM7
-		- PEController_Template_CM4.launch to TestProject_CM4.launch in Projects/PEController/Applications/TestProject/CM4
-	- Open the .project file for editing
+1. Create a copy of the template folder "PEController_Template" in location Projects/PEController/Applications
+2. Rename the copied folder to a custom name such as "TestProject"
+3. Select the folder as workspace in Notepad++
+4. Select find in files and replace all instances of "PEController_Template" with "TestProject"
+5. Rename the following files
+	- PEController_Template.ioc to TestProject.ioc in Projects/PEController/Applications/TestProject
+	- PEController_Template_CM7.launch to TestProject_CM7.launch in Projects/PEController/Applications/TestProject/CM7
+	- PEController_Template_CM4.launch to TestProject_CM4.launch in Projects/PEController/Applications/TestProject/CM4
+6. Open the .project file for editing
