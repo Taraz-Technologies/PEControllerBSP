@@ -24,6 +24,7 @@
  *******************************************************************************/
 #include "pecontroller_pwm1_10.c"
 #include "pecontroller_pwm11_16.c"
+#include "pecontroller_pwm.h"
 /********************************************************************************
  * Defines
  *******************************************************************************/
@@ -53,9 +54,10 @@
  *******************************************************************************/
 /**
  * @brief Configures an PWM pair as inverted pair
- * @param pwmNo Channel no of the first PWM Channel in the pair (Valid Values 1,3,5,7,9,11,13,15)
- * 				 Channel1 = pwmNo
- * 				 Channel2 = pwmNo + 1
+ * @param pwmNo Channel no of reference channel is the PWM pair (Valid Values 1-16). <br>
+ * 				<b>Pairs are classified as :</b>
+ * 				-# CH1 = Reference channel available at pin @ref pwmNo
+ * 				-# CH2 = Inverted Channel from reference available at pin @ref pwmNo + 1 if @ref pwmNo is odd else @ref pwmNo - 1
  * @param *config Pointer to a  pwm_config_t structure that contains the configuration
  * 				   parameters for the PWM pair
  * @return DutyCycleUpdateFnc Returns the function pointer of the type DutyCycleUpdateFnc which needs to be called
@@ -71,7 +73,7 @@ DutyCycleUpdateFnc BSP_PWM_ConfigInvertedPair(uint16_t pwmNo, pwm_config_t *conf
 }
 /**
  * @brief Configures a PWM channel
- * @param pwmNo PWM channel to be configured (Valid Values 1-10,11,13,15)
+ * @param pwmNo PWM channel to be configured (Valid Values 1-16)
  * @param *config Pointer to a  pwm_config_t structure that contains the configuration
  * 				   parameters for the PWM pair
  * @return DutyCycleUpdateFnc Returns the function pointer of the type DutyCycleUpdateFnc which needs to be called
@@ -88,9 +90,10 @@ DutyCycleUpdateFnc BSP_PWM_ConfigChannel(uint16_t pwmNo, pwm_config_t *config)
 
 /**
  * @brief Update the Duty Cycle of an Inverted Pair
- * @param pwmNo Channel no of the first PWM Channel in the pair (Valid Values 1,3,5,7,9,11,13,15)
- * 				 Channel1 = pwmNo
- * 				 Channel2 = pwmNo + 1
+ * @param pwmNo Channel no of reference channel is the PWM pair (Valid Values 1-16). <br>
+ * 				<b>Pairs are classified as :</b>
+ * 				-# CH1 = Reference channel available at pin @ref pwmNo
+ * 				-# CH2 = Inverted Channel from reference available at pin @ref pwmNo + 1 if @ref pwmNo is odd else @ref pwmNo - 1
  * @param duty duty cycle to be applied to the pair (Range 0-1 or given in the config parameter)
  * @param *config Pointer to a  pwm_config_t structure that contains the configuration
  * 				   parameters for the PWM pair
@@ -107,7 +110,7 @@ float BSP_PWM_UpdatePairDuty(uint32_t pwmNo, float duty, pwm_config_t* config)
 
 /**
  * @brief Update the Duty Cycle of a channel
- * @param pwmNo PWM channel to be configured (Valid Values 1-10, 11, 13, 15)
+ * @param pwmNo PWM channel to be configured (Valid Values 1-16)
  * @param duty duty cycle to be applied to the channel (Range 0-1 or given in the config parameter)
  * @param *config Pointer to a  pwm_config_t structure that contains the configuration
  * 				   parameters for the PWM channel
@@ -137,28 +140,28 @@ void BSP_PWM_Config_Interrupt(uint32_t pwmNo, bool enable, PWMResetCallback call
 		BSP_PWM11_16_Config_Interrupt(enable, callback, priority);
 }
 /**
-  * @brief  Enables or disables the TIM Capture Compare Channel xN.
-  * @param  TIMx to select the TIM peripheral
-  * @param  Channel specifies the TIM Channel
-  *          This parameter can be one of the following values:
-  *            @arg TIM_CHANNEL_1: TIM Channel 1
-  *            @arg TIM_CHANNEL_2: TIM Channel 2
-  *            @arg TIM_CHANNEL_3: TIM Channel 3
-  * @param  ChannelNState specifies the TIM Channel CCxNE bit new state.
-  *          This parameter can be: TIM_CCxN_ENABLE or TIM_CCxN_Disable.
-  * @retval None
-  */
+ * @brief  Enables or disables the TIM Capture Compare Channel xN.
+ * @param  TIMx to select the TIM peripheral
+ * @param  Channel specifies the TIM Channel
+ *          This parameter can be one of the following values:
+ *            @arg TIM_CHANNEL_1: TIM Channel 1
+ *            @arg TIM_CHANNEL_2: TIM Channel 2
+ *            @arg TIM_CHANNEL_3: TIM Channel 3
+ * @param  ChannelNState specifies the TIM Channel CCxNE bit new state.
+ *          This parameter can be: TIM_CCxN_ENABLE or TIM_CCxN_Disable.
+ * @retval None
+ */
 static void TIM_CCxNChannelCmd(TIM_TypeDef *TIMx, uint32_t Channel, uint32_t ChannelNState)
 {
-  uint32_t tmp;
+	uint32_t tmp;
 
-  tmp = TIM_CCER_CC1NE << (Channel & 0x1FU); /* 0x1FU = 31 bits max shift */
+	tmp = TIM_CCER_CC1NE << (Channel & 0x1FU); /* 0x1FU = 31 bits max shift */
 
-  /* Reset the CCxNE Bit */
-  TIMx->CCER &=  ~tmp;
+	/* Reset the CCxNE Bit */
+	TIMx->CCER &=  ~tmp;
 
-  /* Set or reset the CCxNE Bit */
-  TIMx->CCER |= (uint32_t)(ChannelNState << (Channel & 0x1FU)); /* 0x1FU = 31 bits max shift */
+	/* Set or reset the CCxNE Bit */
+	TIMx->CCER |= (uint32_t)(ChannelNState << (Channel & 0x1FU)); /* 0x1FU = 31 bits max shift */
 }
 /**
  * @brief Starts the PWM on required PWM pins
@@ -271,11 +274,47 @@ void BSP_PWM_Stop(uint32_t pwmMask)
 	{
 		hhrtim.Instance->sMasterRegs.MCR &= ~
 				((pwmMask & 0x3 ? HRTIM_TIMERID_TIMER_A : 0) |
-				(pwmMask & 0xc ? HRTIM_TIMERID_TIMER_B : 0) |
-				(pwmMask & 0x30 ? HRTIM_TIMERID_TIMER_C : 0) |
-				(pwmMask & 0xc0 ? HRTIM_TIMERID_TIMER_D : 0) |
-				(pwmMask & 0x300 ? HRTIM_TIMERID_TIMER_E : 0));
+						(pwmMask & 0xc ? HRTIM_TIMERID_TIMER_B : 0) |
+						(pwmMask & 0x30 ? HRTIM_TIMERID_TIMER_C : 0) |
+						(pwmMask & 0xc0 ? HRTIM_TIMERID_TIMER_D : 0) |
+						(pwmMask & 0x300 ? HRTIM_TIMERID_TIMER_E : 0));
 	}
 }
 
+/**
+ * @brief Populates the @ref moduleConfig parameter with the default configuration
+ * @details <b>Default Configuration</b>:
+ * -# alignment = CENTER_ALIGNED
+ * -# deadtime.on = false
+ * -# deadtime.nanoSec = 1000
+ * -# periodInUsec = 40
+ * @param moduleConfig module configuration to be updated
+ */
+void BSP_PWM_GetDafaultModuleConfig(pwm_module_config_t* moduleConfig)
+{
+	moduleConfig->alignment = CENTER_ALIGNED;
+	moduleConfig->deadtime.on = false;
+	moduleConfig->deadtime.nanoSec = 1000;
+	moduleConfig->periodInUsec = 40;
+}
+
+/**
+ * @brief Populates the @ref pwmConfig parameter with the default configuration
+ * @details <b>Default Configuration</b>:
+ * -# dutyMode = OUTPUT_DUTY_AT_PWMH
+ * -# lim.min = 0
+ * -# lim.max = 1
+ * -# lim.minMaxDutyCycleBalancing = false
+ * @param pwmConfig PWM configuration structure to be updated
+ * @param moduleConfig module configuration used by this module. Make sure to call
+ * @ref BSP_PWM_GetDafaultModuleConfig() before calling this function
+ */
+void BSP_PWM_GetDefaultConfig(pwm_config_t* pwmConfig, pwm_module_config_t* moduleConfig)
+{
+	pwmConfig->module = moduleConfig;
+	pwmConfig->dutyMode = OUTPUT_DUTY_AT_PWMH;
+	pwmConfig->lim.min = 0;
+	pwmConfig->lim.max = 1;
+	pwmConfig->lim.minMaxDutyCycleBalancing = false;
+}
 /* EOF */

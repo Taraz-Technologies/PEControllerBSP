@@ -78,6 +78,7 @@ int main(void)
 
 /* USER CODE BEGIN Boot_Mode_Sequence_1 */
 	/* Wait until CPU2 boots and enters in stop mode or timeout*/
+
 	timeout = 0xFFFF;
 	while((__HAL_RCC_GET_FLAG(RCC_FLAG_D2CKRDY) != RESET) && (timeout-- > 0));
 	if ( timeout < 0 )
@@ -107,7 +108,7 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   /* USER CODE BEGIN 2 */
-	sharedData->m7Tom4.periodUs = 40;
+	sharedData->m7Tom4.periodUs = 10;
 	MainControl_Init();
 	MainControl_Run();
 	/* When system initialization is finished, Cortex-M7 will release Cortex-M4 by means of

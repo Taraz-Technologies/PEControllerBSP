@@ -23,11 +23,16 @@
 /********************************************************************************
  * Includes
  *******************************************************************************/
+#include "user_config.h"
 #include "open_loop_vf_controller.h"
 /********************************************************************************
  * Defines
  *******************************************************************************/
-
+#define PWM_PERIOD_s					(PWM_PERIOD_Us/1000000.f)
+#define PWM_FREQ_KHz					(1000.f/PWM_PERIOD_Us)
+#define PWM_FREQ_Hz						(1.f/PWM_PERIOD_s)
+#define MIN_MAX_BALANCING_INVERTER		(false)
+#define INVERTER_DUTY_MODE				OUTPUT_DUTY_AT_PWMH
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
@@ -68,7 +73,11 @@ void OpenLoopVfControl_Init(openloopvf_config_t* config, PWMResetCallback pwmRes
 {
 	/***************** Configure Inverter *********************/
 	inverter3Ph_config_t* inverterConfig = &config->inverterConfig;
+#if PECONTROLLER_CONFIG == PLB_TNPC
+	inverterConfig->legType = LEG_TNPC;
+#else
 	inverterConfig->legType = LEG_DEFAULT;
+#endif
 	inverterConfig->pwmConfig.lim.min = 0;
 	inverterConfig->pwmConfig.lim.max = 1;
 	inverterConfig->pwmConfig.lim.minMaxDutyCycleBalancing = MIN_MAX_BALANCING_INVERTER;
@@ -100,8 +109,6 @@ void OpenLoopVfControl_Init(openloopvf_config_t* config, PWMResetCallback pwmRes
  */
 void OpenLoopVfControl_Loop(openloopvf_config_t* config)
 {
-	float duties[3];
-
 	// adjust the frequency with given acceleration
 	if(config->currentFreq < config->outputFreq)
 	{
@@ -123,8 +130,8 @@ void OpenLoopVfControl_Loop(openloopvf_config_t* config)
 	if(config->wt > TWO_PI)
 		config->wt -= TWO_PI;
 
-	// generate SPWM according to the theta and modulation index
-	ComputeDuty_SPWM(config->wt, config->currentModulationIndex, duties);
+	// generate and apply SPWM according to the theta and modulation index
+	Inverter3Ph_UpdateSPWM(&config->inverterConfig, config->wt, config->currentModulationIndex);
 }
 #pragma GCC pop_options
 /* EOF */

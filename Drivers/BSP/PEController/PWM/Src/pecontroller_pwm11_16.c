@@ -54,6 +54,8 @@ static TIM_OC_InitTypeDef sConfigOC =
 		.OCNIdleState = TIM_OCNIDLESTATE_SET,
 };
 static float dutyDeadTime = 0;
+static bool isEdgeAligned;
+static bool isDtEnabled;
 /********************************************************************************
  * Global Variables
  *******************************************************************************/
@@ -70,7 +72,6 @@ static PWMResetCallback resetCallback = NULL;
 /********************************************************************************
  * Code
  *******************************************************************************/
-
 /**
  * @brief Initialize the relevant PWM modules (Timer1). Frequency is constant for the PWMs 11-16
  * @param *config Pointer to a structure that contains the configuration
@@ -87,11 +88,13 @@ static void PWM11_16_Drivers_Init(pwm_config_t* config)
 	{
 		htim1.Init.CounterMode = TIM_COUNTERMODE_CENTERALIGNED2;
 		htim1.Init.Period = (int)(config->module->periodInUsec * (TIM1_FREQ_MHz / 2.f));
+		isEdgeAligned = false;
 	}
 	else
 	{
 		htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
 		htim1.Init.Period = (config->module->periodInUsec * TIM1_FREQ_MHz) - 1;
+		isEdgeAligned = true;
 	}
 	htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
 	htim1.Init.RepetitionCounter = 0;
@@ -152,24 +155,16 @@ static void PWM11_16_Drivers_Init(pwm_config_t* config)
 	if (HAL_TIMEx_ConfigBreakDeadTime(&htim1, &sBreakDeadTimeConfig) != HAL_OK)
 		Error_Handler();
 
-	float oldMax = config->lim.max;
-	if (IsDeadtimeEnabled(&config->module->deadtime))
-	{
-		config->lim.max = 1 - dutyDeadTime;
-		if (oldMax < config->lim.max && oldMax != 0)
-			config->lim.max = oldMax;
-	}
-
-	if (config->lim.minMaxDutyCycleBalancing  && config->lim.max > .5f)
-		config->lim.min = 1 - config->lim.max;
+	isDtEnabled = IsDeadtimeEnabled(&config->module->deadtime);
 
 	pwm11_16_enabled = true;
 }
 /**
  * @brief Update the Duty Cycle of an Inverted Pair
- * @param pwmNo Channel no of the first PWM Channel in the pair (Valid Values 11,13,15)
- * 				 Channel1 = pwmNo
- * 				 Channel2 = pwmNo + 1
+ * @param pwmNo Channel no of reference channel is the PWM pair (Valid Values 11-16). <br>
+ * 				<b>Pairs are classified as :</b>
+ * 				-# CH1 = Reference channel available at pin @ref pwmNo
+ * 				-# CH2 = Inverted Channel from reference available at pin @ref pwmNo + 1 if @ref pwmNo is odd else @ref pwmNo - 1
  * @param duty duty cycle to be applied to the pair (Range 0-1 or given in the config parameter)
  * @param *config Pointer to a  pwm_config_t structure that contains the configuration
  * 				   parameters for the PWM pair
@@ -183,40 +178,60 @@ float BSP_PWM11_16_UpdatePairDuty(uint32_t pwmNo, float duty, pwm_config_t* conf
 	else if (duty < config->lim.min)
 		duty = config->lim.min;
 
-	float dutyUse = duty;
-
-	if (IsDeadtimeEnabled(&config->module->deadtime) && config->dutyMode == OUTPUT_DUTY_AT_PWMH)
-		dutyUse += dutyDeadTime;
-
 	uint32_t ch = (pwmNo - 11) / 2;
-	*(((uint32_t*)&(TIM1->CCR1)) + ch) = dutyUse * TIM1->ARR;
+	if (duty == 0)
+		*(((uint32_t*)&(TIM1->CCR1)) + ch) = isEdgeAligned ? 0 : TIM1->ARR;
+	else
+	{
+		float dutyUse = duty;
+		if (isDtEnabled && config->dutyMode == OUTPUT_DUTY_AT_PWMH)
+			dutyUse += dutyDeadTime;
+		*(((uint32_t*)&(TIM1->CCR1)) + ch) = (isEdgeAligned ? dutyUse : (1 - dutyUse)) * TIM1->ARR;
+	}
 
 	return duty;
 }
 
 /**
  * @brief Configures a single inverted pair for PWM
- * @param pwmNo Channel no of the first PWM Channel in the pair (Valid Values 11,13,15)
- * 				 Channel1 = pwmNo
- * 				 Channel2 = pwmNo + 1
+ * @param pwmNo Channel no of reference channel is the PWM pair (Valid Values 11-16). <br>
+ * 				<b>Pairs are classified as :</b>
+ * 				-# CH1 = Reference channel available at pin @ref pwmNo
+ * 				-# CH2 = Inverted Channel from reference available at pin @ref pwmNo + 1 if @ref pwmNo is odd else @ref pwmNo - 1
  * @param *config Pointer to a  pwm_config_t structure that contains the configuration
  * 				   parameters for the PWM pair
  */
 static void PWM11_16_ConfigInvertedPair(uint32_t pwmNo, pwm_config_t* config)
 {
-	uint32_t ch = (pwmNo - 11);
-	// If pair not selected correctly report as error
-	if(ch % 2 != 0)
+	uint32_t ch = (pwmNo - 11) / 2;
+	uint32_t isCh2 = (pwmNo - 11) % 2;
+
+	ch = ch == 0 ? TIM_CHANNEL_1 : (ch == 1 ? TIM_CHANNEL_2 : TIM_CHANNEL_3);
+
+	TIM_OC_InitTypeDef sConfigOCLocal;
+	memcpy((void*)&sConfigOCLocal, (void*)&sConfigOC, sizeof(TIM_OC_InitTypeDef));
+
+	sConfigOCLocal.OCMode = (isCh2 ^ isEdgeAligned) ? TIM_OCMODE_PWM1 : TIM_OCMODE_PWM2;
+	if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOCLocal, ch) != HAL_OK)
 		Error_Handler();
-	ch = ch == 0 ? TIM_CHANNEL_1 : (ch == 2 ? TIM_CHANNEL_2 : TIM_CHANNEL_3);
-	if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, ch) != HAL_OK)
-		Error_Handler();
+
+	if (isDtEnabled)
+	{
+		float oldMax = config->lim.max;
+		config->lim.max = 1 - dutyDeadTime;
+		if (oldMax < config->lim.max && oldMax != 0)
+			config->lim.max = oldMax;
+	}
+
+	if (config->lim.minMaxDutyCycleBalancing  && config->lim.max > .5f)
+		config->lim.min = 1 - config->lim.max;
 }
 /**
  * @brief Configures consecutive inverted pairs for PWM
- * @param pwmNo Channel no of the first PWM Channel in the pair (Valid Values 11,13,15)
- * 				 Channel1 = pwmNo
- * 				 Channel2 = pwmNo + 1
+ * @param pwmNo Channel no of reference channel is the PWM pair (Valid Values 11-16). <br>
+ * 				<b>Pairs are classified as :</b>
+ * 				-# CH1 = Reference channel available at pin @ref pwmNo
+ * 				-# CH2 = Inverted Channel from reference available at pin @ref pwmNo + 1 if @ref pwmNo is odd else @ref pwmNo - 1
  * @param *config Pointer to a  pwm_config_t structure that contains the configuration
  * 				   parameters for the PWM pair
  * @param pairCount No of PWM pairs to be configured
@@ -237,7 +252,7 @@ DutyCycleUpdateFnc BSP_PWM11_16_ConfigInvertedPairs(uint32_t pwmNo, pwm_config_t
 
 /**
  * @brief Update the Duty Cycle of a channel
- * @param pwmNo PWM channel to be configured (Valid Values 11,13,15)
+ * @param pwmNo PWM channel to be configured (Valid Values 11-16)
  * @param duty duty cycle to be applied to the channel (Range 0-1 or given in the config parameter)
  * @param *config Pointer to a  pwm_config_t structure that contains the configuration
  * 				   parameters for the PWM channel
@@ -250,42 +265,52 @@ float BSP_PWM11_16_UpdateChannelDuty(uint32_t pwmNo, float duty, pwm_config_t* c
 	if (duty > config->lim.max)
 		duty = config->lim.max;
 
-	float dutyUse = duty;
-
-	// always OUTPUT_DUTY_AT_PWMH MODE because dead time will be always added if due to common timer
-	if (IsDeadtimeEnabled(&config->module->deadtime))
-		dutyUse += dutyDeadTime;
-
 	uint32_t ch = (pwmNo - 11) / 2;
-	*(((uint32_t*)&(TIM1->CCR1)) + ch) = dutyUse * TIM1->ARR;
+	if (duty == 0)
+		*(((uint32_t*)&(TIM1->CCR1)) + ch) = 0;
+	else
+	{
+		float dutyUse = duty;
+		// always OUTPUT_DUTY_AT_PWMH MODE because dead time will be always added if due to common timer
+		if (isDtEnabled)
+			dutyUse += dutyDeadTime;
 
+		*(((uint32_t*)&(TIM1->CCR1)) + ch) = (isEdgeAligned ? dutyUse : (1 - dutyUse)) * TIM1->ARR;
+	}
 	return duty;
 }
 /**
  * @brief Configures a single PWM channel
- * @param pwmNo Channel no of the PWM Channel in the pair (Valid Values 11,13,15)
+ * @param pwmNo Channel no of the PWM Channel in the pair (Valid Values 11-16)
  * @param *config Pointer to a  pwm_config_t structure that contains the configuration
  * 				   parameters for the PWM channels
  */
 static void PWM11_16_ConfigChannel(uint32_t pwmNo, pwm_config_t* config)
 {
-	uint32_t ch = (pwmNo - 11);
-	// Even pairs may only be selected as inverted channels
+	uint32_t ch = (pwmNo - 11) / 2;
+	uint32_t isCh2 = (pwmNo - 11) % 2;
+
+	ch = ch == 0 ? TIM_CHANNEL_1 : (ch == 1 ? TIM_CHANNEL_2 : TIM_CHANNEL_3);
+
 	TIM_OC_InitTypeDef sConfigOCLocal;
 	memcpy((void*)&sConfigOCLocal, (void*)&sConfigOC, sizeof(TIM_OC_InitTypeDef));
-	if(ch % 2 != 0)
-	{
-		sConfigOCLocal.OCMode = TIM_OCMODE_PWM2;
-		//sConfigOCLocal.OCNIdleState = TIM_OCNIDLESTATE_RESET;
-	}
-	ch = (ch & 0x6) ? ((ch & 2) ? TIM_CHANNEL_2 : TIM_CHANNEL_3) : TIM_CHANNEL_1;
+
+	sConfigOCLocal.OCMode = (isCh2 ^ isEdgeAligned) ? TIM_OCMODE_PWM1 : TIM_OCMODE_PWM2;
 	if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOCLocal, ch) != HAL_OK)
 		Error_Handler();
+
+	if (isDtEnabled)
+	{
+		float oldMax = config->lim.max;
+		config->lim.max = 1 - dutyDeadTime;
+		if (oldMax < config->lim.max && oldMax != 0)
+			config->lim.max = oldMax;
+	}
 }
 
 /**
  * @brief Configures consecutive PWM channels
- * @param pwmNo Channel no of the first PWM Channel in the pair (Valid Values 11,13,15)
+ * @param pwmNo Channel no of the first PWM Channel in the pair (Valid Values 11-16)
  * @param *config Pointer to a  pwm_config_t structure that contains the configuration
  * 				   parameters for the PWM channels
  * @param chCount No of channels to be configured with the setting. Max supported value is 3. The value should be counted while skipping even channels.

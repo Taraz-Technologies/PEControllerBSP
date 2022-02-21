@@ -161,4 +161,24 @@ void BSP_Dout_TogglePin(int pinNo)
 	HAL_GPIO_TogglePin(pin->GPIO, pin->pinMask);
 }
 
+/**
+ * @brief Set the desired pin value to 1 for DOUT port
+ * @param pinNo Dout Pin No (Range 1-16)
+ */
+void BSP_Dout_SetPin(int pinNo)
+{
+	const digital_pin_t* pin = &doutPins[pinNo-1];
+	pin->GPIO->BSRR = pin->pinMask;
+}
+
+/**
+ * @brief Set the desired pin value to 0 for DOUT port
+ * @param pinNo Dout Pin No (Range 1-16)
+ */
+void BSP_Dout_ClearPin(int pinNo)
+{
+	const digital_pin_t* pin = &doutPins[pinNo-1];
+	pin->GPIO->BSRR = (uint32_t)(pin->pinMask) << 16U;;
+}
+
 /* EOF */

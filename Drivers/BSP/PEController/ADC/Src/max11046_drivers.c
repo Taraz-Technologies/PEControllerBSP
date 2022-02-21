@@ -23,11 +23,17 @@
 /********************************************************************************
  * Includes
  *******************************************************************************/
+#include "user_config.h"
 #include "max11046_drivers.h"
+#if ENABLE_INTELLISENS
+#include "intelliSENS.h"
+#endif
 /********************************************************************************
  * Defines
  *******************************************************************************/
-
+#define READ_ADC_CH(tempData)			maxRead_GPIO_Port->BSRR = (uint32_t)maxRead_Pin << 16U; \
+		*tempData++ = (uint16_t)MAX11046_GPIO->IDR; \
+		maxRead_GPIO_Port->BSRR = maxRead_Pin;
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
@@ -55,6 +61,14 @@ TIM_HandleTypeDef maxTimerHandle;
 /** Contains the latest values of the acquired ADC readings
  */
 adc_measures_t adcVals;
+/** Defines the multipliers for each member of the ADC measurement
+ * These values are used to convert ADC data to meaningful measurements according to the formula <b>value = (adcData - adcOffsets) * adcMultipiers</b>
+ */
+adc_measures_t adcMultipiers = {0};
+/** Defines the offsets for each member of the ADC measurement.
+ * These values are used to convert ADC data to meaningful measurements according to the formula <b>value = (adcData - adcOffsets) * adcMultipiers</b>
+ */
+adc_measures_t adcOffsets = {0};
 /********************************************************************************
  * Function Prototypes
  *******************************************************************************/
@@ -88,6 +102,9 @@ static inline void Measure_SingleADC(GPIO_TypeDef* csGPIO, uint16_t csPin, uint1
 static inline void Measure_BothADCs(uint16_t* dataPtr)
 {
 	int i = 8;
+#if ENABLE_INTELLISENS
+	uint16_t* intelliSENSDataPtr = dataPtr;
+#endif
 	maxCS1_GPIO_Port->BSRR = (uint32_t)maxCS1_Pin << 16U;
 	do
 	{
@@ -104,9 +121,47 @@ static inline void Measure_BothADCs(uint16_t* dataPtr)
 		*dataPtr++ = (uint16_t)MAX11046_GPIO->IDR;
 		maxRead_GPIO_Port->BSRR = maxRead_Pin;
 	}	while (--i);
+#if ENABLE_INTELLISENS
+	intelliSENS.SetADCData((uint64_t*)intelliSENSDataPtr);
+#endif
 	maxCS2_GPIO_Port->BSRR = maxCS2_Pin;
 }
 
+/**
+ * @brief Measure data from all channels - optimized version
+ * @param tempData
+ */
+static inline void Measure_AllChannels(uint16_t* tempData)
+{
+	// ADC1
+	maxCS1_GPIO_Port->BSRR = (uint32_t)maxCS1_Pin << 16U;
+
+	READ_ADC_CH(tempData);
+	READ_ADC_CH(tempData);
+	READ_ADC_CH(tempData);
+	READ_ADC_CH(tempData);
+	READ_ADC_CH(tempData);
+	READ_ADC_CH(tempData);
+	READ_ADC_CH(tempData);
+	READ_ADC_CH(tempData);
+
+	// as CS1 and CS2 port is same in this case
+	maxCS1_GPIO_Port->BSRR = (uint32_t)maxCS2_Pin << 16U | maxCS1_Pin;
+
+	READ_ADC_CH(tempData);
+	READ_ADC_CH(tempData);
+	READ_ADC_CH(tempData);
+	READ_ADC_CH(tempData);
+	READ_ADC_CH(tempData);
+	READ_ADC_CH(tempData);
+	READ_ADC_CH(tempData);
+	READ_ADC_CH(tempData);
+
+	maxCS2_GPIO_Port->BSRR = maxCS2_Pin;
+}
+
+#pragma GCC push_options
+#pragma GCC optimize ("-Ofast")
 /**
  * @brief Acquire measurements and convert to meaningful data for both ADCs
  * @param *dataPtr Pointer to where the data needs to be stored
@@ -115,28 +170,21 @@ static inline void Measure_BothADCs(uint16_t* dataPtr)
  */
 static inline void MeasureConvert_BothADCs(float* dataPtr, const float* mults, const float* offsets)
 {
-	int i = 8;
-	uint16_t temp;
-	maxCS1_GPIO_Port->BSRR = (uint32_t)maxCS1_Pin << 16U;
+	uint64_t intelliSENSDataPtr[4];
+	uint16_t* tempData = (uint16_t*)intelliSENSDataPtr;
+	Measure_AllChannels(tempData);
+
+#if ENABLE_INTELLISENS
+	intelliSENS.SetADCData((uint64_t*)(intelliSENSDataPtr));
+#endif
+
+	int i = 15;
 	do
 	{
-		maxRead_GPIO_Port->BSRR = (uint32_t)maxRead_Pin << 16U;
-		temp = (uint16_t)MAX11046_GPIO->IDR;
-		*dataPtr++ = (temp - *offsets++) * (*mults++);
-		maxRead_GPIO_Port->BSRR = maxRead_Pin;
-	}	while (--i);
-	maxCS1_GPIO_Port->BSRR = maxCS1_Pin;
-	i = 8;
-	maxCS2_GPIO_Port->BSRR = (uint32_t)maxCS2_Pin << 16U;
-	do
-	{
-		maxRead_GPIO_Port->BSRR = (uint32_t)maxRead_Pin << 16U;
-		temp = (uint16_t)MAX11046_GPIO->IDR;
-		*dataPtr++ = (temp - *offsets++) * (*mults++);
-		maxRead_GPIO_Port->BSRR = maxRead_Pin;
-	}	while (--i);
-	maxCS2_GPIO_Port->BSRR = maxCS2_Pin;
+		*dataPtr++ =  (*tempData++ - *offsets++) * (*mults++);
+	} while (i--);
 }
+#pragma GCC pop_options
 
 static void Timer_Config(void)
 {
@@ -149,6 +197,10 @@ static void Timer_Config(void)
 	maxTimerHandle.Init.Prescaler = 0;
 	maxTimerHandle.Init.CounterMode = TIM_COUNTERMODE_UP;
 	maxTimerHandle.Init.Period = (uint16_t)(MAX11046_CLK_Us * adcContConfig.conversionCycleTimeUs);
+#if ENABLE_INTELLISENS
+	intelliSENS.Init(adcContConfig.conversionCycleTimeUs, (const float*)&adcMultipiers, (const float*)&adcOffsets);
+	intelliSENS.SetADCTicks(adcContConfig.conversionCycleTimeUs * 240);
+#endif
 	maxTimerHandle.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
 	maxTimerHandle.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
 	if (HAL_TIM_PWM_Init(&maxTimerHandle) != HAL_OK)
@@ -188,6 +240,36 @@ static void Timer_Config(void)
 }
 
 /**
+ * @brief Configures the sensitivities and offsets for all measurements
+ */
+static void ConfigureMeasurements(void)
+{
+	// implementation of Custom PEControllers is user controlled
+#if	PECONTROLLER_CONFIG != PEC_CUSTOM
+	float* mults = (float*)&adcMultipiers;
+	float* offsets = (float*)&adcOffsets;
+	for (int i = 0; i < 16; i++)
+	{
+		mults[i] = 1000.f / (32768.f);
+		offsets[i] = 32768;
+	}
+#else
+	float* mults = (float*)&adcMultipiers;
+	float* offsets = (float*)&adcOffsets;
+	for (int i = 0; i < MEASUREMENT_COUNT_CURRENT; i++)
+	{
+		mults[i] = 10000.f / (CURRENT_SENSITIVITY_mVA * 32768.f);
+		offsets[i] = 32768;
+	}
+	for (int i = 0; i < MEASUREMENT_COUNT_VOLTAGE; i++)
+	{
+		mults[i + 8] = 1000 / 32768.f;
+		offsets[i + 8] = 32768;
+	}
+#endif
+}
+
+/**
  * @brief Initializes the MAX11046 drivers
  * @param type- ADC_MODE_SINGLE or ADC_MODE_CONT for single or continuous conversions respectively
  * @param *contConfig- adc_cont_config_t contains the continuous transfer configuration
@@ -197,6 +279,11 @@ void BSP_MAX11046_Init(adc_acq_mode_t type, adc_cont_config_t* contConfig)
 	// DeInitialize if already initialized
 	if(moduleActive)
 		BSP_MAX11046_DeInit();
+	ConfigureMeasurements();
+
+#if ENABLE_INTELLISENS
+	intelliSENS_Configure();
+#endif
 
 	acqType = type;
 	adcContConfig.conversionCycleTimeUs = contConfig->conversionCycleTimeUs;
@@ -269,7 +356,7 @@ adc_measures_t* BSP_MAX11046_Run(void)
 	/* EXTI interrupt init*/
 	__HAL_GPIO_EXTI_CLEAR_IT(maxBusy1_Pin);
 	__HAL_GPIO_EXTI_CLEAR_IT(maxBusy2_Pin);
-	HAL_NVIC_SetPriority(EXTI15_10_IRQn, 1, 0);
+	HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
 	HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
 	if(acqType == ADC_MODE_SINGLE)
@@ -304,7 +391,7 @@ void BSP_MAX11046_Stop(void)
 		HAL_TIM_OnePulse_Stop(&maxTimerHandle,TIM_CHANNEL_1);
 		HAL_TIM_OnePulse_Stop(&maxTimerHandle,TIM_CHANNEL_2);
 	}
-		// clear the flag
+	// clear the flag
 	__HAL_GPIO_EXTI_CLEAR_IT(maxBusy1_Pin);
 	__HAL_GPIO_EXTI_CLEAR_IT(maxBusy2_Pin);
 }

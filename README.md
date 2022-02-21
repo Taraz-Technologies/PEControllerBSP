@@ -25,6 +25,22 @@ Board Support Package for PEController module made by Taraz Technologies
 1. STM32CubeIDE
 
 ## Examples
-1. **PELab_OpenLoopVFD**
-     - Location: Projects/Applications/
+1. **PEController_Template**
+     - Location: Projects/PEController/Applications/
+	 - Description- Template project for creating new quick projects
+2. **PELab_OpenLoopVFD**
+     - Location: Projects/PEController/Applications/
      - Description- Example for the PELab in 6 Phase Configuration where both the inverters are run simultaneously @ 25Hz with an initial acceleration. The example provides the basic understating to operate the PWM Outputs and accessing the analog data acquired. Refer to the example of an Open Loop VFD Controller in Projects/Applications/PELab_OpenLoopVFD/ for further information
+
+## Making new project from template project
+To make a new project for personal development follow the following steps
+1. Create a copy of the template folder "PEController_Template" in location Projects/PEController/Applications
+2. Rename the copied folder to a custom name such as "TestProject"
+3. Open Notepad++
+4. Select find in files and select Projects/PEController/Applications/TestProject as directory 
+5. Replace all instances of "PEController_Template" with "TestProject"
+6. Rename the following files
+	- PEController_Template.ioc to TestProject.ioc in Projects/PEController/Applications/TestProject
+	- PEController_Template_CM7.launch to TestProject_CM7.launch in Projects/PEController/Applications/TestProject/CM7
+	- PEController_Template_CM4.launch to TestProject_CM4.launch in Projects/PEController/Applications/TestProject/CM4
+7. Open the .project file for editing

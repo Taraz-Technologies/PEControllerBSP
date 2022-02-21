@@ -34,7 +34,6 @@
 /*******************************************************************************
  * Code
  ******************************************************************************/
-#if 0
 /**
  * @brief
  *
@@ -47,21 +46,22 @@
  * @param *config Pointer to a  pwm_pair_config_t structure that contains the configuration
  * 				   parameters for the PWM pair
  */
-static void TnpcPWM_UpdatePair(uint32_t pwmNo, float duty, pwm_pair_config_t *config)
+static float Tnpc_PWM_UpdatePair(uint32_t pwmNo, float duty, pwm_config_t *config)
 {
+	float d1 = duty;
 	duty = (fabsf(duty - 0.5f)) * 2;
-	if(duty < 0)
+	if(d1 < .5f)
 	{
-		PWMDriver_UpdatePair(pwmNo, 0, config);
-		PWMDriver_UpdatePair(pwmNo + 2, duty, config);
+		BSP_PWM_UpdatePairDuty(pwmNo, 0, config);
+		BSP_PWM_UpdatePairDuty(pwmNo + 3, duty, config);
 	}
 	else
 	{
-		PWMDriver_UpdatePair(pwmNo, duty, config);
-		PWMDriver_UpdatePair(pwmNo + 2, 0, config);
+		BSP_PWM_UpdatePairDuty(pwmNo, duty, config);
+		BSP_PWM_UpdatePairDuty(pwmNo + 3, 0, config);
 	}
+	return d1;
 }
-#endif
 /**
  * @brief Configure the PWMs for a single leg of the inverter
  *
@@ -76,15 +76,14 @@ static DutyCycleUpdateFnc ConfigSingleLeg(uint16_t pwmNo, inverter3Ph_config_t* 
 	BSP_Dout_SetAsPWMPin(pwmNo);
 	BSP_Dout_SetAsPWMPin(pwmNo + 1);
 	/* for Tnpc use four switches */
-#if 0
-	if (initConfig->legType == LEG_TNPC)
+	if (config->legType == LEG_TNPC)
 	{
-		BSP_PWM_ConfigInvertedPair(pwmNo + 2, &handle->pairConfig);
-		callback = TnpcPWM_UpdatePair; 				/* use this function to update all 4 switch duty cycles */
+		BSP_PWM_ConfigInvertedPair(pwmNo + 3, &config->pwmConfig);
+		callback = Tnpc_PWM_UpdatePair; 				/* use this function to update all 4 switch duty cycles */
 		BSP_Dout_SetAsPWMPin(pwmNo + 2);
 		BSP_Dout_SetAsPWMPin(pwmNo + 3);
 	}
-#endif
+
 	return callback;
 }
 
@@ -106,7 +105,6 @@ void Inverter3Ph_Init(inverter3Ph_config_t* config)
 		config->updateCallbacks[i] = ConfigSingleLeg(config->s1PinNos[i], config);
 		config->updateCallbacks[i](config->s1PinNos[i], 0.5f, &config->pwmConfig);
 	}
-
 	// enable the pwm signals by disabling any disable feature. Disable is by default active high
 	for (int i = 0; i < config->dsblPinCount; i++)
 		BSP_Dout_SetAsIOPin(config->dsblPinNo + i, GPIO_PIN_RESET);

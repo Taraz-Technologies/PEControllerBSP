@@ -107,7 +107,7 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   /* USER CODE BEGIN 2 */
-	sharedData->m7Tom4.periodUs = 40;
+	sharedData->m7Tom4.periodUs = SAMPLING_TIME_US;
 	MainControl_Init();
 	MainControl_Run();
 	/* When system initialization is finished, Cortex-M7 will release Cortex-M4 by means of
@@ -132,21 +132,9 @@ int main(void)
 
 	while (1)
 	{
-		uint32_t ticks = HAL_GetTick();
-		uint32_t t1 = SysTick->VAL;
+
 		SharedMemory_GetRecentMeasurements(&adcVals);
-		uint32_t t2 = SysTick->VAL;
-		if (ticks == HAL_GetTick())
-			pollTicks = t1 - t2;
-		ticks = HAL_GetTick();
-		t1 = SysTick->VAL;
 		MainControl_Loop();
-		t2 = SysTick->VAL;
-		if (ticks == HAL_GetTick())
-		{
-			if(t1 - t2 > loopTicks)
-				loopTicks = t1 - t2;
-		}
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

@@ -49,18 +49,33 @@ extern "C" {
 /********************************************************************************
  * Defines
  *******************************************************************************/
+/**
+ * @brief PWM time period in micro-seconds
+ */
 #define PWM_PERIOD_Us					(40)
-#define PWM_PERIOD_s					(PWM_PERIOD_Us/1000000.f)
-#define PWM_FREQ_KHz					(1000.f/PWM_PERIOD_Us)
-#define PWM_FREQ_Hz						(1.f/PWM_PERIOD_s)
-
+/**
+ * @brief Nominal frequency used for computation of current modulation index
+ */
 #define NOMINAL_FREQ					(50)
+/**
+ * @brief Nominal modulation index required at @ref NOMINAL_FREQ
+ */
 #define NOMINAL_MODULATION_INDEX		(.7f)
+/**
+ * @brief Acceleration factor for increasing speed of the controller
+ */
 #define ACCELERATION					(1.00001f)
+/**
+ * @brief Initial frequency used by the system
+ */
 #define INITIAL_FREQ					(1.f)
+/**
+ * @brief Final output frequency of the system
+ */
 #define OUTPUT_FREQ						(25)
-#define MIN_MAX_BALANCING_INVERTER		(false)
-#define INVERTER_DUTY_MODE				OUTPUT_DUTY_AT_PWMH
+/**
+ * @brief Dead time value to be used
+ */
 #define INVERTER_DEADTIME_ns			(500)
 /********************************************************************************
  * Typedefs

@@ -25,8 +25,11 @@
 #include "max11046_drivers.h"
 #include "shared_memory.h"
 #include "pecontroller_display.h"
-#include "logo_display.h"
 #include <string.h>
+#include "user_config.h"
+#if ENABLE_INTELLISENS
+#include "intelliSENS.h"
+#endif
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -67,14 +70,27 @@ static void MX_I2C2_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+#pragma GCC push_options
+#pragma GCC optimize ("-Ofast")
 static void DataProcessingCallback(adc_measures_t* result)
 {
 	volatile m4_to_m7_data_t* data = &sharedData->m4Tom7;
 	int index = (data->recordIndex + 1) & (MEASURE_SAVE_COUNT - 1);
-	memcpy((void*)&(data->dataRecord[index]), result, sizeof(adc_measures_t));
+	uint64_t* resultU64 = (uint64_t*)result;
+	uint64_t* copyU64 = (uint64_t*)&data->dataRecord[index];
+	*copyU64++ = *resultU64++;
+	*copyU64++ = *resultU64++;
+	*copyU64++ = *resultU64++;
+	*copyU64++ = *resultU64++;
+	*copyU64++ = *resultU64++;
+	*copyU64++ = *resultU64++;
+	*copyU64++ = *resultU64++;
+	*copyU64 = *resultU64;
 	data->recordIndex = index;
 	data->lastDataPointer = &data->dataRecord[index];
+	data->sts = true;
 }
+#pragma GCC pop_options
 /* USER CODE END 0 */
 
 /**
@@ -122,8 +138,8 @@ int main(void)
   MX_I2C2_Init();
   /* USER CODE BEGIN 2 */
   BSP_Display_Init();
-  DisplayDefaultImage();
-  HAL_TIM_PWM_Start(&htim17,TIM_CHANNEL_1);			// LCD PWM channel
+  BSP_Display_ShowLogo();
+  HAL_TIM_PWM_Start(&htim17,TIM_CHANNEL_1);			// LCD Brightness
   adc_cont_config_t adcConfig = {
 		  .callback = DataProcessingCallback,
 		  .conversionCycleTimeUs = sharedData->m7Tom4.periodUs };
@@ -135,6 +151,9 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+#if ENABLE_INTELLISENS
+	  intelliSENS.Poll();
+#endif
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -245,7 +264,9 @@ static void MX_TIM17_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN TIM17_Init 2 */
-
+  sConfigOC.Pulse = (htim17.Init.Prescaler - 1) * LCD_BRIGHTNESS;
+  if (HAL_TIM_PWM_ConfigChannel(&htim17, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+    Error_Handler();
   /* USER CODE END TIM17_Init 2 */
   HAL_TIM_MspPostInit(&htim17);
 

@@ -87,9 +87,10 @@ extern TIM_HandleTypeDef htim1;
   */
 /**
  * @brief Configures consecutive inverted pairs for PWM
- * @param pwmNo Channel no of the first PWM Channel in the pair (Valid Values 11,13,15)
- * 				 Channel1 = pwmNo
- * 				 Channel2 = pwmNo + 1
+ * @param pwmNo Channel no of reference channel is the PWM pair (Valid Values 11-16). <br>
+ * 				<b>Pairs are classified as :</b>
+ * 				-# CH1 = Reference channel available at pin @ref pwmNo
+ * 				-# CH2 = Inverted Channel from reference available at pin @ref pwmNo + 1 if @ref pwmNo is odd else @ref pwmNo - 1
  * @param *config Pointer to a  pwm_config_t structure that contains the configuration
  * 				   parameters for the PWM pair
  * @param pairCount No of PWM pairs to be configured
@@ -99,9 +100,10 @@ extern TIM_HandleTypeDef htim1;
 extern DutyCycleUpdateFnc BSP_PWM11_16_ConfigInvertedPairs(uint32_t pwmNo, pwm_config_t* config, int pairCount);
 /**
  * @brief Update the Duty Cycle of an Inverted Pair
- * @param pwmNo Channel no of the first PWM Channel in the pair (Valid Values 11,13,15)
- * 				 Channel1 = pwmNo
- * 				 Channel2 = pwmNo + 1
+ * @param pwmNo Channel no of reference channel is the PWM pair (Valid Values 11-16). <br>
+ * 				<b>Pairs are classified as :</b>
+ * 				-# CH1 = Reference channel available at pin @ref pwmNo
+ * 				-# CH2 = Inverted Channel from reference available at pin @ref pwmNo + 1 if @ref pwmNo is odd else @ref pwmNo - 1
  * @param duty duty cycle to be applied to the pair (Range 0-1 or given in the config parameter)
  * @param *config Pointer to a  pwm_config_t structure that contains the configuration
  * 				   parameters for the PWM pair
@@ -110,7 +112,7 @@ extern DutyCycleUpdateFnc BSP_PWM11_16_ConfigInvertedPairs(uint32_t pwmNo, pwm_c
 extern float BSP_PWM11_16_UpdatePairDuty(uint32_t pwmNo, float duty, pwm_config_t* config);
 /**
  * @brief Configures consecutive PWM channels
- * @param pwmNo Channel no of the first PWM Channel in the pair (Valid Values 11,13,15)
+ * @param pwmNo Channel no of the first PWM Channel in the pair (Valid Values 11-16)
  * @param *config Pointer to a  pwm_config_t structure that contains the configuration
  * 				   parameters for the PWM channels
  * @param chCount No of channels to be configured with the setting. Max supported value is 3. The value should be counted while skipping even channels.
@@ -121,7 +123,7 @@ extern float BSP_PWM11_16_UpdatePairDuty(uint32_t pwmNo, float duty, pwm_config_
 extern DutyCycleUpdateFnc BSP_PWM11_16_ConfigChannels(uint32_t pwmNo, pwm_config_t* config, int chCount);
 /**
  * @brief Update the Duty Cycle of a channel
- * @param pwmNo PWM channel to be configured (Valid Values 11,13,15)
+ * @param pwmNo PWM channel to be configured (Valid Values 11-16)
  * @param duty duty cycle to be applied to the channel (Range 0-1 or given in the config parameter)
  * @param *config Pointer to a  pwm_config_t structure that contains the configuration
  * 				   parameters for the PWM channel

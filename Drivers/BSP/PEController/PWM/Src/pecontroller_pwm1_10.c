@@ -167,9 +167,10 @@ static void PWM1_10_Drivers_Init(void)
 
 /**
  * @brief Update the Duty Cycle of an Inverted Pair
- * @param pwmNo Channel no of the first PWM Channel in the pair (Valid Values 1,3,5,7,9)
- * 				 Channel1 = pwmNo
- * 				 Channel2 = pwmNo + 1
+ * @param pwmNo Channel no of reference channel is the PWM pair (Valid Values 1-10). <br>
+ * 				<b>Pairs are classified as :</b>
+ * 				-# CH1 = Reference channel available at pin @ref pwmNo
+ * 				-# CH2 = Inverted Channel from reference available at pin @ref pwmNo + 1 if @ref pwmNo is odd else @ref pwmNo - 1
  * @param duty duty cycle to be applied to the pair (Range 0-1 or given in the config parameter)
  * @param *config Pointer to a  pwm_config_t structure that contains the configuration
  * 				   parameters for the PWM pair
@@ -189,15 +190,22 @@ float BSP_PWM1_10_UpdatePairDuty(uint32_t pwmNo, float duty, pwm_config_t* confi
 		duty = config->lim.min;
 
 	uint32_t onTime = duty * period;
-	if(mod->alignment == CENTER_ALIGNED)
+
+	if(onTime == 0)
 	{
-		int t0 = (period - onTime) / 2; 		// half time
-		int tEnd = t0 + onTime;					// last edge at this time
+		hhrtim.Instance->sTimerxRegs[TimerIdx].CMP1xR = period + 2;
+		hhrtim.Instance->sTimerxRegs[TimerIdx].CMP2xR = period + 2;
+		MODIFY_REG(hhrtim.Instance->sTimerxRegs[TimerIdx].TIMxCR, HRTIM_TIMCR_DELCMP2, 0U);
+	}
+	else if(mod->alignment == CENTER_ALIGNED)
+	{
 		if(config->dutyMode == OUTPUT_DUTY_AT_PWMH && IsDeadtimeEnabled(&mod->deadtime))
 		{
 			int dt = (mod->deadtime.nanoSec * HRTIM_FREQ) / 1000;
-			t0 -= dt;
+			onTime += dt;
 		}
+		int t0 = (period - onTime) / 2; 		// half time
+		int tEnd = t0 + onTime;					// last edge at this time
 		if (t0 < 3)
 			t0 = 3;
 		hhrtim.Instance->sTimerxRegs[TimerIdx].CMP1xR = t0;
@@ -206,11 +214,11 @@ float BSP_PWM1_10_UpdatePairDuty(uint32_t pwmNo, float duty, pwm_config_t* confi
 	}
 	else
 	{
-		uint32_t dt = 0;
+		uint32_t dt = 3;
 		if(config->dutyMode == OUTPUT_DUTY_AT_PWMH && IsDeadtimeEnabled(&mod->deadtime))
-			dt = (mod->deadtime.nanoSec * HRTIM_FREQ) / 1000;
-		hhrtim.Instance->sTimerxRegs[TimerIdx].CMP1xR = 0;
-		hhrtim.Instance->sTimerxRegs[TimerIdx].CMP1xR = onTime + dt;
+			dt += (mod->deadtime.nanoSec * HRTIM_FREQ) / 1000;
+		hhrtim.Instance->sTimerxRegs[TimerIdx].CMP1xR = 3;
+		hhrtim.Instance->sTimerxRegs[TimerIdx].CMP2xR = onTime + dt;
 		MODIFY_REG(hhrtim.Instance->sTimerxRegs[TimerIdx].TIMxCR, HRTIM_TIMCR_DELCMP2, 0U);
 	}
 	return duty;
@@ -218,9 +226,10 @@ float BSP_PWM1_10_UpdatePairDuty(uint32_t pwmNo, float duty, pwm_config_t* confi
 
 /**
  * @brief Configures a single inverted pair for PWM
- * @param pwmNo Channel no of the first PWM Channel in the pair (Valid Values 1,3,5,7,9)
- * 				 Channel1 = pwmNo
- * 				 Channel2 = pwmNo + 1
+ * @param pwmNo Channel no of reference channel is the PWM pair (Valid Values 1-10). <br>
+ * 				<b>Pairs are classified as :</b>
+ * 				-# CH1 = Reference channel available at pin @ref pwmNo
+ * 				-# CH2 = Inverted Channel from reference available at pin @ref pwmNo + 1 if @ref pwmNo is odd else @ref pwmNo - 1
  * @param *config Pointer to a  pwm_config_t structure that contains the configuration
  * 				   parameters for the PWM pair
  */
@@ -230,6 +239,7 @@ static void PWM1_10_ConfigInvertedPair(uint32_t pwmNo, pwm_config_t* config)
 	uint32_t TimerIdx = (pwmNo - 1) / 2;
 	uint32_t out1 = 1U << (TimerIdx * 2);
 	uint32_t out2 = 1U << (TimerIdx * 2 + 1);
+	uint32_t isCh2 = (pwmNo - 1) % 2;
 	pwm_module_config_t* mod = config->module;
 
 	/* timer configuration */
@@ -250,6 +260,11 @@ static void PWM1_10_ConfigInvertedPair(uint32_t pwmNo, pwm_config_t* config)
 	if (IsDeadtimeEnabled(&mod->deadtime))
 	{
 		HRTIM_DeadTimeCfgTypeDef pDeadTimeCfg = GetDefaultDeadtimeConfig();
+		if(isCh2)
+		{
+			pDeadTimeCfg.RisingSign = HRTIM_TIMDEADTIME_RISINGSIGN_NEGATIVE;
+			pDeadTimeCfg.FallingSign = HRTIM_TIMDEADTIME_FALLINGSIGN_NEGATIVE;
+		}
 		pDeadTimeCfg.FallingValue = pDeadTimeCfg.RisingValue = (mod->deadtime.nanoSec * HRTIM_FREQ) / (16000);
 		if (HAL_HRTIM_DeadTimeConfig(&hhrtim, TimerIdx, &pDeadTimeCfg) != HAL_OK)
 			Error_Handler();
@@ -259,6 +274,8 @@ static void PWM1_10_ConfigInvertedPair(uint32_t pwmNo, pwm_config_t* config)
 
 	/* output configuration */
 	HRTIM_OutputCfgTypeDef pOutputCfg = GetDefaultOutputConfig();
+	if(isCh2)
+		pOutputCfg.Polarity = HRTIM_OUTPUTPOLARITY_LOW;
 	if (HAL_HRTIM_WaveformOutputConfig(&hhrtim, TimerIdx, out1, &pOutputCfg) != HAL_OK)
 		Error_Handler();
 	if(IsDeadtimeEnabled(&mod->deadtime))
@@ -289,9 +306,10 @@ static void PWM1_10_ConfigInvertedPair(uint32_t pwmNo, pwm_config_t* config)
 
 /**
  * @brief Configures consecutive inverted pairs for PWM
- * @param pwmNo Channel no of the first PWM Channel in the pair (Valid Values 1,3,5,7,9)
- * 				 Channel1 = pwmNo
- * 				 Channel2 = pwmNo + 1
+ * @param pwmNo Channel no of reference channel is the PWM pair (Valid Values 1-10). <br>
+ * 				<b>Pairs are classified as :</b>
+ * 				-# CH1 = Reference channel available at pin @ref pwmNo
+ * 				-# CH2 = Inverted Channel from reference available at pin @ref pwmNo + 1 if @ref pwmNo is odd else @ref pwmNo - 1
  * @param *config Pointer to a  pwm_config_t structure that contains the configuration
  * 				   parameters for the PWM pair
  * @param pairCount No of PWM pairs to be configured

@@ -50,6 +50,7 @@
 
 #include "stm32h7xx.h"
 #include <math.h>
+#include "user_config.h"
 
 #if !defined  (HSE_VALUE)
 #define HSE_VALUE    ((uint32_t)25000000) /*!< Value of the External oscillator in Hz */
@@ -84,8 +85,18 @@
 /*!< Uncomment the following line if you need to relocate your vector Table in
      Internal SRAM. */
 /* #define VECT_TAB_SRAM */
+#ifdef CORE_CM4
+#if ENABLE_INTELLISENS
+#define VECT_TAB_OFFSET  0x00020000UL /*!< Vector Table base offset field.
+                                      This value must be a multiple of 0x200. */
+#else
+#define VECT_TAB_OFFSET  0x00020000UL /*!< Vector Table base offset field.
+                                      This value must be a multiple of 0x200. */
+#endif
+#else
 #define VECT_TAB_OFFSET  0x00000000UL /*!< Vector Table base offset field.
                                       This value must be a multiple of 0x200. */
+#endif
 /******************************************************************************/
 
 /**
