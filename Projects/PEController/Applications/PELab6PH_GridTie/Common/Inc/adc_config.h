@@ -37,24 +37,57 @@ extern "C" {
 
 /** @defgroup ADC_Config Configuration
  * @brief This module contains the configurations for the PEController ADC
- * @details The following definitions are required by the user
- * 	-# <b>@ref adc_measures_t :</b> Measurement structure definition
- * 	-# <b>@ref adcMultipiers :</b> Defines the multipliers for each member of the ADC measurement
- * These values are used to convert ADC data to meaningful measurements according to the formula <b>value = (adcData - adcOffsets) * adcMultipiers</b>
- * 	-# <b>@ref adcOffsets :</b> Defines the offsets for each member of the ADC measurement
- * These values are used to convert ADC data to meaningful measurements according to the formula <b>value = (adcData - adcOffsets) * adcMultipiers</b>
  * @{
  */
 /********************************************************************************
  * Includes
  *******************************************************************************/
-
+#include "user_config.h"
 /********************************************************************************
  * Defines
  *******************************************************************************/
 /** @defgroup ADCConfig_Exported_Macros Macros
   * @{
   */
+#if PECONTROLLER_CONFIG == PLB_CUSTOM
+
+#elif PECONTROLLER_CONFIG == PLB_MMC
+/**
+ * @brief Current measurements count
+ */
+#define MEASUREMENT_COUNT_CURRENT		(8)
+/**
+ * @brief Voltage measurements count
+ */
+#define MEASUREMENT_COUNT_VOLTAGE		(8)
+#elif PECONTROLLER_CONFIG == PLB_TNPC
+/**
+ * @brief Current measurements count
+ */
+#define MEASUREMENT_COUNT_CURRENT		(6)
+/**
+ * @brief Voltage measurements count
+ */
+#define MEASUREMENT_COUNT_VOLTAGE		(6)
+#elif PECONTROLLER_CONFIG == PLB_6PH
+/**
+ * @brief Current measurements count
+ */
+#define MEASUREMENT_COUNT_CURRENT		(6)
+/**
+ * @brief Voltage measurements count
+ */
+#define MEASUREMENT_COUNT_VOLTAGE		(6)
+#elif PECONTROLLER_CONFIG == PLB_3PH
+/**
+ * @brief Current measurements count
+ */
+#define MEASUREMENT_COUNT_CURRENT		(3)
+/**
+ * @brief Voltage measurements count
+ */
+#define MEASUREMENT_COUNT_VOLTAGE		(3)
+#endif
 
 /**
  * @}
@@ -65,17 +98,87 @@ extern "C" {
 /** @defgroup ADCConfig_Exported_Typedefs Type Definitions
   * @{
   */
+#if PECONTROLLER_CONFIG == PLB_CUSTOM
 /**
  * @brief Measurement structure definitions
  */
 typedef struct
 {
-	float Ie1;				/**< @brief Current of Leg E1 */
+	float Ch1;				/**< @brief Measurement for Channel No 1 */
+	float Ch2;				/**< @brief Measurement for Channel No 2 */
+	float Ch3;				/**< @brief Measurement for Channel No 3 */
+	float Ch4;				/**< @brief Measurement for Channel No 4 */
+	float Ch5;				/**< @brief Measurement for Channel No 5 */
+	float Ch6;				/**< @brief Measurement for Channel No 6 */
+	float Ch7;				/**< @brief Measurement for Channel No 7 */
+	float Ch8;				/**< @brief Measurement for Channel No 8 */
+	float Ch9;				/**< @brief Measurement for Channel No 9 */
+	float Ch10;				/**< @brief Measurement for Channel No 10 */
+	float Ch11;				/**< @brief Measurement for Channel No 11 */
+	float Ch12;				/**< @brief Measurement for Channel No 12 */
+	float Ch13;				/**< @brief Measurement for Channel No 13 */
+	float Ch14;				/**< @brief Measurement for Channel No 14 */
+	float Ch15;				/**< @brief Measurement for Channel No 15 */
+	float Ch16;				/**< @brief Measurement for Channel No 16 */
+} adc_measures_t;
+#elif PECONTROLLER_CONFIG == PLB_MMC
+/**
+ * @brief Measurement structure definitions
+ */
+typedef struct
+{
+	float Ia2;				/**< @brief Current of Leg A2 */
+	float Ib2;				/**< @brief Current of Leg B2 */
+	float Ic2;				/**< @brief Current of Leg C2 */
+	float Id2;				/**< @brief Current of Leg D2 */
 	float Ie2;				/**< @brief Current of Leg E2 */
-	float Ie3;				/**< @brief Current of Leg E3 */
+	float If2;				/**< @brief Current of Leg F2 */
+	float Ig2;				/**< @brief Current of Leg G2 */
+	float Ih2;				/**< @brief Current of Leg H2 */
+	float Vdc1;				/**< @brief DC Link voltage for first inverter module */
+	float Vdc2;				/**< @brief DC Link voltage for second inverter module */
+	float Vdc3;				/**< @brief DC Link voltage for third inverter module */
+	float Vdc4;				/**< @brief DC Link voltage for fourth inverter module */
+	float V1;				/**< @brief External voltage V1 */
+	float V2;				/**< @brief External voltage V2 */
+	float V3;				/**< @brief External voltage V3 */
+	float V4;				/**< @brief External voltage V4 */
+} adc_measures_t;
+#elif PECONTROLLER_CONFIG == PLB_TNPC
+/**
+ * @brief Measurement structure definitions
+ */
+typedef struct
+{
+	float Ia2;				/**< @brief Current of Leg A2 */
+	float Ic2;				/**< @brief Current of Leg C2 */
+	float Ie2;				/**< @brief Current of Leg E2 */
+	float Ig2;				/**< @brief Current of Leg G2 */
+	float I1;				/**< @brief External current I1 */
+	float I2;				/**< @brief External current I2 */
+	float Reserved1;		/**< @brief RESERVED */
+	float Reserved2;		/**< @brief RESERVED */
+	float Vdc1;				/**< @brief DC Link voltage for first inverter module */
+	float Vdc2;				/**< @brief DC Link voltage for second inverter module */
+	float Vdc3;				/**< @brief DC Link voltage for second inverter module */
+	float Vdc4;				/**< @brief DC Link voltage for second inverter module */
+	float V1;				/**< @brief External voltage V1 */
+	float V2;				/**< @brief External voltage V2 */
+	float Reserved3;		/**< @brief RESERVED */
+	float Reserved4;		/**< @brief RESERVED */
+} adc_measures_t;
+#elif PECONTROLLER_CONFIG == PLB_6PH
+/**
+ * @brief Measurement structure definitions
+ */
+typedef struct
+{
 	float Ih1;				/**< @brief Current of Leg H1 */
 	float Ih2;				/**< @brief Current of Leg H2 */
 	float Ih3;				/**< @brief Current of Leg H3 */
+	float Ie1;				/**< @brief Current of Leg E1 */
+	float Ie2;				/**< @brief Current of Leg E2 */
+	float Ie3;				/**< @brief Current of Leg E3 */
 	float Reserved1;		/**< @brief RESERVED */
 	float Reserved2;		/**< @brief RESERVED */
 	float Vdc1;				/**< @brief DC Link voltage for first inverter module */
@@ -87,6 +190,30 @@ typedef struct
 	float Reserved3;		/**< @brief RESERVED */
 	float Reserved4;		/**< @brief RESERVED */
 } adc_measures_t;
+#elif PECONTROLLER_CONFIG == PLB_3PH
+/**
+ * @brief Measurement structure definitions
+ */
+typedef struct
+{
+	float Ih1;				/**< @brief Current of Leg H1 */
+	float Ih2;				/**< @brief Current of Leg H2 */
+	float Ih3;				/**< @brief Current of Leg H3 */
+	float Reserved1;		/**< @brief RESERVED */
+	float Reserved2;		/**< @brief RESERVED */
+	float Reserved3;		/**< @brief RESERVED */
+	float Reserved4;		/**< @brief RESERVED */
+	float Reserved5;		/**< @brief RESERVED */
+	float Vdc1;				/**< @brief DC Link voltage for first inverter module */
+	float V1;				/**< @brief External voltage V1 */
+	float V2;				/**< @brief External voltage V2 */
+	float Reserved6;		/**< @brief RESERVED */
+	float Reserved7;		/**< @brief RESERVED */
+	float Reserved8;		/**< @brief RESERVED */
+	float Reserved9;		/**< @brief RESERVED */
+	float Reserved10;		/**< @brief RESERVED */
+} adc_measures_t;
+#endif
 /**
  * @}
  */
@@ -106,26 +233,7 @@ typedef struct
 /** @defgroup ADCConfig_Exported_Variables Variables
   * @{
   */
-/** Defines the multipliers for each member of the ADC measurement
- * These values are used to convert ADC data to meaningful measurements according to the formula <b>value = (adcData - adcOffsets) * adcMultipiers</b>
- */
-static const adc_measures_t adcMultipiers = {
-		.Ih1 = 25.0f / 32768, .Ih2 = 25.0f / 32768, .Ih3 = 25.0f / 32768,
-		.Ie1 = 25.0f / 32768, .Ie2 = 25.0f / 32768, .Ie3 = 25.0f / 32768,
-		.Vdc1 = 1000.f / 32768, .V1 = 1000.f / 32768, .V2 = 1000.f / 32768,
-		.Vdc2 = 1000.f / 32768, .V3 = 1000.f / 32768, .V4 = 1000.f / 32768,
-		.Reserved1 = 0, .Reserved2 = 0, .Reserved3 = 0, .Reserved4 = 0
-};
-/** Defines the offsets for each member of the ADC measurement.
- * These values are used to convert ADC data to meaningful measurements according to the formula <b>value = (adcData - adcOffsets) * adcMultipiers</b>
- */
-static const adc_measures_t adcOffsets = {
-		.Ih1 = 32768, .Ih2 = 32768, .Ih3 = 32768,
-		.Ie1 = 32768, .Ie2 = 32768, .Ie3 = 32768,
-		.Vdc1 = 32768, .V1 = 32768, .V2 = 32768,
-		.Vdc2 = 32768, .V3 = 32768, .V4 = 32768,
-		.Reserved1 = 32768, .Reserved2 = 32768, .Reserved3 = 32768, .Reserved4 = 32768
-};
+
 /**
  * @}
  */

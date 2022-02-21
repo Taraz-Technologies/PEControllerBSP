@@ -7,7 +7,7 @@
     <stringAttribute key="com.st.stm32cube.ide.mcu.debug.launch.ip_address_local" value="localhost"/>
     <booleanAttribute key="com.st.stm32cube.ide.mcu.debug.launch.limit_swo_clock.enabled" value="false"/>
     <stringAttribute key="com.st.stm32cube.ide.mcu.debug.launch.limit_swo_clock.value" value=""/>
-    <stringAttribute key="com.st.stm32cube.ide.mcu.debug.launch.loadList" value="{&quot;fItems&quot;:[{&quot;fIsFromMainTab&quot;:false,&quot;fPath&quot;:&quot;..\\..\\..\\..\\..\\Drivers\\BSP\\PEController\\intelliSENS\\intelliSENS.elf&quot;,&quot;fPerformBuild&quot;:false,&quot;fDownload&quot;:true,&quot;fLoadSymbols&quot;:false},{&quot;fIsFromMainTab&quot;:false,&quot;fPath&quot;:&quot;Debug/PELab_OpenLoopVFD_CM4.elf&quot;,&quot;fProjectName&quot;:&quot;PELab_OpenLoopVFD_CM4&quot;,&quot;fBuildConfigId&quot;:&quot;com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.1467079332&quot;,&quot;fPerformBuild&quot;:true,&quot;fDownload&quot;:true,&quot;fLoadSymbols&quot;:true},{&quot;fIsFromMainTab&quot;:true,&quot;fPath&quot;:&quot;Debug/PELab_OpenLoopVFD_CM7.elf&quot;,&quot;fProjectName&quot;:&quot;PELab_OpenLoopVFD_CM7&quot;,&quot;fPerformBuild&quot;:true,&quot;fDownload&quot;:true,&quot;fLoadSymbols&quot;:true}]}"/>
+    <stringAttribute key="com.st.stm32cube.ide.mcu.debug.launch.loadList" value="{&quot;fItems&quot;:[{&quot;fIsFromMainTab&quot;:false,&quot;fPath&quot;:&quot;..\\..\\..\\..\\..\\Drivers\\BSP\\PEController\\intelliSENS\\intelliSENS.elf&quot;,&quot;fPerformBuild&quot;:false,&quot;fDownload&quot;:true,&quot;fLoadSymbols&quot;:false},{&quot;fIsFromMainTab&quot;:false,&quot;fPath&quot;:&quot;Debug/PELab6PH_GridTie_CM4.elf&quot;,&quot;fProjectName&quot;:&quot;PELab6PH_GridTie_CM4&quot;,&quot;fUseActiveBuildConfig&quot;:true,&quot;fPerformBuild&quot;:true,&quot;fDownload&quot;:true,&quot;fLoadSymbols&quot;:true},{&quot;fIsFromMainTab&quot;:true,&quot;fPath&quot;:&quot;Debug/PELab6PH_GridTie_CM7.elf&quot;,&quot;fProjectName&quot;:&quot;PELab6PH_GridTie_CM7&quot;,&quot;fPerformBuild&quot;:true,&quot;fDownload&quot;:true,&quot;fLoadSymbols&quot;:true}]}"/>
     <stringAttribute key="com.st.stm32cube.ide.mcu.debug.launch.override_start_address_mode" value="default"/>
     <stringAttribute key="com.st.stm32cube.ide.mcu.debug.launch.remoteCommand" value="target remote"/>
     <booleanAttribute key="com.st.stm32cube.ide.mcu.debug.launch.startServer" value="true"/>
@@ -65,12 +65,12 @@
     <stringAttribute key="org.eclipse.cdt.launch.DEBUGGER_START_MODE" value="remote"/>
     <booleanAttribute key="org.eclipse.cdt.launch.DEBUGGER_STOP_AT_MAIN" value="true"/>
     <stringAttribute key="org.eclipse.cdt.launch.DEBUGGER_STOP_AT_MAIN_SYMBOL" value="main"/>
-    <stringAttribute key="org.eclipse.cdt.launch.PROGRAM_NAME" value="Debug/PELab_OpenLoopVFD_CM7.elf"/>
-    <stringAttribute key="org.eclipse.cdt.launch.PROJECT_ATTR" value="PELab_OpenLoopVFD_CM7"/>
-    <booleanAttribute key="org.eclipse.cdt.launch.PROJECT_BUILD_CONFIG_AUTO_ATTR" value="true"/>
-    <stringAttribute key="org.eclipse.cdt.launch.PROJECT_BUILD_CONFIG_ID_ATTR" value="com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.353946906"/>
+    <stringAttribute key="org.eclipse.cdt.launch.PROGRAM_NAME" value="Debug/PELab6PH_GridTie_CM7.elf"/>
+    <stringAttribute key="org.eclipse.cdt.launch.PROJECT_ATTR" value="PELab6PH_GridTie_CM7"/>
+    <booleanAttribute key="org.eclipse.cdt.launch.PROJECT_BUILD_CONFIG_AUTO_ATTR" value="false"/>
+    <stringAttribute key="org.eclipse.cdt.launch.PROJECT_BUILD_CONFIG_ID_ATTR" value=""/>
     <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
-        <listEntry value="/PELab_OpenLoopVFD_CM7"/>
+        <listEntry value="/PELab6PH_GridTie_CM7"/>
     </listAttribute>
     <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
         <listEntry value="4"/>
