@@ -1,6 +1,9 @@
 # PEControllerBSP
 Board Support Package for PEController module made by Taraz Technologies
 
+## Documentation
+https://www.taraztechnologies.com/Downloads/Software/PEControllerBSP/index.html
+
 ## Components
 1. **Microcontroller** STM32H745BIT6 (Dual Core CM4/CM7) @ 480MHz
 2. **Debug Interface**
