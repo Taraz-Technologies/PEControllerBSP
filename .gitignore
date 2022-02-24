@@ -5,7 +5,6 @@
 *.o
 *.ko
 *.obj
-*.elf
 
 # Linker output
 *.ilk
@@ -54,3 +53,5 @@ dkms.conf
 # Folders
 **/Debug/
 **/Release/
+**/Docs/
+*.prefs

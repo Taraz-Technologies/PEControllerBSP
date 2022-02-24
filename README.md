@@ -1,6 +1,9 @@
 # PEControllerBSP
 Board Support Package for PEController module made by Taraz Technologies
 
+## Documentation
+https://www.taraztechnologies.com/Downloads/Software/PEControllerBSP/index.html
+
 ## Components
 1. **Microcontroller** STM32H745BIT6 (Dual Core CM4/CM7) @ 480MHz
 2. **Debug Interface**
@@ -24,7 +27,40 @@ Board Support Package for PEController module made by Taraz Technologies
 ## Supported IDEs
 1. STM32CubeIDE
 
-## Examples
-1. **PELab_OpenLoopVFD**
-     - Location: Projects/Applications/
-     - Description- Example for the PELab in 6 Phase Configuration where both the inverters are run simultaneously @ 25Hz with an initial acceleration. The example provides the basic understating to operate the PWM Outputs and accessing the analog data acquired. Refer to the example of an Open Loop VFD Controller in Projects/Applications/PELab_OpenLoopVFD/ for further information
+## BSP Structure
+1. **Drivers:**
+	- *BSP:* Contains the Board Support Drivers provided by Taraz Technologies
+		- *PEController:* Contains the drivers for PEController board
+			- *ADC:* Contains the drivers for ADC 
+			- *Common:* Contains the commonly used files
+			- *Components:* Contains the other components used by the BSP
+			- *DigitalPins:* Contains the drivers for the digital Pins
+			- *Display:* Contains the display drivers
+			- *intelliSENS:* Contains the drivers for integration with intelliSENS software
+			- *PWM:* Contains the PWM drivers
+	- *CMSIS:* Contains the drivers provided by CMSIS 
+	- *STM32H7xx_HAL_Driver:* Contains the drivers provided by ST
+2. **Middleware**
+	- *ST:* Helper libraries provided by ST
+	- *Taraz:* Helper libraries provided by Taraz Technologies
+		- *ControlLib:* Control System library containing different coordinate systems and transformations
+	- *Third_Party:* Third party libraries
+3. **Projects**
+	- *PEController:* 
+		- *Applications:* 
+			- *PEController_Template:*  Template project for creating new quick projects
+			- *PELab_OpenLoopVFD:* Basic Implementation of Open Loop V/f Control Implemented for different variants of PELab
+
+
+## Making new project from template project
+To make a new project for personal development follow the following steps
+1. Create a copy of the template folder "PEController_Template" in location Projects/PEController/Applications
+2. Rename the copied folder to a custom name such as "TestProject"
+3. Open Notepad++
+4. Select find in files and select Projects/PEController/Applications/TestProject as directory 
+5. Replace all instances of "PEController_Template" with "TestProject"
+6. Rename the following files
+	- PEController_Template.ioc to TestProject.ioc in Projects/PEController/Applications/TestProject
+	- PEController_Template_CM7.launch to TestProject_CM7.launch in Projects/PEController/Applications/TestProject/CM7
+	- PEController_Template_CM4.launch to TestProject_CM4.launch in Projects/PEController/Applications/TestProject/CM4
+7. Open the .project file for editing
