@@ -24,13 +24,30 @@ Board Support Package for PEController module made by Taraz Technologies
 ## Supported IDEs
 1. STM32CubeIDE
 
-## Examples
-1. **PEController_Template**
-     - Location: Projects/PEController/Applications/
-	 - Description- Template project for creating new quick projects
-2. **PELab_OpenLoopVFD**
-     - Location: Projects/PEController/Applications/
-     - Description- Example for the PELab in 6 Phase Configuration where both the inverters are run simultaneously @ 25Hz with an initial acceleration. The example provides the basic understating to operate the PWM Outputs and accessing the analog data acquired. Refer to the example of an Open Loop VFD Controller in Projects/Applications/PELab_OpenLoopVFD/ for further information
+## BSP Structure
+1. **Drivers:**
+	- *BSP:* Contains the Board Support Drivers provided by Taraz Technologies
+		- *PEController:* Contains the drivers for PEController board
+			- *ADC:* Contains the drivers for ADC 
+			- *Common:* Contains the commonly used files
+			- *Components:* Contains the other components used by the BSP
+			- *DigitalPins:* Contains the drivers for the digital Pins
+			- *Display:* Contains the display drivers
+			- *intelliSENS:* Contains the drivers for integration with intelliSENS software
+			- *PWM:* Contains the PWM drivers
+	- *CMSIS:* Contains the drivers provided by CMSIS 
+	- *STM32H7xx_HAL_Driver:* Contains the drivers provided by ST
+2. **Middleware**
+	- *ST:* Helper libraries provided by ST
+	- *Taraz:* Helper libraries provided by Taraz Technologies
+		- *ControlLib:* Control System library containing different coordinate systems and transformations
+	- *Third_Party:* Third party libraries
+3. **Projects**
+	- *PEController:* 
+		- *Applications:* 
+			- *PEController_Template:*  Template project for creating new quick projects
+			- *PELab_OpenLoopVFD:* Basic Implementation of Open Loop V/f Control Implemented for different variants of PELab
+
 
 ## Making new project from template project
 To make a new project for personal development follow the following steps

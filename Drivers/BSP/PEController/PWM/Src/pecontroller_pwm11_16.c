@@ -163,12 +163,12 @@ static void PWM11_16_Drivers_Init(pwm_config_t* config)
  * @brief Update the Duty Cycle of an Inverted Pair
  * @param pwmNo Channel no of reference channel is the PWM pair (Valid Values 11-16). <br>
  * 				<b>Pairs are classified as :</b>
- * 				-# CH1 = Reference channel available at pin @ref pwmNo
- * 				-# CH2 = Inverted Channel from reference available at pin @ref pwmNo + 1 if @ref pwmNo is odd else @ref pwmNo - 1
+ * 				-# CH1 = Reference channel available at pin pwmNo
+ * 				-# CH2 = Inverted Channel from reference available at pin pwmNo + 1 if pwmNo is odd else pwmNo - 1
  * @param duty duty cycle to be applied to the pair (Range 0-1 or given in the config parameter)
  * @param *config Pointer to a  pwm_config_t structure that contains the configuration
  * 				   parameters for the PWM pair
- * @return float Duty cycle applied in this cycle. May differ from the @ref duty variable if outside permitted limits
+ * @return float Duty cycle applied in this cycle. May differ from the duty variable if outside permitted limits
  */
 float BSP_PWM11_16_UpdatePairDuty(uint32_t pwmNo, float duty, pwm_config_t* config)
 {
@@ -196,8 +196,8 @@ float BSP_PWM11_16_UpdatePairDuty(uint32_t pwmNo, float duty, pwm_config_t* conf
  * @brief Configures a single inverted pair for PWM
  * @param pwmNo Channel no of reference channel is the PWM pair (Valid Values 11-16). <br>
  * 				<b>Pairs are classified as :</b>
- * 				-# CH1 = Reference channel available at pin @ref pwmNo
- * 				-# CH2 = Inverted Channel from reference available at pin @ref pwmNo + 1 if @ref pwmNo is odd else @ref pwmNo - 1
+ * 				-# CH1 = Reference channel available at pin pwmNo
+ * 				-# CH2 = Inverted Channel from reference available at pin pwmNo + 1 if pwmNo is odd else pwmNo - 1
  * @param *config Pointer to a  pwm_config_t structure that contains the configuration
  * 				   parameters for the PWM pair
  */
@@ -230,8 +230,8 @@ static void PWM11_16_ConfigInvertedPair(uint32_t pwmNo, pwm_config_t* config)
  * @brief Configures consecutive inverted pairs for PWM
  * @param pwmNo Channel no of reference channel is the PWM pair (Valid Values 11-16). <br>
  * 				<b>Pairs are classified as :</b>
- * 				-# CH1 = Reference channel available at pin @ref pwmNo
- * 				-# CH2 = Inverted Channel from reference available at pin @ref pwmNo + 1 if @ref pwmNo is odd else @ref pwmNo - 1
+ * 				-# CH1 = Reference channel available at pin pwmNo
+ * 				-# CH2 = Inverted Channel from reference available at pin pwmNo + 1 if pwmNo is odd else pwmNo - 1
  * @param *config Pointer to a  pwm_config_t structure that contains the configuration
  * 				   parameters for the PWM pair
  * @param pairCount No of PWM pairs to be configured
@@ -256,7 +256,7 @@ DutyCycleUpdateFnc BSP_PWM11_16_ConfigInvertedPairs(uint32_t pwmNo, pwm_config_t
  * @param duty duty cycle to be applied to the channel (Range 0-1 or given in the config parameter)
  * @param *config Pointer to a  pwm_config_t structure that contains the configuration
  * 				   parameters for the PWM channel
- * @return float Duty cycle applied in this cycle. May differ from the @ref duty variable if outside permitted limits
+ * @return float Duty cycle applied in this cycle. May differ from the duty variable if outside permitted limits
  */
 float BSP_PWM11_16_UpdateChannelDuty(uint32_t pwmNo, float duty, pwm_config_t* config)
 {
@@ -332,7 +332,7 @@ DutyCycleUpdateFnc BSP_PWM11_16_ConfigChannels(uint32_t pwmNo, pwm_config_t* con
 
 /**
  * @brief Enable / Disable interrupt for a PWM channel as per requirement
- * @param enable If enable interrupt set this parameter to <c>true</>
+ * @param enable If enable interrupt set this parameter to <c>true</c>
  * @param callback Specifies the function to be called when the PWM is reset
  * @param priority Interrupt priority. Range (0-15). Here 0 is the highest priority
  */

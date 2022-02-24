@@ -23,6 +23,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "shared_memory.h"
+#include "main_controller.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -108,6 +109,8 @@ int main(void)
 	MX_GPIO_Init();
 	/* USER CODE BEGIN 2 */
 	sharedData->m7Tom4.periodUs = SAMPLING_TIME_US;
+	MainControl_Init();
+	MainControl_Run();
 	/* When system initialization is finished, Cortex-M7 will release Cortex-M4 by means of
   HSEM notification */
 	/*HW semaphore Clock enable*/
@@ -131,6 +134,7 @@ int main(void)
 	while (1)
 	{
 		SharedMemory_GetRecentMeasurements(&adcVals);
+		MainControl_Loop();
 		/* USER CODE END WHILE */
 
 		/* USER CODE BEGIN 3 */

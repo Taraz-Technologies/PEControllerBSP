@@ -107,8 +107,8 @@ typedef struct
  * @brief Configures an PWM pair as inverted pair
  * @param pwmNo Channel no of reference channel is the PWM pair (Valid Values 1-16). <br>
  * 				<b>Pairs are classified as :</b>
- * 				-# CH1 = Reference channel available at pin @ref pwmNo
- * 				-# CH2 = Inverted Channel from reference available at pin @ref pwmNo + 1 if @ref pwmNo is odd else @ref pwmNo - 1
+ * 				-# CH1 = Reference channel available at pin pwmNo
+ * 				-# CH2 = Inverted Channel from reference available at pin pwmNo + 1 if pwmNo is odd else pwmNo - 1
  * @param *config Pointer to a  pwm_config_t structure that contains the configuration
  * 				   parameters for the PWM pair
  * @return DutyCycleUpdateFnc Returns the function pointer of the type DutyCycleUpdateFnc which needs to be called
@@ -129,12 +129,12 @@ extern DutyCycleUpdateFnc BSP_PWM_ConfigChannel(uint16_t pwmNo, pwm_config_t *co
  * @brief Update the Duty Cycle of an Inverted Pair
  * @param pwmNo Channel no of reference channel is the PWM pair (Valid Values 1-16). <br>
  * 				<b>Pairs are classified as :</b>
- * 				-# CH1 = Reference channel available at pin @ref pwmNo
- * 				-# CH2 = Inverted Channel from reference available at pin @ref pwmNo + 1 if @ref pwmNo is odd else @ref pwmNo - 1
+ * 				-# CH1 = Reference channel available at pin pwmNo
+ * 				-# CH2 = Inverted Channel from reference available at pin pwmNo + 1 if pwmNo is odd else pwmNo - 1
  * @param duty duty cycle to be applied to the pair (Range 0-1 or given in the config parameter)
  * @param *config Pointer to a  pwm_config_t structure that contains the configuration
  * 				   parameters for the PWM pair
- * @return float Duty cycle applied in this cycle. May differ from the @ref duty variable if outside permitted limits
+ * @return float Duty cycle applied in this cycle. May differ from the duty variable if outside permitted limits
  */
 extern float BSP_PWM_UpdatePairDuty(uint32_t pwmNo, float duty, pwm_config_t* config);
 
@@ -144,14 +144,14 @@ extern float BSP_PWM_UpdatePairDuty(uint32_t pwmNo, float duty, pwm_config_t* co
  * @param duty duty cycle to be applied to the channel (Range 0-1 or given in the config parameter)
  * @param *config Pointer to a  pwm_config_t structure that contains the configuration
  * 				   parameters for the PWM channel
- * @return float Duty cycle applied in this cycle. May differ from the @ref duty variable if outside permitted limits
+ * @return float Duty cycle applied in this cycle. May differ from the duty variable if outside permitted limits
  */
 extern float BSP_PWM_UpdateChannelDuty(uint32_t pwmNo, float duty, pwm_config_t* config);
 
 /**
  * @brief Enable / Disable interrupt for a PWM channel as per requirement
  * @param pwmNo Channel no of the PWM Channel (Range 1-16)
- * @param enable If enable interrupt set this parameter to <c>true</>
+ * @param enable If enable interrupt set this parameter to <c>true</c>
  * @param callback Specifies the function to be called when the PWM is reset
  * @param priority Interrupt priority. Range (0-15). Here 0 is the highest priority
  */
@@ -185,7 +185,7 @@ extern void BSP_PWM_Start(uint32_t pwmMask);
  */
 extern void BSP_PWM_Stop(uint32_t pwmMask);
 /**
- * @brief Populates the @ref moduleConfig parameter with the default configuration
+ * @brief Populates the provided @ref pwm_module_config_t parameter with the default configuration
  * @details <b>Default Configuration</b>:
  * -# alignment = CENTER_ALIGNED
  * -# deadtime.on = false
@@ -195,7 +195,7 @@ extern void BSP_PWM_Stop(uint32_t pwmMask);
  */
 extern void BSP_PWM_GetDafaultModuleConfig(pwm_module_config_t* moduleConfig);
 /**
- * @brief Populates the @ref pwmConfig parameter with the default configuration
+ * @brief Populates the provided @ref pwm_config_t parameter with the default configuration
  * @details <b>Default Configuration</b>:
  * -# dutyMode = OUTPUT_DUTY_AT_PWMH
  * -# lim.min = 0

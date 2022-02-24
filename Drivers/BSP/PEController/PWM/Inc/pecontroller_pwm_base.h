@@ -140,7 +140,7 @@ typedef struct
  * @param pwmNo Channel no of the first PWM in sequence
  * @param duty Duty cycle to be applied (Range 0-1)
  * @param *config Pointer to the PWM configuration
- * @return float Duty cycle applied in this cycle. May differ from the @ref duty variable if outside permitted limits
+ * @return float Duty cycle applied in this cycle. May differ from the duty variable if outside permitted limits
  */
 typedef float (*DutyCycleUpdateFnc)(uint32_t pwmNo, float duty, pwm_config_t *config);
 /**

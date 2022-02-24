@@ -163,7 +163,7 @@ typedef struct
   * @{
   */
 /**
- * @brief Lock the grid voltages using Pll
+ * @brief Lock the grid voltages using PLL
  *
  * @param pll Pointer to the data structure
  * @return pll_states_t PLL_LOCKED if grid phase successfully locked

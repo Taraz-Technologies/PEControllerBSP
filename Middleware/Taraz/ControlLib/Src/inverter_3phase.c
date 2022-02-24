@@ -1,11 +1,24 @@
-/*!
-@file Inverter3Ph.c
-@brief file for control of three phase inverter
-@details
-
-@author Waqas Ehsan Butt
-@copyright Taraz Technologies Pvt. Ltd.
-*/
+/**
+ ********************************************************************************
+ * @file    	inverter_3phase.c
+ * @author 		Waqas Ehsan Butt
+ * @date    	Nov 25, 2021
+ *
+ * @brief   File for control of three phase inverter
+ ********************************************************************************
+ ********************************************************************************
+ * @attention
+ *
+ * <h2><center>&copy; Copyright (c) 2021 Taraz Technologies Pvt. Ltd.</center></h2>
+ * <h3><center>All rights reserved.</center></h3>
+ *
+ * <center>This software component is licensed by Taraz Technologies under BSD 3-Clause license,
+ * the "License"; You may not use this file except in compliance with the License. You may obtain
+ * a copy of the License at:
+ *                        www.opensource.org/licenses/BSD-3-Clause</center>
+ *
+ ********************************************************************************
+ */
 /*******************************************************************************
  * Includes
  ******************************************************************************/
@@ -105,6 +118,14 @@ void Inverter3Ph_Init(inverter3Ph_config_t* config)
 		config->updateCallbacks[i] = ConfigSingleLeg(config->s1PinNos[i], config);
 		config->updateCallbacks[i](config->s1PinNos[i], 0.5f, &config->pwmConfig);
 	}
+
+	// if the duplicate pin is defined also intialize it
+	if (config->s1PinDuplicate)
+	{
+		config->updateCallbackDuplicate = ConfigSingleLeg(config->s1PinDuplicate, config);
+		config->updateCallbackDuplicate(config->s1PinDuplicate, 0.5f, &config->pwmConfig);
+	}
+
 	// enable the pwm signals by disabling any disable feature. Disable is by default active high
 	for (int i = 0; i < config->dsblPinCount; i++)
 		BSP_Dout_SetAsIOPin(config->dsblPinNo + i, GPIO_PIN_RESET);
@@ -120,6 +141,10 @@ void Inverter3Ph_UpdateDuty(inverter3Ph_config_t* config, float* duties)
 {
 	for (int i = 0; i < 3; i++)
 		config->updateCallbacks[i](config->s1PinNos[i], duties[i], &config->pwmConfig);
+
+	// if the duplicate pin is defined also process it
+	if (config->s1PinDuplicate)
+		config->updateCallbackDuplicate(config->s1PinDuplicate, duties[2], &config->pwmConfig);
 }
 
 /**

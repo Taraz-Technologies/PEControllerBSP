@@ -245,12 +245,12 @@ static void Timer_Config(void)
 static void ConfigureMeasurements(void)
 {
 	// implementation of Custom PEControllers is user controlled
-#if	PECONTROLLER_CONFIG != PEC_CUSTOM
+#if	PECONTROLLER_CONFIG == PEC_CUSTOM
 	float* mults = (float*)&adcMultipiers;
 	float* offsets = (float*)&adcOffsets;
 	for (int i = 0; i < 16; i++)
 	{
-		mults[i] = 1000.f / (32768.f);
+		mults[i] = 10.f / (32768.f);
 		offsets[i] = 32768;
 	}
 #else

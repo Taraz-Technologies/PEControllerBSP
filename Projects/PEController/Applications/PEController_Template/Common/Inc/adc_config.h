@@ -98,7 +98,7 @@ extern "C" {
 /** @defgroup ADCConfig_Exported_Typedefs Type Definitions
   * @{
   */
-#if PECONTROLLER_CONFIG == PLB_CUSTOM
+#if PECONTROLLER_CONFIG == PEC_CUSTOM
 /**
  * @brief Measurement structure definitions
  */

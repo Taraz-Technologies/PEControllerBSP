@@ -26,20 +26,11 @@
 extern "C" {
 #endif
 
-/** @addtogroup PELab_OpenLoopVFD
+/** @defgroup ApplicationExamples Application Examples
  * @{
  */
 
-/** @addtogroup PELab_OpenLoopVFD_CM7
- * @{
- */
-
-/** @addtogroup PELab_OpenLoopVFD_CM7_Configs
- * @{
- */
-
-/** @defgroup PELab_OpenLoopVFD_CM7_ControlConfigs Control Configurations
- * @brief Defines the configurations used by the control system
+/** @addtogroup OpenLoopVf Open Loop V/f Example
  * @{
  */
 /********************************************************************************
@@ -49,6 +40,9 @@ extern "C" {
 /********************************************************************************
  * Defines
  *******************************************************************************/
+/** @defgroup OPENLOOPVF_Exported_Macros Configurations
+  * @{
+  */
 /**
  * @brief PWM time period in micro-seconds
  */
@@ -77,6 +71,9 @@ extern "C" {
  * @brief Dead time value to be used
  */
 #define INVERTER_DEADTIME_ns			(500)
+/**
+ * @}
+ */
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
@@ -102,12 +99,6 @@ extern "C" {
 }
 #endif
 
-/**
- * @}
- */
-/**
- * @}
- */
 /**
  * @}
  */

@@ -40,7 +40,8 @@ extern "C" {
  * @details List of functions
  * 	-# <b>@ref BSP_Display_Init()</b> Initializes the display module
  * 	-# <b>@ref BSP_Display_DeInit()</b> De-initializes the display module
- * 	-# <b>@ref BSP_Display_ShowLayer()</b> Shows the configured layer on the LCD
+ * 	-# <b>@ref BSP_Display_ShowFirstLayer()</b> Displays the first layer after applying configuration
+ * 	-# <b>@ref BSP_Display_ShowLogo()</b> Display the selected LOGO. Use the user_config.h file to select appropriate LOGO
  * @{
  */
 /********************************************************************************

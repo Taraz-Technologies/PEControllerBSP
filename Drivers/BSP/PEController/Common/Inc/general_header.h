@@ -21,7 +21,7 @@
 #ifndef GENERAL_HEADER_H
 #define GENERAL_HEADER_H
 
-/** @defgroup BSP
+/** @defgroup BSP BSP
  * @brief Defines the Board Support Driver Package for PEController
  * @{
  */

@@ -1,6 +1,6 @@
 /**
  ********************************************************************************
- * @file    	MainControl.c
+ * @file    	main_controller.c
  * @author  	Waqas Ehsan Butt
  * @date    	October 5, 2021
  * @copyright 	Taraz Technologies Pvt. Ltd.
@@ -55,37 +55,27 @@ void MainControl_Init(void)
 	openLoopVfConfig1.inverterConfig.s1PinNos[0] = 1;
 	openLoopVfConfig1.inverterConfig.s1PinNos[1] = 3;
 	openLoopVfConfig1.inverterConfig.s1PinNos[2] = 5;
+	BSP_Dout_SetAsIOPin(15, GPIO_PIN_SET);
+	BSP_Dout_SetAsIOPin(16, GPIO_PIN_SET);
 #ifdef PELAB_VERSION
 #if	PELAB_VERSION < 4
 	BSP_Dout_SetAsIOPin(13, GPIO_PIN_RESET);
 	BSP_Dout_SetAsIOPin(14, GPIO_PIN_RESET);
-	BSP_Dout_SetAsIOPin(15, GPIO_PIN_SET);
-	BSP_Dout_SetAsIOPin(16, GPIO_PIN_SET);
 #else
 	BSP_Dout_SetAsIOPin(13, GPIO_PIN_SET);
 	BSP_Dout_SetAsIOPin(14, GPIO_PIN_SET);
-	BSP_Dout_SetAsIOPin(15, GPIO_PIN_SET);
-	BSP_Dout_SetAsIOPin(16, GPIO_PIN_SET);
 #endif
 #endif
 #elif PECONTROLLER_CONFIG == PLB_MMC
 	openLoopVfConfig1.inverterConfig.s1PinNos[0] = 1;
 	openLoopVfConfig1.inverterConfig.s1PinNos[1] = 3;
 	openLoopVfConfig1.inverterConfig.s1PinNos[2] = 5;
-	// Deactivate last leg as it is not used in the application
-	BSP_Dout_SetAsIOPin(7, GPIO_PIN_RESET);
-	BSP_Dout_SetAsIOPin(8, GPIO_PIN_RESET);
-	BSP_Dout_SetAsIOPin(15, GPIO_PIN_RESET);
-	BSP_Dout_SetAsIOPin(16, GPIO_PIN_RESET);
+	openLoopVfConfig1.inverterConfig.s1PinDuplicate = 7;
 #elif PECONTROLLER_CONFIG == PLB_TNPC
 	openLoopVfConfig1.inverterConfig.s1PinNos[0] = 1;
 	openLoopVfConfig1.inverterConfig.s1PinNos[1] = 5;
 	openLoopVfConfig1.inverterConfig.s1PinNos[2] = 9;
-	// Deactivate the fourth leg as it is not required
-	BSP_Dout_SetAsIOPin(13, GPIO_PIN_RESET);
-	BSP_Dout_SetAsIOPin(14, GPIO_PIN_RESET);
-	BSP_Dout_SetAsIOPin(15, GPIO_PIN_RESET);
-	BSP_Dout_SetAsIOPin(16, GPIO_PIN_RESET);
+	openLoopVfConfig1.inverterConfig.s1PinDuplicate = 13;
 #endif
 	OpenLoopVfControl_Init(&openLoopVfConfig1, Inverter3Ph_ResetSignal);
 
@@ -99,6 +89,7 @@ void MainControl_Init(void)
 	openLoopVfConfig2.inverterConfig.s1PinNos[0] = 9;
 	openLoopVfConfig2.inverterConfig.s1PinNos[1] = 11;
 	openLoopVfConfig2.inverterConfig.s1PinNos[2] = 13;
+	openLoopVfConfig2.inverterConfig.s1PinDuplicate = 15;
 	OpenLoopVfControl_Init(&openLoopVfConfig2, NULL);
 #endif
 }

@@ -1,6 +1,6 @@
 /**
  ********************************************************************************
- * @file 		ControlLib.h
+ * @file 		control_library.h
  * @author 		Waqas Ehsan Butt
  * @date 		Nov 25, 2021
  *

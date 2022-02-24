@@ -511,8 +511,6 @@ void HAL_GPIO_EXTI_IRQHandler(uint16_t GPIO_Pin)
   if (__HAL_GPIO_EXTID2_GET_IT(GPIO_Pin) != 0x00U)
   {
     __HAL_GPIO_EXTID2_CLEAR_IT(GPIO_Pin);
-    volatile uint32_t i = EXTI->C2PR1;
-    EXTI->C2PR1 = i;
     HAL_GPIO_EXTI_Callback(GPIO_Pin);
   }
 #else

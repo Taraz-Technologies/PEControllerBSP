@@ -66,7 +66,7 @@ static pwm_module_config_t inverterPWMModuleConfig =
  *******************************************************************************/
 /**
  * @brief Initialize the grid tie controller
- * @param gridTie Pointer to the grid tie structure
+ * @param config Pointer to the configuration structure
  * @param pwmResetCallback Function callback issued after each PWM completion
  */
 void OpenLoopVfControl_Init(openloopvf_config_t* config, PWMResetCallback pwmResetCallback)
@@ -104,8 +104,8 @@ void OpenLoopVfControl_Init(openloopvf_config_t* config, PWMResetCallback pwmRes
  * @brief This function computes new duty cycles for the inverter in each cycle
  * @param config Pointer to the inverter structure
  * @details Here the frequency starts from the @ref INITIAL_FREQ and keeps increasing till
- * 	it reaches the @ref OUTPUT_FREQ value with constant @ref ACCELERATION. The @ref  currentModulationIndex
- * 	is acquired by @ref nominalModulationIndex / @ref nominalFreq
+ * 	it reaches the @ref OUTPUT_FREQ value with constant @ref ACCELERATION. The currentModulationIndex
+ * 	is acquired by nominalModulationIndex / nominalFreq
  */
 void OpenLoopVfControl_Loop(openloopvf_config_t* config)
 {
