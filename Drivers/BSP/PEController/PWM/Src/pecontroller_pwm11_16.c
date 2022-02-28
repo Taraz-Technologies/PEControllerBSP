@@ -108,9 +108,9 @@ static void PWM11_16_Drivers_Init(pwm_config_t* config)
 	if (HAL_TIM_PWM_Init(&htim1) != HAL_OK)
 		Error_Handler();
 	TIM_MasterConfigTypeDef sMasterConfig = {0};
-	sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+	sMasterConfig.MasterOutputTrigger = TIM_TRGO_ENABLE;
 	sMasterConfig.MasterOutputTrigger2 = TIM_TRGO2_RESET;
-	sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+	sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_ENABLE;
 	if (HAL_TIMEx_MasterConfigSynchronization(&htim1, &sMasterConfig) != HAL_OK)
 		Error_Handler();
 	TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig = {0};

@@ -160,6 +160,8 @@ static void PWM1_10_Drivers_Init(void)
 	hhrtim.Instance = HRTIM1;
 	hhrtim.Init.HRTIMInterruptResquests = HRTIM_IT_NONE;
 	hhrtim.Init.SyncOptions = HRTIM_SYNCOPTION_NONE;
+	hhrtim.Init.SyncOptions = HRTIM_SYNCOPTION_SLAVE;
+	hhrtim.Init.SyncInputSource = HRTIM_SYNCINPUTSOURCE_INTERNALEVENT;
 	if (HAL_HRTIM_Init(&hhrtim) != HAL_OK)
 		Error_Handler();
 	pwm1_10_enabled = true;
@@ -245,6 +247,7 @@ static void PWM1_10_ConfigInvertedPair(uint32_t pwmNo, pwm_config_t* config)
 	/* timer configuration */
 	HRTIM_TimerCfgTypeDef pTimerCfg = GetDefaultTimerConfig(mod->periodInUsec, TimerIdx);
 	pTimerCfg.DeadTimeInsertion = IsDeadtimeEnabled(&mod->deadtime) ? HRTIM_TIMDEADTIMEINSERTION_ENABLED : HRTIM_TIMDEADTIMEINSERTION_DISABLED;
+	pTimerCfg.StartOnSync = HRTIM_SYNCSTART_ENABLED;
 	if (HAL_HRTIM_WaveformTimerConfig(&hhrtim, TimerIdx, &pTimerCfg) != HAL_OK)
 		Error_Handler();
 
