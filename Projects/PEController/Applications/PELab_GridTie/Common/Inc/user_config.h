@@ -43,7 +43,7 @@ extern "C" {
 /**
  * @brief Defines the Configuration for the PEController. Select @ref PEC_CUSTOM for independent PEControllers
  */
-#define PECONTROLLER_CONFIG		(PLB_TNPC)
+#define PECONTROLLER_CONFIG		(PLB_6PH)
 
 #if PECONTROLLER_CONFIG != PEC_CUSTOM
 /**

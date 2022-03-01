@@ -12,10 +12,12 @@
  * Includes
  ******************************************************************************/
 #include "general_header.h"
+#include "user_config.h"
 #include "control_library.h"
 #include "adc_config.h"
+#include "main_controller.h"
 #include "open_loop_vf_controller.h"
-#include "user_config.h"
+#include "pecontroller_digital_in.h"
 /*******************************************************************************
  * Defines
  ******************************************************************************/
@@ -50,7 +52,14 @@ static volatile bool recompute = false;
  */
 void MainControl_Init(void)
 {
+	// Configure digital IOs
 	BSP_DigitalPins_Init();
+	// Activate input port
+	BSP_Din_SetPortGPIO();
+	// latch zero to the output state till PWM signals are enabled
+	BSP_Dout_SetPortAsGPIO();
+	BSP_Dout_SetPortValue(0);
+
 #if PECONTROLLER_CONFIG == PLB_6PH || PECONTROLLER_CONFIG == PLB_3PH
 	openLoopVfConfig1.inverterConfig.s1PinNos[0] = 1;
 	openLoopVfConfig1.inverterConfig.s1PinNos[1] = 3;
@@ -58,10 +67,7 @@ void MainControl_Init(void)
 	BSP_Dout_SetAsIOPin(15, GPIO_PIN_SET);
 	BSP_Dout_SetAsIOPin(16, GPIO_PIN_SET);
 #ifdef PELAB_VERSION
-#if	PELAB_VERSION < 4
-	BSP_Dout_SetAsIOPin(13, GPIO_PIN_RESET);
-	BSP_Dout_SetAsIOPin(14, GPIO_PIN_RESET);
-#else
+#if	PELAB_VERSION >= 4
 	BSP_Dout_SetAsIOPin(13, GPIO_PIN_SET);
 	BSP_Dout_SetAsIOPin(14, GPIO_PIN_SET);
 #endif
@@ -79,7 +85,7 @@ void MainControl_Init(void)
 #endif
 	OpenLoopVfControl_Init(&openLoopVfConfig1, Inverter3Ph_ResetSignal);
 
-// Other PELab configurations don't support multiple inverter configurations
+	// Other PELab configurations don't support multiple inverter configurations
 #if PECONTROLLER_CONFIG == PLB_6PH
 	openLoopVfConfig2.inverterConfig.s1PinNos[0] = 7;
 	openLoopVfConfig2.inverterConfig.s1PinNos[1] = 9;
@@ -127,7 +133,7 @@ void MainControl_Loop(void)
 	if(recompute)
 	{
 		OpenLoopVfControl_Loop(&openLoopVfConfig1);
-// Other PELab configurations don't support multiple inverter configurations
+		// Other PELab configurations don't support multiple inverter configurations
 #if PECONTROLLER_CONFIG == PLB_6PH || PECONTROLLER_CONFIG == PLB_MMC
 		OpenLoopVfControl_Loop(&openLoopVfConfig2);
 #endif

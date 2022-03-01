@@ -54,15 +54,13 @@ static pwm_module_config_t inverterPWMModuleConfig =
 				.on = true,
 				.nanoSec = INVERTER_DEADTIME_ns,
 		},
+		.synchOnStart = true
 };
 static pwm_module_config_t boostPWMConfig =
 {
 		.alignment = CENTER_ALIGNED,
 		.periodInUsec = PWM_PERIOD_Us,
-		/*.deadtime = {
-				.on = true,
-				.nanoSec = INVERTER_DEADTIME_ns,
-		},*/
+		.synchOnStart = true
 };
 /********************************************************************************
  * Global Variables
@@ -128,6 +126,8 @@ void GridTieControl_Init(grid_tie_t* gridTie, PWMResetCallback pwmResetCallback)
 	/***************** Configure Boost *********************/
 
 	BSP_Dout_SetAsIOPin(GRID_RELAY_IO, GPIO_PIN_RESET);
+	if(gridTie->boostDiodePin)
+		BSP_Dout_SetAsIOPin(gridTie->boostDiodePin, GPIO_PIN_RESET);
 
 	// Configure the interrupt for PWM Channel with highest priority
 	BSP_PWM_Config_Interrupt(inverterConfig->s1PinNos[0], true, pwmResetCallback, 0);

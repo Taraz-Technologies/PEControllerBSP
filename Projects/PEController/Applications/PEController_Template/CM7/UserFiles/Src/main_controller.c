@@ -16,6 +16,7 @@
 #include "control_library.h"
 #include "adc_config.h"
 #include "main_controller.h"
+#include "pecontroller_digital_in.h"
 /*******************************************************************************
  * Defines
  ******************************************************************************/
@@ -45,7 +46,13 @@ static volatile bool recompute = false;
  */
 void MainControl_Init(void)
 {
+	// Configure digital IOs
 	BSP_DigitalPins_Init();
+	// Activate input port
+	BSP_Din_SetPortGPIO();
+	// latch zero to the output state till PWM signals are enabled
+	BSP_Dout_SetPortAsGPIO();
+	BSP_Dout_SetPortValue(0);
 }
 
 /**

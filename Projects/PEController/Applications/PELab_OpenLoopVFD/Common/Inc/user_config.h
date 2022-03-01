@@ -43,7 +43,7 @@ extern "C" {
 /**
  * @brief Defines the Configuration for the PEController. Select @ref PEC_CUSTOM for independent PEControllers
  */
-#define PECONTROLLER_CONFIG		(PLB_MMC)
+#define PECONTROLLER_CONFIG		(PLB_6PH)
 
 #if PECONTROLLER_CONFIG != PEC_CUSTOM
 /**
@@ -70,7 +70,7 @@ extern "C" {
 /**
  * @brief Select the LOGO to be displayed on PEController
  */
-#define LOGO_TYPE				(LOGO_DEFAULT)
+#define LOGO_TYPE				(LOGO_CUSTOM)
 
 /**
  * @brief Selects the display brightness value between 0-100
@@ -89,7 +89,7 @@ extern "C" {
  * @note Minimum setting value is 10 (100KHz) with intelliSENS but may vary if additional logic is added.
  * Minimum setting value is 8 (125KHz) without intelliSENS software
  */
-#define SAMPLING_TIME_US		(20)
+#define SAMPLING_TIME_US		(40)
 /******** MEASUREMENT CONFIGURATION ***********/
 
 #ifdef __cplusplus

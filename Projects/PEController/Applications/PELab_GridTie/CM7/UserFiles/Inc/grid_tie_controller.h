@@ -75,6 +75,7 @@ typedef struct
 	pll_lock_t pll;							/**< @brief PLL structure used by the grid tie controller */
 	inverter3Ph_config_t inverterConfig;	/**< @brief Output inverter configuration */
 	independent_pwm_config_t boostConfig;	/**< @brief Boost configuration for developing DC link */
+	uint16_t boostDiodePin;					/**< @brief Pin no of the switch acting as diode */
 	grid_tie_state_t state;					/**< @brief Current state of the grid tie controller */
 	float tempIndex;						/**< @brief Temporary variable */
 } grid_tie_t;
