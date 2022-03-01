@@ -118,6 +118,8 @@ typedef struct
 	uint32_t periodInUsec;			/**< @brief Specifies the period of the PWM in micro-seconds */
 	deadtime_t deadtime;			/**< @brief The dead time parameter for the paired inverted PWM.
 										For individual PWMs this value should be NULL */
+	bool synchOnStart;				/**< @brief Controls synchronization of PWM modules.
+										If <c>true</c> synchronize the HRTIM sub-module to TIM1 */
 } pwm_module_config_t;
 /**
  * @brief Defines the parameters for specific PWM configuration
