@@ -267,7 +267,7 @@ float BSP_PWM11_16_UpdateChannelDuty(uint32_t pwmNo, float duty, pwm_config_t* c
 
 	uint32_t ch = (pwmNo - 11) / 2;
 	if (duty == 0)
-		*(((uint32_t*)&(TIM1->CCR1)) + ch) = 0;
+		*(((uint32_t*)&(TIM1->CCR1)) + ch) = isEdgeAligned ? 0 : TIM1->ARR;
 	else
 	{
 		float dutyUse = duty;
