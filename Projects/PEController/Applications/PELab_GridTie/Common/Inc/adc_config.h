@@ -173,12 +173,12 @@ typedef struct
  */
 typedef struct
 {
-	float Ih1;				/**< @brief Current of Leg H1 */
-	float Ih2;				/**< @brief Current of Leg H2 */
-	float Ih3;				/**< @brief Current of Leg H3 */
-	float Ie1;				/**< @brief Current of Leg E1 */
-	float Ie2;				/**< @brief Current of Leg E2 */
-	float Ie3;				/**< @brief Current of Leg E3 */
+	float Ie1;				/**< @brief Current of Leg H1 */
+	float Ie2;				/**< @brief Current of Leg H2 */
+	float Ie3;				/**< @brief Current of Leg H3 */
+	float Ih1;				/**< @brief Current of Leg E1 */
+	float Ih2;				/**< @brief Current of Leg E2 */
+	float Ih3;				/**< @brief Current of Leg E3 */
 	float Reserved1;		/**< @brief RESERVED */
 	float Reserved2;		/**< @brief RESERVED */
 	float Vdc1;				/**< @brief DC Link voltage for first inverter module */

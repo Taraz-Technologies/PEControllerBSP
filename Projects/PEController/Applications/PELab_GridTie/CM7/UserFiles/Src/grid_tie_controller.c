@@ -32,9 +32,14 @@
 #define DC_LINK_CAPACITANCE					(.00094f)
 #define IL1_DISCON_VAL						(.1f)
 #define L_BOOST								(.0025f)
-#define EC1_DIV								(50.0f)
+#define EC1_DIV								(10.0f)
 #define VBST_CONTROL_D0_LIMIT				(750.f)
 #define IL1_LMT								(18)
+
+#define BOOST_SIMPLE_PI			(1)
+#define BOOST_MPC				(2)
+#define BOOST_CASCADED			(3)
+#define BOOST_METHOD 			(BOOST_MPC)
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
@@ -103,7 +108,7 @@ void GridTieControl_Init(grid_tie_t* gridTie, PWMResetCallback pwmResetCallback)
 	gridTie->pll.compensator.dt = PWM_PERIOD_s;
 	gridTie->pll.qLockMax = 20;
 	gridTie->pll.dLockMin = gridTie->pll.qLockMax * 10;
-	gridTie->pll.cycleCount = (int)((1 / PWM_PERIOD_s) * 10);
+	gridTie->pll.cycleCount = (int)((1 / PWM_PERIOD_s) * 2);
 
 	// configure Grid Tie Parameters
 	gridTie->iQComp.Kp = 20.0f;
@@ -133,26 +138,28 @@ void GridTieControl_Init(grid_tie_t* gridTie, PWMResetCallback pwmResetCallback)
 	BSP_PWM_Config_Interrupt(inverterConfig->s1PinNos[0], true, pwmResetCallback, 0);
 }
 
+#if BOOST_METHOD == BOOST_MPC
 static float BoostVsetOffsetCompensation(float error, float setPoint, bool boostFault)
 {
 	static pi_compensator_t boostVsetOffsetPI = {.has_lmt = true, .dt = PWM_PERIOD_s, .Integral = 0, };
 	if (boostFault)
 		boostVsetOffsetPI.Integral = 0;
 	//float errAbs = fabsf(error);
-	boostVsetOffsetPI.Kp = 0.5f;
+	boostVsetOffsetPI.Kp = .5f;
 	boostVsetOffsetPI.Ki = 50.f;
 	boostVsetOffsetPI.max = 20; // (setPoint * 0.12f) /200.0f;
 	boostVsetOffsetPI.min = -boostVsetOffsetPI.max;
 	return PI_Compensate(&boostVsetOffsetPI, error);
 }
+#endif
 
 static float GridTie_BoostControl(grid_tie_t* gridTie, bool boostFault)
 {
 	/********************** Compute Boost Duty Cycle ********************/
-#if 0
+#if BOOST_METHOD == BOOST_SIMPLE_PI
 	static float data_avg[8];
 	static mov_avg_t filt = {.avg = 0, .count = 8, .dataPtr = data_avg};
-	static pi_compensator_t boostPI = {.has_lmt = true, .Kp = .01f, .Ki = .5f, .dt = PWM_PERIOD_s, .
+	static pi_compensator_t boostPI = {.has_lmt = true, .Kp = .01f, .Ki = .2f, .dt = PWM_PERIOD_s, .
 			Integral = 0, .max = BOOST_DUTYCYCLE_MAX, .min = 0.f };
 	float errAvg = MovingAverage_Compute(&filt, VBST_SET - gridTie->vdc);
 	if (boostFault)
@@ -165,7 +172,7 @@ static float GridTie_BoostControl(grid_tie_t* gridTie, bool boostFault)
 	/********************** Compute Boost Duty Cycle ********************/
 
 	/********************** Compute Boost Duty Cycle ********************/
-#if 1
+#if BOOST_METHOD == BOOST_MPC
 	const float C1 = DC_LINK_CAPACITANCE * 0.5f;
 	const float Tc = PWM_PERIOD_s;
 	const float iL1ZeroVal = IL1_DISCON_VAL;
@@ -232,6 +239,47 @@ static float GridTie_BoostControl(grid_tie_t* gridTie, bool boostFault)
 	return D;
 #endif
 	/********************** Compute Boost Duty Cycle ********************/
+
+	/********************** Compute Boost Duty Cycle ********************/
+#if BOOST_METHOD == BOOST_CASCADED
+	float iLRef = gridTie->iLRef;
+	static pi_compensator_t boostPI = {.has_lmt = false, .Kp = 1.f, .Ki = 50.f, .dt = PWM_PERIOD_s, .Integral = 0, };
+	float div = gridTie->vdc > .01f ? gridTie->vdc : .01f;
+	float refIntegral = boostPI.Integral;
+	float pi = PI_Compensate(&boostPI, iLRef - gridTie->idc);
+	float duty = (gridTie->vpv - pi) / div;
+	if (duty < 0)
+	{
+		//boostPI.Integral = refIntegral;
+		duty = 0;
+	}
+	if (duty > BOOST_DUTYCYCLE_MAX)
+	{
+		//boostPI.Integral = refIntegral;
+		duty = BOOST_DUTYCYCLE_MAX;
+	}
+
+	float vgd = gridTie->vCoor.dq0.d > .01f ? gridTie->vCoor.dq0.d : .01f;
+	float igd1 = (2/3.f) * (iLRef * gridTie->vpv / vgd);
+
+	static float data_avg[8];
+	static mov_avg_t filt = {.avg = 0, .count = 8, .dataPtr = data_avg};
+	static pi_compensator_t boostPIV = {.has_lmt = false, .Kp = .01f, .Ki = .2f, .dt = PWM_PERIOD_s, .Integral = 0, };
+	refIntegral = boostPIV.Integral;
+	gridTie->iRef = MovingAverage_Compute(&filt, igd1) + PI_Compensate(&boostPIV, VBST_SET - gridTie->vdc);
+	if (gridTie->iRef < -10)
+	{
+		boostPIV.Integral = refIntegral;
+		gridTie->iRef = -10;
+	}
+	if (gridTie->iRef > 10)
+	{
+		boostPIV.Integral = refIntegral;
+		gridTie->iRef = 10;
+	}
+	return duty;
+#endif
+	/********************** Compute Boost Duty Cycle ********************/
 }
 
 static void GridTie_GenerateOutput(grid_tie_t* gridTie, float* inverterDuties)
@@ -254,6 +302,8 @@ static void GridTie_GenerateOutput(grid_tie_t* gridTie, float* inverterDuties)
 			+ TWO_PI * GRID_FREQ * L_OUT * iCoor->dq0.d;
 
 	// get ABCD coordinates from DQ coordinates
+	/** Model 1 **/ /*
+	// get ABCD coordinates from DQ coordinates
 	LIB_3COOR_ABC_t abc;
 	iCoor->dq0.d *= (2.f/(gridTie->vdc));
 	iCoor->dq0.q *= (2.f/(gridTie->vdc));
@@ -262,11 +312,23 @@ static void GridTie_GenerateOutput(grid_tie_t* gridTie, float* inverterDuties)
 	inverterDuties[0] = (abc.a + 1) * .5f;
 	inverterDuties[1] = (abc.b + 1) * .5f;
 	inverterDuties[2] = (abc.c + 1) * .5f;
+	/**//** Model 1 **/
+
+	/** Model 2 **/
+	// get ABCD coordinates from DQ coordinates
+	LIB_3COOR_ABC_t abc;
+	Transform_abc_dq0(&abc, &iCoor->dq0, &iCoor->trigno, SRC_DQ0, PARK_SINE);
+	// get duty cycles based on ABC coordinates
+	inverterDuties[0] = (abc.a / gridTie->vdc) + .5f;
+	inverterDuties[1] = (abc.b / gridTie->vdc) + .5f;
+	inverterDuties[2] = (abc.c / gridTie->vdc) + .5f;
+	/**//** Model 2 **/
 	/******************** Compute Inverter Duty Cycles ******************/
 
 	Inverter3Ph_UpdateDuty(&gridTie->inverterConfig, inverterDuties);
 }
-
+volatile float boostDutyNo = 0;
+volatile int boostCount = 0;
 /**
  * @brief This function computes new duty cycles for the inverter and boost in each cycle
  * @param gridTie Pointer to the grid tie structure
@@ -280,8 +342,12 @@ void GridTieControl_Loop(grid_tie_t* gridTie)
 	bool inverterBridgeFault = BSP_Din_GetPinState(9) | BSP_Din_GetPinState(10) | BSP_Din_GetPinState(11) | BSP_Din_GetPinState(13);
 	bool boostBridgeFault = BSP_Din_GetPinState(12) | BSP_Din_GetPinState(14) | BSP_Din_GetPinState(15) | BSP_Din_GetPinState(16);
 	float boostDuty = GridTie_BoostControl(gridTie, boostBridgeFault);
+	if (boostDuty > 0)
+	{
+		boostDutyNo = boostDuty;
+		boostCount++;
+	}
 	gridTie->boostD0 = gridTie->boostConfig.dutyUpdateFnc(gridTie->boostConfig.pinNo, boostDuty, &gridTie->boostConfig.pwmConfig);
-
 	if (Pll_LockGrid(pll) == PLL_LOCKED)
 	{
 		// if not stabilized yet stabilize
@@ -323,6 +389,8 @@ void GridTieControl_Loop(grid_tie_t* gridTie)
 		BSP_Dout_SetAsIOPin(GRID_RELAY_IO, GPIO_PIN_RESET);
 		gridTie->tempIndex = 0;
 	}
+	gridTie->iQComp.Integral = 0;
+	gridTie->iDComp.Integral = 0;
 	BSP_Dout_SetAsIOPin(gridTie->inverterConfig.s1PinNos[0], GPIO_PIN_RESET);
 	BSP_Dout_SetAsIOPin(gridTie->inverterConfig.s1PinNos[0] + 1, GPIO_PIN_RESET);
 	BSP_Dout_SetAsIOPin(gridTie->inverterConfig.s1PinNos[1], GPIO_PIN_RESET);
