@@ -36,10 +36,10 @@
 #define VBST_CONTROL_D0_LIMIT				(750.f)
 #define IL1_LMT								(18)
 
-#define BOOST_SIMPLE_PI			(1)
-#define BOOST_MPC				(2)
-#define BOOST_CASCADED			(3)
-#define BOOST_METHOD 			(BOOST_MPC)
+#define BOOST_SIMPLE_PI						(1)
+#define BOOST_MPC							(2)
+#define BOOST_CASCADED						(3)
+#define BOOST_METHOD 						(BOOST_MPC)
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
@@ -111,11 +111,11 @@ void GridTieControl_Init(grid_tie_t* gridTie, PWMResetCallback pwmResetCallback)
 	gridTie->pll.cycleCount = (int)((1 / PWM_PERIOD_s) * 2);
 
 	// configure Grid Tie Parameters
-	gridTie->iQComp.Kp = 20.0f;
-	gridTie->iQComp.Ki = 60.f;
+	gridTie->iQComp.Kp = 15.0f;
+	gridTie->iQComp.Ki = 100.f;
 	gridTie->iQComp.dt = PWM_PERIOD_s;
-	gridTie->iDComp.Kp = 20.0f;
-	gridTie->iDComp.Ki = 60.f;
+	gridTie->iDComp.Kp = 15.0f;
+	gridTie->iDComp.Ki = 100.f;
 	gridTie->iDComp.dt = PWM_PERIOD_s;
 	gridTie->iRef = .1f;
 	/***************** Configure Inverter *********************/

@@ -49,7 +49,7 @@ extern "C" {
 /**
  * @brief Select the correct version of PELAB for your configuration
  */
-#define PELAB_VERSION			(4)
+#define PELAB_VERSION			(3)
 /**
  * @brief For correct measurement sensitivity of channels in mV/A should be provided here
  */

@@ -113,8 +113,8 @@ void MainControl_Loop(void)
 
 		// slow increase to iref for better response
 		if (gridTieConfig.state == GRID_TIE_INACTIVE)
-			gridTieConfig.iRef = .1f;
-		else if (gridTieConfig.iRef < 1.f)
+			gridTieConfig.iRef = 0.1f;
+		else if (gridTieConfig.iRef < 4.0f)
 			gridTieConfig.iRef += .0001f;
 
 		// implement the control

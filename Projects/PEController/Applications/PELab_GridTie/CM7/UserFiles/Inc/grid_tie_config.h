@@ -49,7 +49,7 @@ extern "C" {
 /********************************************************************************
  * Defines
  *******************************************************************************/
-#define PWM_PERIOD_Us					(40)
+#define PWM_PERIOD_Us					(25)
 #define PWM_PERIOD_s					(PWM_PERIOD_Us/1000000.f)
 #define PWM_FREQ_KHz					(1000.f/PWM_PERIOD_Us)
 #define PWM_FREQ_Hz						(1.f/PWM_PERIOD_s)
@@ -58,9 +58,9 @@ extern "C" {
 #define L_OUT							(.0025f)
 #define RELAY_TURN_ON_VBST				(650.f)
 #define RELAY_TURN_OFF_VBST				(550.f)
-#define VBST_SET						(700.f)
+#define VBST_SET						(730.f)
 #define BOOST_DUTYCYCLE_MAX				(.9f)
-#define INVERTER_DEADTIME_ns			(500)
+#define INVERTER_DEADTIME_ns			(200)
 #define MIN_MAX_BALANCING_INVERTER		(true)
 #define INVERTER_DUTY_MODE				OUTPUT_DUTY_AT_PWMH
 
