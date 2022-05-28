@@ -49,21 +49,51 @@ extern "C" {
 /********************************************************************************
  * Defines
  *******************************************************************************/
+/**
+ * @brief PWM Time Period in micro-seconds
+ */
 #define PWM_PERIOD_Us					(25)
-#define PWM_PERIOD_s					(PWM_PERIOD_Us/1000000.f)
-#define PWM_FREQ_KHz					(1000.f/PWM_PERIOD_Us)
-#define PWM_FREQ_Hz						(1.f/PWM_PERIOD_s)
-#define GRID_RELAY_IO					(15)
+/**
+ * @brief Frequency of the grid in Hz
+ */
 #define GRID_FREQ						(50)
+/**
+ * @brief Series Output Inductance in Henry
+ */
 #define L_OUT							(.0025f)
-#define RELAY_TURN_ON_VBST				(650.f)
-#define RELAY_TURN_OFF_VBST				(550.f)
-#define VBST_SET						(730.f)
-#define BOOST_DUTYCYCLE_MAX				(.9f)
-#define INVERTER_DEADTIME_ns			(200)
-#define MIN_MAX_BALANCING_INVERTER		(true)
-#define INVERTER_DUTY_MODE				OUTPUT_DUTY_AT_PWMH
+/**
+ * @brief Number of Boost Switches to control
+ * @note The boost switches should start from @ref BOOST1_IO and use consecutive legs
+ */
+#define BOOST_COUNT						(2)
+/**
+ * @brief First boost switch
+ */
+#define BOOST1_IO						(10)
+/**
+ * @brief Set point voltage for Boost
+ */
+#define BOOST_VSET						(720)
+#define BOOST_KP						(0.002f)
+#define BOOST_KI						(0.1f)
+#define KP_I							(60)
+#define KI_I							(1000)
+#define BOOST_DUTYCYCLE_MAX				(.95f)
+/**
+ * @brief Number of connected relays to grid
+ * @note The relay IO should start from @ref GRID_RELAY_IO and use consecutive IOs after that
+ */
+#define GRID_RELAY_COUNT				(2)
+/**
+ * @brief First grid relay IO
+ */
+#define GRID_RELAY_IO					(15)
 
+#define RELAY_TURN_ON_VBST				(620.f)
+#define RELAY_TURN_OFF_VBST				(530.f)
+#define INVERTER_DEADTIME_ns			(200)
+#define MIN_MAX_BALANCING_INVERTER		(false)
+#define INVERTER_DUTY_MODE				OUTPUT_DUTY_AT_PWMH
 #define PLL_FILT_SIZE					(8)
 /********************************************************************************
  * Typedefs

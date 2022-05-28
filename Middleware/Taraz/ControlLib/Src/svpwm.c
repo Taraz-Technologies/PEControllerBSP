@@ -19,7 +19,8 @@
  *
  ********************************************************************************
  */
-
+#pragma GCC push_options
+#pragma GCC optimize ("-Ofast")
 /********************************************************************************
  * Includes
  *******************************************************************************/
@@ -27,7 +28,7 @@
 /********************************************************************************
  * Defines
  *******************************************************************************/
-
+#define ONE_BY_SQRT3				(1.0f/sqrtf(3))
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
@@ -51,6 +52,63 @@
 /********************************************************************************
  * Code
  *******************************************************************************/
+/**
+ * @brief Limits the duty cycle value from 0-1
+ */
+static inline void Limit_Duty_0_1(float* duty)
+{
+	if (*duty > 1.f)
+		*duty = 1.f;
+	else if (*duty < 0)
+		*duty = 0;
+}
+
+/**
+ * @brief Get duty cycles of each leg using space vector PWM from LIB_3COOR_ALBE0_t
+ * @param *alBe0 Alpha Beta Zero Coordinates
+ * @param *duties Pointer to the array where duty cycles need to be updated. Duty Cycle range is between (0-1)
+ */
+void SVPWM_GenerateDutyCycles(LIB_3COOR_ALBE0_t *alBe0, float* duties)
+{
+	float shift = ONE_BY_SQRT3 * alBe0->alpha;
+	float a = 2 * shift;
+	float b = alBe0->beta - shift;
+	float c = -alBe0->beta - shift;
+
+	float max = a;
+	float min = a;
+
+	// min - max function
+	if (a > b)
+	{
+		if (c > a)
+			max = c;
+		min = b > c ? c : b;
+	}
+	else
+	{
+		if (c < a)
+			min = c;
+		max = b > c ? b : c;
+	}
+
+	float pk = (min + max) / 2;
+	// subtract 1 from pk
+	// this compensates 0.5 offset in output duty cycle
+	float sub = pk - 1;
+
+	// Evaluate final duty cycles with limits
+	duties[0] = ((a - sub) / 2);
+	Limit_Duty_0_1(duties);
+
+	duties[1] = ((b - sub) / 2);
+	Limit_Duty_0_1(duties + 1);
+
+	duties[2] = ((c - sub) / 2);
+	Limit_Duty_0_1(duties + 2);
+
+}
+
 /**
  * @brief Get duty cycles of each leg using space vector PWM from LIB_3COOR_ALBE0_t
  * @param *alBe0 Alpha Beta Coordinates
@@ -148,5 +206,5 @@ void ComputeDuty_SVPWM_FromAlBe0(LIB_3COOR_ALBE0_t *alBe0, float* duties)
 		duties[0] = 0;
 	}
 }
-
+#pragma GCC pop_options
 /* EOF */

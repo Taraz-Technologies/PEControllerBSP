@@ -64,9 +64,14 @@ static pll_states_t IsPLLSynched(pll_lock_t* pll)
 	if(absQ > info->tempQMax)
 		info->tempQMax = absQ;
 
-	// replace temporary min of D is exceeds
+	// replace temporary min of D if exceeds
 	if (pll->coords->dq0.d < info->tempDMin)
 		info->tempDMin = pll->coords->dq0.d;
+
+
+	// replace temporary max of D if exceeds
+	if (pll->coords->dq0.d > info->tempDMax)
+		info->tempDMax = pll->coords->dq0.d;
 
 	// increase index
 	info->index++;
@@ -74,12 +79,13 @@ static pll_states_t IsPLLSynched(pll_lock_t* pll)
 	if (pll->status == PLL_LOCKED)
 	{
 		// if grid is lost disable pll lock
-		if (info->tempQMax > (pll->qLockMax * 2.f) ||  info->tempDMin < (pll->dLockMin/3.f))
+		if (info->tempQMax > (pll->qLockMax * 2.f) || info->tempDMin < (pll->dLockMin) || info->tempDMax > (pll->dLockMax))
 		{
 			pll->status = PLL_INVALID;
 			info->index = 0;
 			info->tempQMax = 0;
 			info->tempDMin = 200000;
+			info->tempDMax = -200000;
 		}
 	}
 	// check PLL status
@@ -89,7 +95,7 @@ static pll_states_t IsPLLSynched(pll_lock_t* pll)
 		info->qMax = info->tempQMax;
 		info->dMin = info->tempDMin;
 #endif
-		if (info->tempQMax < pll->qLockMax && info->tempDMin > pll->dLockMin)
+		if (info->tempQMax < pll->qLockMax && info->tempDMin > pll->dLockMin && info->tempDMax < pll->dLockMax)
 			pll->status = pll->status == PLL_LOCKED ? PLL_LOCKED : PLL_PENDING;
 		else
 			pll->status = PLL_INVALID;
@@ -97,6 +103,7 @@ static pll_states_t IsPLLSynched(pll_lock_t* pll)
 		info->index = 0;
 		info->tempQMax = 0;
 		info->tempDMin = 200000;
+		info->tempDMax = -200000;
 	}
 
 	// lock to the phase once the phase is very low

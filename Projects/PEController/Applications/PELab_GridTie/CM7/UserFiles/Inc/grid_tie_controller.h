@@ -34,7 +34,9 @@ extern "C" {
 /********************************************************************************
  * Defines
  *******************************************************************************/
-
+#define PWM_PERIOD_s					(PWM_PERIOD_Us/1000000.f)
+#define PWM_FREQ_KHz					(1000.f/PWM_PERIOD_Us)
+#define PWM_FREQ_Hz						(1.f/PWM_PERIOD_s)
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
@@ -42,7 +44,7 @@ extern "C" {
   * @{
   */
 /**
- * @brief Defines the states for the grid tie controller
+ * @brief Defines the states for the grid-tie controller
  */
 typedef enum
 {
@@ -59,24 +61,22 @@ typedef enum
   * @{
   */
 /**
- * @brief Defines the parameters for grid tie controller
+ * @brief Defines the parameters for grid-tie controller
  */
 typedef struct
 {
 	float vdc;								/**< @brief DC link voltage */
-	float vpv;								/**< @brief Input voltage for the boost inductor */
-	float idc;								/**< @brief Input current for the DC link */
 	float iRef;								/**< @brief Constant reference current for output */
-	float iLRef;								/**< @brief Constant reference current for output */
-	float boostD0;							/**< @brief Duty cycle applied in the last cycle */
 	LIB_COOR_ALL_t vCoor;					/**< @brief Phase voltage coordinates */
 	LIB_COOR_ALL_t iCoor;					/**< @brief Phase current coordinates */
 	pi_compensator_t iQComp;				/**< @brief Compensator for Q value of DQ transform for grid currents */
 	pi_compensator_t iDComp;				/**< @brief Compensator for D value of DQ transform for grid currents */
 	pll_lock_t pll;							/**< @brief PLL structure used by the grid tie controller */
 	inverter3Ph_config_t inverterConfig;	/**< @brief Output inverter configuration */
-	independent_pwm_config_t boostConfig;	/**< @brief Boost configuration for developing DC link */
-	uint16_t boostDiodePin;					/**< @brief Pin no of the switch acting as diode */
+	independent_pwm_config_t boostConfig[BOOST_COUNT];	/**< @brief Boost configuration for developing DC link */
+	uint16_t boostDiodePin[BOOST_COUNT];				/**< @brief Pin no of the switches acting as diode */
+	float VbstSet;							/**< @brief Boost set point voltage */
+	bool isVbstStable;						/**< @brief Describes the state of boost stability */
 	grid_tie_state_t state;					/**< @brief Current state of the grid tie controller */
 	float tempIndex;						/**< @brief Temporary variable */
 } grid_tie_t;

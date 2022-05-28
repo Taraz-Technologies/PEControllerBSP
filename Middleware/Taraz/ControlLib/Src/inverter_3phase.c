@@ -96,8 +96,18 @@ static DutyCycleUpdateFnc ConfigSingleLeg(uint16_t pwmNo, inverter3Ph_config_t* 
 		BSP_Dout_SetAsPWMPin(pwmNo + 2);
 		BSP_Dout_SetAsPWMPin(pwmNo + 3);
 	}
-
 	return callback;
+}
+
+/**
+ * @brief Enable/Disable the PWMs for a single leg of the inverter
+ *
+ * @param pwmNo Channel no of the initial switch of the leg.
+ * @param en True if needs to be enabled else false
+ */
+static void EnableSingleLeg(uint16_t pwmNo, bool en)
+{
+	BSP_PWM_ActivateInvertedPair(pwmNo, en);
 }
 
 /**
@@ -129,6 +139,9 @@ void Inverter3Ph_Init(inverter3Ph_config_t* config)
 	// enable the pwm signals by disabling any disable feature. Disable is by default active high
 	for (int i = 0; i < config->dsblPinCount; i++)
 		BSP_Dout_SetAsIOPin(config->dsblPinNo + i, GPIO_PIN_RESET);
+
+	// Deactivate the inverter at startup
+	Inverter3Ph_Activate(config, false);
 }
 
 /**
@@ -161,5 +174,18 @@ void Inverter3Ph_UpdateSPWM(inverter3Ph_config_t* config, float theta, float mod
 	Inverter3Ph_UpdateDuty(config, duties);
 }
 
+/**
+ * @brief Activate/Deactive the 3-Phase inverter
+ * @param *config handle representing the inverter
+ * @param en <c>true</c> if needs to be enabled, else <c>false</c>
+ */
+void Inverter3Ph_Activate(inverter3Ph_config_t* config, bool en)
+{
+	for (int i = 0; i < 3; i++)
+		EnableSingleLeg(config->s1PinNos[i], en);
+	if (config->s1PinDuplicate)
+		EnableSingleLeg(config->s1PinDuplicate, en);
+	config->state = en ? INVERTER_ACTIVE : INVERTER_INACTIVE;
+}
 
 /* EOF */

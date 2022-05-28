@@ -42,7 +42,7 @@ static volatile bool recompute = false;
 /**
  * @brief Grid Tie Control Parameters
  */
-static grid_tie_t gridTieConfig = {0};
+grid_tie_t gridTieConfig = {0};
 /*******************************************************************************
  * Code
  ******************************************************************************/
@@ -63,9 +63,14 @@ void MainControl_Init(void)
 	gridTieConfig.inverterConfig.s1PinNos[0] = 1;
 	gridTieConfig.inverterConfig.s1PinNos[1] = 3;
 	gridTieConfig.inverterConfig.s1PinNos[2] = 5;
-	gridTieConfig.boostConfig.pinNo = 12;
-	gridTieConfig.boostDiodePin = 11;
+	//gridTieConfig.boostConfig[0].pinNo = 8;
+	//gridTieConfig.boostDiodePin[0] = 7;
+	gridTieConfig.boostConfig[0].pinNo = 10;
+	gridTieConfig.boostDiodePin[0] = 9;
+	gridTieConfig.boostConfig[1].pinNo = 12;
+	gridTieConfig.boostDiodePin[1] = 11;
 	GridTieControl_Init(&gridTieConfig, Inverter3Ph_ResetSignal);
+	gridTieConfig.iRef = 2;
 }
 
 /**
@@ -104,18 +109,10 @@ void MainControl_Loop(void)
 		gridTieConfig.vCoor.abc.a = adcVals.V1;
 		gridTieConfig.vCoor.abc.b = adcVals.V2;
 		gridTieConfig.vCoor.abc.c = adcVals.V3;
-		gridTieConfig.vdc = (adcVals.Vdc1 + adcVals.Vdc2) / 2.f;
-		gridTieConfig.vpv = adcVals.V4;
-		gridTieConfig.idc = -adcVals.Ih3;
+		gridTieConfig.vdc = (adcVals.Vdc1);
 		gridTieConfig.iCoor.abc.a = adcVals.Ie1;
 		gridTieConfig.iCoor.abc.b = adcVals.Ie2;
 		gridTieConfig.iCoor.abc.c = adcVals.Ie3;
-
-		// slow increase to iref for better response
-		if (gridTieConfig.state == GRID_TIE_INACTIVE)
-			gridTieConfig.iRef = 0.1f;
-		else if (gridTieConfig.iRef < 4.0f)
-			gridTieConfig.iRef += .0001f;
 
 		// implement the control
 		GridTieControl_Loop(&gridTieConfig);

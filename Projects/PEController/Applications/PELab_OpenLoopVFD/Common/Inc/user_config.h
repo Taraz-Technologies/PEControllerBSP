@@ -43,7 +43,7 @@ extern "C" {
 /**
  * @brief Defines the Configuration for the PEController. Select @ref PEC_CUSTOM for independent PEControllers
  */
-#define PECONTROLLER_CONFIG		(PLB_6PH)
+#define PECONTROLLER_CONFIG		(PLB_TNPC)
 
 #if PECONTROLLER_CONFIG != PEC_CUSTOM
 /**
@@ -63,7 +63,7 @@ extern "C" {
 /**
  * @brief Select LCD variant installed on PEController
  */
-#define DISPLAY					(LCD_AFY800480B0)
+#define DISPLAY					(LCD_AFY800480A0)
 
 #define LOGO_DEFAULT			(0)
 #define LOGO_CUSTOM				(1)
@@ -89,7 +89,7 @@ extern "C" {
  * @note Minimum setting value is 10 (100KHz) with intelliSENS but may vary if additional logic is added.
  * Minimum setting value is 8 (125KHz) without intelliSENS software
  */
-#define SAMPLING_TIME_US		(40)
+#define SAMPLING_TIME_US		(10)
 /******** MEASUREMENT CONFIGURATION ***********/
 
 #ifdef __cplusplus

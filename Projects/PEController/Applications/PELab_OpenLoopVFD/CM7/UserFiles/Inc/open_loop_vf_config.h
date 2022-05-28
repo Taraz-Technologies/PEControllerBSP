@@ -46,7 +46,7 @@ extern "C" {
 /**
  * @brief PWM time period in micro-seconds
  */
-#define PWM_PERIOD_Us					(40)
+#define PWM_PERIOD_Us					(20)
 /**
  * @brief Nominal frequency used for computation of current modulation index
  */
@@ -54,11 +54,11 @@ extern "C" {
 /**
  * @brief Nominal modulation index required at @ref NOMINAL_FREQ
  */
-#define NOMINAL_MODULATION_INDEX		(.7f)
+#define NOMINAL_MODULATION_INDEX		(.9f)
 /**
  * @brief Acceleration factor for increasing speed of the controller
  */
-#define ACCELERATION					(1.00001f)
+#define ACCELERATION					(1.000001f)
 /**
  * @brief Initial frequency used by the system
  */

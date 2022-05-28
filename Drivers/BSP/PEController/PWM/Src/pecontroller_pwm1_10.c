@@ -227,6 +227,26 @@ float BSP_PWM1_10_UpdatePairDuty(uint32_t pwmNo, float duty, pwm_config_t* confi
 }
 
 /**
+ * @brief Activates a specific PWM Inverted pair
+ * @param pwmNo Channel no of reference channel is the PWM pair (Valid Values 1-10). <br>
+ * 				<b>Pairs are classified as :</b>
+ * 				-# CH1 = Reference channel available at pin pwmNo
+ * 				-# CH2 = Inverted Channel from reference available at pin pwmNo + 1 if pwmNo is odd else pwmNo - 1
+ * @param en <c>true</c> if needs activation, else false
+ */
+void PWM1_10_ActivateInvertedPair(uint32_t pwmNo, bool en)
+{
+	if (en)
+	{
+		HAL_HRTIM_WaveformOutputStart(&hhrtim, 3U << (pwmNo - 1));
+	}
+	else
+	{
+		HAL_HRTIM_WaveformOutputStop(&hhrtim, 3U << (pwmNo - 1));
+	}
+}
+
+/**
  * @brief Configures a single inverted pair for PWM
  * @param pwmNo Channel no of reference channel is the PWM pair (Valid Values 1-10). <br>
  * 				<b>Pairs are classified as :</b>
