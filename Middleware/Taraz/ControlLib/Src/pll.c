@@ -49,6 +49,10 @@
 /********************************************************************************
  * Code
  *******************************************************************************/
+/**
+ * @brief Initialize the PLL structure.
+ * @param *pll Structure to be initialized.
+ */
 void PLL_Init(pll_lock_t* pll)
 {
 	// should point to valid pll structure
@@ -69,9 +73,9 @@ void PLL_Init(pll_lock_t* pll)
 }
 
 /**
- * @brief Checks if the PLL is currently locked
- * @param *pll Pointer to the PLL structure
- * @return pll_states_t state of the PLL in this cycle
+ * @brief Checks if the PLL is currently locked.
+ * @param *pll Pointer to the PLL structure.
+ * @return pll_states_t state of the PLL in this cycle.
  */
 static pll_states_t IsPLLSynched(pll_lock_t* pll)
 {
@@ -152,7 +156,7 @@ pll_states_t Pll_LockGrid(pll_lock_t* pll)
 
 	// implement PI on dq results
 	// KP * q + Integrator * KI * q;
-	float omega = PI_Compensate(&pll->compensator, coords->dq0.q);///////////////????
+	float omega = PI_Compensate(&pll->compensator, coords->dq0.q);
 
 	// freq = pi / 2 * omega;
 	// magnitude = (d*d + q*q) ^ 0.5

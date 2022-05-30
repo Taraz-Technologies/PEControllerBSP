@@ -151,10 +151,9 @@ void GridTieControl_Init(grid_tie_t* gridTie, PWMResetCallback pwmResetCallback)
 /**
  * Get the duty cycle for boost channels
  * @param gridTie
- * @param boostFault
  * @return duty cycle to be applied
  */
-static float GridTie_BoostControl(grid_tie_t* gridTie, bool boostFault)
+static float GridTie_BoostControl(grid_tie_t* gridTie)
 {
 	return PI_Compensate(&boostPI, gridTie->VbstSet - gridTie->vdc);
 }
@@ -166,21 +165,15 @@ static float GridTie_BoostControl(grid_tie_t* gridTie, bool boostFault)
  */
 static void GridTie_GenerateOutput(grid_tie_t* gridTie, float* inverterDuties, bool disable)
 {
-	LIB_COOR_ALL_t coorV = {0};
-	LIB_COOR_ALL_t* vCoor = &coorV;
-	vCoor->abc.a = gridTie->vCoor.abc.a;
-	vCoor->abc.b = gridTie->vCoor.abc.b;
-	vCoor->abc.c = gridTie->vCoor.abc.c;
+	LIB_COOR_ALL_t* vCoor = &gridTie->vCoor;
 	LIB_COOR_ALL_t* iCoor = &gridTie->iCoor;
 
 	/******************** Compute Inverter Duty Cycles ******************/
 	// As only real power is needed so voltage and current should be completely in phase
-	memcpy(&vCoor->trigno, &gridTie->vCoor.trigno, sizeof(vCoor->trigno));
 	memcpy(&iCoor->trigno, &vCoor->trigno, sizeof(vCoor->trigno));
 
 
 	// Transform the current measurements to DQ coordinates
-	Transform_abc_dq0(&vCoor->abc, &vCoor->dq0, &iCoor->trigno, SRC_ABC, PARK_SINE);
 	Transform_abc_dq0(&iCoor->abc, &iCoor->dq0, &iCoor->trigno, SRC_ABC, PARK_SINE);
 
 	// Apply PI control to both DQ coordinates gridTie->dCompensator.dt
@@ -228,17 +221,11 @@ void GridTieControl_Loop(grid_tie_t* gridTie)
 	// get pointer to the coordinates
 	pll_lock_t* pll = &gridTie->pll;
 
-	uint32_t temp1 = SysTick->VAL;
-	// get fault states
-	//bool inverterBridgeFault = BSP_Din_GetPinState(9) | BSP_Din_GetPinState(10) | BSP_Din_GetPinState(11) | BSP_Din_GetPinState(13);
-	//bool boostBridgeFault = BSP_Din_GetPinState(12) | BSP_Din_GetPinState(14) | BSP_Din_GetPinState(15) | BSP_Din_GetPinState(16);
-	uint32_t temp2 = SysTick->VAL;
-	if (temp2 < temp1)
-		ts[7] = temp1 - temp2;
+	uint32_t temp1, temp2;
 
 	temp1 = SysTick->VAL;
 	// Compute and apply boost duty cycle
-	float boostDuty = GridTie_BoostControl(gridTie, false);
+	float boostDuty = GridTie_BoostControl(gridTie);
 	if (gridTie->VbstSet > 800.f)
 		boostDuty = 0;
 	temp2 = SysTick->VAL;

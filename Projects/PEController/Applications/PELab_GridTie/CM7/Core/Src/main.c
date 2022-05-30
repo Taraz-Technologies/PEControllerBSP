@@ -61,7 +61,7 @@ static void MX_GPIO_Init(void);
 /* USER CODE BEGIN 0 */
 int pollTicks, loopTicks;
 adc_measures_t adcVals;
-volatile uint32_t tempTicks;
+volatile int tempTicks;
 /* USER CODE END 0 */
 
 /**
@@ -134,12 +134,13 @@ int main(void)
 
 	while (1)
 	{
-		uint32_t temp1 = SysTick->VAL;
+		volatile int temp1 = SysTick->VAL;
 		SharedMemory_GetRecentMeasurements(&adcVals);
 		MainControl_Loop();
-		uint32_t temp2 = SysTick->VAL;
-		if (temp2 > temp1)
-			tempTicks = (480000 - (temp2 - temp1)) / 480;
+		volatile int temp2 = SysTick->VAL;
+		if (temp1 - temp2 > 3000)
+			tempTicks = (temp1 - temp2) / 480;
+
 		/* USER CODE END WHILE */
 
 		/* USER CODE BEGIN 3 */

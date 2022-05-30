@@ -165,6 +165,11 @@ typedef struct
   * @{
   */
 /**
+ * @brief Initialize the PLL structure.
+ * @param *pll Structure to be initialized.
+ */
+extern void PLL_Init(pll_lock_t* pll);
+/**
  * @brief Lock the grid voltages using PLL
  *
  * @param pll Pointer to the data structure
