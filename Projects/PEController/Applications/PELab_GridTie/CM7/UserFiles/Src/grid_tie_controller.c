@@ -69,7 +69,7 @@ pi_compensator_t boostPI = {
 /********************************************************************************
  * Global Variables
  *******************************************************************************/
-
+float inverterDuties[3];
 /********************************************************************************
  * Function Prototypes
  *******************************************************************************/
@@ -95,20 +95,16 @@ void GridTieControl_Init(grid_tie_t* gridTie, PWMResetCallback pwmResetCallback)
 	Inverter3Ph_Init(inverterConfig);
 
 	// configure PLL
-	static float vDFiltData[PLL_FILT_SIZE] = {0};
-	static float vQFiltData[PLL_FILT_SIZE] = {0};
 	gridTie->pll.coords = &gridTie->vCoor;
-	gridTie->pll.dFilt.dataPtr = vDFiltData;
-	gridTie->pll.qFilt.dataPtr = vQFiltData;
-	gridTie->pll.dFilt.count = PLL_FILT_SIZE;
-	gridTie->pll.qFilt.count = PLL_FILT_SIZE;
-	gridTie->pll.compensator.Kp = .001f;
-	gridTie->pll.compensator.Ki = .8f;
+	gridTie->pll.compensator.Kp = KP_PLL;
+	gridTie->pll.compensator.Ki = KI_PLL;
 	gridTie->pll.compensator.dt = PWM_PERIOD_s;
+	gridTie->pll.expectedGridFreq = 50;
 	gridTie->pll.qLockMax = 20;
 	gridTie->pll.dLockMin = 255;
 	gridTie->pll.dLockMax = 375;
 	gridTie->pll.cycleCount = (int)((1 / PWM_PERIOD_s) * 2);
+	PLL_Init(&gridTie->pll);
 
 	// configure Grid Tie Parameters
 	gridTie->iQComp.Kp = KP_I;
@@ -231,7 +227,6 @@ void GridTieControl_Loop(grid_tie_t* gridTie)
 {
 	// get pointer to the coordinates
 	pll_lock_t* pll = &gridTie->pll;
-	float inverterDuties[3];
 
 	uint32_t temp1 = SysTick->VAL;
 	// get fault states

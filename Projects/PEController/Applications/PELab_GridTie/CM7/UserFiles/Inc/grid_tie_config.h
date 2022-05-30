@@ -76,6 +76,8 @@ extern "C" {
 #define BOOST_VSET						(720)
 #define BOOST_KP						(0.002f)
 #define BOOST_KI						(0.1f)
+#define KP_PLL							(10)
+#define KI_PLL							(.5f)
 #define KP_I							(60)
 #define KI_I							(1000)
 #define BOOST_DUTYCYCLE_MAX				(.95f)
@@ -93,7 +95,7 @@ extern "C" {
 #define RELAY_TURN_OFF_VBST				(530.f)
 #define INVERTER_DEADTIME_ns			(200)
 #define MIN_MAX_BALANCING_INVERTER		(false)
-#define INVERTER_DUTY_MODE				OUTPUT_DUTY_AT_PWMH
+#define INVERTER_DUTY_MODE				OUTPUT_DUTY_MINUS_DEADTIME_AT_PWMH
 #define PLL_FILT_SIZE					(8)
 /********************************************************************************
  * Typedefs

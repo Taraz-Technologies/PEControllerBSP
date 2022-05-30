@@ -89,7 +89,7 @@ extern "C" {
 /**
  * @brief Set this to 1 if PLL monitoring is required
  */
-#define MONITOR_PLL						(0)
+#define MONITOR_PLL						(1)
 /**
  * @}
  */
@@ -138,8 +138,6 @@ typedef struct
 typedef struct
 {
 	LIB_COOR_ALL_t* coords;			/**< @brief Grid voltage coordinates in different coordinate systems */
-	mov_avg_t dFilt;				/**< @brief Filter for the D coordinate of DQ0 coordinates */
-	mov_avg_t qFilt;				/**< @brief Filter for the Q coordinate of DQ0 coordinates */
 	pi_compensator_t compensator;	/**< @brief PI compensator for Q adjustment */
 	pll_info_t info;				/**< @brief PLL info internaly used by the system */
 	pll_states_t status;			/**< @brief Current status of PLL */
@@ -151,6 +149,7 @@ typedef struct
 	float dLockMax;					/**< @brief Maximum value of D. If in a cycle defined by @ref cycleCount the value
 									remains smaller only than the PLL locking will be enabled */
 	int cycleCount;					/**< @brief If the PLL remains lock for this many control loops than it will be considered locked */
+	float expectedGridFreq;			/**< @brief Expected grid frequency  */
 } pll_lock_t;
 /**
  * @}
