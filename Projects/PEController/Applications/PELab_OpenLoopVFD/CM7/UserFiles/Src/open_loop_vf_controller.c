@@ -32,7 +32,7 @@
 #define PWM_FREQ_KHz					(1000.f/PWM_PERIOD_Us)
 #define PWM_FREQ_Hz						(1.f/PWM_PERIOD_s)
 #define MIN_MAX_BALANCING_INVERTER		(false)
-#define INVERTER_DUTY_MODE				OUTPUT_DUTY_AT_PWMH
+#define INVERTER_DUTY_MODE				OUTPUT_DUTY_MINUS_DEADTIME_AT_PWMH
 /********************************************************************************
  * Typedefs
  *******************************************************************************/

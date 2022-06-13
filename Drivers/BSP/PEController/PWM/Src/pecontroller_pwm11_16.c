@@ -56,15 +56,16 @@ static TIM_OC_InitTypeDef sConfigOC =
 static float dutyDeadTime = 0;
 static bool isEdgeAligned;
 static bool isDtEnabled;
+/** keeps the callback function of all PWM module
+ */
+static PWMResetCallback resetCallback = NULL;
+
 /********************************************************************************
  * Global Variables
  *******************************************************************************/
 /** Timer 1 handle
  */
 TIM_HandleTypeDef htim1;
-/** keeps the callback function of all PWM module
- */
-static PWMResetCallback resetCallback = NULL;
 /********************************************************************************
  * Function Prototypes
  *******************************************************************************/
@@ -215,13 +216,10 @@ static void PWM11_16_ConfigInvertedPair(uint32_t pwmNo, pwm_config_t* config)
 	if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOCLocal, ch) != HAL_OK)
 		Error_Handler();
 
-	if (isDtEnabled)
-	{
-		float oldMax = config->lim.max;
-		config->lim.max = 1 - dutyDeadTime;
-		if (oldMax < config->lim.max && oldMax != 0)
-			config->lim.max = oldMax;
-	}
+	float oldMax = config->lim.max;
+	config->lim.max = isDtEnabled ? 1 - dutyDeadTime : 1;
+	if (oldMax < config->lim.max && oldMax != 0)
+		config->lim.max = oldMax;
 
 	if (config->lim.minMaxDutyCycleBalancing  && config->lim.max > .5f)
 		config->lim.min = 1 - config->lim.max;
@@ -299,13 +297,10 @@ static void PWM11_16_ConfigChannel(uint32_t pwmNo, pwm_config_t* config)
 	if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOCLocal, ch) != HAL_OK)
 		Error_Handler();
 
-	if (isDtEnabled)
-	{
-		float oldMax = config->lim.max;
-		config->lim.max = 1 - dutyDeadTime;
-		if (oldMax < config->lim.max && oldMax != 0)
-			config->lim.max = oldMax;
-	}
+	float oldMax = config->lim.max;
+	config->lim.max = isDtEnabled ? 1 - dutyDeadTime : 1;
+	if (oldMax < config->lim.max && oldMax != 0)
+		config->lim.max = oldMax;
 }
 
 /**

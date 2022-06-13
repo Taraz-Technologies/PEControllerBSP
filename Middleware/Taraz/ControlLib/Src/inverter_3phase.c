@@ -66,12 +66,12 @@ static float Tnpc_PWM_UpdatePair(uint32_t pwmNo, float duty, pwm_config_t *confi
 	if(d1 < .5f)
 	{
 		BSP_PWM_UpdatePairDuty(pwmNo, 0, config);
-		BSP_PWM_UpdatePairDuty(pwmNo + 3, duty, config);
+		BSP_PWM_UpdatePairDuty(pwmNo + 2, 1 - duty, config);
 	}
 	else
 	{
 		BSP_PWM_UpdatePairDuty(pwmNo, duty, config);
-		BSP_PWM_UpdatePairDuty(pwmNo + 3, 0, config);
+		BSP_PWM_UpdatePairDuty(pwmNo + 2, 1, config);
 	}
 	return d1;
 }
@@ -91,7 +91,7 @@ static DutyCycleUpdateFnc ConfigSingleLeg(uint16_t pwmNo, inverter3Ph_config_t* 
 	/* for Tnpc use four switches */
 	if (config->legType == LEG_TNPC)
 	{
-		BSP_PWM_ConfigInvertedPair(pwmNo + 3, &config->pwmConfig);
+		BSP_PWM_ConfigInvertedPair(pwmNo + 2, &config->pwmConfig);
 		callback = Tnpc_PWM_UpdatePair; 				/* use this function to update all 4 switch duty cycles */
 		BSP_Dout_SetAsPWMPin(pwmNo + 2);
 		BSP_Dout_SetAsPWMPin(pwmNo + 3);

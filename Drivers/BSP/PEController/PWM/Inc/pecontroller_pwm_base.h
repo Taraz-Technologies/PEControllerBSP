@@ -115,7 +115,7 @@ typedef struct
 typedef struct
 {
 	pwm_alignment_t alignment;		/**< @brief Specifies the alignment of PWM */
-	uint32_t periodInUsec;			/**< @brief Specifies the period of the PWM in micro-seconds */
+	uint32_t periodInUsec;			/**< @brief Specifies the period of the PWM in micro-seconds (Maximum possible value is 250Us) */
 	deadtime_t deadtime;			/**< @brief The dead time parameter for the paired inverted PWM.
 										For individual PWMs this value should be NULL */
 } pwm_module_config_t;
