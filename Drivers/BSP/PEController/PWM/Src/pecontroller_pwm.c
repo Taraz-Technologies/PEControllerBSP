@@ -205,12 +205,12 @@ void BSP_PWM_Start(uint32_t pwmMask)
 		TIM_CCxNChannelCmd(htim1.Instance, TIM_CHANNEL_3, TIM_CCxN_ENABLE);
 
 	HAL_HRTIM_WaveformOutputStart(&hhrtim,
-			//(pwmMask & 0x1 ? HRTIM_OUTPUT_TA1 : 0) |
-			//(pwmMask & 0x2 ? HRTIM_OUTPUT_TA2 : 0) |
-			//(pwmMask & 0x4 ? HRTIM_OUTPUT_TB1 : 0) |
-			//(pwmMask & 0x8 ? HRTIM_OUTPUT_TB2 : 0) |
-			//(pwmMask & 0x10 ? HRTIM_OUTPUT_TC1 : 0) |
-			//(pwmMask & 0x20 ? HRTIM_OUTPUT_TC2 : 0) |
+			(pwmMask & 0x1 ? HRTIM_OUTPUT_TA1 : 0) |
+			(pwmMask & 0x2 ? HRTIM_OUTPUT_TA2 : 0) |
+			(pwmMask & 0x4 ? HRTIM_OUTPUT_TB1 : 0) |
+			(pwmMask & 0x8 ? HRTIM_OUTPUT_TB2 : 0) |
+			(pwmMask & 0x10 ? HRTIM_OUTPUT_TC1 : 0) |
+			(pwmMask & 0x20 ? HRTIM_OUTPUT_TC2 : 0) |
 			(pwmMask & 0x40 ? HRTIM_OUTPUT_TD1 : 0) |
 			(pwmMask & 0x80 ? HRTIM_OUTPUT_TD2 : 0) |
 			(pwmMask & 0x100 ? HRTIM_OUTPUT_TE1 : 0) |

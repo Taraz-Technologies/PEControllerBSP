@@ -38,6 +38,9 @@ static void Inverter3Ph_ResetSignal(void);
  * Variables
  ******************************************************************************/
 extern adc_measures_t adcVals;
+/**
+ * @brief Used to indicate the requirement of new duty cycle computations.
+ */
 static volatile bool recompute = false;
 /**
  * @brief Grid Tie Control Parameters

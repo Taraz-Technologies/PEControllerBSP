@@ -88,36 +88,6 @@ float PI_Compensate(pi_compensator_t* pi, float err)
 #endif
 	return result;
 }
-/*
-#if MONITOR_PI
-	pi->err = err;
-#endif
-	pi->Integral += (err * pi->dt) ;
-	float integralTerm = (pi->Ki * pi->Integral);
-#if PI_COMPENSATOR_LIMIT_CAPABLE
-	if (pi->has_lmt)
-	{
-		if(integralTerm > pi->max)
-			pi->Integral = pi->max / pi->Ki;
-		if(integralTerm < pi->min)
-			pi->Integral = pi->min / pi->Ki;
-	}
-#endif
-	float result = pi->Kp * err + (pi->Ki * pi->Integral);
-#if PI_COMPENSATOR_LIMIT_CAPABLE
-	if (pi->has_lmt)
-	{
-		if(result > pi->max)
-			result = pi->max;
-		if(result < pi->min)
-			result = pi->min;
-	}
-#endif
-#if MONITOR_PI
-	pi->result = result;
-#endif
-	return result;
-*/
 
 /**
  * @brief Computes the moving average

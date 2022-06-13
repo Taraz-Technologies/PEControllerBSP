@@ -41,6 +41,9 @@
 /********************************************************************************
  * Static Variables
  *******************************************************************************/
+/**
+ * @brief PWM configuration for the inverter
+ */
 static pwm_module_config_t inverterPWMModuleConfig =
 {
 		.alignment = CENTER_ALIGNED,
@@ -51,14 +54,19 @@ static pwm_module_config_t inverterPWMModuleConfig =
 		},
 		.synchOnStart = true
 };
+/**
+ * @brief PWM configuration for the boost switches
+ */
 static pwm_module_config_t boostPWMConfig =
 {
 		.alignment = CENTER_ALIGNED,
 		.periodInUsec = PWM_PERIOD_Us,
 		.synchOnStart = true
 };
-// define the compensator for PI controller
-pi_compensator_t boostPI = {
+/**
+ * @brief Compensator for PI
+ */
+static pi_compensator_t boostPI = {
 		.has_lmt = true,
 		.Kp = BOOST_KP,
 		.Ki = BOOST_KI,
@@ -69,7 +77,7 @@ pi_compensator_t boostPI = {
 /********************************************************************************
  * Global Variables
  *******************************************************************************/
-float inverterDuties[3];
+
 /********************************************************************************
  * Function Prototypes
  *******************************************************************************/
@@ -149,9 +157,9 @@ void GridTieControl_Init(grid_tie_t* gridTie, PWMResetCallback pwmResetCallback)
 }
 
 /**
- * Get the duty cycle for boost channels
- * @param gridTie
- * @return duty cycle to be applied
+ * Get the duty cycle for boost channels.
+ * @param gridTie Grid Tie structure to be used.
+ * @return Duty cycle to be applied.
  */
 static float GridTie_BoostControl(grid_tie_t* gridTie)
 {
@@ -160,29 +168,28 @@ static float GridTie_BoostControl(grid_tie_t* gridTie)
 
 /**
  * @brief Generate the output duty cycles for the grid tie inverter
- * @param gridTie
- * @param inverterDuties
+ * @param gridTie Grid Tie structure to be used.
+ * @param disable Used to reset the PI compensators in case the inverter is not enabled
  */
-static void GridTie_GenerateOutput(grid_tie_t* gridTie, float* inverterDuties, bool disable)
+static void GridTie_GenerateOutput(grid_tie_t* gridTie, float*, bool disable)
 {
 	LIB_COOR_ALL_t* vCoor = &gridTie->vCoor;
 	LIB_COOR_ALL_t* iCoor = &gridTie->iCoor;
+	float inverterDuties[3];
 
 	/******************** Compute Inverter Duty Cycles ******************/
 	// As only real power is needed so voltage and current should be completely in phase
 	memcpy(&iCoor->trigno, &vCoor->trigno, sizeof(vCoor->trigno));
 
-
 	// Transform the current measurements to DQ coordinates
 	Transform_abc_dq0(&iCoor->abc, &iCoor->dq0, &iCoor->trigno, SRC_ABC, PARK_SINE);
 
 	// Apply PI control to both DQ coordinates gridTie->dCompensator.dt
-
 	LIB_COOR_ALL_t coor;
 	coor.dq0.d = PI_Compensate(&gridTie->iDComp, gridTie->iRef - iCoor->dq0.d) + vCoor->dq0.d
-			- TWO_PI * GRID_FREQ * L_OUT * iCoor->dq0.q;
+			- TWO_PI * GRID_FREQ * L_OUT * iCoor->dq0.q / PWM_FREQ_Hz;
 	coor.dq0.q = PI_Compensate(&gridTie->iQComp, 0             - iCoor->dq0.q) + vCoor->dq0.q
-			+ TWO_PI * GRID_FREQ * L_OUT * iCoor->dq0.d;
+			+ TWO_PI * GRID_FREQ * L_OUT * iCoor->dq0.d / PWM_FREQ_Hz;
 
 	// Divide by VDC for normalization
 	coor.dq0.d /= gridTie->vdc;
@@ -197,20 +204,14 @@ static void GridTie_GenerateOutput(grid_tie_t* gridTie, float* inverterDuties, b
 
 	// get the values in alpha beta coordinates
 	Transform_alphaBeta0_dq0(&coor.alBe0, &coor.dq0, &iCoor->trigno, SRC_DQ0, PARK_SINE);
-	/*
-	Transform_abc_dq0(&coor.abc, &coor.dq0, &iCoor->trigno, SRC_DQ0, PARK_SINE);
-
-	inverterDuties[0] = coor.abc.a + .5f;
-	inverterDuties[1] = coor.abc.b + .5f;
-	inverterDuties[2] = coor.abc.c + .5f;
-	*/
 	// Get SVPWM signal
-	// SVPWM_GenerateDutyCycles(&coor.alBe0, inverterDuties);
+	// SVPWM_GenerateDutyCycles(&coor.alBe0, inverterDuties); --todo--
 	ComputeDuty_SVPWM_FromAlBe0(&coor.alBe0, inverterDuties);
 	/******************** Compute Inverter Duty Cycles ******************/
-}
 
-uint32_t ts[10] = {0};
+	// generate the duty cycle for the inverter
+	Inverter3Ph_UpdateDuty(&gridTie->inverterConfig, inverterDuties);
+}
 
 /**
  * @brief This function computes new duty cycles for the inverter and boost in each cycle
@@ -221,24 +222,15 @@ void GridTieControl_Loop(grid_tie_t* gridTie)
 	// get pointer to the coordinates
 	pll_lock_t* pll = &gridTie->pll;
 
-	uint32_t temp1, temp2;
-
-	temp1 = SysTick->VAL;
 	// Compute and apply boost duty cycle
 	float boostDuty = GridTie_BoostControl(gridTie);
 	if (gridTie->VbstSet > 800.f)
 		boostDuty = 0;
-	temp2 = SysTick->VAL;
-	if (temp2 < temp1)
-		ts[0] = temp1 - temp2;
-	temp1 = SysTick->VAL;
+
 	for (int i = 0; i < BOOST_COUNT; i++)
 		gridTie->boostConfig[i].dutyUpdateFnc(gridTie->boostConfig[i].pinNo, boostDuty, &gridTie->boostConfig[i].pwmConfig);
-	temp2 = SysTick->VAL;
-	if (temp2 < temp1)
-		ts[1] = temp1 - temp2;
 
-	temp1 = SysTick->VAL;
+
 	// Relay Control depending On Vboost
 	if (gridTie->isVbstStable)
 	{
@@ -265,19 +257,10 @@ void GridTieControl_Loop(grid_tie_t* gridTie)
 			gridTie->tempIndex = 0;
 		}
 	}
-	temp2 = SysTick->VAL;
-	if (temp2 < temp1)
-		ts[2] = temp1 - temp2;
 
-	temp1 = SysTick->VAL;
 	// Implement phase lock loop
 	Pll_LockGrid(pll);
-	temp2 = SysTick->VAL;
-	if (temp2 < temp1)
-		ts[3] = temp1 - temp2;
-	//pll->status = PLL_LOCKED;
 
-	temp1 = SysTick->VAL;
 	// Update status of grid tie depending upon dc-link and pll
 	if(gridTie->state == GRID_TIE_INACTIVE)
 	{
@@ -295,36 +278,9 @@ void GridTieControl_Loop(grid_tie_t* gridTie)
 			Inverter3Ph_Activate(&gridTie->inverterConfig, false);
 		}
 	}
-	temp2 = SysTick->VAL;
-	if (temp2 < temp1)
-		ts[4] = temp1 - temp2;
 
-	temp1 = SysTick->VAL;
 	// compute and generate the duty cycle for inverter
 	GridTie_GenerateOutput(gridTie, inverterDuties, gridTie->state == GRID_TIE_INACTIVE);
-	temp2 = SysTick->VAL;
-	if (temp2 < temp1)
-		ts[5] = temp1 - temp2;
-
-	/*
-	static bool st = false;
-	if (st)
-	{
-		st = false;
-		inverterDuties[0] = .2f; inverterDuties[1] = .45f; inverterDuties[2] = .7f;
-	}
-	else
-	{
-		st = true;
-		inverterDuties[0] = .8f; inverterDuties[1] = .2f; inverterDuties[2] = .3f;
-	}
-	*/
-
-	temp1 = SysTick->VAL;
-	Inverter3Ph_UpdateDuty(&gridTie->inverterConfig, inverterDuties);
-	temp2 = SysTick->VAL;
-	if (temp2 < temp1)
-		ts[6] = temp1 - temp2;
 }
 
 #pragma GCC pop_options

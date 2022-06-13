@@ -106,7 +106,6 @@ void SVPWM_GenerateDutyCycles(LIB_3COOR_ALBE0_t *alBe0, float* duties)
 
 	duties[2] = ((c - sub) / 2);
 	Limit_Duty_0_1(duties + 2);
-
 }
 
 /**
