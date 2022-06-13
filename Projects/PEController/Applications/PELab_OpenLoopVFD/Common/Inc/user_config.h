@@ -63,14 +63,14 @@ extern "C" {
 /**
  * @brief Select LCD variant installed on PEController
  */
-#define DISPLAY					(LCD_AFY800480B0)
+#define DISPLAY					(LCD_AFY800480A0)
 
 #define LOGO_DEFAULT			(0)
 #define LOGO_CUSTOM				(1)
 /**
  * @brief Select the LOGO to be displayed on PEController
  */
-#define LOGO_TYPE				(LOGO_DEFAULT)
+#define LOGO_TYPE				(LOGO_CUSTOM)
 
 /**
  * @brief Selects the display brightness value between 0-100

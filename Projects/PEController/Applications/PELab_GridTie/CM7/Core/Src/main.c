@@ -134,12 +134,8 @@ int main(void)
 
 	while (1)
 	{
-		volatile int temp1 = SysTick->VAL;
 		SharedMemory_GetRecentMeasurements(&adcVals);
 		MainControl_Loop();
-		volatile int temp2 = SysTick->VAL;
-		if (temp1 - temp2 > 3000)
-			tempTicks = (temp1 - temp2) / 480;
 
 		/* USER CODE END WHILE */
 

@@ -102,6 +102,7 @@ typedef struct
 														This value represents the first switch of the 4th leg. To disable duplication set this to 0 */
 	DutyCycleUpdateFnc updateCallbackDuplicate; /**< @brief These call backs are used by the drivers to update
 													the duty cycles of the duplicate leg according to the configuration */
+
 } inverter3Ph_config_t;
 /**
  * @}

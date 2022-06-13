@@ -149,6 +149,8 @@ void GridTieControl_Init(grid_tie_t* gridTie, PWMResetCallback pwmResetCallback)
 		// Turn off the upper switch so that it behaves as a diode
 		if(gridTie->boostDiodePin[i])
 			BSP_Dout_SetAsIOPin(gridTie->boostDiodePin[i], GPIO_PIN_RESET);
+
+		//BSP_PWMOut_Enable((1 << (boostConfig->pinNo - 1)) , true);			// --TODO-- TNPC leg for boost??
 	}
 	gridTie->VbstSet = BOOST_VSET;
 	/***************** Configure Boost *********************/
@@ -171,7 +173,7 @@ static float GridTie_BoostControl(grid_tie_t* gridTie)
  * @param gridTie Grid Tie structure to be used.
  * @param disable Used to reset the PI compensators in case the inverter is not enabled
  */
-static void GridTie_GenerateOutput(grid_tie_t* gridTie, float*, bool disable)
+static void GridTie_GenerateOutput(grid_tie_t* gridTie, bool disable)
 {
 	LIB_COOR_ALL_t* vCoor = &gridTie->vCoor;
 	LIB_COOR_ALL_t* iCoor = &gridTie->iCoor;
@@ -280,7 +282,7 @@ void GridTieControl_Loop(grid_tie_t* gridTie)
 	}
 
 	// compute and generate the duty cycle for inverter
-	GridTie_GenerateOutput(gridTie, inverterDuties, gridTie->state == GRID_TIE_INACTIVE);
+	GridTie_GenerateOutput(gridTie, gridTie->state == GRID_TIE_INACTIVE);
 }
 
 #pragma GCC pop_options

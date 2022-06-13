@@ -206,6 +206,21 @@ extern void BSP_PWM_GetDafaultModuleConfig(pwm_module_config_t* moduleConfig);
  * @ref BSP_PWM_GetDafaultModuleConfig() before calling this function
  */
 extern void BSP_PWM_GetDefaultConfig(pwm_config_t* pwmConfig, pwm_module_config_t* moduleConfig);
+/**
+ * @brief Enable disable the output for required PWM channels
+ * @code
+ * // Enable PWM output for channel 1
+ * BSP_PWMOut_Enable(0x1, true);
+ * // Enable PWM output for channel 1 and channel 2
+ * BSP_PWMOut_Enable(0x3, true);
+ * // Disable PWM output for channel n and channel m, where n & m are between 1 & 16
+ * BSP_PWMOut_Enable((1U << (n - 1)) | (1U << (m - 1)), false);
+ * @endcode
+ * @param pwmMask Set the PWM channels needed to be run.<br>
+ * 				<b>Valid Range</b> =  (0x0001 - 0xffff)
+ * @param en <c>true</c> if needs to be enabled else <c>false</c>
+ */
+extern void BSP_PWMOut_Enable(uint32_t pwmMask, bool en);
 /*******************************************************************************
  * Code
  ******************************************************************************/

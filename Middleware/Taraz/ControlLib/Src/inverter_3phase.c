@@ -102,12 +102,14 @@ static DutyCycleUpdateFnc ConfigSingleLeg(uint16_t pwmNo, inverter3Ph_config_t* 
 /**
  * @brief Enable/Disable the PWMs for a single leg of the inverter
  *
+ * @param *config Pointer to the Inverter Configurations
  * @param pwmNo Channel no of the initial switch of the leg.
  * @param en True if needs to be enabled else false
  */
-static void EnableSingleLeg(uint16_t pwmNo, bool en)
+static void EnableSingleLeg(inverter3Ph_config_t* config, uint16_t pwmNo, bool en)
 {
 	BSP_PWM_ActivateInvertedPair(pwmNo, en);
+	//BSP_PWMOut_Enable(((config->legType == LEG_TNPC ? 15U : 3U) << (pwmNo - 1)) , en);
 }
 
 /**
@@ -182,9 +184,9 @@ void Inverter3Ph_UpdateSPWM(inverter3Ph_config_t* config, float theta, float mod
 void Inverter3Ph_Activate(inverter3Ph_config_t* config, bool en)
 {
 	for (int i = 0; i < 3; i++)
-		EnableSingleLeg(config->s1PinNos[i], en);
+		EnableSingleLeg(config, config->s1PinNos[i], en);
 	if (config->s1PinDuplicate)
-		EnableSingleLeg(config->s1PinDuplicate, en);
+		EnableSingleLeg(config, config->s1PinDuplicate, en);
 	config->state = en ? INVERTER_ACTIVE : INVERTER_INACTIVE;
 }
 
