@@ -182,6 +182,8 @@ static void PWM1_10_Drivers_Init(void)
 	hhrtim.Instance = HRTIM1;
 	hhrtim.Init.HRTIMInterruptResquests = HRTIM_IT_NONE;
 	hhrtim.Init.SyncOptions = HRTIM_SYNCOPTION_NONE;
+	hhrtim.Init.SyncOptions = HRTIM_SYNCOPTION_SLAVE;
+	hhrtim.Init.SyncInputSource = HRTIM_SYNCINPUTSOURCE_INTERNALEVENT;
 	if (HAL_HRTIM_Init(&hhrtim) != HAL_OK)
 		Error_Handler();
 	pwm1_10_enabled = true;
@@ -244,6 +246,26 @@ float BSP_PWM1_10_UpdatePairDuty(uint32_t pwmNo, float duty, pwm_config_t* confi
 }
 
 /**
+ * @brief Activates a specific PWM Inverted pair
+ * @param pwmNo Channel no of reference channel is the PWM pair (Valid Values 1-10). <br>
+ * 				<b>Pairs are classified as :</b>
+ * 				-# CH1 = Reference channel available at pin pwmNo
+ * 				-# CH2 = Inverted Channel from reference available at pin pwmNo + 1 if pwmNo is odd else pwmNo - 1
+ * @param en <c>true</c> if needs activation, else false
+ */
+void PWM1_10_ActivateInvertedPair(uint32_t pwmNo, bool en)
+{
+	if (en)
+	{
+		HAL_HRTIM_WaveformOutputStart(&hhrtim, 3U << (pwmNo - 1));
+	}
+	else
+	{
+		HAL_HRTIM_WaveformOutputStop(&hhrtim, 3U << (pwmNo - 1));
+	}
+}
+
+/**
  * @brief Configures a single inverted pair for PWM
  * @param pwmNo Channel no of reference channel is the PWM pair (Valid Values 1-10). <br>
  * 				<b>Pairs are classified as :</b>
@@ -264,6 +286,7 @@ static void PWM1_10_ConfigInvertedPair(uint32_t pwmNo, pwm_config_t* config)
 	/* timer configuration */
 	HRTIM_TimerCfgTypeDef pTimerCfg = GetDefaultTimerConfig(mod->periodInUsec, TimerIdx);
 	pTimerCfg.DeadTimeInsertion = IsDeadtimeEnabled(&mod->deadtime) ? HRTIM_TIMDEADTIMEINSERTION_ENABLED : HRTIM_TIMDEADTIMEINSERTION_DISABLED;
+	pTimerCfg.StartOnSync = mod->synchOnStart ? HRTIM_SYNCSTART_ENABLED : HRTIM_SYNCSTART_DISABLED;
 	if (HAL_HRTIM_WaveformTimerConfig(&hhrtim, TimerIdx, &pTimerCfg) != HAL_OK)
 		Error_Handler();
 
@@ -417,6 +440,7 @@ static void PWM1_10_ConfigChannel(uint32_t pwmNo, pwm_config_t* config)
 	/* timer configuration */
 	HRTIM_TimerCfgTypeDef pTimerCfg = GetDefaultTimerConfig(mod->periodInUsec, TimerIdx);
 	pTimerCfg.DeadTimeInsertion = HRTIM_TIMDEADTIMEINSERTION_DISABLED;
+	pTimerCfg.StartOnSync = mod->synchOnStart ? HRTIM_SYNCSTART_ENABLED : HRTIM_SYNCSTART_DISABLED;
 	if (HAL_HRTIM_WaveformTimerConfig(&hhrtim, TimerIdx, &pTimerCfg) != HAL_OK)
 		Error_Handler();
 

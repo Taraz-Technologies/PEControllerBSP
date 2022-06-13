@@ -128,6 +128,7 @@ typedef struct
 #endif
 	float tempQMax;					/**< @brief Temporary variable for evaluating cycle maximum for Q */
 	float tempDMin;					/**< @brief Temporary variable for evaluating cycle minimum for D */
+	float tempDMax;					/**< @brief Temporary variable for evaluating cycle maximum for D */
 	int index;						/**< @brief Current index of the cycle */
 } pll_info_t;
 
@@ -137,8 +138,6 @@ typedef struct
 typedef struct
 {
 	LIB_COOR_ALL_t* coords;			/**< @brief Grid voltage coordinates in different coordinate systems */
-	mov_avg_t dFilt;				/**< @brief Filter for the D coordinate of DQ0 coordinates */
-	mov_avg_t qFilt;				/**< @brief Filter for the Q coordinate of DQ0 coordinates */
 	pi_compensator_t compensator;	/**< @brief PI compensator for Q adjustment */
 	pll_info_t info;				/**< @brief PLL info internaly used by the system */
 	pll_states_t status;			/**< @brief Current status of PLL */
@@ -147,7 +146,10 @@ typedef struct
 									remains less than this value the PLL will be considered locked */
 	float dLockMin;					/**< @brief Minimum value of D. If in a cycle defined by @ref cycleCount the value
 									remains greater only than the PLL locking will be enabled */
+	float dLockMax;					/**< @brief Maximum value of D. If in a cycle defined by @ref cycleCount the value
+									remains smaller only than the PLL locking will be enabled */
 	int cycleCount;					/**< @brief If the PLL remains lock for this many control loops than it will be considered locked */
+	float expectedGridFreq;			/**< @brief Expected grid frequency  */
 } pll_lock_t;
 /**
  * @}
@@ -162,6 +164,11 @@ typedef struct
 /** @defgroup PLL_Exported_Functions Functions
   * @{
   */
+/**
+ * @brief Initialize the PLL structure.
+ * @param *pll Structure to be initialized.
+ */
+extern void PLL_Init(pll_lock_t* pll);
 /**
  * @brief Lock the grid voltages using PLL
  *

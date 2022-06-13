@@ -52,6 +52,7 @@ static pwm_module_config_t inverterPWMModuleConfig =
 				.on = true,
 				.nanoSec = INVERTER_DEADTIME_ns,
 		},
+		.synchOnStart = true
 };
 /********************************************************************************
  * Global Variables

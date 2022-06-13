@@ -59,7 +59,6 @@ static bool isDtEnabled;
 /** keeps the callback function of all PWM module
  */
 static PWMResetCallback resetCallback = NULL;
-
 /********************************************************************************
  * Global Variables
  *******************************************************************************/
@@ -109,9 +108,9 @@ static void PWM11_16_Drivers_Init(pwm_config_t* config)
 	if (HAL_TIM_PWM_Init(&htim1) != HAL_OK)
 		Error_Handler();
 	TIM_MasterConfigTypeDef sMasterConfig = {0};
-	sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+	sMasterConfig.MasterOutputTrigger = TIM_TRGO_ENABLE;
 	sMasterConfig.MasterOutputTrigger2 = TIM_TRGO2_RESET;
-	sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+	sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_ENABLE;
 	if (HAL_TIMEx_MasterConfigSynchronization(&htim1, &sMasterConfig) != HAL_OK)
 		Error_Handler();
 	TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig = {0};
@@ -265,7 +264,7 @@ float BSP_PWM11_16_UpdateChannelDuty(uint32_t pwmNo, float duty, pwm_config_t* c
 
 	uint32_t ch = (pwmNo - 11) / 2;
 	if (duty == 0)
-		*(((uint32_t*)&(TIM1->CCR1)) + ch) = 0;
+		*(((uint32_t*)&(TIM1->CCR1)) + ch) = isEdgeAligned ? 0 : TIM1->ARR;
 	else
 	{
 		float dutyUse = duty;

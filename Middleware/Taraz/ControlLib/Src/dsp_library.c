@@ -63,18 +63,17 @@ float PI_Compensate(pi_compensator_t* pi, float err)
 #if MONITOR_PI
 	pi->err = err;
 #endif
-	pi->Integral += (err * pi->dt) ;
-	float integralTerm = (pi->Ki * pi->Integral);
+	pi->Integral += (pi->Ki * err * pi->dt) ;
 #if PI_COMPENSATOR_LIMIT_CAPABLE
 	if (pi->has_lmt)
 	{
-		if(integralTerm > pi->max)
-			pi->Integral = pi->max / pi->Ki;
-		if(integralTerm < pi->min)
-			pi->Integral = pi->min / pi->Ki;
+		if(pi->Integral > pi->max)
+			pi->Integral = pi->max;
+		if(pi->Integral < pi->min)
+			pi->Integral = pi->min;
 	}
 #endif
-	float result = pi->Kp * err + (pi->Ki * pi->Integral);
+	float result = pi->Kp * err + pi->Integral;
 #if PI_COMPENSATOR_LIMIT_CAPABLE
 	if (pi->has_lmt)
 	{

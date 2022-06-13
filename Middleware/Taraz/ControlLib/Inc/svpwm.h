@@ -64,6 +64,12 @@ extern "C" {
   */
 /**
  * @brief Get duty cycles of each leg using space vector PWM from LIB_3COOR_ALBE0_t
+ * @param *alBe0 Alpha Beta Zero Coordinates
+ * @param *duties Pointer to the array where duty cycles need to be updated. Duty Cycle range is between (0-1)
+ */
+extern void SVPWM_GenerateDutyCycles(LIB_3COOR_ALBE0_t *alBe0, float* duties);
+/**
+ * @brief Get duty cycles of each leg using space vector PWM from LIB_3COOR_ALBE0_t
  * @param *alBe0 Alpha Beta Coordinates
  * @param *duties Pointer to the array where duty cycles need to be updated
  */
