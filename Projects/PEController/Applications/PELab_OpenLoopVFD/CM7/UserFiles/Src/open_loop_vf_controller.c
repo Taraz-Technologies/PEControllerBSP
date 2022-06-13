@@ -99,6 +99,8 @@ void OpenLoopVfControl_Init(openloopvf_config_t* config, PWMResetCallback pwmRes
 
 	if(pwmResetCallback != NULL)
 		BSP_PWM_Config_Interrupt(inverterConfig->s1PinNos[0], true, pwmResetCallback, 0);
+
+	Inverter3Ph_Activate(inverterConfig, true);
 }
 
 /**

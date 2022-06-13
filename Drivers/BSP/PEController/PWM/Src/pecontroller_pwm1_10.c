@@ -57,6 +57,17 @@ HRTIM_HandleTypeDef hhrtim;
 /********************************************************************************
  * Code
  *******************************************************************************/
+/**
+ * @brief Gets the clock frequency of the specific timer in MHz.
+ * @param TimerIdx Index of the timer submodule.
+ * @return Clock frequency in MHz.
+ */
+static inline uint32_t GetTimerFreqMHz(uint32_t TimerIdx)
+{
+	static const uint32_t divs[8] = { 1, 1, 1, 1, 1, 1, 2, 4};
+	return HRTIM_FREQ / divs[(hhrtim.Instance->sTimerxRegs[TimerIdx].TIMxCR & 0x7)];
+}
+
 static HRTIM_TimerCfgTypeDef GetDefaultTimerConfig(uint32_t periodInUsec, uint32_t TimerIdx)
 {
 	/* timer base configuration */
@@ -66,7 +77,18 @@ static HRTIM_TimerCfgTypeDef GetDefaultTimerConfig(uint32_t periodInUsec, uint32
 			.PrescalerRatio = HRTIM_PRESCALERRATIO_DIV1,
 			.Mode = HRTIM_MODE_CONTINUOUS,
 	};
-	pTimeBaseCfg.Period = periodInUsec * HRTIM_FREQ;
+	uint32_t ticks = periodInUsec * HRTIM_FREQ;
+	if(ticks > 65535)
+	{
+		ticks /= 2;
+		pTimeBaseCfg.PrescalerRatio = HRTIM_PRESCALERRATIO_DIV2;
+		if(ticks > 65535)
+		{
+			ticks /= 2;
+			pTimeBaseCfg.PrescalerRatio = HRTIM_PRESCALERRATIO_DIV4;
+		}
+	}
+	pTimeBaseCfg.Period = ticks;
 	if (HAL_HRTIM_TimeBaseConfig(&hhrtim, TimerIdx, &pTimeBaseCfg) != HAL_OK)
 		Error_Handler();
 
@@ -130,7 +152,7 @@ static HRTIM_OutputCfgTypeDef GetDefaultOutputConfig(void)
 			.FaultLevel = HRTIM_OUTPUTFAULTLEVEL_NONE,
 			.ChopperModeEnable = HRTIM_OUTPUTCHOPPERMODE_DISABLED,
 			.BurstModeEntryDelayed = HRTIM_OUTPUTBURSTMODEENTRY_REGULAR,
-			.SetSource = HRTIM_OUTPUTRESET_TIMCMP1,
+			.SetSource = HRTIM_OUTPUTSET_TIMCMP1,
 			.ResetSource = HRTIM_OUTPUTRESET_TIMCMP2,
 	};
 	return pOutputCfg;
@@ -197,13 +219,12 @@ float BSP_PWM1_10_UpdatePairDuty(uint32_t pwmNo, float duty, pwm_config_t* confi
 	{
 		hhrtim.Instance->sTimerxRegs[TimerIdx].CMP1xR = period + 2;
 		hhrtim.Instance->sTimerxRegs[TimerIdx].CMP2xR = period + 2;
-		MODIFY_REG(hhrtim.Instance->sTimerxRegs[TimerIdx].TIMxCR, HRTIM_TIMCR_DELCMP2, 0U);
 	}
 	else if(mod->alignment == CENTER_ALIGNED)
 	{
 		if(config->dutyMode == OUTPUT_DUTY_AT_PWMH && IsDeadtimeEnabled(&mod->deadtime))
 		{
-			int dt = (mod->deadtime.nanoSec * HRTIM_FREQ) / 1000;
+			int dt = (mod->deadtime.nanoSec * GetTimerFreqMHz(TimerIdx)) / 1000;
 			onTime += dt;
 		}
 		int t0 = (period - onTime) / 2; 		// half time
@@ -212,16 +233,14 @@ float BSP_PWM1_10_UpdatePairDuty(uint32_t pwmNo, float duty, pwm_config_t* confi
 			t0 = 3;
 		hhrtim.Instance->sTimerxRegs[TimerIdx].CMP1xR = t0;
 		hhrtim.Instance->sTimerxRegs[TimerIdx].CMP2xR = tEnd;
-		MODIFY_REG(hhrtim.Instance->sTimerxRegs[TimerIdx].TIMxCR, HRTIM_TIMCR_DELCMP2, 0U);
 	}
 	else
 	{
 		uint32_t dt = 3;
 		if(config->dutyMode == OUTPUT_DUTY_AT_PWMH && IsDeadtimeEnabled(&mod->deadtime))
-			dt += (mod->deadtime.nanoSec * HRTIM_FREQ) / 1000;
+			dt += (mod->deadtime.nanoSec * GetTimerFreqMHz(TimerIdx)) / 1000;
 		hhrtim.Instance->sTimerxRegs[TimerIdx].CMP1xR = 3;
 		hhrtim.Instance->sTimerxRegs[TimerIdx].CMP2xR = onTime + dt;
-		MODIFY_REG(hhrtim.Instance->sTimerxRegs[TimerIdx].TIMxCR, HRTIM_TIMCR_DELCMP2, 0U);
 	}
 	return duty;
 }
@@ -288,11 +307,12 @@ static void PWM1_10_ConfigInvertedPair(uint32_t pwmNo, pwm_config_t* config)
 			pDeadTimeCfg.RisingSign = HRTIM_TIMDEADTIME_RISINGSIGN_NEGATIVE;
 			pDeadTimeCfg.FallingSign = HRTIM_TIMDEADTIME_FALLINGSIGN_NEGATIVE;
 		}
-		pDeadTimeCfg.FallingValue = pDeadTimeCfg.RisingValue = (mod->deadtime.nanoSec * HRTIM_FREQ) / (16000);
+		pDeadTimeCfg.FallingValue = pDeadTimeCfg.RisingValue = (mod->deadtime.nanoSec * GetTimerFreqMHz(TimerIdx)) / (16000);
 		if (HAL_HRTIM_DeadTimeConfig(&hhrtim, TimerIdx, &pDeadTimeCfg) != HAL_OK)
 			Error_Handler();
 
-		deadTicks += (pDeadTimeCfg.RisingValue * 16);
+		if (config->dutyMode == OUTPUT_DUTY_AT_PWMH)
+			deadTicks += (pDeadTimeCfg.RisingValue * 16);
 	}
 
 	/* output configuration */
@@ -320,7 +340,7 @@ static void PWM1_10_ConfigInvertedPair(uint32_t pwmNo, pwm_config_t* config)
 		deadTicks++;
 
 	float oldMax = config->lim.max;
-	config->lim.max = 1 - ((deadTicks / HRTIM_FREQ) / mod->periodInUsec);
+	config->lim.max = 1 - ((deadTicks / GetTimerFreqMHz(TimerIdx)) / mod->periodInUsec);
 	if (oldMax < config->lim.max && oldMax != 0)
 		config->lim.max = oldMax;
 	if (config->lim.minMaxDutyCycleBalancing && config->lim.max > .5f)
@@ -463,7 +483,7 @@ static void PWM1_10_ConfigChannel(uint32_t pwmNo, pwm_config_t* config)
 		deadTicks++;
 
 	float oldMax = config->lim.max;
-	config->lim.max = 1 - ((deadTicks / HRTIM_FREQ) / mod->periodInUsec);
+	config->lim.max = 1 - ((deadTicks / GetTimerFreqMHz(TimerIdx)) / mod->periodInUsec);
 	if (oldMax < config->lim.max && oldMax != 0)
 		config->lim.max = oldMax;
 }

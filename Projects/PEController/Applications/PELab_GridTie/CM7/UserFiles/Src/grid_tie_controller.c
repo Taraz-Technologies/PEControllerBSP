@@ -150,7 +150,7 @@ void GridTieControl_Init(grid_tie_t* gridTie, PWMResetCallback pwmResetCallback)
 		if(gridTie->boostDiodePin[i])
 			BSP_Dout_SetAsIOPin(gridTie->boostDiodePin[i], GPIO_PIN_RESET);
 
-		//BSP_PWMOut_Enable((1 << (boostConfig->pinNo - 1)) , true);			// --TODO-- TNPC leg for boost??
+		BSP_PWMOut_Enable((1 << (boostConfig->pinNo - 1)) , true);			// --TODO-- TNPC leg for boost??
 	}
 	gridTie->VbstSet = BOOST_VSET;
 	/***************** Configure Boost *********************/
@@ -207,8 +207,7 @@ static void GridTie_GenerateOutput(grid_tie_t* gridTie, bool disable)
 	// get the values in alpha beta coordinates
 	Transform_alphaBeta0_dq0(&coor.alBe0, &coor.dq0, &iCoor->trigno, SRC_DQ0, PARK_SINE);
 	// Get SVPWM signal
-	// SVPWM_GenerateDutyCycles(&coor.alBe0, inverterDuties); --todo--
-	ComputeDuty_SVPWM_FromAlBe0(&coor.alBe0, inverterDuties);
+	 SVPWM_GenerateDutyCycles(&coor.alBe0, inverterDuties);
 	/******************** Compute Inverter Duty Cycles ******************/
 
 	// generate the duty cycle for the inverter

@@ -108,8 +108,7 @@ static DutyCycleUpdateFnc ConfigSingleLeg(uint16_t pwmNo, inverter3Ph_config_t* 
  */
 static void EnableSingleLeg(inverter3Ph_config_t* config, uint16_t pwmNo, bool en)
 {
-	BSP_PWM_ActivateInvertedPair(pwmNo, en);
-	//BSP_PWMOut_Enable(((config->legType == LEG_TNPC ? 15U : 3U) << (pwmNo - 1)) , en);
+	BSP_PWMOut_Enable(((config->legType == LEG_TNPC ? 15U : 3U) << (pwmNo - 1)) , en);
 }
 
 /**
