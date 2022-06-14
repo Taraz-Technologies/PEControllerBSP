@@ -66,12 +66,14 @@ void MainControl_Init(void)
 	gridTieConfig.inverterConfig.s1PinNos[0] = 1;
 	gridTieConfig.inverterConfig.s1PinNos[1] = 3;
 	gridTieConfig.inverterConfig.s1PinNos[2] = 5;
-	gridTieConfig.boostConfig[0].pinNo = 10;
-	gridTieConfig.boostDiodePin[0] = 9;
-	gridTieConfig.boostConfig[1].pinNo = 12;
-	gridTieConfig.boostDiodePin[1] = 11;
+	gridTieConfig.boostConfig[0].pinNo = 8;
+	gridTieConfig.boostDiodePin[0] = 7;
+	gridTieConfig.boostConfig[1].pinNo = 10;
+	gridTieConfig.boostDiodePin[1] = 9;
+	gridTieConfig.boostConfig[2].pinNo = 12;
+	gridTieConfig.boostDiodePin[2] = 11;
 	GridTieControl_Init(&gridTieConfig, Inverter3Ph_ResetSignal);
-	gridTieConfig.iRef = 4;
+	gridTieConfig.iRef = 3;
 }
 
 /**

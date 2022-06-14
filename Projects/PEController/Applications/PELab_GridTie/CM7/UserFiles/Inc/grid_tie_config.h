@@ -58,7 +58,7 @@ extern "C" {
 /**
  * @brief Number of Boost Switches to control
  */
-#define BOOST_COUNT						(2)
+#define BOOST_COUNT						(3)
 /**
  * @brief Set point voltage for boost converter
  */
