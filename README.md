@@ -50,6 +50,7 @@ https://www.taraztechnologies.com/Downloads/Software/PEControllerBSP/index.html
 		- *Applications:* 
 			- *PEController_Template:*  Template project for creating new quick projects
 			- *PELab_OpenLoopVFD:* Basic Implementation of Open Loop V/f Control Implemented for different variants of PELab
+			- *PELab_GridTie:* Basic Implementation of a three phase Grid Tie Inverter with Boost Converter
 
 
 ## Making new project from template project

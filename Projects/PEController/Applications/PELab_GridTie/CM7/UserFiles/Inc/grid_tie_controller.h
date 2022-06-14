@@ -25,7 +25,24 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+/** @addtogroup ApplicationExamples Application Examples
+ * @{
+ */
 
+/** @defgroup 3PhGridTie 3-Phase Grid Tie Inverter
+ * @brief Describes the three-phase grid tie inverter with boost converter implementation for the PEController
+ * @details
+ * This example controls a three phase inverter module as well as a boost converter for PEController.
+ * At the start of the application the boost converter starts regulation to provide a stabilized DC-Link voltage.
+ * After stabilizing the DC-Link voltage, the relay turns on for connection with the grid.
+ * The control algorithm implements a PLL algorithm to detect the phase of the grid voltages.
+ * After estimating the exact phase angle the inverter is enabled and starts injecting power in the grid.
+ * Make sure to provide the DC Link before connecting to the grid to avoid failure due to in-rush current.
+ * Initializes the algorithm using @ref GridTieControl_Init().
+ * Once initialized constantly polls using @ref GridTieControl_Loop().
+ * The structure @ref adcVals contains all measurements obtained by the cortex-M4 processor
+ * @{
+ */
 /********************************************************************************
  * Includes
  *******************************************************************************/
@@ -109,6 +126,12 @@ extern void GridTieControl_Loop(grid_tie_t* gridTie);
  *******************************************************************************/
 
 
+/**
+ * @}
+ */
+/**
+ * @}
+ */
 /**
  * @}
  */
