@@ -89,7 +89,7 @@ extern "C" {
  * @note Minimum setting value is 10 (100KHz) with intelliSENS but may vary if additional logic is added.
  * Minimum setting value is 8 (125KHz) without intelliSENS software
  */
-#define SAMPLING_TIME_US		(25)
+#define SAMPLING_TIME_US		(10)
 /******** MEASUREMENT CONFIGURATION ***********/
 
 #ifdef __cplusplus

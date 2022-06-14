@@ -66,10 +66,10 @@ static pwm_module_config_t boostPWMConfig =
 /**
  * @brief Compensator for PI
  */
-static pi_compensator_t boostPI = {
+pi_compensator_t boostPI = {
 		.has_lmt = true,
-		.Kp = BOOST_KP,
-		.Ki = BOOST_KI,
+		.Kp = KP_BOOST,
+		.Ki = KI_BOOST,
 		.dt = PWM_PERIOD_s,
 		.Integral = 0,
 		.max = BOOST_DUTYCYCLE_MAX,

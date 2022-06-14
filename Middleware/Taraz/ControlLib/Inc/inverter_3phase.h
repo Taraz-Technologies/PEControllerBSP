@@ -36,6 +36,7 @@ extern "C" {
  * 	-# <b>@ref Inverter3Ph_Init() :</b> Initialize an inverter module
  * 	-# <b>@ref Inverter3Ph_UpdateSPWM() :</b> Update the duty cycles of the inverter by using SPWM configuration
  * 	-# <b>@ref Inverter3Ph_UpdateDuty() :</b> Update the duty cycles of the inverter
+ * 	-# <b>@ref Inverter3Ph_Activate() :</b> Activate/Deactive the 3-Phase inverter output
  * @{
  */
 /*******************************************************************************
@@ -122,7 +123,6 @@ typedef struct
  * @brief Initialize an inverter module
  *
  * @param *config Pointer to the Inverter Configurations
- * @return *inverter3Ph_config_t handle representing the inverter
  */
 void Inverter3Ph_Init(inverter3Ph_config_t* config);
 /**
@@ -141,7 +141,7 @@ void Inverter3Ph_UpdateSPWM(inverter3Ph_config_t* config, float theta, float mod
  */
 void Inverter3Ph_UpdateDuty(inverter3Ph_config_t* config, float* duties);
 /**
- * @brief Activate/Deactive the 3-Phase inverter
+ * @brief Activate/Deactive the 3-Phase inverter output
  * @param *config handle representing the inverter
  * @param en <c>true</c> if needs to be enabled, else <c>false</c>
  */

@@ -33,7 +33,7 @@ extern "C" {
 /** @defgroup PLL	Phase Locked Loop
  * @brief Contains the declarations and procedures to implement Phase Locked Loop
  * @details
- * The first step for grid phase detection is to assign suitable filters and
+ * The first step for grid phase detection is to assign suitable
  * compensator values and phase detection error settings for the PLL structure.
  * Once configured the PLL should be run in every cycle to detect the voltage phase.
  * Below programming example further describes the module usage
@@ -47,19 +47,16 @@ extern "C" {
 	// Initializes the PLL module
 	void Init (void)
 	{
-		static float vDFiltData[PLL_FILT_SIZE] = {0};
-		static float vQFiltData[PLL_FILT_SIZE] = {0};
 		pll.coords = &gridTie.vCoor;
-		pll.dFilt.dataPtr = vDFiltData;
-		pll.qFilt.dataPtr = vQFiltData;
-		pll.dFilt.count = PLL_FILT_SIZE;
-		pll.qFilt.count = PLL_FILT_SIZE;
 		pll.compensator.Kp = .001f;
 		pll.compensator.Ki = .8f;
 		pll.compensator.dt = PWM_PERIOD_s;
+		pll.expectedGridFreq = 50;
 		pll.qLockMax = 10;
-		pll.dLockMin = gridTie.pll.qLockMax * 10;
-		pll.cycleCount = (int)((1 / PWM_PERIOD_s) * 10);
+		pll.dLockMin = 255;
+		pll.dLockMax = 375;
+		pll.cycleCount = (int)((1 / PWM_PERIOD_s) * 2);
+		PLL_Init(&pll);
 	}
 
 	// Poll the PLL module on every cycle and connect to the output if PLL is locked else disconnect

@@ -71,7 +71,7 @@ void MainControl_Init(void)
 	gridTieConfig.boostConfig[1].pinNo = 12;
 	gridTieConfig.boostDiodePin[1] = 11;
 	GridTieControl_Init(&gridTieConfig, Inverter3Ph_ResetSignal);
-	gridTieConfig.iRef = 5;
+	gridTieConfig.iRef = 4;
 }
 
 /**

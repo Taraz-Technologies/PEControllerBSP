@@ -59,7 +59,13 @@ extern "C" {
  * 		Once configured the duty cycle of the relevant channel can be updated by the function @ref BSP_PWM_UpdateChannelDuty().
  * 		-# <b>Inverted Pair PWM:</b><br>
  * 		To configure the channel for Individual PWM use @ref BSP_PWM_ConfigInvertedPair().
- * 		Once configured the duty cycle of the relevant channels can be updated by the function @ref BSP_PWM_UpdatePairDuty().
+ * 		Once configured the duty cycle of the relevant channels can be updated by the function @ref BSP_PWM_UpdatePairDuty(). <br>
+ *
+ * The output of the PWM timers can be controlled using the following functions
+ * 		-# <b>BSP_PWM_Start:</b> Starts the PWM on required PWM pins
+ * 		-# <b>BSP_PWM_Stop:</b> Stops the PWM on required PWM pins
+ * 		-# <b>BSP_PWMOut_Enable:</b> Enable / disable the output for required PWM channels
+ * 		-# <b>BSP_PWM_Config_Interrupt:</b> Enable / Disable interrupt for a PWM channel as per requirement<br>
  * @{
  */
 /*******************************************************************************
@@ -157,7 +163,7 @@ extern float BSP_PWM_UpdateChannelDuty(uint32_t pwmNo, float duty, pwm_config_t*
  */
 extern void BSP_PWM_Config_Interrupt(uint32_t pwmNo, bool enable, PWMResetCallback callback, int priority);
 /**
- * @brief Starts the PWM on required PWM pins
+ * @brief Starts the PWM on required PWM pins. To enable outputs for required channels call BSP_PWMOut_Enable().
  * @code
  * // Start PWM for channel 1
  * BSP_PWM_Start(0x1);
@@ -207,7 +213,7 @@ extern void BSP_PWM_GetDafaultModuleConfig(pwm_module_config_t* moduleConfig);
  */
 extern void BSP_PWM_GetDefaultConfig(pwm_config_t* pwmConfig, pwm_module_config_t* moduleConfig);
 /**
- * @brief Enable disable the output for required PWM channels
+ * @brief Enable / disable the output for required PWM channels
  * @code
  * // Enable PWM output for channel 1
  * BSP_PWMOut_Enable(0x1, true);

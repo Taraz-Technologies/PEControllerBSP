@@ -115,7 +115,6 @@ static void EnableSingleLeg(inverter3Ph_config_t* config, uint16_t pwmNo, bool e
  * @brief Initialize an inverter module
  *
  * @param *config Pointer to the Inverter Configurations
- * @return *inverter3Ph_config_t handle representing the inverter
  */
 void Inverter3Ph_Init(inverter3Ph_config_t* config)
 {
@@ -176,7 +175,7 @@ void Inverter3Ph_UpdateSPWM(inverter3Ph_config_t* config, float theta, float mod
 }
 
 /**
- * @brief Activate/Deactive the 3-Phase inverter
+ * @brief Activate/Deactive the 3-Phase inverter output
  * @param *config handle representing the inverter
  * @param en <c>true</c> if needs to be enabled, else <c>false</c>
  */

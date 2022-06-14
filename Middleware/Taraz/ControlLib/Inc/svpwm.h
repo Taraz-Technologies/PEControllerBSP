@@ -33,7 +33,7 @@ extern "C" {
 /** @defgroup SVPWM SVPWM
  * @brief Contains the declaration and procedures for SVPWM generation
  * @details List of functions
- * 	-# <b>@ref ComputeDuty_SVPWM_FromAlBe0() :</b> Get duty cycles of each leg using space vector PWM from LIB_3COOR_ALBE0_t
+ * 	-# <b>@ref SVPWM_GenerateDutyCycles() :</b> Get duty cycles of each leg using space vector PWM from LIB_3COOR_ALBE0_t
  * @{
  */
 /********************************************************************************

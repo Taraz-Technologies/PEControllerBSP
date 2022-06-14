@@ -57,7 +57,6 @@ extern "C" {
 #define L_OUT							(.0025f)
 /**
  * @brief Number of Boost Switches to control
- * @note The boost switches should start from @ref BOOST1_IO and use consecutive legs
  */
 #define BOOST_COUNT						(2)
 /**

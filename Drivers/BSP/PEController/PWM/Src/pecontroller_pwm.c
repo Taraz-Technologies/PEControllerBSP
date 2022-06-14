@@ -308,7 +308,7 @@ void BSP_PWM_GetDefaultConfig(pwm_config_t* pwmConfig, pwm_module_config_t* modu
 	pwmConfig->lim.minMaxDutyCycleBalancing = false;
 }
 /**
- * @brief Enable disable the output for required PWM channels
+ * @brief Enable / disable the output for required PWM channels
  * @code
  * // Enable PWM output for channel 1
  * BSP_PWMOut_Enable(0x1, true);
@@ -325,18 +325,15 @@ void BSP_PWMOut_Enable(uint32_t pwmMask, bool en)
 {
 	if (en)
 	{
-		if (pwmMask & 0x400)
-			TIM_CCxChannelCmd(htim1.Instance, TIM_CHANNEL_1, TIM_CCx_ENABLE);
-		if (pwmMask & 0x800)
-			TIM_CCxNChannelCmd(htim1.Instance, TIM_CHANNEL_1, TIM_CCxN_ENABLE);
-		if (pwmMask & 0x1000)
-			TIM_CCxChannelCmd(htim1.Instance, TIM_CHANNEL_2, TIM_CCx_ENABLE);
-		if (pwmMask & 0x2000)
-			TIM_CCxNChannelCmd(htim1.Instance, TIM_CHANNEL_2, TIM_CCxN_ENABLE);
-		if (pwmMask & 0x4000)
-			TIM_CCxChannelCmd(htim1.Instance, TIM_CHANNEL_3, TIM_CCx_ENABLE);
-		if (pwmMask & 0x8000)
-			TIM_CCxNChannelCmd(htim1.Instance, TIM_CHANNEL_3, TIM_CCxN_ENABLE);
+		if (pwmMask & 0xC00)
+			{TIM_CCxChannelCmd(htim1.Instance, TIM_CHANNEL_1, TIM_CCx_ENABLE);
+			TIM_CCxNChannelCmd(htim1.Instance, TIM_CHANNEL_1, TIM_CCxN_ENABLE);}
+		if (pwmMask & 0x3000)
+			{TIM_CCxChannelCmd(htim1.Instance, TIM_CHANNEL_2, TIM_CCx_ENABLE);
+			TIM_CCxNChannelCmd(htim1.Instance, TIM_CHANNEL_2, TIM_CCxN_ENABLE);}
+		if (pwmMask & 0xC000)
+			{TIM_CCxChannelCmd(htim1.Instance, TIM_CHANNEL_3, TIM_CCx_ENABLE);
+			TIM_CCxNChannelCmd(htim1.Instance, TIM_CHANNEL_3, TIM_CCxN_ENABLE);}
 
 		HAL_HRTIM_WaveformOutputStart(&hhrtim,
 				(pwmMask & 0x1 ? HRTIM_OUTPUT_TA1 : 0) |
