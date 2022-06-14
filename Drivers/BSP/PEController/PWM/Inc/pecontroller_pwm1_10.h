@@ -128,6 +128,15 @@ extern float BSP_PWM1_10_UpdateChannelDuty(uint32_t pwmNo, float duty, pwm_confi
  * @param priority Interrupt priority. Range (0-15). Here 0 is the highest priority
  */
 extern void BSP_PWM1_10_Config_Interrupt(uint32_t pwmNo, bool enable, PWMResetCallback callback, int priority);
+/**
+ * @brief Activates a specific PWM Inverted pair
+ * @param pwmNo Channel no of reference channel is the PWM pair (Valid Values 1-10). <br>
+ * 				<b>Pairs are classified as :</b>
+ * 				-# CH1 = Reference channel available at pin pwmNo
+ * 				-# CH2 = Inverted Channel from reference available at pin pwmNo + 1 if pwmNo is odd else pwmNo - 1
+ * @param en <c>true</c> if needs activation, else false
+ */
+extern void PWM1_10_ActivateInvertedPair(uint32_t pwmNo, bool en);
 /********************************************************************************
  * Code
  *******************************************************************************/

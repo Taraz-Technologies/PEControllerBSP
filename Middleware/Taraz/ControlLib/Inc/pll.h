@@ -33,7 +33,7 @@ extern "C" {
 /** @defgroup PLL	Phase Locked Loop
  * @brief Contains the declarations and procedures to implement Phase Locked Loop
  * @details
- * The first step for grid phase detection is to assign suitable filters and
+ * The first step for grid phase detection is to assign suitable
  * compensator values and phase detection error settings for the PLL structure.
  * Once configured the PLL should be run in every cycle to detect the voltage phase.
  * Below programming example further describes the module usage
@@ -47,19 +47,16 @@ extern "C" {
 	// Initializes the PLL module
 	void Init (void)
 	{
-		static float vDFiltData[PLL_FILT_SIZE] = {0};
-		static float vQFiltData[PLL_FILT_SIZE] = {0};
 		pll.coords = &gridTie.vCoor;
-		pll.dFilt.dataPtr = vDFiltData;
-		pll.qFilt.dataPtr = vQFiltData;
-		pll.dFilt.count = PLL_FILT_SIZE;
-		pll.qFilt.count = PLL_FILT_SIZE;
 		pll.compensator.Kp = .001f;
 		pll.compensator.Ki = .8f;
 		pll.compensator.dt = PWM_PERIOD_s;
+		pll.expectedGridFreq = 50;
 		pll.qLockMax = 10;
-		pll.dLockMin = gridTie.pll.qLockMax * 10;
-		pll.cycleCount = (int)((1 / PWM_PERIOD_s) * 10);
+		pll.dLockMin = 255;
+		pll.dLockMax = 375;
+		pll.cycleCount = (int)((1 / PWM_PERIOD_s) * 2);
+		PLL_Init(&pll);
 	}
 
 	// Poll the PLL module on every cycle and connect to the output if PLL is locked else disconnect
@@ -128,6 +125,7 @@ typedef struct
 #endif
 	float tempQMax;					/**< @brief Temporary variable for evaluating cycle maximum for Q */
 	float tempDMin;					/**< @brief Temporary variable for evaluating cycle minimum for D */
+	float tempDMax;					/**< @brief Temporary variable for evaluating cycle maximum for D */
 	int index;						/**< @brief Current index of the cycle */
 } pll_info_t;
 
@@ -137,8 +135,6 @@ typedef struct
 typedef struct
 {
 	LIB_COOR_ALL_t* coords;			/**< @brief Grid voltage coordinates in different coordinate systems */
-	mov_avg_t dFilt;				/**< @brief Filter for the D coordinate of DQ0 coordinates */
-	mov_avg_t qFilt;				/**< @brief Filter for the Q coordinate of DQ0 coordinates */
 	pi_compensator_t compensator;	/**< @brief PI compensator for Q adjustment */
 	pll_info_t info;				/**< @brief PLL info internaly used by the system */
 	pll_states_t status;			/**< @brief Current status of PLL */
@@ -147,7 +143,10 @@ typedef struct
 									remains less than this value the PLL will be considered locked */
 	float dLockMin;					/**< @brief Minimum value of D. If in a cycle defined by @ref cycleCount the value
 									remains greater only than the PLL locking will be enabled */
+	float dLockMax;					/**< @brief Maximum value of D. If in a cycle defined by @ref cycleCount the value
+									remains smaller only than the PLL locking will be enabled */
 	int cycleCount;					/**< @brief If the PLL remains lock for this many control loops than it will be considered locked */
+	float expectedGridFreq;			/**< @brief Expected grid frequency  */
 } pll_lock_t;
 /**
  * @}
@@ -162,6 +161,11 @@ typedef struct
 /** @defgroup PLL_Exported_Functions Functions
   * @{
   */
+/**
+ * @brief Initialize the PLL structure.
+ * @param *pll Structure to be initialized.
+ */
+extern void PLL_Init(pll_lock_t* pll);
 /**
  * @brief Lock the grid voltages using PLL
  *

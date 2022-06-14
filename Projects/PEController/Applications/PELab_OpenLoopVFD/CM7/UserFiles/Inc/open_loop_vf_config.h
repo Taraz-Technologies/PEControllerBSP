@@ -44,7 +44,7 @@ extern "C" {
   * @{
   */
 /**
- * @brief PWM time period in micro-seconds
+ * @brief PWM time period in micro-seconds. Range = 1-250
  */
 #define PWM_PERIOD_Us					(40)
 /**
@@ -70,7 +70,7 @@ extern "C" {
 /**
  * @brief Dead time value to be used
  */
-#define INVERTER_DEADTIME_ns			(500)
+#define INVERTER_DEADTIME_ns			(200)
 /**
  * @}
  */

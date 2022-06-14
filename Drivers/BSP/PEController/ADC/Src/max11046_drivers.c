@@ -196,7 +196,7 @@ static void Timer_Config(void)
 	maxTimerHandle.Instance = TIM12;
 	maxTimerHandle.Init.Prescaler = 0;
 	maxTimerHandle.Init.CounterMode = TIM_COUNTERMODE_UP;
-	maxTimerHandle.Init.Period = (uint16_t)(MAX11046_CLK_Us * adcContConfig.conversionCycleTimeUs);
+	maxTimerHandle.Init.Period = (uint16_t)(MAX11046_CLK_Us * adcContConfig.conversionCycleTimeUs) - 1;
 #if ENABLE_INTELLISENS
 	intelliSENS.Init(adcContConfig.conversionCycleTimeUs, (const float*)&adcMultipiers, (const float*)&adcOffsets);
 	intelliSENS.SetADCTicks(adcContConfig.conversionCycleTimeUs * 240);

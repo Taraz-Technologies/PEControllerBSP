@@ -32,7 +32,7 @@
 #define PWM_FREQ_KHz					(1000.f/PWM_PERIOD_Us)
 #define PWM_FREQ_Hz						(1.f/PWM_PERIOD_s)
 #define MIN_MAX_BALANCING_INVERTER		(false)
-#define INVERTER_DUTY_MODE				OUTPUT_DUTY_AT_PWMH
+#define INVERTER_DUTY_MODE				OUTPUT_DUTY_MINUS_DEADTIME_AT_PWMH
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
@@ -52,6 +52,7 @@ static pwm_module_config_t inverterPWMModuleConfig =
 				.on = true,
 				.nanoSec = INVERTER_DEADTIME_ns,
 		},
+		.synchOnStart = true
 };
 /********************************************************************************
  * Global Variables
@@ -98,6 +99,8 @@ void OpenLoopVfControl_Init(openloopvf_config_t* config, PWMResetCallback pwmRes
 
 	if(pwmResetCallback != NULL)
 		BSP_PWM_Config_Interrupt(inverterConfig->s1PinNos[0], true, pwmResetCallback, 0);
+
+	Inverter3Ph_Activate(inverterConfig, true);
 }
 
 /**

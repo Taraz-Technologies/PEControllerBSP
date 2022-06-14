@@ -66,12 +66,12 @@ static float Tnpc_PWM_UpdatePair(uint32_t pwmNo, float duty, pwm_config_t *confi
 	if(d1 < .5f)
 	{
 		BSP_PWM_UpdatePairDuty(pwmNo, 0, config);
-		BSP_PWM_UpdatePairDuty(pwmNo + 3, duty, config);
+		BSP_PWM_UpdatePairDuty(pwmNo + 2, 1 - duty, config);
 	}
 	else
 	{
 		BSP_PWM_UpdatePairDuty(pwmNo, duty, config);
-		BSP_PWM_UpdatePairDuty(pwmNo + 3, 0, config);
+		BSP_PWM_UpdatePairDuty(pwmNo + 2, 1, config);
 	}
 	return d1;
 }
@@ -91,20 +91,30 @@ static DutyCycleUpdateFnc ConfigSingleLeg(uint16_t pwmNo, inverter3Ph_config_t* 
 	/* for Tnpc use four switches */
 	if (config->legType == LEG_TNPC)
 	{
-		BSP_PWM_ConfigInvertedPair(pwmNo + 3, &config->pwmConfig);
+		BSP_PWM_ConfigInvertedPair(pwmNo + 2, &config->pwmConfig);
 		callback = Tnpc_PWM_UpdatePair; 				/* use this function to update all 4 switch duty cycles */
 		BSP_Dout_SetAsPWMPin(pwmNo + 2);
 		BSP_Dout_SetAsPWMPin(pwmNo + 3);
 	}
-
 	return callback;
+}
+
+/**
+ * @brief Enable/Disable the PWMs for a single leg of the inverter
+ *
+ * @param *config Pointer to the Inverter Configurations
+ * @param pwmNo Channel no of the initial switch of the leg.
+ * @param en True if needs to be enabled else false
+ */
+static void EnableSingleLeg(inverter3Ph_config_t* config, uint16_t pwmNo, bool en)
+{
+	BSP_PWMOut_Enable(((config->legType == LEG_TNPC ? 15U : 3U) << (pwmNo - 1)) , en);
 }
 
 /**
  * @brief Initialize an inverter module
  *
  * @param *config Pointer to the Inverter Configurations
- * @return *inverter3Ph_config_t handle representing the inverter
  */
 void Inverter3Ph_Init(inverter3Ph_config_t* config)
 {
@@ -129,6 +139,9 @@ void Inverter3Ph_Init(inverter3Ph_config_t* config)
 	// enable the pwm signals by disabling any disable feature. Disable is by default active high
 	for (int i = 0; i < config->dsblPinCount; i++)
 		BSP_Dout_SetAsIOPin(config->dsblPinNo + i, GPIO_PIN_RESET);
+
+	// Deactivate the inverter at startup
+	Inverter3Ph_Activate(config, false);
 }
 
 /**
@@ -161,5 +174,18 @@ void Inverter3Ph_UpdateSPWM(inverter3Ph_config_t* config, float theta, float mod
 	Inverter3Ph_UpdateDuty(config, duties);
 }
 
+/**
+ * @brief Activate/Deactive the 3-Phase inverter output
+ * @param *config handle representing the inverter
+ * @param en <c>true</c> if needs to be enabled, else <c>false</c>
+ */
+void Inverter3Ph_Activate(inverter3Ph_config_t* config, bool en)
+{
+	for (int i = 0; i < 3; i++)
+		EnableSingleLeg(config, config->s1PinNos[i], en);
+	if (config->s1PinDuplicate)
+		EnableSingleLeg(config, config->s1PinDuplicate, en);
+	config->state = en ? INVERTER_ACTIVE : INVERTER_INACTIVE;
+}
 
 /* EOF */

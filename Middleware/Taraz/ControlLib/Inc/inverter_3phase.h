@@ -36,6 +36,7 @@ extern "C" {
  * 	-# <b>@ref Inverter3Ph_Init() :</b> Initialize an inverter module
  * 	-# <b>@ref Inverter3Ph_UpdateSPWM() :</b> Update the duty cycles of the inverter by using SPWM configuration
  * 	-# <b>@ref Inverter3Ph_UpdateDuty() :</b> Update the duty cycles of the inverter
+ * 	-# <b>@ref Inverter3Ph_Activate() :</b> Activate/Deactive the 3-Phase inverter output
  * @{
  */
 /*******************************************************************************
@@ -54,6 +55,14 @@ extern "C" {
 /** @defgroup INVERTER_3PH_Exported_Typedefs Type Definitions
   * @{
   */
+/**
+ * @brief Inverter Active / Inactive state
+ */
+typedef enum
+{
+	INVERTER_INACTIVE,            /**< The inverter state is inactive */
+	INVERTER_ACTIVE,              /**< The inverter state is active */
+} inverter_state_t;
 /**
  * @brief Definitions of Switch Legs
  */
@@ -77,6 +86,7 @@ typedef enum
  */
 typedef struct
 {
+	inverter_state_t state;						/**< @brief The inverter state whether active or inactive */
 	uint16_t s1PinNos[3];						/**< @brief Collection of the Pin numbers of the first PWM switch
 													in a leg of the 3-Phase System. The remaining PWMs are the
 													consecutive pins after this pin */
@@ -93,6 +103,7 @@ typedef struct
 														This value represents the first switch of the 4th leg. To disable duplication set this to 0 */
 	DutyCycleUpdateFnc updateCallbackDuplicate; /**< @brief These call backs are used by the drivers to update
 													the duty cycles of the duplicate leg according to the configuration */
+
 } inverter3Ph_config_t;
 /**
  * @}
@@ -112,7 +123,6 @@ typedef struct
  * @brief Initialize an inverter module
  *
  * @param *config Pointer to the Inverter Configurations
- * @return *inverter3Ph_config_t handle representing the inverter
  */
 void Inverter3Ph_Init(inverter3Ph_config_t* config);
 /**
@@ -130,6 +140,12 @@ void Inverter3Ph_UpdateSPWM(inverter3Ph_config_t* config, float theta, float mod
  * @param *duties pointer to the three duty cycles of the inverter (Range 0-1)
  */
 void Inverter3Ph_UpdateDuty(inverter3Ph_config_t* config, float* duties);
+/**
+ * @brief Activate/Deactive the 3-Phase inverter output
+ * @param *config handle representing the inverter
+ * @param en <c>true</c> if needs to be enabled, else <c>false</c>
+ */
+extern void Inverter3Ph_Activate(inverter3Ph_config_t* config, bool en);
 /*******************************************************************************
  * Code
  ******************************************************************************/

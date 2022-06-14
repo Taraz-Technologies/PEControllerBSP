@@ -53,6 +53,19 @@
  * Code
  *******************************************************************************/
 /**
+ * @brief Activates a specific PWM Inverted pair
+ * @param pwmNo Channel no of reference channel is the PWM pair (Valid Values 1-16). <br>
+ * 				<b>Pairs are classified as :</b>
+ * 				-# CH1 = Reference channel available at pin pwmNo
+ * 				-# CH2 = Inverted Channel from reference available at pin pwmNo + 1 if pwmNo is odd else pwmNo - 1
+ * @param en <c>true</c> if needs activation, else false
+ */
+void BSP_PWM_ActivateInvertedPair(uint32_t pwmNo, bool en)
+{
+	if (pwmNo <= 10)
+		PWM1_10_ActivateInvertedPair(pwmNo, en);
+}
+/**
  * @brief Configures an PWM pair as inverted pair
  * @param pwmNo Channel no of reference channel is the PWM pair (Valid Values 1-16). <br>
  * 				<b>Pairs are classified as :</b>
@@ -163,8 +176,9 @@ static void TIM_CCxNChannelCmd(TIM_TypeDef *TIMx, uint32_t Channel, uint32_t Cha
 	/* Set or reset the CCxNE Bit */
 	TIMx->CCER |= (uint32_t)(ChannelNState << (Channel & 0x1FU)); /* 0x1FU = 31 bits max shift */
 }
+
 /**
- * @brief Starts the PWM on required PWM pins
+ * @brief Starts the PWM on required PWM pins. To enable outputs for required channels call BSP_PWMOut_Enable().
  * @code
  * // Start PWM for channel 1
  * BSP_PWM_Start(0x1);
@@ -178,30 +192,6 @@ static void TIM_CCxNChannelCmd(TIM_TypeDef *TIMx, uint32_t Channel, uint32_t Cha
  */
 void BSP_PWM_Start(uint32_t pwmMask)
 {
-	if (pwmMask & 0x400)
-		TIM_CCxChannelCmd(htim1.Instance, TIM_CHANNEL_1, TIM_CCx_ENABLE);
-	if (pwmMask & 0x800)
-		TIM_CCxNChannelCmd(htim1.Instance, TIM_CHANNEL_1, TIM_CCxN_ENABLE);
-	if (pwmMask & 0x1000)
-		TIM_CCxChannelCmd(htim1.Instance, TIM_CHANNEL_2, TIM_CCx_ENABLE);
-	if (pwmMask & 0x2000)
-		TIM_CCxNChannelCmd(htim1.Instance, TIM_CHANNEL_2, TIM_CCxN_ENABLE);
-	if (pwmMask & 0x4000)
-		TIM_CCxChannelCmd(htim1.Instance, TIM_CHANNEL_3, TIM_CCx_ENABLE);
-	if (pwmMask & 0x8000)
-		TIM_CCxNChannelCmd(htim1.Instance, TIM_CHANNEL_3, TIM_CCxN_ENABLE);
-
-	HAL_HRTIM_WaveformOutputStart(&hhrtim,
-			(pwmMask & 0x1 ? HRTIM_OUTPUT_TA1 : 0) |
-			(pwmMask & 0x2 ? HRTIM_OUTPUT_TA2 : 0) |
-			(pwmMask & 0x4 ? HRTIM_OUTPUT_TB1 : 0) |
-			(pwmMask & 0x8 ? HRTIM_OUTPUT_TB2 : 0) |
-			(pwmMask & 0x10 ? HRTIM_OUTPUT_TC1 : 0) |
-			(pwmMask & 0x20 ? HRTIM_OUTPUT_TC2 : 0) |
-			(pwmMask & 0x40 ? HRTIM_OUTPUT_TD1 : 0) |
-			(pwmMask & 0x80 ? HRTIM_OUTPUT_TD2 : 0) |
-			(pwmMask & 0x100 ? HRTIM_OUTPUT_TE1 : 0) |
-			(pwmMask & 0x200 ? HRTIM_OUTPUT_TE2 : 0));
 	uint32_t th_tim_sel =
 			(pwmMask & 0x3 ? HRTIM_TIMERID_TIMER_A : 0) |
 			(pwmMask & 0xc ? HRTIM_TIMERID_TIMER_B : 0) |
@@ -317,4 +307,73 @@ void BSP_PWM_GetDefaultConfig(pwm_config_t* pwmConfig, pwm_module_config_t* modu
 	pwmConfig->lim.max = 1;
 	pwmConfig->lim.minMaxDutyCycleBalancing = false;
 }
+/**
+ * @brief Enable / disable the output for required PWM channels
+ * @code
+ * // Enable PWM output for channel 1
+ * BSP_PWMOut_Enable(0x1, true);
+ * // Enable PWM output for channel 1 and channel 2
+ * BSP_PWMOut_Enable(0x3, true);
+ * // Disable PWM output for channel n and channel m, where n & m are between 1 & 16
+ * BSP_PWMOut_Enable((1U << (n - 1)) | (1U << (m - 1)), false);
+ * @endcode
+ * @param pwmMask Set the PWM channels needed to be run.<br>
+ * 				<b>Valid Range</b> =  (0x0001 - 0xffff)
+ * @param en <c>true</c> if needs to be enabled else <c>false</c>
+ */
+void BSP_PWMOut_Enable(uint32_t pwmMask, bool en)
+{
+	if (en)
+	{
+		if (pwmMask & 0xC00)
+			{TIM_CCxChannelCmd(htim1.Instance, TIM_CHANNEL_1, TIM_CCx_ENABLE);
+			TIM_CCxNChannelCmd(htim1.Instance, TIM_CHANNEL_1, TIM_CCxN_ENABLE);}
+		if (pwmMask & 0x3000)
+			{TIM_CCxChannelCmd(htim1.Instance, TIM_CHANNEL_2, TIM_CCx_ENABLE);
+			TIM_CCxNChannelCmd(htim1.Instance, TIM_CHANNEL_2, TIM_CCxN_ENABLE);}
+		if (pwmMask & 0xC000)
+			{TIM_CCxChannelCmd(htim1.Instance, TIM_CHANNEL_3, TIM_CCx_ENABLE);
+			TIM_CCxNChannelCmd(htim1.Instance, TIM_CHANNEL_3, TIM_CCxN_ENABLE);}
+
+		HAL_HRTIM_WaveformOutputStart(&hhrtim,
+				(pwmMask & 0x1 ? HRTIM_OUTPUT_TA1 : 0) |
+				(pwmMask & 0x2 ? HRTIM_OUTPUT_TA2 : 0) |
+				(pwmMask & 0x4 ? HRTIM_OUTPUT_TB1 : 0) |
+				(pwmMask & 0x8 ? HRTIM_OUTPUT_TB2 : 0) |
+				(pwmMask & 0x10 ? HRTIM_OUTPUT_TC1 : 0) |
+				(pwmMask & 0x20 ? HRTIM_OUTPUT_TC2 : 0) |
+				(pwmMask & 0x40 ? HRTIM_OUTPUT_TD1 : 0) |
+				(pwmMask & 0x80 ? HRTIM_OUTPUT_TD2 : 0) |
+				(pwmMask & 0x100 ? HRTIM_OUTPUT_TE1 : 0) |
+				(pwmMask & 0x200 ? HRTIM_OUTPUT_TE2 : 0));
+	}
+	else
+	{
+		if (pwmMask & 0x400)
+			TIM_CCxChannelCmd(htim1.Instance, TIM_CHANNEL_1, TIM_CCx_DISABLE);
+		if (pwmMask & 0x800)
+			TIM_CCxNChannelCmd(htim1.Instance, TIM_CHANNEL_1, TIM_CCxN_DISABLE);
+		if (pwmMask & 0x1000)
+			TIM_CCxChannelCmd(htim1.Instance, TIM_CHANNEL_2, TIM_CCx_DISABLE);
+		if (pwmMask & 0x2000)
+			TIM_CCxNChannelCmd(htim1.Instance, TIM_CHANNEL_2, TIM_CCxN_DISABLE);
+		if (pwmMask & 0x4000)
+			TIM_CCxChannelCmd(htim1.Instance, TIM_CHANNEL_3, TIM_CCx_DISABLE);
+		if (pwmMask & 0x8000)
+			TIM_CCxNChannelCmd(htim1.Instance, TIM_CHANNEL_3, TIM_CCxN_DISABLE);
+
+		HAL_HRTIM_WaveformOutputStop(&hhrtim,
+				(pwmMask & 0x1 ? HRTIM_OUTPUT_TA1 : 0) |
+				(pwmMask & 0x2 ? HRTIM_OUTPUT_TA2 : 0) |
+				(pwmMask & 0x4 ? HRTIM_OUTPUT_TB1 : 0) |
+				(pwmMask & 0x8 ? HRTIM_OUTPUT_TB2 : 0) |
+				(pwmMask & 0x10 ? HRTIM_OUTPUT_TC1 : 0) |
+				(pwmMask & 0x20 ? HRTIM_OUTPUT_TC2 : 0) |
+				(pwmMask & 0x40 ? HRTIM_OUTPUT_TD1 : 0) |
+				(pwmMask & 0x80 ? HRTIM_OUTPUT_TD2 : 0) |
+				(pwmMask & 0x100 ? HRTIM_OUTPUT_TE1 : 0) |
+				(pwmMask & 0x200 ? HRTIM_OUTPUT_TE2 : 0));
+	}
+}
+
 /* EOF */
