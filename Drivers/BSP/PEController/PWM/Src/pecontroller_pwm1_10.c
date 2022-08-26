@@ -68,7 +68,7 @@ static inline uint32_t GetTimerFreqMHz(uint32_t TimerIdx)
 	return HRTIM_FREQ / divs[(hhrtim.Instance->sTimerxRegs[TimerIdx].TIMxCR & 0x7)];
 }
 
-static HRTIM_TimerCfgTypeDef GetDefaultTimerConfig(uint32_t periodInUsec, uint32_t TimerIdx)
+static HRTIM_TimerCfgTypeDef GetDefaultTimerConfig(pwm_period_t periodInUsec, uint32_t TimerIdx)
 {
 	/* timer base configuration */
 	HRTIM_TimeBaseCfgTypeDef pTimeBaseCfg =
@@ -88,7 +88,7 @@ static HRTIM_TimerCfgTypeDef GetDefaultTimerConfig(uint32_t periodInUsec, uint32
 			pTimeBaseCfg.PrescalerRatio = HRTIM_PRESCALERRATIO_DIV4;
 		}
 	}
-	pTimeBaseCfg.Period = ticks;
+	pTimeBaseCfg.Period = (uint32_t)(periodInUsec * HRTIM_FREQ);
 	if (HAL_HRTIM_TimeBaseConfig(&hhrtim, TimerIdx, &pTimeBaseCfg) != HAL_OK)
 		Error_Handler();
 

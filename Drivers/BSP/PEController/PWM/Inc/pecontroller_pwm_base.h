@@ -74,6 +74,10 @@ typedef enum
 											on the other edge duty cycle will be removed from the lower side switch */
 } duty_mode_t;
 /**
+ * @brief Defines the type for PWM Period Specification
+ */
+typedef float pwm_period_t;
+/**
  * @brief Defines the PWM reset callback,
  * The drivers will call this function whenever the timer for the PWM is reset if enabled in configuration
  */
@@ -115,7 +119,7 @@ typedef struct
 typedef struct
 {
 	pwm_alignment_t alignment;		/**< @brief Specifies the alignment of PWM */
-	uint32_t periodInUsec;			/**< @brief Specifies the period of the PWM in micro-seconds (Maximum possible value is 250Us) */
+	pwm_period_t periodInUsec;			/**< @brief Specifies the period of the PWM in micro-seconds (Maximum possible value is 250Us) */
 	deadtime_t deadtime;			/**< @brief The dead time parameter for the paired inverted PWM.
 										For individual PWMs this value should be NULL */
 	bool synchOnStart;				/**< @brief Controls synchronization of PWM modules.

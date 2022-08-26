@@ -40,7 +40,7 @@ extern "C" {
 /********************************************************************************
  * Defines
  *******************************************************************************/
-/** @defgroup OPENLOOPVF_Exported_Macros Configurations
+/** @defgroup GRIDTIE_Exported_Macros Configurations
   * @{
   */
 /**
