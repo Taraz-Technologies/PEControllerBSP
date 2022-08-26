@@ -93,7 +93,7 @@ static void PWM11_16_Drivers_Init(pwm_config_t* config)
 	else
 	{
 		htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
-		htim1.Init.Period = (config->module->periodInUsec * TIM1_FREQ_MHz) - 1;
+		htim1.Init.Period = (int)(config->module->periodInUsec * TIM1_FREQ_MHz) - 1;
 		isEdgeAligned = true;
 	}
 	htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
