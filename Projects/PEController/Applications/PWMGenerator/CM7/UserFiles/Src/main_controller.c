@@ -82,7 +82,18 @@ void MainControl_Init(void)
 
 	BSP_PWMOut_Enable(0xff , true);
 
-	BSP_AuxTim_ConfigHRTIM(30, false, 2);
+	hrtim_opts_t opts =
+	{
+			.periodInUsecs = 30,
+			.syncResetTim1 = false,
+			.syncStartTim1 = true,
+	};
+	BSP_AuxTim_ConfigHRTIM(&opts);
+	BSP_AuxTim_SetDutyShift(&opts, HRTIM_COMP1, 0);
+	BSP_AuxTim_SetDutyShift(&opts, HRTIM_COMP2, .5f);
+	BSP_AuxTim_SetDutyShift(&opts, HRTIM_COMP3, .75);
+	BSP_AuxTim_SetDutyShift(&opts, HRTIM_COMP4, .25);
+
 	//BSP_AuxTim_ConfigTim3(30, 18);
 	//BSP_AuxTim_StartTim3();
 	//BSP_AuxTim_ConfigTim2(100, TIM_SLAVEMODE_COMBINED_RESETTRIGGER, TIM_TRIGGERPOLARITY_FALLING);

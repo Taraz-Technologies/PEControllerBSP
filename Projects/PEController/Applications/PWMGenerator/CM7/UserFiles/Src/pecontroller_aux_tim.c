@@ -61,25 +61,38 @@ TIM_HandleTypeDef htim3;
  * @param *config Pointer to a  pwm_config_t structure that contains the configuration
  * 				   parameters for the PWM channels
  */
-void BSP_AuxTim_ConfigHRTIM(pwm_period_t periodInUsec, bool startOnSync, int trigger)
+void BSP_AuxTim_ConfigHRTIM(hrtim_opts_t* opts)
 {
 	BSP_HRTim_Init();
 	/* timer configuration */
-	HRTIM_TimerCfgTypeDef pTimerCfg = BSP_HRTim_GetDefaultTimerConfig(periodInUsec, HRTIM_TIMERINDEX_MASTER);
+	HRTIM_TimerCfgTypeDef pTimerCfg = BSP_HRTim_GetDefaultTimerConfig(opts->periodInUsecs, HRTIM_TIMERINDEX_MASTER);
 	pTimerCfg.RepetitionUpdate = HRTIM_MCR_MREPU;
 	pTimerCfg.DeadTimeInsertion = HRTIM_TIMDEADTIMEINSERTION_DISABLED;
-	pTimerCfg.StartOnSync = startOnSync ? HRTIM_SYNCSTART_ENABLED : HRTIM_SYNCSTART_DISABLED;
-	//////// --not possible  pTimerCfg.ResetTrigger = HRTIM_TIMRESETTRIGGER_EEV_3; //trigger == 0 ? HRTIM_TIMRESETTRIGGER_EEV_1 :
+	pTimerCfg.StartOnSync = opts->syncStartTim1 ? HRTIM_SYNCSTART_ENABLED : HRTIM_SYNCSTART_DISABLED;
+	pTimerCfg.ResetOnSync = opts->syncResetTim1 ? HRTIM_SYNCRESET_ENABLED : HRTIM_SYNCRESET_DISABLED;
+	//////// --not possible  pTimerCfg.ResetTrigger = HRTIM_TIMRESETTRIGGER_EEV_3;
+	/// //trigger == 0 ? HRTIM_TIMRESETTRIGGER_EEV_1 :
 			//(trigger == 1 ? HRTIM_TIMRESETTRIGGER_EEV_2 : HRTIM_TIMRESETTRIGGER_EEV_3);
 	if (HAL_HRTIM_WaveformTimerConfig(&hhrtim, HRTIM_TIMERINDEX_MASTER, &pTimerCfg) != HAL_OK)
 		Error_Handler();
 
 	/* compare configuration */
 	hhrtim.Instance->sMasterRegs.MCMP1R = 3;
-	hhrtim.Instance->sMasterRegs.MCMP2R = 960;
-	hhrtim.Instance->sMasterRegs.MCMP3R = 1920;
-	hhrtim.Instance->sMasterRegs.MCMP4R = 2880;
+	hhrtim.Instance->sMasterRegs.MCMP2R = 3;//960;
+	hhrtim.Instance->sMasterRegs.MCMP3R = 3;//1920;
+	hhrtim.Instance->sMasterRegs.MCMP4R = 3;//2880;
 }
+
+void BSP_AuxTim_SetValueShift(hrtim_comp_t comp, uint32_t value)
+{
+	*((uint32_t*)(&hhrtim.Instance->sMasterRegs.MCMP1R) + comp) = value;
+}
+
+void BSP_AuxTim_SetDutyShift(hrtim_opts_t* opts, hrtim_comp_t comp, float duty)
+{
+	*((uint32_t*)(&hhrtim.Instance->sMasterRegs.MCMP1R) + comp) = (opts->periodInUsecs * HRTIM_FREQ - 1) * duty;
+}
+
 void BSP_AuxTim_ConfigTim2(float periodInUsecs, tim_slave_type_t slaveType, tim_slave_edge_t slaveEdge)
 {
 	TIM_ClockConfigTypeDef sClockSourceConfig = {0};

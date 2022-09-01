@@ -49,10 +49,22 @@ typedef enum
 	TIM_SLAVE_RISING = TIM_TRIGGERPOLARITY_RISING,
 	TIM_SLAVE_FALLING = TIM_TRIGGERPOLARITY_FALLING
 } tim_slave_edge_t;
+typedef enum
+{
+	HRTIM_COMP1 = 0,
+	HRTIM_COMP2 = 2,
+	HRTIM_COMP3 = 3,
+	HRTIM_COMP4 = 4
+} hrtim_comp_t;
 /********************************************************************************
  * Structures
  *******************************************************************************/
-
+typedef struct
+{
+	bool syncStartTim1;
+	bool syncResetTim1;
+	pwm_period_t periodInUsecs;
+} hrtim_opts_t;
 /********************************************************************************
  * Exported Variablesd
  *******************************************************************************/
@@ -62,7 +74,9 @@ typedef enum
  *******************************************************************************/
 void BSP_AuxTim_ConfigTim3(float periodInUsecs, float triggerDelayInUsecs);
 void BSP_AuxTim_ConfigTim2(float periodInUsecs, tim_slave_type_t slaveType, tim_slave_edge_t slaveEdge);
-void BSP_AuxTim_ConfigHRTIM(pwm_period_t periodInUsec, bool startOnSync, int trigger);
+extern void BSP_AuxTim_ConfigHRTIM(hrtim_opts_t* opts);
+extern void BSP_AuxTim_SetValueShift(hrtim_comp_t comp, uint32_t value);
+extern void BSP_AuxTim_SetDutyShift(hrtim_opts_t* opts, hrtim_comp_t comp, float duty);
 void BSP_AuxTim_StartTim3(void);
 /********************************************************************************
  * Code
