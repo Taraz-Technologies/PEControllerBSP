@@ -66,18 +66,19 @@ void BSP_AuxTim_ConfigHRTIM(pwm_period_t periodInUsec, bool startOnSync, int tri
 	BSP_HRTim_Init();
 	/* timer configuration */
 	HRTIM_TimerCfgTypeDef pTimerCfg = BSP_HRTim_GetDefaultTimerConfig(periodInUsec, HRTIM_TIMERINDEX_MASTER);
+	pTimerCfg.RepetitionUpdate = HRTIM_MCR_MREPU;
 	pTimerCfg.DeadTimeInsertion = HRTIM_TIMDEADTIMEINSERTION_DISABLED;
 	pTimerCfg.StartOnSync = startOnSync ? HRTIM_SYNCSTART_ENABLED : HRTIM_SYNCSTART_DISABLED;
-	pTimerCfg.ResetTrigger = HRTIM_TIMRESETTRIGGER_EEV_3; //trigger == 0 ? HRTIM_TIMRESETTRIGGER_EEV_1 :
+	//////// --not possible  pTimerCfg.ResetTrigger = HRTIM_TIMRESETTRIGGER_EEV_3; //trigger == 0 ? HRTIM_TIMRESETTRIGGER_EEV_1 :
 			//(trigger == 1 ? HRTIM_TIMRESETTRIGGER_EEV_2 : HRTIM_TIMRESETTRIGGER_EEV_3);
 	if (HAL_HRTIM_WaveformTimerConfig(&hhrtim, HRTIM_TIMERINDEX_MASTER, &pTimerCfg) != HAL_OK)
 		Error_Handler();
 
 	/* compare configuration */
 	hhrtim.Instance->sMasterRegs.MCMP1R = 3;
-	hhrtim.Instance->sMasterRegs.MCMP2R = 480;
-	hhrtim.Instance->sMasterRegs.MCMP3R = 960;
-	hhrtim.Instance->sMasterRegs.MCMP4R = 1440;
+	hhrtim.Instance->sMasterRegs.MCMP2R = 960;
+	hhrtim.Instance->sMasterRegs.MCMP3R = 1920;
+	hhrtim.Instance->sMasterRegs.MCMP4R = 2880;
 }
 void BSP_AuxTim_ConfigTim2(float periodInUsecs, tim_slave_type_t slaveType, tim_slave_edge_t slaveEdge)
 {
