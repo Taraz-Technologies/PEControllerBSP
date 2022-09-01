@@ -177,7 +177,6 @@ void BSP_HRTim_Init(void)
 	if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
 		Error_Handler();
 	__HAL_RCC_HRTIM1_CLK_ENABLE();
-	/* enable the HRTimer (high Resolution Timer) responsible for PWM1-PWM10 */
 	hhrtim.Instance = HRTIM1;
 	hhrtim.Init.HRTIMInterruptResquests = HRTIM_IT_NONE;
 	hhrtim.Init.SyncInputSource = HRTIM_SYNCINPUTSOURCE_INTERNALEVENT;

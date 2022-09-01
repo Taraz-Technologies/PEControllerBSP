@@ -197,7 +197,8 @@ void BSP_PWM_Start(uint32_t pwmMask)
 			(pwmMask & 0xc ? HRTIM_TIMERID_TIMER_B : 0) |
 			(pwmMask & 0x30 ? HRTIM_TIMERID_TIMER_C : 0) |
 			(pwmMask & 0xc0 ? HRTIM_TIMERID_TIMER_D : 0) |
-			(pwmMask & 0x300 ? HRTIM_TIMERID_TIMER_E : 0);
+			(pwmMask & 0x300 ? HRTIM_TIMERID_TIMER_E : 0) |
+			HRTIM_TIMERID_MASTER;
 
 	// enable timer
 	if ((pwmMask & 0xfc00) && (pwmMask & 0x2ff))

@@ -150,6 +150,9 @@ static void PWM1_10_ConfigInvertedPair(uint32_t pwmNo, pwm_config_t* config)
 	HRTIM_TimerCfgTypeDef pTimerCfg = BSP_HRTim_GetDefaultTimerConfig(mod->periodInUsec, TimerIdx);
 	pTimerCfg.DeadTimeInsertion = IsDeadtimeEnabled(&mod->deadtime) ? HRTIM_TIMDEADTIMEINSERTION_ENABLED : HRTIM_TIMDEADTIMEINSERTION_DISABLED;
 	pTimerCfg.StartOnSync = mod->synchOnStart ? HRTIM_SYNCSTART_ENABLED : HRTIM_SYNCSTART_DISABLED;
+	pTimerCfg.ResetTrigger = HRTIM_TIMRESETTRIGGER_MASTER_PER;//TimerIdx == HRTIM_TIMERINDEX_TIMER_A ? HRTIM_TIMRESETTRIGGER_MASTER_CMP1 :
+			//(TimerIdx == HRTIM_TIMERINDEX_TIMER_B ? HRTIM_TIMRESETTRIGGER_MASTER_CMP2 :
+					//(TimerIdx == HRTIM_TIMERINDEX_TIMER_C ? HRTIM_TIMRESETTRIGGER_MASTER_CMP3 : HRTIM_TIMRESETTRIGGER_MASTER_CMP4));
 	if (HAL_HRTIM_WaveformTimerConfig(&hhrtim, TimerIdx, &pTimerCfg) != HAL_OK)
 		Error_Handler();
 
