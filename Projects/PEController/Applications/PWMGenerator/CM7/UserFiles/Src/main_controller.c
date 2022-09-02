@@ -124,7 +124,7 @@ void MainControl_Init(void)
 	BSP_Dout_SetAsPWMPin(15);
 	BSP_Dout_SetAsPWMPin(16);
 
-	BSP_PWMOut_Enable(0xff , true);
+	BSP_PWMOut_Enable(0xffff , true);
 
 	hrtim_opts_t opts =
 	{
