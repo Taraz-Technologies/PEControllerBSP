@@ -60,41 +60,57 @@ void MainControl_Init(void)
 	{
 			.alignment = EDGE_ALIGNED,
 			.periodInUsec = 40,
-			.deadtime = {.on = false },
-			.synchOnStart = false
+			.deadtime = {.on = false }
+	};
+	pwm_slave_opts_t slaveOpts =
+	{
+			.syncStartTim1 = false,
+			.syncRestetSrc = PWM_RST_HRTIM_MASTER_CMP1
 	};
 	pwm_config_t pwm =
 	{
 			.dutyMode = OUTPUT_DUTY_MINUS_DEADTIME_AT_PWMH,
 			.lim = { .min = 0, .max = 1, .minMaxDutyCycleBalancing = false },
-			.module = &inverterPWMModuleConfig
+			.module = &inverterPWMModuleConfig,
+			.slaveOpts = &slaveOpts
 	};
 
-	// configure the PWM functions
-	for (int i = 0; i < 4; i++)
-	{
-		int index = i * 2 + 1;
-		DutyCycleUpdateFnc fnc = BSP_PWM_ConfigInvertedPair(index, &pwm);
-		fnc(index, .5f, &pwm);
-		BSP_Dout_SetAsPWMPin(index);
-		BSP_Dout_SetAsPWMPin(index+1);
-	}
+	// First Inverted Pair (PWM 1-2, Ref Channel = PWM1) (Reset is triggered by master compare 1 module)
+	DutyCycleUpdateFnc updateFnc = BSP_PWM_ConfigInvertedPair(1, &pwm);
+	updateFnc(1, .5f, &pwm);
+	BSP_Dout_SetAsPWMPin(1);
+	BSP_Dout_SetAsPWMPin(2);
+
+	// Second Inverted Pair (PWM 3-4, Ref Channel = PWM3) (Reset is triggered by master compare 2 module)
+	slaveOpts.syncRestetSrc = PWM_RST_HRTIM_MASTER_CMP2;
+	updateFnc = BSP_PWM_ConfigInvertedPair(3, &pwm);
+	updateFnc(3, .5f, &pwm);
+	BSP_Dout_SetAsPWMPin(3);
+	BSP_Dout_SetAsPWMPin(4);
+
+	// Third Inverted Pair (PWM 5-6, Ref Channel = PWM6) (Reset is triggered by master compare 2 module)
+	updateFnc = BSP_PWM_ConfigInvertedPair(6, &pwm);
+	updateFnc(5, .5f, &pwm);
+	BSP_Dout_SetAsPWMPin(5);
+	BSP_Dout_SetAsPWMPin(6);
 
 	BSP_PWMOut_Enable(0xff , true);
 
 	hrtim_opts_t opts =
 	{
-			.periodInUsecs = 30,
+			.periodInUsecs = 35,
 			.syncResetTim1 = false,
 			.syncStartTim1 = true,
 	};
 	BSP_AuxTim_ConfigHRTIM(&opts);
 	BSP_AuxTim_SetDutyShift(&opts, HRTIM_COMP1, 0);
-	BSP_AuxTim_SetDutyShift(&opts, HRTIM_COMP2, .5f);
-	BSP_AuxTim_SetDutyShift(&opts, HRTIM_COMP3, .75);
-	BSP_AuxTim_SetDutyShift(&opts, HRTIM_COMP4, .25);
+	BSP_AuxTim_SetDutyShift(&opts, HRTIM_COMP2, .25f);
+	BSP_AuxTim_SetDutyShift(&opts, HRTIM_COMP3, .5f);
+	BSP_AuxTim_SetDutyShift(&opts, HRTIM_COMP4, .75f);
 
-	//BSP_AuxTim_ConfigTim3(30, 18);
+	BSP_AuxTim_ConfigTim3(35, 18);
+	BSP_AuxTim_StartTim3(true);
+
 	//BSP_AuxTim_StartTim3();
 	//BSP_AuxTim_ConfigTim2(100, TIM_SLAVEMODE_COMBINED_RESETTRIGGER, TIM_TRIGGERPOLARITY_FALLING);
 }

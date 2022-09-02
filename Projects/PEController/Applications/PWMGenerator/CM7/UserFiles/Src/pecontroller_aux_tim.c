@@ -72,25 +72,28 @@ void BSP_AuxTim_ConfigHRTIM(hrtim_opts_t* opts)
 	pTimerCfg.ResetOnSync = opts->syncResetTim1 ? HRTIM_SYNCRESET_ENABLED : HRTIM_SYNCRESET_DISABLED;
 	//////// --not possible  pTimerCfg.ResetTrigger = HRTIM_TIMRESETTRIGGER_EEV_3;
 	/// //trigger == 0 ? HRTIM_TIMRESETTRIGGER_EEV_1 :
-			//(trigger == 1 ? HRTIM_TIMRESETTRIGGER_EEV_2 : HRTIM_TIMRESETTRIGGER_EEV_3);
+	//(trigger == 1 ? HRTIM_TIMRESETTRIGGER_EEV_2 : HRTIM_TIMRESETTRIGGER_EEV_3);
 	if (HAL_HRTIM_WaveformTimerConfig(&hhrtim, HRTIM_TIMERINDEX_MASTER, &pTimerCfg) != HAL_OK)
 		Error_Handler();
 
 	/* compare configuration */
-	hhrtim.Instance->sMasterRegs.MCMP1R = 3;
-	hhrtim.Instance->sMasterRegs.MCMP2R = 3;//960;
-	hhrtim.Instance->sMasterRegs.MCMP3R = 3;//1920;
-	hhrtim.Instance->sMasterRegs.MCMP4R = 3;//2880;
+	hhrtim.Instance->sMasterRegs.MCMP1R = hhrtim.Instance->sMasterRegs.MCMP2R =
+			hhrtim.Instance->sMasterRegs.MCMP3R = hhrtim.Instance->sMasterRegs.MCMP4R = 3;
 }
 
 void BSP_AuxTim_SetValueShift(hrtim_comp_t comp, uint32_t value)
 {
+	if (value < 3)
+		value = 3;
 	*((uint32_t*)(&hhrtim.Instance->sMasterRegs.MCMP1R) + comp) = value;
 }
 
 void BSP_AuxTim_SetDutyShift(hrtim_opts_t* opts, hrtim_comp_t comp, float duty)
 {
-	*((uint32_t*)(&hhrtim.Instance->sMasterRegs.MCMP1R) + comp) = (opts->periodInUsecs * HRTIM_FREQ - 1) * duty;
+	uint32_t val = (opts->periodInUsecs * HRTIM_FREQ - 1) * duty;
+	if (val < 3)
+		val = 3;
+	*((uint32_t*)(&hhrtim.Instance->sMasterRegs.MCMP1R) + comp) = val;
 }
 
 void BSP_AuxTim_ConfigTim2(float periodInUsecs, tim_slave_type_t slaveType, tim_slave_edge_t slaveEdge)
@@ -188,9 +191,16 @@ void BSP_AuxTim_ConfigTim3(float periodInUsecs, float triggerDelayInUsecs)
 	GPIO_InitStruct.Alternate = GPIO_AF2_TIM3;
 	HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 }
-void BSP_AuxTim_StartTim3(void)
+
+void BSP_AuxTim_StartTim3(bool startHrtimMaster)
 {
-	HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+	/* Enable the Capture compare channel */
+	TIM_CCxChannelCmd(htim3.Instance, 0, TIM_CCx_ENABLE);
+	__HAL_TIM_MOE_ENABLE(&htim3);
+	if (startHrtimMaster)
+		hhrtim.Instance->sMasterRegs.MCR |= (HRTIM_TIMERID_MASTER);
+	__HAL_TIM_ENABLE(&htim3);
+
 }
 
 /* EOF */

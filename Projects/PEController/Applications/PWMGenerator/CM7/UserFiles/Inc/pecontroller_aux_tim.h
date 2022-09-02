@@ -66,7 +66,7 @@ typedef struct
 	pwm_period_t periodInUsecs;
 } hrtim_opts_t;
 /********************************************************************************
- * Exported Variablesd
+ * Exported Variables
  *******************************************************************************/
 
 /********************************************************************************
@@ -77,7 +77,7 @@ void BSP_AuxTim_ConfigTim2(float periodInUsecs, tim_slave_type_t slaveType, tim_
 extern void BSP_AuxTim_ConfigHRTIM(hrtim_opts_t* opts);
 extern void BSP_AuxTim_SetValueShift(hrtim_comp_t comp, uint32_t value);
 extern void BSP_AuxTim_SetDutyShift(hrtim_opts_t* opts, hrtim_comp_t comp, float duty);
-void BSP_AuxTim_StartTim3(void);
+void BSP_AuxTim_StartTim3(bool startHrtimMaster);
 /********************************************************************************
  * Code
  *******************************************************************************/

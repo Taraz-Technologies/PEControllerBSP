@@ -122,9 +122,24 @@ typedef struct
 	pwm_period_t periodInUsec;			/**< @brief Specifies the period of the PWM in micro-seconds (Maximum possible value is 250Us) */
 	deadtime_t deadtime;			/**< @brief The dead time parameter for the paired inverted PWM.
 										For individual PWMs this value should be NULL */
-	bool synchOnStart;				/**< @brief Controls synchronization of PWM modules.
-										If <c>true</c> synchronize the HRTIM sub-module to TIM1 */
 } pwm_module_config_t;
+typedef enum
+{
+	PWM_RST_NONE,
+	PWM_RST_TIM1,
+	PWM_RST_TIM2,
+	PWM_RST_TIM3,
+	PWM_RST_HRTIM_MASTER_PERIOD,	// after this only available for PWM 1-10
+	PWM_RST_HRTIM_MASTER_CMP1,
+	PWM_RST_HRTIM_MASTER_CMP2,
+	PWM_RST_HRTIM_MASTER_CMP3,
+	PWM_RST_HRTIM_MASTER_CMP4,
+} pwm_slave_rst_src_t;
+typedef struct
+{
+	bool syncStartTim1;				/**< @brief Defines if the timer start should be synchronised with timer 1*/
+	pwm_slave_rst_src_t syncRestetSrc;	/**< @brief Defines the reset source which can reset the PWM channel */
+} pwm_slave_opts_t;
 /**
  * @brief Defines the parameters for specific PWM configuration
  */
@@ -133,6 +148,9 @@ typedef struct
 	duty_limits_t lim;				/**< @brief Defines the duty cycle limits for the specified channels */
 	duty_mode_t dutyMode;			/**< @brief Controls the duty cycle computation mode.
 										This parameter is used only when the dead time is enabled */
+	pwm_slave_opts_t* slaveOpts;	/**< @brief Defines the options for slave operation for the PWM.
+										@note Keep in mind that some options may only be available for specific PWM channels only.
+										For details view the relevant source definitions */
 	pwm_module_config_t* module;	/**< @brief Define the module configuration */
 } pwm_config_t;
 /**

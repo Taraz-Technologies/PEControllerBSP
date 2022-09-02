@@ -128,6 +128,22 @@ void PWM1_10_ActivateInvertedPair(uint32_t pwmNo, bool en)
 	}
 }
 
+static uint32_t GetResetSrcValue(pwm_slave_rst_src_t src)
+{
+	switch (src)
+	{
+	case PWM_RST_TIM1: return HRTIM_TIMRESETTRIGGER_EEV_1;
+	case PWM_RST_TIM2: return HRTIM_TIMRESETTRIGGER_EEV_2;
+	case PWM_RST_TIM3: return HRTIM_TIMRESETTRIGGER_EEV_3;
+	case PWM_RST_HRTIM_MASTER_PERIOD: return HRTIM_TIMRESETTRIGGER_MASTER_PER;
+	case PWM_RST_HRTIM_MASTER_CMP1: return HRTIM_TIMRESETTRIGGER_MASTER_CMP1;
+	case PWM_RST_HRTIM_MASTER_CMP2: return HRTIM_TIMRESETTRIGGER_MASTER_CMP2;
+	case PWM_RST_HRTIM_MASTER_CMP3: return HRTIM_TIMRESETTRIGGER_MASTER_CMP3;
+	case PWM_RST_HRTIM_MASTER_CMP4: return HRTIM_TIMRESETTRIGGER_MASTER_CMP4;
+	default: return HRTIM_TIMRESETTRIGGER_NONE;
+	}
+}
+
 /**
  * @brief Configures a single inverted pair for PWM
  * @param pwmNo Channel no of reference channel is the PWM pair (Valid Values 1-10). <br>
@@ -145,14 +161,16 @@ static void PWM1_10_ConfigInvertedPair(uint32_t pwmNo, pwm_config_t* config)
 	uint32_t out2 = 1U << (TimerIdx * 2 + 1);
 	uint32_t isCh2 = (pwmNo - 1) % 2;
 	pwm_module_config_t* mod = config->module;
+	pwm_slave_opts_t* slaveOpts = config->slaveOpts;
 
 	/* timer configuration */
 	HRTIM_TimerCfgTypeDef pTimerCfg = BSP_HRTim_GetDefaultTimerConfig(mod->periodInUsec, TimerIdx);
 	pTimerCfg.DeadTimeInsertion = IsDeadtimeEnabled(&mod->deadtime) ? HRTIM_TIMDEADTIMEINSERTION_ENABLED : HRTIM_TIMDEADTIMEINSERTION_DISABLED;
-	pTimerCfg.StartOnSync = mod->synchOnStart ? HRTIM_SYNCSTART_ENABLED : HRTIM_SYNCSTART_DISABLED;
-	pTimerCfg.ResetTrigger = TimerIdx == HRTIM_TIMERINDEX_TIMER_A ? HRTIM_TIMRESETTRIGGER_MASTER_PER :
-			(TimerIdx == HRTIM_TIMERINDEX_TIMER_B ? HRTIM_TIMRESETTRIGGER_MASTER_CMP2 :
-					(TimerIdx == HRTIM_TIMERINDEX_TIMER_C ? HRTIM_TIMRESETTRIGGER_MASTER_CMP3 : HRTIM_TIMRESETTRIGGER_MASTER_CMP4));
+	if (slaveOpts != NULL)
+	{
+		pTimerCfg.StartOnSync = slaveOpts->syncStartTim1 ? HRTIM_SYNCSTART_ENABLED : HRTIM_SYNCSTART_DISABLED;
+		pTimerCfg.ResetTrigger = GetResetSrcValue(slaveOpts->syncRestetSrc);
+	}
 	if (HAL_HRTIM_WaveformTimerConfig(&hhrtim, TimerIdx, &pTimerCfg) != HAL_OK)
 		Error_Handler();
 
@@ -302,11 +320,16 @@ static void PWM1_10_ConfigChannel(uint32_t pwmNo, pwm_config_t* config)
 	bool isPWM1 = pwmNo % 2 == 0 ? false : true;
 	uint32_t out = 1U << (TimerIdx * 2 + (isPWM1 ? 0 : 1));
 	pwm_module_config_t* mod = config->module;
+	pwm_slave_opts_t* slaveOpts = config->slaveOpts;
 
 	/* timer configuration */
 	HRTIM_TimerCfgTypeDef pTimerCfg = BSP_HRTim_GetDefaultTimerConfig(mod->periodInUsec, TimerIdx);
 	pTimerCfg.DeadTimeInsertion = HRTIM_TIMDEADTIMEINSERTION_DISABLED;
-	pTimerCfg.StartOnSync = mod->synchOnStart ? HRTIM_SYNCSTART_ENABLED : HRTIM_SYNCSTART_DISABLED;
+	if (slaveOpts != NULL)
+	{
+		pTimerCfg.StartOnSync = slaveOpts->syncStartTim1 ? HRTIM_SYNCSTART_ENABLED : HRTIM_SYNCSTART_DISABLED;
+		pTimerCfg.ResetTrigger = GetResetSrcValue(slaveOpts->syncRestetSrc);
+	}
 	if (HAL_HRTIM_WaveformTimerConfig(&hhrtim, TimerIdx, &pTimerCfg) != HAL_OK)
 		Error_Handler();
 
