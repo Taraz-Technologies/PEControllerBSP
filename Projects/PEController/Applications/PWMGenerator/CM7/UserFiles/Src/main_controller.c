@@ -60,7 +60,7 @@ void MainControl_Init(void)
 	{
 			.alignment = EDGE_ALIGNED,
 			.periodInUsec = 40,
-			.deadtime = {.on = false }
+			.deadtime = {.on = true, .nanoSec = 1000 }
 	};
 	pwm_slave_opts_t slaveOpts =
 	{
@@ -90,15 +90,45 @@ void MainControl_Init(void)
 
 	// Third Inverted Pair (PWM 5-6, Ref Channel = PWM6) (Reset is triggered by master compare 2 module)
 	updateFnc = BSP_PWM_ConfigInvertedPair(6, &pwm);
-	updateFnc(5, .5f, &pwm);
+	updateFnc(6, .5f, &pwm);
 	BSP_Dout_SetAsPWMPin(5);
 	BSP_Dout_SetAsPWMPin(6);
+
+	// Fourth Inverted Pair (PWM 7-8, Ref Channel = PWM6) (Reset is triggered by Timer 3, Fiber Tx Channel module)
+	slaveOpts.syncRestetSrc = PWM_RST_TIM3;
+	updateFnc = BSP_PWM_ConfigInvertedPair(7, &pwm);
+	updateFnc(7, .5f, &pwm);
+	BSP_Dout_SetAsPWMPin(7);
+	BSP_Dout_SetAsPWMPin(8);
+
+	// Fifth Inverted Pair (PWM 9-10, Ref Channel = PWM9) (Reset is triggered by Timer 2, Fiber Rx Channel module)
+	BSP_AuxTim_ConfigTim2(100, TIM_SLAVEMODE_COMBINED_RESETTRIGGER, TIM_TRIGGERPOLARITY_FALLING);
+	slaveOpts.syncRestetSrc = PWM_RST_TIM2;
+	updateFnc = BSP_PWM_ConfigInvertedPair(9, &pwm);
+	updateFnc(9, .5f, &pwm);
+	BSP_Dout_SetAsPWMPin(9);
+	BSP_Dout_SetAsPWMPin(10);
+
+	updateFnc = BSP_PWM_ConfigInvertedPair(12, &pwm);
+	updateFnc(12, .5f, &pwm);
+	BSP_Dout_SetAsPWMPin(11);
+	BSP_Dout_SetAsPWMPin(12);
+
+	updateFnc = BSP_PWM_ConfigInvertedPair(13, &pwm);
+	updateFnc(13, .5f, &pwm);
+	BSP_Dout_SetAsPWMPin(13);
+	BSP_Dout_SetAsPWMPin(14);
+
+	updateFnc = BSP_PWM_ConfigInvertedPair(16, &pwm);
+	updateFnc(16, .5f, &pwm);
+	BSP_Dout_SetAsPWMPin(15);
+	BSP_Dout_SetAsPWMPin(16);
 
 	BSP_PWMOut_Enable(0xff , true);
 
 	hrtim_opts_t opts =
 	{
-			.periodInUsecs = 35,
+			.periodInUsecs = 39.5,
 			.syncResetTim1 = false,
 			.syncStartTim1 = true,
 	};
@@ -108,7 +138,7 @@ void MainControl_Init(void)
 	BSP_AuxTim_SetDutyShift(&opts, HRTIM_COMP3, .5f);
 	BSP_AuxTim_SetDutyShift(&opts, HRTIM_COMP4, .75f);
 
-	BSP_AuxTim_ConfigTim3(35, 18);
+	BSP_AuxTim_ConfigTim3(opts.periodInUsecs, 18);
 	BSP_AuxTim_StartTim3(true);
 
 	//BSP_AuxTim_StartTim3();
