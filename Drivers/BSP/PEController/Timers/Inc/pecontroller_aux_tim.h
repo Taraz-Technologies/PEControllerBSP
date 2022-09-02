@@ -1,6 +1,6 @@
 /**
  ********************************************************************************
- * @file 		pecontroller_timers.h
+ * @file 		pecontroller_aux_tim.h
  * @author 		Waqas Ehsan Butt
  * @date 		Aug 30, 2022
  *
@@ -19,8 +19,8 @@
  ********************************************************************************
  */
 
-#ifndef PWM_PECONTROLLER_TIMERS_H_
-#define PWM_PECONTROLLER_TIMERS_H_
+#ifndef PECONTROLLER_AUX_TIM_H_
+#define PECONTROLLER_AUX_TIM_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,43 +29,48 @@ extern "C" {
 /********************************************************************************
  * Includes
  *******************************************************************************/
-#include "general_header.h"
 #include "pecontroller_pwm_base.h"
 /********************************************************************************
  * Defines
  *******************************************************************************/
-#define HRTIM_FREQ					(480)
+
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
-
+typedef enum
+{
+	TIM_SLAVE_RISING = TIM_TRIGGERPOLARITY_RISING,
+	TIM_SLAVE_FALLING = TIM_TRIGGERPOLARITY_FALLING
+} tim_slave_edge_t;
+typedef enum
+{
+	HRTIM_COMP1 = 0,
+	HRTIM_COMP2 = 2,
+	HRTIM_COMP3 = 3,
+	HRTIM_COMP4 = 4
+} hrtim_comp_t;
 /********************************************************************************
  * Structures
  *******************************************************************************/
-
+typedef struct
+{
+	pwm_sync_src_t syncSrc;
+	pwm_sync_type_t syncType;
+	pwm_period_t periodInUsecs;
+} hrtim_opts_t;
 /********************************************************************************
  * Exported Variables
  *******************************************************************************/
-/** Pointer to the timer structure
- */
-extern HRTIM_HandleTypeDef hhrtim;
-/** Enabled HRTimer
- * <c>true</c> if module previously initialized
- */
-extern bool hrtimEnabled;
+
 /********************************************************************************
  * Global Function Prototypes
  *******************************************************************************/
-uint32_t BSP_HRTim_GetTimerFreq(uint32_t TimerIdx);
-HRTIM_TimerCfgTypeDef BSP_HRTim_GetDefaultTimerConfig(pwm_period_t periodInUsec, uint32_t TimerIdx);
-HRTIM_CompareCfgTypeDef BSP_HRTim_GetDefaultCompareConfig(void);
-HRTIM_DeadTimeCfgTypeDef BSP_HRTim_GetDefaultDeadtimeConfig(void);
-HRTIM_OutputCfgTypeDef BSP_HRTim_GetDefaultOutputConfig(void);
-IRQn_Type BSP_HRTim_GetIRQn(uint32_t TimerIdx);
-/**
- * @brief  Initialize the HRTimer
- */
-void BSP_HRTim_Init(void);
+void BSP_AuxTim_ConfigTim3(float periodInUsecs, float triggerDelayInUsecs);
+void BSP_AuxTim_ConfigTim2(float periodInUsecs, pwm_sync_type_t slaveType, tim_slave_edge_t slaveEdge);
+extern void BSP_AuxTim_ConfigHRTIM(hrtim_opts_t* opts);
+extern void BSP_AuxTim_SetValueShift(hrtim_comp_t comp, uint32_t value);
+extern void BSP_AuxTim_SetDutyShift(hrtim_opts_t* opts, hrtim_comp_t comp, float duty);
+void BSP_AuxTim_StartTim3(bool startHrtimMaster);
 /********************************************************************************
  * Code
  *******************************************************************************/

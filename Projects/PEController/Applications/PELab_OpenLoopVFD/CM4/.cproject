@@ -48,6 +48,7 @@
 									<listOptionValue builtIn="false" value="../../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy"/>
 									<listOptionValue builtIn="false" value="../../Drivers/CMSIS/Device/ST/STM32H7xx/Include"/>
 									<listOptionValue builtIn="false" value="../../Drivers/CMSIS/Include"/>
+									<listOptionValue builtIn="false" value="../../../../../../Drivers/BSP/PEController/Timers/Inc"/>
 									<listOptionValue builtIn="false" value="../../../../../../Drivers/BSP/PEController/PWM/Inc"/>
 									<listOptionValue builtIn="false" value="../../../../../../Drivers/BSP/PEController/ADC/Inc"/>
 									<listOptionValue builtIn="false" value="../../../../../../Drivers/BSP/PEController/Display/Inc"/>
@@ -148,6 +149,7 @@
 									<listOptionValue builtIn="false" value="../../../../../../Drivers/BSP/PEController/Common/Inc"/>
 									<listOptionValue builtIn="false" value="../BSP/Display"/>
 									<listOptionValue builtIn="false" value="../../../../../../Drivers/BSP/PEController/intelliSENS/Inc"/>
+									<listOptionValue builtIn="false" value="../../../../../../Drivers/BSP/PEController/Timers/Inc"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.245915100" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
 							</tool>

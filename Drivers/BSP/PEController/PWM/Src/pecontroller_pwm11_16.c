@@ -110,10 +110,10 @@ static void PWM11_16_Drivers_Init(pwm_config_t* config)
 	if (config->slaveOpts)
 	{
 		TIM_SlaveConfigTypeDef sSlaveConfig = {0};
-		sSlaveConfig.InputTrigger = config->slaveOpts->syncRestetSrc == PWM_RST_TIM2 ? TIM_TS_ITR1 :
-				(config->slaveOpts->syncRestetSrc == PWM_RST_TIM3 ? TIM_TS_ITR2 : TIM_TS_NONE);
+		sSlaveConfig.InputTrigger = config->slaveOpts->syncSrc == PWM_SYNC_SRC_TIM2 ? TIM_TS_ITR1 :
+				(config->slaveOpts->syncSrc == PWM_SYNC_SRC_TIM3 ? TIM_TS_ITR2 : TIM_TS_NONE);
 		sSlaveConfig.TriggerPolarity = TIM_TRIGGERPOLARITY_RISING;
-		sSlaveConfig.SlaveMode = TIM_SLAVEMODE_COMBINED_RESETTRIGGER;
+		sSlaveConfig.SlaveMode = config->slaveOpts->syncType;
 		if (HAL_TIM_SlaveConfigSynchro(&htim1, &sSlaveConfig) != HAL_OK)
 		{
 			Error_Handler();

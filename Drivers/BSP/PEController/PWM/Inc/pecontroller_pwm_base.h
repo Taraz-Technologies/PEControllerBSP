@@ -73,6 +73,24 @@ typedef enum
 											On one edge duty cycle will be removed from high side whereas
 											on the other edge duty cycle will be removed from the lower side switch */
 } duty_mode_t;
+typedef enum
+{
+	PWM_SYNC_SRC_NONE,
+	PWM_SYNC_SRC_TIM1,
+	PWM_SYNC_SRC_TIM2,
+	PWM_SYNC_SRC_TIM3,
+	PWM_SYNC_SRC_HRTIM_MASTER_PERIOD,	// after this only available for PWM 1-10
+	PWM_SYNC_SRC_HRTIM_MASTER_CMP1,
+	PWM_SYNC_SRC_HRTIM_MASTER_CMP2,
+	PWM_SYNC_SRC_HRTIM_MASTER_CMP3,
+	PWM_SYNC_SRC_HRTIM_MASTER_CMP4,
+} pwm_sync_src_t;
+typedef enum
+{
+	PWM_SYNC_RST = TIM_SLAVEMODE_RESET,
+	PWM_SYNC_START = TIM_SLAVEMODE_TRIGGER,
+	PWM_SYNC_RESET_AND_START = TIM_SLAVEMODE_COMBINED_RESETTRIGGER
+} pwm_sync_type_t;
 /**
  * @brief Defines the type for PWM Period Specification
  */
@@ -123,22 +141,10 @@ typedef struct
 	deadtime_t deadtime;			/**< @brief The dead time parameter for the paired inverted PWM.
 										For individual PWMs this value should be NULL */
 } pwm_module_config_t;
-typedef enum
-{
-	PWM_RST_NONE,
-	PWM_RST_TIM1,
-	PWM_RST_TIM2,
-	PWM_RST_TIM3,
-	PWM_RST_HRTIM_MASTER_PERIOD,	// after this only available for PWM 1-10
-	PWM_RST_HRTIM_MASTER_CMP1,
-	PWM_RST_HRTIM_MASTER_CMP2,
-	PWM_RST_HRTIM_MASTER_CMP3,
-	PWM_RST_HRTIM_MASTER_CMP4,
-} pwm_slave_rst_src_t;
 typedef struct
 {
-	bool syncStartTim1;				/**< @brief Defines if the timer start should be synchronised with timer 1*/
-	pwm_slave_rst_src_t syncRestetSrc;	/**< @brief Defines the reset source which can reset the PWM channel */
+	pwm_sync_src_t syncSrc;
+	pwm_sync_type_t syncType;
 } pwm_slave_opts_t;
 /**
  * @brief Defines the parameters for specific PWM configuration

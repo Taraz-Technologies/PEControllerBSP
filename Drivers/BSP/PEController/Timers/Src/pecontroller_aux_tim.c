@@ -68,11 +68,10 @@ void BSP_AuxTim_ConfigHRTIM(hrtim_opts_t* opts)
 	HRTIM_TimerCfgTypeDef pTimerCfg = BSP_HRTim_GetDefaultTimerConfig(opts->periodInUsecs, HRTIM_TIMERINDEX_MASTER);
 	pTimerCfg.RepetitionUpdate = HRTIM_MCR_MREPU;
 	pTimerCfg.DeadTimeInsertion = HRTIM_TIMDEADTIMEINSERTION_DISABLED;
-	pTimerCfg.StartOnSync = opts->syncStartTim1 ? HRTIM_SYNCSTART_ENABLED : HRTIM_SYNCSTART_DISABLED;
-	pTimerCfg.ResetOnSync = opts->syncResetTim1 ? HRTIM_SYNCRESET_ENABLED : HRTIM_SYNCRESET_DISABLED;
-	//////// --not possible  pTimerCfg.ResetTrigger = HRTIM_TIMRESETTRIGGER_EEV_3;
-	/// //trigger == 0 ? HRTIM_TIMRESETTRIGGER_EEV_1 :
-	//(trigger == 1 ? HRTIM_TIMRESETTRIGGER_EEV_2 : HRTIM_TIMRESETTRIGGER_EEV_3);
+	pTimerCfg.StartOnSync = (opts->syncSrc == PWM_SYNC_SRC_TIM1 &&
+			(opts->syncType == PWM_SYNC_START || opts->syncType == PWM_SYNC_RESET_AND_START)) ? HRTIM_SYNCSTART_ENABLED : HRTIM_SYNCSTART_DISABLED;
+	pTimerCfg.ResetOnSync = (opts->syncSrc == PWM_SYNC_SRC_TIM1 &&
+			(opts->syncType == PWM_SYNC_RST || opts->syncType == PWM_SYNC_RESET_AND_START)) ? HRTIM_SYNCRESET_ENABLED : HRTIM_SYNCRESET_DISABLED;
 	if (HAL_HRTIM_WaveformTimerConfig(&hhrtim, HRTIM_TIMERINDEX_MASTER, &pTimerCfg) != HAL_OK)
 		Error_Handler();
 
@@ -96,7 +95,7 @@ void BSP_AuxTim_SetDutyShift(hrtim_opts_t* opts, hrtim_comp_t comp, float duty)
 	*((uint32_t*)(&hhrtim.Instance->sMasterRegs.MCMP1R) + comp) = val;
 }
 
-void BSP_AuxTim_ConfigTim2(float periodInUsecs, tim_slave_type_t slaveType, tim_slave_edge_t slaveEdge)
+void BSP_AuxTim_ConfigTim2(float periodInUsecs, pwm_sync_type_t slaveType, tim_slave_edge_t slaveEdge)
 {
 	TIM_ClockConfigTypeDef sClockSourceConfig = {0};
 	TIM_SlaveConfigTypeDef sSlaveConfig = {0};

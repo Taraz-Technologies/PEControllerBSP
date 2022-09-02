@@ -52,7 +52,11 @@ static pwm_module_config_t inverterPWMModuleConfig =
 				.on = true,
 				.nanoSec = INVERTER_DEADTIME_ns,
 		},
-		.synchOnStart = true
+};
+static pwm_slave_opts_t inverterPWMSync =
+{
+		.syncSrc = PWM_SYNC_SRC_TIM1,
+		.syncType = PWM_SYNC_RESET_AND_START
 };
 /********************************************************************************
  * Global Variables
@@ -83,6 +87,7 @@ void OpenLoopVfControl_Init(openloopvf_config_t* config, PWMResetCallback pwmRes
 	inverterConfig->pwmConfig.lim.max = 1;
 	inverterConfig->pwmConfig.lim.minMaxDutyCycleBalancing = MIN_MAX_BALANCING_INVERTER;
 	inverterConfig->pwmConfig.dutyMode = INVERTER_DUTY_MODE;
+	inverterConfig->pwmConfig.slaveOpts = &inverterPWMSync;
 	inverterConfig->pwmConfig.module = &inverterPWMModuleConfig;
 	Inverter3Ph_Init(inverterConfig);
 	/***************** Configure Inverter *********************/

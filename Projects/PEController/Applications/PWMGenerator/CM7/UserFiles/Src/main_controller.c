@@ -64,8 +64,8 @@ void MainControl_Init(void)
 	};
 	pwm_slave_opts_t slaveOpts =
 	{
-			.syncStartTim1 = false,
-			.syncRestetSrc = PWM_RST_HRTIM_MASTER_CMP1
+			.syncSrc = PWM_SYNC_SRC_HRTIM_MASTER_CMP1,
+			.syncType = TIM_SLAVEMODE_COMBINED_RESETTRIGGER,
 	};
 	pwm_config_t pwm =
 	{
@@ -82,7 +82,7 @@ void MainControl_Init(void)
 	BSP_Dout_SetAsPWMPin(2);
 
 	// Second Inverted Pair (PWM 3-4, Ref Channel = PWM3) (Reset is triggered by master compare 2 module)
-	slaveOpts.syncRestetSrc = PWM_RST_HRTIM_MASTER_CMP2;
+	slaveOpts.syncSrc = PWM_SYNC_SRC_HRTIM_MASTER_CMP1;
 	updateFnc = BSP_PWM_ConfigInvertedPair(3, &pwm);
 	updateFnc(3, .5f, &pwm);
 	BSP_Dout_SetAsPWMPin(3);
@@ -95,7 +95,7 @@ void MainControl_Init(void)
 	BSP_Dout_SetAsPWMPin(6);
 
 	// Fourth Inverted Pair (PWM 7-8, Ref Channel = PWM6) (Reset is triggered by Timer 3, Fiber Tx Channel module)
-	slaveOpts.syncRestetSrc = PWM_RST_TIM3;
+	slaveOpts.syncSrc = PWM_SYNC_SRC_TIM3;
 	updateFnc = BSP_PWM_ConfigInvertedPair(7, &pwm);
 	updateFnc(7, .5f, &pwm);
 	BSP_Dout_SetAsPWMPin(7);
@@ -103,7 +103,7 @@ void MainControl_Init(void)
 
 	// Fifth Inverted Pair (PWM 9-10, Ref Channel = PWM9) (Reset is triggered by Timer 2, Fiber Rx Channel module)
 	BSP_AuxTim_ConfigTim2(100, TIM_SLAVEMODE_COMBINED_RESETTRIGGER, TIM_TRIGGERPOLARITY_FALLING);
-	slaveOpts.syncRestetSrc = PWM_RST_TIM2;
+	slaveOpts.syncSrc = PWM_SYNC_SRC_TIM2;
 	updateFnc = BSP_PWM_ConfigInvertedPair(9, &pwm);
 	updateFnc(9, .5f, &pwm);
 	BSP_Dout_SetAsPWMPin(9);
@@ -129,8 +129,7 @@ void MainControl_Init(void)
 	hrtim_opts_t opts =
 	{
 			.periodInUsecs = 39.5,
-			.syncResetTim1 = false,
-			.syncStartTim1 = true,
+			.syncSrc = PWM_SYNC_SRC_NONE,
 	};
 	BSP_AuxTim_ConfigHRTIM(&opts);
 	BSP_AuxTim_SetDutyShift(&opts, HRTIM_COMP1, 0);
@@ -140,9 +139,6 @@ void MainControl_Init(void)
 
 	BSP_AuxTim_ConfigTim3(opts.periodInUsecs, 18);
 	BSP_AuxTim_StartTim3(true);
-
-	//BSP_AuxTim_StartTim3();
-	//BSP_AuxTim_ConfigTim2(100, TIM_SLAVEMODE_COMBINED_RESETTRIGGER, TIM_TRIGGERPOLARITY_FALLING);
 }
 
 /**

@@ -52,7 +52,6 @@ static pwm_module_config_t inverterPWMModuleConfig =
 				.on = true,
 				.nanoSec = INVERTER_DEADTIME_ns,
 		},
-		.synchOnStart = true
 };
 /**
  * @brief PWM configuration for the boost switches
@@ -60,8 +59,12 @@ static pwm_module_config_t inverterPWMModuleConfig =
 static pwm_module_config_t boostPWMConfig =
 {
 		.alignment = CENTER_ALIGNED,
-		.periodInUsec = PWM_PERIOD_Us,
-		.synchOnStart = true
+		.periodInUsec = PWM_PERIOD_Us
+};
+static pwm_slave_opts_t PWMSync =
+{
+		.syncSrc = PWM_SYNC_SRC_TIM1,
+		.syncType = PWM_SYNC_RESET_AND_START
 };
 /**
  * @brief Compensator for PI
@@ -99,6 +102,7 @@ void GridTieControl_Init(grid_tie_t* gridTie, PWMResetCallback pwmResetCallback)
 	inverterConfig->pwmConfig.lim.max = 1;
 	inverterConfig->pwmConfig.lim.minMaxDutyCycleBalancing = MIN_MAX_BALANCING_INVERTER;
 	inverterConfig->pwmConfig.dutyMode = INVERTER_DUTY_MODE;
+	inverterConfig->pwmConfig.slaveOpts = &PWMSync;
 	inverterConfig->pwmConfig.module = &inverterPWMModuleConfig;
 	Inverter3Ph_Init(inverterConfig);
 
@@ -142,6 +146,7 @@ void GridTieControl_Init(grid_tie_t* gridTie, PWMResetCallback pwmResetCallback)
 		boostConfig->pwmConfig.lim.min = 0;
 		boostConfig->pwmConfig.lim.max = BOOST_DUTYCYCLE_MAX;
 		boostConfig->pwmConfig.module = &boostPWMConfig;
+		boostConfig->pwmConfig.slaveOpts = &PWMSync;
 		boostConfig->dutyUpdateFnc = BSP_PWM_ConfigChannel(boostConfig->pinNo, &boostConfig->pwmConfig);
 		boostConfig->dutyUpdateFnc(boostConfig->pinNo, 0.f, &boostConfig->pwmConfig);
 		BSP_Dout_SetAsPWMPin(boostConfig->pinNo);
