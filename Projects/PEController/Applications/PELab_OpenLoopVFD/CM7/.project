@@ -60,11 +60,6 @@
 			<locationURI>PARENT-5-PROJECT_LOC/Drivers/BSP/PEController/PWM/Src/pecontroller_pwm.c</locationURI>
 		</link>
 		<link>
-			<name>BSP/Timers/pecontroller_aux_tim.c</name>
-			<type>1</type>
-			<location>C:/TarazWorkDir/TempLoc/PEControllerBSP/Drivers/BSP/PEController/Timers/Src/pecontroller_aux_tim.c</location>
-		</link>
-		<link>
 			<name>BSP/Timers/pecontroller_timers.c</name>
 			<type>1</type>
 			<location>C:/TarazWorkDir/TempLoc/PEControllerBSP/Drivers/BSP/PEController/Timers/Src/pecontroller_timers.c</location>

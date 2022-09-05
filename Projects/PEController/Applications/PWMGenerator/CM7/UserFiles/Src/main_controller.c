@@ -17,7 +17,6 @@
 #include "adc_config.h"
 #include "main_controller.h"
 #include "pecontroller_digital_in.h"
-#include "pecontroller_aux_tim.h"
 #include "pecontroller_pwm.h"
 /*******************************************************************************
  * Defines
@@ -75,34 +74,47 @@ void MainControl_Init(void)
 			.slaveOpts = &slaveOpts
 	};
 
-	// First Inverted Pair (PWM 1-2, Ref Channel = PWM1) (Reset is triggered by master compare 1 module)
+	/****************** Inverted Pair synched to CMP1 of Master HRTIM ***********************/
+	/** Creates an inverted PWM Pair which resets whenever the
+	 * value matches compare 1 value of the master HRTIM */
+	slaveOpts.syncSrc = PWM_SYNC_SRC_HRTIM_MASTER_CMP1;
 	DutyCycleUpdateFnc updateFnc = BSP_PWM_ConfigInvertedPair(1, &pwm);
 	updateFnc(1, .5f, &pwm);
 	BSP_Dout_SetAsPWMPin(1);
 	BSP_Dout_SetAsPWMPin(2);
+	/****************** Inverted Pair synched to CMP1 of Master HRTIM ***********************/
 
-	// Second Inverted Pair (PWM 3-4, Ref Channel = PWM3) (Reset is triggered by master compare 2 module)
-	slaveOpts.syncSrc = PWM_SYNC_SRC_HRTIM_MASTER_CMP1;
+	/****** 2 Inverted Pairs Operating as a HBridge synched to CMP2 of Master HRTIM  *******/
+	/** Creates a PWM sequence for the H-Bridges where switches 3, 6 get the same signal
+	 * whereas switches 4,5 get the inverted signal. The phase shift for the H-Bridge is controlled
+	 * via the value of compare 2 unit of master HRTIM */
+	slaveOpts.syncSrc = PWM_SYNC_SRC_HRTIM_MASTER_CMP2;
 	updateFnc = BSP_PWM_ConfigInvertedPair(3, &pwm);
 	updateFnc(3, .5f, &pwm);
 	BSP_Dout_SetAsPWMPin(3);
 	BSP_Dout_SetAsPWMPin(4);
 
-	// Third Inverted Pair (PWM 5-6, Ref Channel = PWM6) (Reset is triggered by master compare 2 module)
 	updateFnc = BSP_PWM_ConfigInvertedPair(6, &pwm);
 	updateFnc(6, .5f, &pwm);
 	BSP_Dout_SetAsPWMPin(5);
 	BSP_Dout_SetAsPWMPin(6);
+	/****** 2 Inverted Pairs Operating as a HBridge synched to CMP2 of Master HRTIM  *******/
 
-	// Fourth Inverted Pair (PWM 7-8, Ref Channel = PWM6) (Reset is triggered by Timer 3, Fiber Tx Channel module)
+	/********************* Inverted Pair synched to FiberTx TIM3 ************************/
+	/** Creates an inverted PWM Pair which resets whenever the
+	 * Timer 3 falling edge is detected */
 	slaveOpts.syncSrc = PWM_SYNC_SRC_TIM3;
 	updateFnc = BSP_PWM_ConfigInvertedPair(7, &pwm);
 	updateFnc(7, .5f, &pwm);
 	BSP_Dout_SetAsPWMPin(7);
 	BSP_Dout_SetAsPWMPin(8);
+	/********************* Inverted Pair synched to FiberTx TIM3 ************************/
 
-	// Fifth Inverted Pair (PWM 9-10, Ref Channel = PWM9) (Reset is triggered by Timer 2, Fiber Rx Channel module)
-	BSP_AuxTim_ConfigTim2(100, TIM_SLAVEMODE_COMBINED_RESETTRIGGER, TIM_TRIGGERPOLARITY_FALLING);
+	/****** 4 Inverted Pairs Operating as 2 HBridge synched to Fiber-Rx TIM2  *******/
+	/** This portion shows the capability of synchronizing with another PEController
+	 * via synch or fiber connection, while simultaneously showing the synchronization between
+	 * HRTIM PWMs and TIM1 PWMs */
+	BSP_TIM2_ConfigFiberRx(TIM_SLAVEMODE_COMBINED_RESETTRIGGER, TIM_TRIGGERPOLARITY_FALLING);
 	slaveOpts.syncSrc = PWM_SYNC_SRC_TIM2;
 	updateFnc = BSP_PWM_ConfigInvertedPair(9, &pwm);
 	updateFnc(9, .5f, &pwm);
@@ -123,22 +135,28 @@ void MainControl_Init(void)
 	updateFnc(16, .5f, &pwm);
 	BSP_Dout_SetAsPWMPin(15);
 	BSP_Dout_SetAsPWMPin(16);
+	/****** 4 Inverted Pairs Operating as 2 HBridge synched to Fiber-Rx TIM2  *******/
 
+	// Enables the output for all the PWM channels
 	BSP_PWMOut_Enable(0xffff , true);
 
+	// Set time period a little different so that synchronization is visible
 	hrtim_opts_t opts =
 	{
-			.periodInUsecs = 39.5,
+			.periodInUsecs = 38,
 			.syncSrc = PWM_SYNC_SRC_NONE,
 	};
-	BSP_AuxTim_ConfigHRTIM(&opts);
-	BSP_AuxTim_SetDutyShift(&opts, HRTIM_COMP1, 0);
-	BSP_AuxTim_SetDutyShift(&opts, HRTIM_COMP2, .25f);
-	BSP_AuxTim_SetDutyShift(&opts, HRTIM_COMP3, .5f);
-	BSP_AuxTim_SetDutyShift(&opts, HRTIM_COMP4, .75f);
+	// configure the master HRTIM
+	BSP_MasterHRTIM_Config(&opts);
+	// Use these function to configure phase shifts by controlling the values for the compare units
+	BSP_MasterHRTIM_SetShiftPercent(&opts, HRTIM_COMP1, 0);
+	BSP_MasterHRTIM_SetShiftValue(HRTIM_COMP2, 2000);
+	BSP_MasterHRTIM_SetShiftPercent(&opts, HRTIM_COMP3, .5f);
+	BSP_MasterHRTIM_SetShiftPercent(&opts, HRTIM_COMP4, .75f);
 
-	BSP_AuxTim_ConfigTim3(opts.periodInUsecs, 18);
-	BSP_AuxTim_StartTim3(true);
+	// Configure and connect the Fiber synchronization between PEControllers
+	BSP_TIM3_ConfigFiberTx(opts.periodInUsecs, 18);
+	BSP_TIM3_FiberTxStart(true);
 }
 
 /**
