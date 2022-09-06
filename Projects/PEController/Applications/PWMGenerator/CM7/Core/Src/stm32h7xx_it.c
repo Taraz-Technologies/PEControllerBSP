@@ -235,5 +235,9 @@ void HRTIM1_TIME_IRQHandler(void)
 {
   HAL_HRTIM_IRQHandler(&hhrtim,HRTIM_TIMERINDEX_TIMER_E);
 }
+void HRTIM1_Master_IRQHandler(void)
+{
+  HAL_HRTIM_IRQHandler(&hhrtim,HRTIM_TIMERINDEX_MASTER);
+}
 /* USER CODE END 1 */
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

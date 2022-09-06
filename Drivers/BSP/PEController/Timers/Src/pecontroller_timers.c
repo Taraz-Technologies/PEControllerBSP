@@ -478,7 +478,7 @@ void BSP_HRTIM_Config_Interrupt(bool enable, PWMResetCallback callback, int prio
 	{
 		hrtimCallbacks[HRTIM_TIMERINDEX_MASTER] = callback;
 		hhrtim.TimerParam[HRTIM_TIMERINDEX_MASTER].InterruptRequests = HRTIM_TIM_IT_REP;
-		__HAL_HRTIM_TIMER_ENABLE_IT(&hhrtim, HRTIM_TIMERINDEX_MASTER, hhrtim.TimerParam[HRTIM_TIMERINDEX_MASTER].InterruptRequests);
+		__HAL_HRTIM_MASTER_ENABLE_IT(&hhrtim, hhrtim.TimerParam[HRTIM_TIMERINDEX_MASTER].InterruptRequests);
 		IRQn_Type irq = BSP_HRTIM_GetIRQn(HRTIM_TIMERINDEX_MASTER);
 		HAL_NVIC_SetPriority(irq, priority, 0);
 		HAL_NVIC_EnableIRQ(irq);
@@ -486,7 +486,7 @@ void BSP_HRTIM_Config_Interrupt(bool enable, PWMResetCallback callback, int prio
 	else
 	{
 		hhrtim.TimerParam[HRTIM_TIMERINDEX_MASTER].InterruptRequests = HRTIM_TIM_IT_NONE;
-		__HAL_HRTIM_TIMER_DISABLE_IT(&hhrtim, HRTIM_TIMERINDEX_MASTER, hhrtim.TimerParam[HRTIM_TIMERINDEX_MASTER].InterruptRequests);
+		__HAL_HRTIM_MASTER_DISABLE_IT(&hhrtim, hhrtim.TimerParam[HRTIM_TIMERINDEX_MASTER].InterruptRequests);
 		HAL_NVIC_DisableIRQ(BSP_HRTIM_GetIRQn(HRTIM_TIMERINDEX_MASTER));
 		hrtimCallbacks[HRTIM_TIMERINDEX_MASTER] = NULL;
 	}

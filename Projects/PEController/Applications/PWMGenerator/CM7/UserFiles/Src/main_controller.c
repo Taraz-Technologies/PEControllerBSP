@@ -39,6 +39,29 @@ static void Inverter3Ph_ResetSignal(void);
  ******************************************************************************/
 extern adc_measures_t adcVals;
 static volatile bool recompute = false;
+pwm_module_config_t inverterPWMModuleConfig =
+{
+		.alignment = EDGE_ALIGNED,
+		.periodInUsec = 100,
+		.deadtime = {.on = true, .nanoSec = 1000 }
+};
+pwm_slave_opts_t slaveOpts =
+{
+		.syncSrc = PWM_SYNC_SRC_HRTIM_MASTER_CMP1,
+		.syncType = TIM_SLAVEMODE_COMBINED_RESETTRIGGER,
+};
+pwm_config_t pwm =
+{
+		.dutyMode = OUTPUT_DUTY_MINUS_DEADTIME_AT_PWMH,
+		.lim = { .min = 0, .max = 1, .minMaxDutyCycleBalancing = false },
+		.module = &inverterPWMModuleConfig,
+		.slaveOpts = &slaveOpts
+};
+hrtim_opts_t opts =
+{
+		.periodInUsecs = 80,
+		.syncSrc = PWM_SYNC_SRC_NONE,
+};
 /*******************************************************************************
  * Code
  ******************************************************************************/
@@ -54,25 +77,6 @@ void MainControl_Init(void)
 	// latch zero to the output state till PWM signals are enabled
 	BSP_Dout_SetPortValue(0);
 	BSP_Dout_SetPortAsGPIO();
-
-	pwm_module_config_t inverterPWMModuleConfig =
-	{
-			.alignment = EDGE_ALIGNED,
-			.periodInUsec = 40,
-			.deadtime = {.on = true, .nanoSec = 1000 }
-	};
-	pwm_slave_opts_t slaveOpts =
-	{
-			.syncSrc = PWM_SYNC_SRC_HRTIM_MASTER_CMP1,
-			.syncType = TIM_SLAVEMODE_COMBINED_RESETTRIGGER,
-	};
-	pwm_config_t pwm =
-	{
-			.dutyMode = OUTPUT_DUTY_MINUS_DEADTIME_AT_PWMH,
-			.lim = { .min = 0, .max = 1, .minMaxDutyCycleBalancing = false },
-			.module = &inverterPWMModuleConfig,
-			.slaveOpts = &slaveOpts
-	};
 
 	/****************** Inverted Pair synched to CMP1 of Master HRTIM ***********************/
 	/** Creates an inverted PWM Pair which resets whenever the
@@ -141,11 +145,6 @@ void MainControl_Init(void)
 	BSP_PWMOut_Enable(0xffff , true);
 
 	// Set time period a little different so that synchronization is visible
-	hrtim_opts_t opts =
-	{
-			.periodInUsecs = 38,
-			.syncSrc = PWM_SYNC_SRC_NONE,
-	};
 	// configure the master HRTIM
 	BSP_MasterHRTIM_Config(&opts);
 	// Use these function to configure phase shifts by controlling the values for the compare units
@@ -158,6 +157,8 @@ void MainControl_Init(void)
 	BSP_TIM3_ConfigFiberTx(opts.periodInUsecs, 18);
 	// Start both fiber and HRTIM master timers
 	BSP_TIM3_FiberTxStart(true);
+
+	BSP_HRTIM_Config_Interrupt(true, Inverter3Ph_ResetSignal, 0);
 }
 
 /**
@@ -192,6 +193,9 @@ void MainControl_Loop(void)
 {
 	if(recompute)
 	{
+		static uint32_t val = 0;
+		// switch between 90 and 180 degrees phase shift alternate PWM cycles
+		BSP_MasterHRTIM_SetShiftPercent(&opts, HRTIM_COMP2, ++val % 2 ? .25f : .5f);
 		recompute = false;
 	}
 }
