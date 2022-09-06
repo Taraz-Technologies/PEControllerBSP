@@ -85,25 +85,25 @@ typedef enum
 									This event is triggered on TIM1 start and TIM1 reset events.
 									This event is available for all PWM channels.  */
 	PWM_SYNC_SRC_TIM2,               /**< Synchronizes with TIM2 trigger.
-									This event can be configured using @ref BSP_AuxTim_ConfigTim2().
+									This event can be configured using @ref BSP_TIM2_ConfigFiberRx().
 									This event can start and reset PWM11-16, while it can only reset PWM1-10   */
 	PWM_SYNC_SRC_TIM3,               /**< Synchronizes with TIM3 trigger.
-									This event can be configured using @ref BSP_AuxTim_ConfigTim3().
+									This event can be configured using @ref BSP_TIM3_ConfigFiberTx().
 									This event can start and reset PWM11-16, while it can only reset PWM1-10   */
 	PWM_SYNC_SRC_HRTIM_MASTER_PERIOD,/**< Synchronizes with HRTim Master Period Completion.
-									This event can be configured using @ref BSP_AuxTim_ConfigHRTIM().
+									This event can be configured using @ref BSP_MasterHRTIM_Config().
 									This event can only reset PWM1-10. Not avaiable for PWM11-16  */
 	PWM_SYNC_SRC_HRTIM_MASTER_CMP1,  /**< Synchronizes with HRTim Master Compare 1 vaue matching.
-									This event can be configured using @ref BSP_AuxTim_ConfigHRTIM().
+									This event can be configured using @ref BSP_MasterHRTIM_Config().
 									This event can only reset PWM1-10. Not avaiable for PWM11-16  */
 	PWM_SYNC_SRC_HRTIM_MASTER_CMP2,  /**< Synchronizes with HRTim Master Compare 2 vaue matching.
-									This event can be configured using @ref BSP_AuxTim_ConfigHRTIM().
+									This event can be configured using @ref BSP_MasterHRTIM_Config().
 									This event can only reset PWM1-10. Not avaiable for PWM11-16  */
 	PWM_SYNC_SRC_HRTIM_MASTER_CMP3,  /**< Synchronizes with HRTim Master Compare 3 vaue matching.
-									This event can be configured using @ref BSP_AuxTim_ConfigHRTIM().
+									This event can be configured using @ref BSP_MasterHRTIM_Config().
 									This event can only reset PWM1-10. Not avaiable for PWM11-16  */
 	PWM_SYNC_SRC_HRTIM_MASTER_CMP4,  /**< Synchronizes with HRTim Master Compare 4 vaue matching.
-									This event can be configured using @ref BSP_AuxTim_ConfigHRTIM().
+									This event can be configured using @ref BSP_MasterHRTIM_Config().
 									This event can only reset PWM1-10. Not avaiable for PWM11-16  */
 } pwm_sync_src_t;
 /**

@@ -149,13 +149,14 @@ void MainControl_Init(void)
 	// configure the master HRTIM
 	BSP_MasterHRTIM_Config(&opts);
 	// Use these function to configure phase shifts by controlling the values for the compare units
-	BSP_MasterHRTIM_SetShiftPercent(&opts, HRTIM_COMP1, 0);
-	BSP_MasterHRTIM_SetShiftValue(HRTIM_COMP2, 2000);
-	BSP_MasterHRTIM_SetShiftPercent(&opts, HRTIM_COMP3, .5f);
-	BSP_MasterHRTIM_SetShiftPercent(&opts, HRTIM_COMP4, .75f);
+	BSP_MasterHRTIM_SetShiftPercent(&opts, HRTIM_COMP1, 0);			// resets the timer aligned with master HRTIM
+	BSP_MasterHRTIM_SetShiftPercent(&opts, HRTIM_COMP2, .25f);		// resets the timer with a 90 degrees phase shift with master HRTIM
+	BSP_MasterHRTIM_SetShiftPercent(&opts, HRTIM_COMP3, .5f);		// resets the timer with a 180 degrees phase shift with master HRTIM
+	BSP_MasterHRTIM_SetShiftPercent(&opts, HRTIM_COMP4, .75f);		// resets the timer with a 270 degrees phase shift with master HRTIM
 
 	// Configure and connect the Fiber synchronization between PEControllers
 	BSP_TIM3_ConfigFiberTx(opts.periodInUsecs, 18);
+	// Start both fiber and HRTIM master timers
 	BSP_TIM3_FiberTxStart(true);
 }
 

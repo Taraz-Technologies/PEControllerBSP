@@ -305,8 +305,8 @@ void BSP_MasterHRTIM_SetShiftPercent(hrtim_opts_t* opts, hrtim_comp_t comp, floa
 
 /**
  * @brief Configures the Fiber/Sync Rx pin to receive the synchronization event via TIM2 module.
- * @details The output trigger event for the TIM2 module will be obtained based on the settings of @ref slaveType
- * and @ref slaveEdge on Rx Pin of the Fiber/Sync connectors.
+ * @details The output trigger event for the TIM2 module will be obtained based on the settings of slaveType
+ * and slaveEdge on Rx Pin of the Fiber/Sync connectors.
  * @param slaveType Configures the type of input trigger
  * @param slaveEdge Configures the edge for the input trigger
  */
@@ -359,8 +359,8 @@ void BSP_TIM2_ConfigFiberRx(pwm_sync_type_t slaveType, tim_slave_edge_t slaveEdg
 
 /**
  * @brief Configures the Fiber/Sync Tx pin to generate a PWM of required frequency.
- * @details The output period is controlled by the @ref periodInUsecs while the onTime is controlled via @ref triggerDelayInUsecs.
- * The output trigger is generated after @ref triggerDelayInUsecs in each PWM period.
+ * @details The output period is controlled by the periodInUsecs while the onTime is controlled via triggerDelayInUsecs.
+ * The output trigger is generated after triggerDelayInUsecs in each PWM period.
  * @param periodInUsecs Time period of the wave in micro-seconds
  * @param triggerDelayInUsecs Output trigger delay from the start of period in micro-seconds
  */
