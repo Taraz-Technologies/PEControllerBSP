@@ -70,7 +70,7 @@ extern "C" {
 /**
  * @brief Select the LOGO to be displayed on PEController
  */
-#define LOGO_TYPE				(LOGO_CUSTOM)
+#define LOGO_TYPE				(LOGO_DEFAULT)
 
 /**
  * @brief Selects the display brightness value between 0-100

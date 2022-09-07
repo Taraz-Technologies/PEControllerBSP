@@ -43,13 +43,13 @@ extern "C" {
 /**
  * @brief Defines the Configuration for the PEController. Select @ref PEC_CUSTOM for independent PEControllers
  */
-#define PECONTROLLER_CONFIG		(PLB_TNPC)
+#define PECONTROLLER_CONFIG		(PLB_6PH)
 
 #if PECONTROLLER_CONFIG != PEC_CUSTOM
 /**
  * @brief Select the correct version of PELAB for your configuration
  */
-#define PELAB_VERSION			(3)
+#define PELAB_VERSION			(4)
 /**
  * @brief For correct measurement sensitivity of channels in mV/A should be provided here
  */
@@ -70,7 +70,7 @@ extern "C" {
 /**
  * @brief Select the LOGO to be displayed on PEController
  */
-#define LOGO_TYPE				(LOGO_CUSTOM)
+#define LOGO_TYPE				(LOGO_DEFAULT)
 
 /**
  * @brief Selects the display brightness value between 0-100
