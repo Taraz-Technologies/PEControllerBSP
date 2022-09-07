@@ -39,6 +39,8 @@
  * the Fiber Tx signal and generating the Fiber Tx signal to synchronize slave PEControllers.
  * -# <b>PWM 9-16 (LEG 5, 8)</b>: Presents 2 H-Bridges with 8 switches showing the mechanism to synchronize
  * with Fiber Rx signal as slave and also synchronizing TIM1 and HRTIM submodules.<br><br>
+ *
+ *
  * \image html "PWM Generation Description.png"
  * @{
  */
