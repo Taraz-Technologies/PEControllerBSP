@@ -38,18 +38,11 @@
 /********************************************************************************
  * Static Variables
  *******************************************************************************/
-/** <c>true</c> if module previously initialized
- */
-static bool pwm1_10_enabled = false;
-/** keeps the callback functions of all PWM sub-modules
- */
-static PWMResetCallback callbacks[5] = {0};
+
 /********************************************************************************
  * Global Variables
  *******************************************************************************/
-/** Pointer to the timer structure
- */
-HRTIM_HandleTypeDef hhrtim;
+
 /********************************************************************************
  * Function Prototypes
  *******************************************************************************/
@@ -57,138 +50,6 @@ HRTIM_HandleTypeDef hhrtim;
 /********************************************************************************
  * Code
  *******************************************************************************/
-/**
- * @brief Gets the clock frequency of the specific timer in MHz.
- * @param TimerIdx Index of the timer submodule.
- * @return Clock frequency in MHz.
- */
-static inline uint32_t GetTimerFreqMHz(uint32_t TimerIdx)
-{
-	static const uint32_t divs[8] = { 1, 1, 1, 1, 1, 1, 2, 4};
-	return HRTIM_FREQ / divs[(hhrtim.Instance->sTimerxRegs[TimerIdx].TIMxCR & 0x7)];
-}
-
-static HRTIM_TimerCfgTypeDef GetDefaultTimerConfig(uint32_t periodInUsec, uint32_t TimerIdx)
-{
-	/* timer base configuration */
-	HRTIM_TimeBaseCfgTypeDef pTimeBaseCfg =
-	{
-			.RepetitionCounter = 0x00,
-			.PrescalerRatio = HRTIM_PRESCALERRATIO_DIV1,
-			.Mode = HRTIM_MODE_CONTINUOUS,
-	};
-	uint32_t ticks = periodInUsec * HRTIM_FREQ;
-	if(ticks > 65535)
-	{
-		ticks /= 2;
-		pTimeBaseCfg.PrescalerRatio = HRTIM_PRESCALERRATIO_DIV2;
-		if(ticks > 65535)
-		{
-			ticks /= 2;
-			pTimeBaseCfg.PrescalerRatio = HRTIM_PRESCALERRATIO_DIV4;
-		}
-	}
-	pTimeBaseCfg.Period = ticks;
-	if (HAL_HRTIM_TimeBaseConfig(&hhrtim, TimerIdx, &pTimeBaseCfg) != HAL_OK)
-		Error_Handler();
-
-	/* configuration for the timer */
-	HRTIM_TimerCfgTypeDef pTimerCfg =
-	{
-			.DMARequests = HRTIM_TIM_DMA_NONE,
-			.DMASrcAddress = 0x0000,
-			.DMADstAddress = 0x0000,
-			.DMASize = 0x1,
-			.HalfModeEnable = HRTIM_HALFMODE_DISABLED,
-			.StartOnSync = HRTIM_SYNCSTART_DISABLED,
-			.ResetOnSync = HRTIM_SYNCRESET_DISABLED,
-			.DACSynchro = HRTIM_DACSYNC_NONE,
-			.PreloadEnable = HRTIM_PRELOAD_ENABLED,
-			.UpdateGating = HRTIM_UPDATEGATING_INDEPENDENT,
-			.BurstMode = HRTIM_TIMERBURSTMODE_MAINTAINCLOCK,
-			.RepetitionUpdate = HRTIM_UPDATEONREPETITION_DISABLED,
-			.PushPull = HRTIM_TIMPUSHPULLMODE_DISABLED,
-			.FaultEnable = HRTIM_TIMFAULTENABLE_NONE,
-			.FaultLock = HRTIM_TIMFAULTLOCK_READWRITE,
-			.DelayedProtectionMode = HRTIM_TIMER_A_B_C_DELAYEDPROTECTION_DISABLED,	// HRTIM_TIMER_D_E_DELAYEDPROTECTION_DISABLED, both have same value no need to replace
-			.UpdateTrigger = HRTIM_TIMUPDATETRIGGER_NONE,
-			.ResetTrigger = HRTIM_TIMRESETTRIGGER_NONE,
-			.ResetUpdate = HRTIM_TIMUPDATEONRESET_ENABLED,
-	};
-
-	return pTimerCfg;
-}
-static HRTIM_CompareCfgTypeDef GetDefaultCompareConfig(void)
-{
-	HRTIM_CompareCfgTypeDef pCompareCfg =
-	{
-			.CompareValue = 3,
-			.AutoDelayedMode = HRTIM_AUTODELAYEDMODE_REGULAR,
-			.AutoDelayedTimeout = 0x0000,
-	};
-	return pCompareCfg;
-}
-static HRTIM_DeadTimeCfgTypeDef GetDefaultDeadtimeConfig(void)
-{
-	HRTIM_DeadTimeCfgTypeDef pDeadTimeCfg =
-	{
-			.Prescaler = HRTIM_TIMDEADTIME_PRESCALERRATIO_DIV16,
-			.RisingSign = HRTIM_TIMDEADTIME_RISINGSIGN_POSITIVE,
-			.RisingLock = HRTIM_TIMDEADTIME_RISINGLOCK_READONLY,
-			.RisingSignLock = HRTIM_TIMDEADTIME_RISINGSIGNLOCK_WRITE,
-			.FallingSign = HRTIM_TIMDEADTIME_FALLINGSIGN_POSITIVE,
-			.FallingLock = HRTIM_TIMDEADTIME_FALLINGLOCK_READONLY,
-			.FallingSignLock = HRTIM_TIMDEADTIME_FALLINGSIGNLOCK_WRITE,
-	};
-	return pDeadTimeCfg;
-}
-static HRTIM_OutputCfgTypeDef GetDefaultOutputConfig(void)
-{
-	HRTIM_OutputCfgTypeDef pOutputCfg =
-	{
-			.Polarity = HRTIM_OUTPUTPOLARITY_HIGH,
-			.IdleMode = HRTIM_OUTPUTIDLEMODE_NONE,
-			.IdleLevel = HRTIM_OUTPUTIDLELEVEL_INACTIVE,
-			.FaultLevel = HRTIM_OUTPUTFAULTLEVEL_NONE,
-			.ChopperModeEnable = HRTIM_OUTPUTCHOPPERMODE_DISABLED,
-			.BurstModeEntryDelayed = HRTIM_OUTPUTBURSTMODEENTRY_REGULAR,
-			.SetSource = HRTIM_OUTPUTSET_TIMCMP1,
-			.ResetSource = HRTIM_OUTPUTRESET_TIMCMP2,
-	};
-	return pOutputCfg;
-}
-static IRQn_Type GetIRQn(uint32_t TimerIdx)
-{
-	return TimerIdx == HRTIM_TIMERINDEX_TIMER_A ? HRTIM1_TIMA_IRQn :
-			(TimerIdx == HRTIM_TIMERINDEX_TIMER_B ? HRTIM1_TIMB_IRQn :
-					(TimerIdx == HRTIM_TIMERINDEX_TIMER_C ? HRTIM1_TIMC_IRQn :
-							(TimerIdx == HRTIM_TIMERINDEX_TIMER_D ? HRTIM1_TIMD_IRQn : HRTIM1_TIME_IRQn)));
-}
-
-/**
- * @brief  Initialize the relevant PWM modules (High Precision Timers)
- */
-static void PWM1_10_Drivers_Init(void)
-{
-	if(pwm1_10_enabled)
-		return;
-	RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
-	PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_HRTIM1;
-	PeriphClkInitStruct.Hrtim1ClockSelection = RCC_HRTIM1CLK_CPUCLK;
-	if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
-		Error_Handler();
-	__HAL_RCC_HRTIM1_CLK_ENABLE();
-	/* enable the HRTimer (high Resolution Timer) responsible for PWM1-PWM10 */
-	hhrtim.Instance = HRTIM1;
-	hhrtim.Init.HRTIMInterruptResquests = HRTIM_IT_NONE;
-	hhrtim.Init.SyncOptions = HRTIM_SYNCOPTION_NONE;
-	hhrtim.Init.SyncOptions = HRTIM_SYNCOPTION_SLAVE;
-	hhrtim.Init.SyncInputSource = HRTIM_SYNCINPUTSOURCE_INTERNALEVENT;
-	if (HAL_HRTIM_Init(&hhrtim) != HAL_OK)
-		Error_Handler();
-	pwm1_10_enabled = true;
-}
-
 /**
  * @brief Update the Duty Cycle of an Inverted Pair
  * @param pwmNo Channel no of reference channel is the PWM pair (Valid Values 1-10). <br>
@@ -224,7 +85,7 @@ float BSP_PWM1_10_UpdatePairDuty(uint32_t pwmNo, float duty, pwm_config_t* confi
 	{
 		if(config->dutyMode == OUTPUT_DUTY_AT_PWMH && IsDeadtimeEnabled(&mod->deadtime))
 		{
-			int dt = (mod->deadtime.nanoSec * GetTimerFreqMHz(TimerIdx)) / 1000;
+			int dt = (mod->deadtime.nanoSec * BSP_HRTIM_GetTimerFreq(TimerIdx)) / 1000;
 			onTime += dt;
 		}
 		int t0 = (period - onTime) / 2; 		// half time
@@ -238,7 +99,7 @@ float BSP_PWM1_10_UpdatePairDuty(uint32_t pwmNo, float duty, pwm_config_t* confi
 	{
 		uint32_t dt = 3;
 		if(config->dutyMode == OUTPUT_DUTY_AT_PWMH && IsDeadtimeEnabled(&mod->deadtime))
-			dt += (mod->deadtime.nanoSec * GetTimerFreqMHz(TimerIdx)) / 1000;
+			dt += (mod->deadtime.nanoSec * BSP_HRTIM_GetTimerFreq(TimerIdx)) / 1000;
 		hhrtim.Instance->sTimerxRegs[TimerIdx].CMP1xR = 3;
 		hhrtim.Instance->sTimerxRegs[TimerIdx].CMP2xR = onTime + dt;
 	}
@@ -265,6 +126,22 @@ void PWM1_10_ActivateInvertedPair(uint32_t pwmNo, bool en)
 	}
 }
 
+static uint32_t GetResetSrcValue(pwm_sync_src_t src)
+{
+	switch (src)
+	{
+	case PWM_SYNC_SRC_TIM1: return HRTIM_TIMRESETTRIGGER_EEV_1;
+	case PWM_SYNC_SRC_TIM2: return HRTIM_TIMRESETTRIGGER_EEV_2;
+	case PWM_SYNC_SRC_TIM3: return HRTIM_TIMRESETTRIGGER_EEV_3;
+	case PWM_SYNC_SRC_HRTIM_MASTER_PERIOD: return HRTIM_TIMRESETTRIGGER_MASTER_PER;
+	case PWM_SYNC_SRC_HRTIM_MASTER_CMP1: return HRTIM_TIMRESETTRIGGER_MASTER_CMP1;
+	case PWM_SYNC_SRC_HRTIM_MASTER_CMP2: return HRTIM_TIMRESETTRIGGER_MASTER_CMP2;
+	case PWM_SYNC_SRC_HRTIM_MASTER_CMP3: return HRTIM_TIMRESETTRIGGER_MASTER_CMP3;
+	case PWM_SYNC_SRC_HRTIM_MASTER_CMP4: return HRTIM_TIMRESETTRIGGER_MASTER_CMP4;
+	default: return HRTIM_TIMRESETTRIGGER_NONE;
+	}
+}
+
 /**
  * @brief Configures a single inverted pair for PWM
  * @param pwmNo Channel no of reference channel is the PWM pair (Valid Values 1-10). <br>
@@ -280,18 +157,24 @@ static void PWM1_10_ConfigInvertedPair(uint32_t pwmNo, pwm_config_t* config)
 	uint32_t TimerIdx = (pwmNo - 1) / 2;
 	uint32_t out1 = 1U << (TimerIdx * 2);
 	uint32_t out2 = 1U << (TimerIdx * 2 + 1);
-	uint32_t isCh2 = (pwmNo - 1) % 2;
+	bool isPWM1 = pwmNo % 2 == 0 ? false : true;
 	pwm_module_config_t* mod = config->module;
+	pwm_slave_opts_t* slaveOpts = config->slaveOpts;
 
 	/* timer configuration */
-	HRTIM_TimerCfgTypeDef pTimerCfg = GetDefaultTimerConfig(mod->periodInUsec, TimerIdx);
+	HRTIM_TimerCfgTypeDef pTimerCfg = BSP_HRTIM_GetDefaultTimerConfig(mod->periodInUsec, TimerIdx);
 	pTimerCfg.DeadTimeInsertion = IsDeadtimeEnabled(&mod->deadtime) ? HRTIM_TIMDEADTIMEINSERTION_ENABLED : HRTIM_TIMDEADTIMEINSERTION_DISABLED;
-	pTimerCfg.StartOnSync = mod->synchOnStart ? HRTIM_SYNCSTART_ENABLED : HRTIM_SYNCSTART_DISABLED;
+	if (slaveOpts != NULL)
+	{
+		pTimerCfg.StartOnSync = (slaveOpts->syncSrc == PWM_SYNC_SRC_TIM1 &&
+				(slaveOpts->syncType == PWM_SYNC_START || slaveOpts->syncType == PWM_SYNC_RESET_AND_START)) ? HRTIM_SYNCSTART_ENABLED : HRTIM_SYNCSTART_DISABLED;
+		pTimerCfg.ResetTrigger = GetResetSrcValue(slaveOpts->syncSrc);
+	}
 	if (HAL_HRTIM_WaveformTimerConfig(&hhrtim, TimerIdx, &pTimerCfg) != HAL_OK)
 		Error_Handler();
 
 	/* compare configuration */
-	HRTIM_CompareCfgTypeDef pCompareCfg = GetDefaultCompareConfig();
+	HRTIM_CompareCfgTypeDef pCompareCfg = BSP_HRTIM_GetDefaultCompareConfig();
 	if (HAL_HRTIM_WaveformCompareConfig(&hhrtim, TimerIdx, HRTIM_COMPAREUNIT_1, &pCompareCfg) != HAL_OK)
 		Error_Handler();
 	if (HAL_HRTIM_WaveformCompareConfig(&hhrtim, TimerIdx, HRTIM_COMPAREUNIT_2, &pCompareCfg) != HAL_OK)
@@ -301,13 +184,13 @@ static void PWM1_10_ConfigInvertedPair(uint32_t pwmNo, pwm_config_t* config)
 	float deadTicks = 3;	/* dead ticks because compare value can't be lower than 3 */
 	if (IsDeadtimeEnabled(&mod->deadtime))
 	{
-		HRTIM_DeadTimeCfgTypeDef pDeadTimeCfg = GetDefaultDeadtimeConfig();
-		if(isCh2)
+		HRTIM_DeadTimeCfgTypeDef pDeadTimeCfg = BSP_HRTIM_GetDefaultDeadtimeConfig();
+		if(!isPWM1)
 		{
 			pDeadTimeCfg.RisingSign = HRTIM_TIMDEADTIME_RISINGSIGN_NEGATIVE;
 			pDeadTimeCfg.FallingSign = HRTIM_TIMDEADTIME_FALLINGSIGN_NEGATIVE;
 		}
-		pDeadTimeCfg.FallingValue = pDeadTimeCfg.RisingValue = (mod->deadtime.nanoSec * GetTimerFreqMHz(TimerIdx)) / (16000);
+		pDeadTimeCfg.FallingValue = pDeadTimeCfg.RisingValue = (mod->deadtime.nanoSec * BSP_HRTIM_GetTimerFreq(TimerIdx)) / (16000);
 		if (HAL_HRTIM_DeadTimeConfig(&hhrtim, TimerIdx, &pDeadTimeCfg) != HAL_OK)
 			Error_Handler();
 
@@ -316,8 +199,8 @@ static void PWM1_10_ConfigInvertedPair(uint32_t pwmNo, pwm_config_t* config)
 	}
 
 	/* output configuration */
-	HRTIM_OutputCfgTypeDef pOutputCfg = GetDefaultOutputConfig();
-	if(isCh2)
+	HRTIM_OutputCfgTypeDef pOutputCfg = BSP_HRTIM_GetDefaultOutputConfig();
+	if(!isPWM1)
 		pOutputCfg.Polarity = HRTIM_OUTPUTPOLARITY_LOW;
 	if (HAL_HRTIM_WaveformOutputConfig(&hhrtim, TimerIdx, out1, &pOutputCfg) != HAL_OK)
 		Error_Handler();
@@ -326,8 +209,10 @@ static void PWM1_10_ConfigInvertedPair(uint32_t pwmNo, pwm_config_t* config)
 		pOutputCfg.SetSource = HRTIM_OUTPUTSET_NONE;
 		pOutputCfg.ResetSource = HRTIM_OUTPUTRESET_NONE;
 	}
-	else
+	else if (isPWM1)
 		pOutputCfg.Polarity = HRTIM_OUTPUTPOLARITY_LOW;
+	else
+		pOutputCfg.Polarity = HRTIM_OUTPUTPOLARITY_HIGH;
 	if (HAL_HRTIM_WaveformOutputConfig(&hhrtim, TimerIdx, out2, &pOutputCfg) != HAL_OK)
 		Error_Handler();
 	if (HAL_HRTIM_WaveformTimerConfig(&hhrtim, TimerIdx, &pTimerCfg) != HAL_OK)
@@ -340,7 +225,7 @@ static void PWM1_10_ConfigInvertedPair(uint32_t pwmNo, pwm_config_t* config)
 		deadTicks++;
 
 	float oldMax = config->lim.max;
-	config->lim.max = 1 - ((deadTicks / GetTimerFreqMHz(TimerIdx)) / mod->periodInUsec);
+	config->lim.max = 1 - ((deadTicks / BSP_HRTIM_GetTimerFreq(TimerIdx)) / mod->periodInUsec);
 	if (oldMax < config->lim.max && oldMax != 0)
 		config->lim.max = oldMax;
 	if (config->lim.minMaxDutyCycleBalancing && config->lim.max > .5f)
@@ -361,8 +246,8 @@ static void PWM1_10_ConfigInvertedPair(uint32_t pwmNo, pwm_config_t* config)
  */
 DutyCycleUpdateFnc BSP_PWM1_10_ConfigInvertedPairs(uint32_t pwmNo, pwm_config_t* config, int pairCount)
 {
-	if(!pwm1_10_enabled)
-		PWM1_10_Drivers_Init();
+	if(!hrtimEnabled)
+		BSP_HRTIM_Init();
 	while (pairCount--)
 	{
 		PWM1_10_ConfigInvertedPair(pwmNo, config);
@@ -436,16 +321,22 @@ static void PWM1_10_ConfigChannel(uint32_t pwmNo, pwm_config_t* config)
 	bool isPWM1 = pwmNo % 2 == 0 ? false : true;
 	uint32_t out = 1U << (TimerIdx * 2 + (isPWM1 ? 0 : 1));
 	pwm_module_config_t* mod = config->module;
+	pwm_slave_opts_t* slaveOpts = config->slaveOpts;
 
 	/* timer configuration */
-	HRTIM_TimerCfgTypeDef pTimerCfg = GetDefaultTimerConfig(mod->periodInUsec, TimerIdx);
+	HRTIM_TimerCfgTypeDef pTimerCfg = BSP_HRTIM_GetDefaultTimerConfig(mod->periodInUsec, TimerIdx);
 	pTimerCfg.DeadTimeInsertion = HRTIM_TIMDEADTIMEINSERTION_DISABLED;
-	pTimerCfg.StartOnSync = mod->synchOnStart ? HRTIM_SYNCSTART_ENABLED : HRTIM_SYNCSTART_DISABLED;
+	if (slaveOpts != NULL)
+	{
+		pTimerCfg.StartOnSync = (slaveOpts->syncSrc == PWM_SYNC_SRC_TIM1 &&
+				(slaveOpts->syncType == PWM_SYNC_START || slaveOpts->syncType == PWM_SYNC_RESET_AND_START)) ? HRTIM_SYNCSTART_ENABLED : HRTIM_SYNCSTART_DISABLED;
+		pTimerCfg.ResetTrigger = GetResetSrcValue(slaveOpts->syncSrc);
+	}
 	if (HAL_HRTIM_WaveformTimerConfig(&hhrtim, TimerIdx, &pTimerCfg) != HAL_OK)
 		Error_Handler();
 
 	/* compare configuration */
-	HRTIM_CompareCfgTypeDef pCompareCfg = GetDefaultCompareConfig();
+	HRTIM_CompareCfgTypeDef pCompareCfg = BSP_HRTIM_GetDefaultCompareConfig();
 	if (isPWM1)
 	{
 		if (HAL_HRTIM_WaveformCompareConfig(&hhrtim, TimerIdx, HRTIM_COMPAREUNIT_1, &pCompareCfg) != HAL_OK)
@@ -465,7 +356,7 @@ static void PWM1_10_ConfigChannel(uint32_t pwmNo, pwm_config_t* config)
 	float deadTicks = 3;
 
 	/* output configuration */
-	HRTIM_OutputCfgTypeDef pOutputCfg = GetDefaultOutputConfig();
+	HRTIM_OutputCfgTypeDef pOutputCfg = BSP_HRTIM_GetDefaultOutputConfig();
 	if (isPWM1 == false)
 	{
 		pOutputCfg.SetSource = HRTIM_OUTPUTRESET_TIMCMP3;
@@ -483,7 +374,7 @@ static void PWM1_10_ConfigChannel(uint32_t pwmNo, pwm_config_t* config)
 		deadTicks++;
 
 	float oldMax = config->lim.max;
-	config->lim.max = 1 - ((deadTicks / GetTimerFreqMHz(TimerIdx)) / mod->periodInUsec);
+	config->lim.max = 1 - ((deadTicks / BSP_HRTIM_GetTimerFreq(TimerIdx)) / mod->periodInUsec);
 	if (oldMax < config->lim.max && oldMax != 0)
 		config->lim.max = oldMax;
 }
@@ -499,8 +390,8 @@ static void PWM1_10_ConfigChannel(uint32_t pwmNo, pwm_config_t* config)
  */
 DutyCycleUpdateFnc BSP_PWM1_10_ConfigChannels(uint32_t pwmNo, pwm_config_t* config, int chCount)
 {
-	if(!pwm1_10_enabled)
-		PWM1_10_Drivers_Init();
+	if(!hrtimEnabled)
+		BSP_HRTIM_Init();
 	while (chCount--)
 		PWM1_10_ConfigChannel(pwmNo++, config);
 	return BSP_PWM1_10_UpdateChannelDuty;
@@ -519,10 +410,10 @@ void BSP_PWM1_10_Config_Interrupt(uint32_t pwmNo, bool enable, PWMResetCallback 
 	__HAL_HRTIM_ENABLE_IT(&hhrtim, hhrtim.Init.HRTIMInterruptResquests);
 	if (enable)
 	{
-		callbacks[TimerIdx] = callback;
+		hrtimCallbacks[TimerIdx] = callback;
 		hhrtim.TimerParam[TimerIdx].InterruptRequests = HRTIM_TIM_IT_RST;
 		__HAL_HRTIM_TIMER_ENABLE_IT(&hhrtim, TimerIdx, hhrtim.TimerParam[TimerIdx].InterruptRequests);
-		IRQn_Type irq = GetIRQn(TimerIdx);
+		IRQn_Type irq = BSP_HRTIM_GetIRQn(TimerIdx);
 		HAL_NVIC_SetPriority(irq, priority, 0);
 		HAL_NVIC_EnableIRQ(irq);
 	}
@@ -530,31 +421,9 @@ void BSP_PWM1_10_Config_Interrupt(uint32_t pwmNo, bool enable, PWMResetCallback 
 	{
 		hhrtim.TimerParam[TimerIdx].InterruptRequests = HRTIM_TIM_IT_NONE;
 		__HAL_HRTIM_TIMER_DISABLE_IT(&hhrtim, TimerIdx, hhrtim.TimerParam[TimerIdx].InterruptRequests);
-		HAL_NVIC_DisableIRQ(GetIRQn(TimerIdx));
-		callbacks[TimerIdx] = NULL;
+		HAL_NVIC_DisableIRQ(BSP_HRTIM_GetIRQn(TimerIdx));
+		hrtimCallbacks[TimerIdx] = NULL;
 	}
-}
-
-/**
- * @brief Callback function invoked when the timer x counter reset/roll-over
- *         event occurs.
- * @param *hhrtim Pointer to HAL HRTIM handle
- * @param TimerIdx Timer index
- *                   This parameter can be one of the following values:
- *                   @arg HRTIM_TIMERINDEX_TIMER_A for timer A
- *                   @arg HRTIM_TIMERINDEX_TIMER_B for timer B
- *                   @arg HRTIM_TIMERINDEX_TIMER_C for timer C
- *                   @arg HRTIM_TIMERINDEX_TIMER_D for timer D
- *                   @arg HRTIM_TIMERINDEX_TIMER_E for timer E
- */
-void HAL_HRTIM_CounterResetCallback(HRTIM_HandleTypeDef * hhrtim,
-		uint32_t TimerIdx)
-{
-	/* Prevent unused argument(s) compilation warning */
-	UNUSED(hhrtim);
-
-	if(callbacks[TimerIdx])
-		callbacks[TimerIdx]();
 }
 
 /* EOF */

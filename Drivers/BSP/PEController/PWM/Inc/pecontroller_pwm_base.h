@@ -45,7 +45,7 @@ extern "C" {
 /********************************************************************************
  * Defines
  *******************************************************************************/
-#define HRTIM_FREQ					(480)					// --todo-- centralize
+
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
@@ -73,6 +73,53 @@ typedef enum
 											On one edge duty cycle will be removed from high side whereas
 											on the other edge duty cycle will be removed from the lower side switch */
 } duty_mode_t;
+/**
+ * @brief Defines the synchronization sources available for the PWM channels
+ * @note All sources are not available for all PWM channels. See details for relevant information.
+ *
+ */
+typedef enum
+{
+	PWM_SYNC_SRC_NONE,               /**< No synchronization */
+	PWM_SYNC_SRC_TIM1,               /**< Synchronizes with TIM1 trigger.
+									This event is triggered on TIM1 start and TIM1 reset events.
+									This event is available for all PWM channels.  */
+	PWM_SYNC_SRC_TIM2,               /**< Synchronizes with TIM2 trigger.
+									This event can be configured using @ref BSP_TIM2_ConfigFiberRx().
+									This event can start and reset PWM11-16, while it can only reset PWM1-10   */
+	PWM_SYNC_SRC_TIM3,               /**< Synchronizes with TIM3 trigger.
+									This event can be configured using @ref BSP_TIM3_ConfigFiberTx().
+									This event can start and reset PWM11-16, while it can only reset PWM1-10   */
+	PWM_SYNC_SRC_HRTIM_MASTER_PERIOD,/**< Synchronizes with HRTim Master Period Completion.
+									This event can be configured using @ref BSP_MasterHRTIM_Config().
+									This event can only reset PWM1-10. Not avaiable for PWM11-16  */
+	PWM_SYNC_SRC_HRTIM_MASTER_CMP1,  /**< Synchronizes with HRTim Master Compare 1 vaue matching.
+									This event can be configured using @ref BSP_MasterHRTIM_Config().
+									This event can only reset PWM1-10. Not avaiable for PWM11-16  */
+	PWM_SYNC_SRC_HRTIM_MASTER_CMP2,  /**< Synchronizes with HRTim Master Compare 2 vaue matching.
+									This event can be configured using @ref BSP_MasterHRTIM_Config().
+									This event can only reset PWM1-10. Not avaiable for PWM11-16  */
+	PWM_SYNC_SRC_HRTIM_MASTER_CMP3,  /**< Synchronizes with HRTim Master Compare 3 vaue matching.
+									This event can be configured using @ref BSP_MasterHRTIM_Config().
+									This event can only reset PWM1-10. Not avaiable for PWM11-16  */
+	PWM_SYNC_SRC_HRTIM_MASTER_CMP4,  /**< Synchronizes with HRTim Master Compare 4 vaue matching.
+									This event can be configured using @ref BSP_MasterHRTIM_Config().
+									This event can only reset PWM1-10. Not avaiable for PWM11-16  */
+} pwm_sync_src_t;
+/**
+ * @brief Defines the input synchronization event for PWM timers.
+ *
+ */
+typedef enum
+{
+	PWM_SYNC_RST = TIM_SLAVEMODE_RESET,                           /**< Reset the PWM channel at @ref pwm_sync_src_t */
+	PWM_SYNC_START = TIM_SLAVEMODE_TRIGGER,                       /**< Start the PWM channel at @ref pwm_sync_src_t */
+	PWM_SYNC_RESET_AND_START = TIM_SLAVEMODE_COMBINED_RESETTRIGGER/**< Starts and resets the PWM channel at @ref pwm_sync_src_t */
+} pwm_sync_type_t;
+/**
+ * @brief Defines the type for PWM Period Specification
+ */
+typedef float pwm_period_t;
 /**
  * @brief Defines the PWM reset callback,
  * The drivers will call this function whenever the timer for the PWM is reset if enabled in configuration
@@ -115,12 +162,19 @@ typedef struct
 typedef struct
 {
 	pwm_alignment_t alignment;		/**< @brief Specifies the alignment of PWM */
-	uint32_t periodInUsec;			/**< @brief Specifies the period of the PWM in micro-seconds (Maximum possible value is 250Us) */
+	pwm_period_t periodInUsec;			/**< @brief Specifies the period of the PWM in micro-seconds (Maximum possible value is 250Us) */
 	deadtime_t deadtime;			/**< @brief The dead time parameter for the paired inverted PWM.
 										For individual PWMs this value should be NULL */
-	bool synchOnStart;				/**< @brief Controls synchronization of PWM modules.
-										If <c>true</c> synchronize the HRTIM sub-module to TIM1 */
 } pwm_module_config_t;
+/**
+ * @brief Defines the PWM synchronization information
+ *
+ */
+typedef struct
+{
+	pwm_sync_src_t syncSrc;			/**<  @brief Specifies the synchronization source */
+	pwm_sync_type_t syncType;		/**<  @brief Specifies the synchronization type */
+} pwm_slave_opts_t;
 /**
  * @brief Defines the parameters for specific PWM configuration
  */
@@ -129,7 +183,10 @@ typedef struct
 	duty_limits_t lim;				/**< @brief Defines the duty cycle limits for the specified channels */
 	duty_mode_t dutyMode;			/**< @brief Controls the duty cycle computation mode.
 										This parameter is used only when the dead time is enabled */
-	pwm_module_config_t* module;	/**< @brief Define the module configuration */
+	pwm_slave_opts_t* slaveOpts;	/**< @brief Defines the options for slave operation for the PWM.
+										@note Keep in mind that some options may only be available for specific PWM channels only.
+										For details view the relevant source definitions */
+	pwm_module_config_t* module;	/**< @brief Defines the module configuration */
 } pwm_config_t;
 /**
  * @}

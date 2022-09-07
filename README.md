@@ -1,16 +1,16 @@
 # PEControllerBSP
-Board Support Package for PEController module made by Taraz Technologies
+Board Support Package for PEController module made by Taraz Technologies.
 
 ## Documentation
 https://www.taraztechnologies.com/Downloads/Software/PEControllerBSP/index.html
 
 ## Components
-1. **Microcontroller** STM32H745BIT6 (Dual Core CM4/CM7) @ 480MHz
+1. **Microcontroller** STM32H745BIT6 (Dual Core CM4/CM7) @ 480MHz.
 2. **Debug Interface**
      - STLINK-v2
      - SWD
 3. **Display**
-     - **AFY800480A0-5.0INTH-C / AFY800480B0-5.0N12NTM-C** 5" TFT with RGB interface (800 x 480 resolution) with Capacitive Touch Panel
+     - **AFY800480A0-5.0INTH-C / AFY800480B0-5.0N12NTM-C** 5" TFT with RGB interface (800 x 480 resolution) with Capacitive Touch Panel.
 4. **Communication Protocols**
      - **Ethernet** 10/100Mb (RMII Interface) via RJ45
      - **USB-HS 2.0 OTG** via USB-A Type connector
@@ -22,35 +22,37 @@ https://www.taraztechnologies.com/Downloads/Software/PEControllerBSP/index.html
      - **I2C**
      - **SD Card Slot**
 5. **PWM IOs** 24 Channels
-6. **Analog IOs** 18 Channels with 2 on-board MAX11046 ADCs each providing 8 channels
+6. **Analog IOs** 18 Channels with 2 on-board MAX11046 ADCs each providing 8 channels.
 
 ## Supported IDEs
 1. STM32CubeIDE
 
 ## BSP Structure
 1. **Drivers:**
-	- *BSP:* Contains the Board Support Drivers provided by Taraz Technologies
-		- *PEController:* Contains the drivers for PEController board
-			- *ADC:* Contains the drivers for ADC 
-			- *Common:* Contains the commonly used files
-			- *Components:* Contains the other components used by the BSP
-			- *DigitalPins:* Contains the drivers for the digital Pins
-			- *Display:* Contains the display drivers
-			- *intelliSENS:* Contains the drivers for integration with intelliSENS software
-			- *PWM:* Contains the PWM drivers
-	- *CMSIS:* Contains the drivers provided by CMSIS 
-	- *STM32H7xx_HAL_Driver:* Contains the drivers provided by ST
+	- *BSP:* Contains the Board Support Drivers provided by Taraz Technologies.
+		- *PEController:* Contains the drivers for PEController board.
+			- *ADC:* Contains the drivers for ADC.
+			- *Common:* Contains the commonly used files.
+			- *Components:* Contains the other components used by the BSP.
+			- *DigitalPins:* Contains the drivers for the digital Pins.
+			- *Display:* Contains the display drivers.
+			- *intelliSENS:* Contains the drivers for integration with intelliSENS software.
+			- *PWM:* Contains the PWM drivers.
+			- *Timers: * Contains the drivers for the supporting timers.
+	- *CMSIS:* Contains the drivers provided by CMSIS.
+	- *STM32H7xx_HAL_Driver:* Contains the drivers provided by ST.
 2. **Middleware**
-	- *ST:* Helper libraries provided by ST
-	- *Taraz:* Helper libraries provided by Taraz Technologies
-		- *ControlLib:* Control System library containing different coordinate systems and transformations
-	- *Third_Party:* Third party libraries
+	- *ST:* Helper libraries provided by ST.
+	- *Taraz:* Helper libraries provided by Taraz Technologies.
+		- *ControlLib:* Control System library containing different coordinate systems and transformations.
+	- *Third_Party:* Third party libraries.
 3. **Projects**
 	- *PEController:* 
 		- *Applications:* 
-			- *PEController_Template:*  Template project for creating new quick projects
-			- *PELab_OpenLoopVFD:* Basic Implementation of Open Loop V/f Control Implemented for different variants of PELab
-			- *PELab_GridTie:* Basic Implementation of a three phase Grid Tie Inverter with Boost Converter
+			- *PEController_Template:*  Template project for creating new quick projects.
+			- *PELab_OpenLoopVFD:* Basic Implementation of Open Loop V/f Control Implemented for different variants of PELab.
+			- *PELab_GridTie:* Basic Implementation of a three phase Grid Tie Inverter with Boost Converter.
+			- *PWMGenerator:* Describes different schemes for driving the PWM signals as PWM pair, H-Bridge configuration, Phase-shifted PWMs, externally synched PWMs and generating synchronization signal for slave PEControllers.
 
 
 ## Making new project from template project

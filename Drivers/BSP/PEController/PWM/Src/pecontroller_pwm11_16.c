@@ -93,7 +93,7 @@ static void PWM11_16_Drivers_Init(pwm_config_t* config)
 	else
 	{
 		htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
-		htim1.Init.Period = (config->module->periodInUsec * TIM1_FREQ_MHz) - 1;
+		htim1.Init.Period = (int)(config->module->periodInUsec * TIM1_FREQ_MHz) - 1;
 		isEdgeAligned = true;
 	}
 	htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -107,6 +107,21 @@ static void PWM11_16_Drivers_Init(pwm_config_t* config)
 		Error_Handler();
 	if (HAL_TIM_PWM_Init(&htim1) != HAL_OK)
 		Error_Handler();
+	if (config->slaveOpts)
+	{
+		if (config->slaveOpts->syncSrc == PWM_SYNC_SRC_TIM2 || config->slaveOpts->syncSrc == PWM_SYNC_SRC_TIM3)
+		{
+			TIM_SlaveConfigTypeDef sSlaveConfig = {0};
+			sSlaveConfig.InputTrigger = config->slaveOpts->syncSrc == PWM_SYNC_SRC_TIM2 ? TIM_TS_ITR1 :
+					(config->slaveOpts->syncSrc == PWM_SYNC_SRC_TIM3 ? TIM_TS_ITR2 : TIM_TS_NONE);
+			sSlaveConfig.TriggerPolarity = TIM_TRIGGERPOLARITY_RISING;
+			sSlaveConfig.SlaveMode = config->slaveOpts->syncType;
+			if (HAL_TIM_SlaveConfigSynchro(&htim1, &sSlaveConfig) != HAL_OK)
+			{
+				Error_Handler();
+			}
+		}
+	}
 	TIM_MasterConfigTypeDef sMasterConfig = {0};
 	sMasterConfig.MasterOutputTrigger = TIM_TRGO_ENABLE;
 	sMasterConfig.MasterOutputTrigger2 = TIM_TRGO2_RESET;

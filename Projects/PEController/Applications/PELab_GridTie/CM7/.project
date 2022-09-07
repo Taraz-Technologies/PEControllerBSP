@@ -60,6 +60,11 @@
 			<locationURI>PARENT-5-PROJECT_LOC/Drivers/BSP/PEController/PWM/Src/pecontroller_pwm.c</locationURI>
 		</link>
 		<link>
+			<name>BSP/Timers/pecontroller_timers.c</name>
+			<type>1</type>
+			<location>C:/TarazWorkDir/TempLoc/PEControllerBSP/Drivers/BSP/PEController/Timers/Src/pecontroller_timers.c</location>
+		</link>
+		<link>
 			<name>Drivers/STM32H7xx_HAL_Driver/stm32h7xx_hal.c</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal.c</locationURI>

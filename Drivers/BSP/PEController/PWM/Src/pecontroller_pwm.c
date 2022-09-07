@@ -181,23 +181,25 @@ static void TIM_CCxNChannelCmd(TIM_TypeDef *TIMx, uint32_t Channel, uint32_t Cha
  * @brief Starts the PWM on required PWM pins. To enable outputs for required channels call BSP_PWMOut_Enable().
  * @code
  * // Start PWM for channel 1
- * BSP_PWM_Start(0x1);
+ * BSP_PWM_Start(0x1, true);
  * // Start PWM for channel 1 and channel 2
- * BSP_PWM_Start(0x3);
+ * BSP_PWM_Start(0x3, false);
  * // Start PWM for channel n and channel m, where n & m are between 1 & 16
- * BSP_PWM_Start((1U << (n - 1)) | (1U << (m - 1)));
+ * BSP_PWM_Start((1U << (n - 1)) | (1U << (m - 1)), bool);
  * @endcode
  * @param pwmMask Set the PWM channels needed to be run.<br>
  * 				<b>Valid Range</b> =  (0x0001 - 0xffff)
+ * @param masterHRTIM <c>true</c> if masterHRTIM to be enabled synchronously else <c>false</c>
  */
-void BSP_PWM_Start(uint32_t pwmMask)
+void BSP_PWM_Start(uint32_t pwmMask, bool masterHRTIM)
 {
 	uint32_t th_tim_sel =
 			(pwmMask & 0x3 ? HRTIM_TIMERID_TIMER_A : 0) |
 			(pwmMask & 0xc ? HRTIM_TIMERID_TIMER_B : 0) |
 			(pwmMask & 0x30 ? HRTIM_TIMERID_TIMER_C : 0) |
 			(pwmMask & 0xc0 ? HRTIM_TIMERID_TIMER_D : 0) |
-			(pwmMask & 0x300 ? HRTIM_TIMERID_TIMER_E : 0);
+			(pwmMask & 0x300 ? HRTIM_TIMERID_TIMER_E : 0) |
+			(masterHRTIM ? HRTIM_TIMERID_MASTER : 0);
 
 	// enable timer
 	if ((pwmMask & 0xfc00) && (pwmMask & 0x2ff))
@@ -219,16 +221,17 @@ void BSP_PWM_Start(uint32_t pwmMask)
  * @brief Stops the PWM on required PWM pins
  * @code
  * // Stop PWM for channel 1
- * BSP_PWM_Stop(0x1);
+ * BSP_PWM_Stop(0x1, false);
  * // Stop PWM for channel 1 and channel 2
- * BSP_PWM_Stop(0x3);
+ * BSP_PWM_Stop(0x3, false);
  * // Stop PWM for channel n and channel m, where n & m are between 1 & 16
- * BSP_PWM_Stop((1U << (n - 1)) | (1U << (m - 1)));
+ * BSP_PWM_Stop((1U << (n - 1)) | (1U << (m - 1)), bool);
  * @endcode
  * @param pwmMask Set the PWM channels needed to be stopped.<br>
  * 				<b>Valid Range</b> =  (0x0001 - 0xffff)
+ * @param masterHRTIM <c>true</c> if masterHRTIM to be disabled synchronously else <c>false</c>
  */
-void BSP_PWM_Stop(uint32_t pwmMask)
+void BSP_PWM_Stop(uint32_t pwmMask, bool masterHRTIM)
 {
 	if (pwmMask & 0x400)
 		TIM_CCxChannelCmd(htim1.Instance, TIM_CHANNEL_1, TIM_CCx_DISABLE);
@@ -267,7 +270,8 @@ void BSP_PWM_Stop(uint32_t pwmMask)
 						(pwmMask & 0xc ? HRTIM_TIMERID_TIMER_B : 0) |
 						(pwmMask & 0x30 ? HRTIM_TIMERID_TIMER_C : 0) |
 						(pwmMask & 0xc0 ? HRTIM_TIMERID_TIMER_D : 0) |
-						(pwmMask & 0x300 ? HRTIM_TIMERID_TIMER_E : 0));
+						(pwmMask & 0x300 ? HRTIM_TIMERID_TIMER_E : 0) |
+						(masterHRTIM ? HRTIM_TIMERID_MASTER : 0));
 	}
 }
 
@@ -295,6 +299,7 @@ void BSP_PWM_GetDafaultModuleConfig(pwm_module_config_t* moduleConfig)
  * -# lim.min = 0
  * -# lim.max = 1
  * -# lim.minMaxDutyCycleBalancing = false
+ * -# slaveOpts = NULL
  * @param pwmConfig PWM configuration structure to be updated
  * @param moduleConfig module configuration used by this module. Make sure to call
  * @ref BSP_PWM_GetDafaultModuleConfig() before calling this function
@@ -306,6 +311,7 @@ void BSP_PWM_GetDefaultConfig(pwm_config_t* pwmConfig, pwm_module_config_t* modu
 	pwmConfig->lim.min = 0;
 	pwmConfig->lim.max = 1;
 	pwmConfig->lim.minMaxDutyCycleBalancing = false;
+	pwmConfig->slaveOpts = NULL;
 }
 /**
  * @brief Enable / disable the output for required PWM channels
@@ -326,14 +332,14 @@ void BSP_PWMOut_Enable(uint32_t pwmMask, bool en)
 	if (en)
 	{
 		if (pwmMask & 0xC00)
-			{TIM_CCxChannelCmd(htim1.Instance, TIM_CHANNEL_1, TIM_CCx_ENABLE);
-			TIM_CCxNChannelCmd(htim1.Instance, TIM_CHANNEL_1, TIM_CCxN_ENABLE);}
+		{TIM_CCxChannelCmd(htim1.Instance, TIM_CHANNEL_1, TIM_CCx_ENABLE);
+		TIM_CCxNChannelCmd(htim1.Instance, TIM_CHANNEL_1, TIM_CCxN_ENABLE);}
 		if (pwmMask & 0x3000)
-			{TIM_CCxChannelCmd(htim1.Instance, TIM_CHANNEL_2, TIM_CCx_ENABLE);
-			TIM_CCxNChannelCmd(htim1.Instance, TIM_CHANNEL_2, TIM_CCxN_ENABLE);}
+		{TIM_CCxChannelCmd(htim1.Instance, TIM_CHANNEL_2, TIM_CCx_ENABLE);
+		TIM_CCxNChannelCmd(htim1.Instance, TIM_CHANNEL_2, TIM_CCxN_ENABLE);}
 		if (pwmMask & 0xC000)
-			{TIM_CCxChannelCmd(htim1.Instance, TIM_CHANNEL_3, TIM_CCx_ENABLE);
-			TIM_CCxNChannelCmd(htim1.Instance, TIM_CHANNEL_3, TIM_CCxN_ENABLE);}
+		{TIM_CCxChannelCmd(htim1.Instance, TIM_CHANNEL_3, TIM_CCx_ENABLE);
+		TIM_CCxNChannelCmd(htim1.Instance, TIM_CHANNEL_3, TIM_CCxN_ENABLE);}
 
 		HAL_HRTIM_WaveformOutputStart(&hhrtim,
 				(pwmMask & 0x1 ? HRTIM_OUTPUT_TA1 : 0) |
