@@ -32,7 +32,18 @@ extern "C" {
 
 /** @defgroup Timers Timers
  * @brief Contains the declaration and procedures relating the supporting timer modules (HRTIM Master, TIM2, TIM3).
- * @details The relevant timers and their operation mechnics are described below:
+ * @details The following timers can be configured using this support package.
+ * -# <b>HRTIM Master:</b> This timer can be used to control the timing of the PWM channels 1-10.
+ * The timing units of this timer can be used to reset these PWMs at required times;
+ * thus generating the possibility of creating phase shifted PWMs.
+ * The operation mechanics of relevant timers are described below:
+ * -# <b>TIM2 (Fiber Rx For Slave Operation):</b> This timer can be configured to trigger a reset on all
+ * PWM channels on a rising or falling edge at the Fiber Rx connector.
+ * -# <b>TIM3 (Fiber Tx For Master Operation):</b> This timer can be configured to trigger a reset on a slave PEController
+ *  by connecting it to the Fiber Rx pin of the slave controller. <br><br>
+ *
+ *
+ * The following list describes the operating mechanics for the relevant timers.
  * -# <b>HRTIM Master:</b> @ref BSP_MasterHRTIM_Config() can be used to configure the
  * HRTIM Master timer for synchronization with timer 1 as well as HRTIMA-HRTIME.
  * @ref BSP_MasterHRTIM_SetShiftValue() and @ref BSP_MasterHRTIM_SetShiftPercent() can then be used to
@@ -233,6 +244,10 @@ extern void BSP_MasterHRTIM_SetShiftPercent(hrtim_opts_t* opts, hrtim_comp_t com
  * To enable this feature pass <c>true</c> in this parameter.
  */
 extern void BSP_TIM3_FiberTxStart(bool startHrtimMaster);
+/**
+ * @brief Use this function to start the Master HRTIM
+ */
+extern void BSP_MasterHRTIM_Start(void);
 /**
  * @brief Enable / Disable interrupt for Master HRTIM unit
  * @param enable If enable interrupt set this parameter to <c>true</c>

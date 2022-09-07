@@ -167,30 +167,32 @@ extern void BSP_PWM_Config_Interrupt(uint32_t pwmNo, bool enable, PWMResetCallba
  * @brief Starts the PWM on required PWM pins. To enable outputs for required channels call BSP_PWMOut_Enable().
  * @code
  * // Start PWM for channel 1
- * BSP_PWM_Start(0x1);
+ * BSP_PWM_Start(0x1, true);
  * // Start PWM for channel 1 and channel 2
- * BSP_PWM_Start(0x3);
+ * BSP_PWM_Start(0x3, false);
  * // Start PWM for channel n and channel m, where n & m are between 1 & 16
- * BSP_PWM_Start((1U << (n - 1)) | (1U << (m - 1)));
+ * BSP_PWM_Start((1U << (n - 1)) | (1U << (m - 1)), bool);
  * @endcode
  * @param pwmMask Set the PWM channels needed to be run.<br>
  * 				<b>Valid Range</b> =  (0x0001 - 0xffff)
+ * @param masterHRTIM <c>true</c> if masterHRTIM to be enabled synchronously else <c>false</c>
  */
-extern void BSP_PWM_Start(uint32_t pwmMask);
+extern void BSP_PWM_Start(uint32_t pwmMask, bool masterHRTIM);
 /**
  * @brief Stops the PWM on required PWM pins
  * @code
  * // Stop PWM for channel 1
- * BSP_PWM_Stop(0x1);
+ * BSP_PWM_Stop(0x1, false);
  * // Stop PWM for channel 1 and channel 2
- * BSP_PWM_Stop(0x3);
+ * BSP_PWM_Stop(0x3, false);
  * // Stop PWM for channel n and channel m, where n & m are between 1 & 16
- * BSP_PWM_Stop((1U << (n - 1)) | (1U << (m - 1)));
+ * BSP_PWM_Stop((1U << (n - 1)) | (1U << (m - 1)), bool);
  * @endcode
  * @param pwmMask Set the PWM channels needed to be stopped.<br>
  * 				<b>Valid Range</b> =  (0x0001 - 0xffff)
+ * @param masterHRTIM <c>true</c> if masterHRTIM to be disabled synchronously else <c>false</c>
  */
-extern void BSP_PWM_Stop(uint32_t pwmMask);
+extern void BSP_PWM_Stop(uint32_t pwmMask, bool masterHRTIM);
 /**
  * @brief Populates the provided @ref pwm_module_config_t parameter with the default configuration
  * @details <b>Default Configuration</b>:
@@ -208,6 +210,7 @@ extern void BSP_PWM_GetDafaultModuleConfig(pwm_module_config_t* moduleConfig);
  * -# lim.min = 0
  * -# lim.max = 1
  * -# lim.minMaxDutyCycleBalancing = false
+ * -# slaveOpts = NULL
  * @param pwmConfig PWM configuration structure to be updated
  * @param moduleConfig module configuration used by this module. Make sure to call
  * @ref BSP_PWM_GetDafaultModuleConfig() before calling this function

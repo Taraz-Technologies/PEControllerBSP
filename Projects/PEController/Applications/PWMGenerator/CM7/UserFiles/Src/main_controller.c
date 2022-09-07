@@ -166,7 +166,7 @@ void MainControl_Init(void)
  */
 void MainControl_Run(void)
 {
-	BSP_PWM_Start(0xffff);
+	BSP_PWM_Start(0xffff, false);
 }
 
 /**
@@ -174,7 +174,7 @@ void MainControl_Run(void)
  */
 void MainControl_Stop(void)
 {
-	BSP_PWM_Stop(0xffff);
+	BSP_PWM_Stop(0xffff, true);
 }
 
 /**

@@ -425,9 +425,14 @@ void BSP_TIM3_FiberTxStart(bool startHrtimMaster)
 	if (startHrtimMaster)
 		hhrtim.Instance->sMasterRegs.MCR |= (HRTIM_TIMERID_MASTER);
 	__HAL_TIM_ENABLE(&htim3);
-
 }
-
+/**
+ * @brief Use this function to start the Master HRTIM
+ */
+void BSP_MasterHRTIM_Start(void)
+{
+	hhrtim.Instance->sMasterRegs.MCR |= (HRTIM_TIMERID_MASTER);
+}
 /**
  * @brief Callback function invoked when the timer x counter reset/roll-over
  *         event occurs.
