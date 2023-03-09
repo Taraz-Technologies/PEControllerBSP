@@ -27,11 +27,24 @@
 #if DISPLAY == LCD_AFY800480A0 || DISPLAY == LCD_AFY800480B0
 #include "LCD_AFY800480A0_B0.h"
 #endif
+#include "pecontroller_clut.h"
 #include "logo.h"
+#include "lvgl.h"
 /********************************************************************************
  * Defines
  *******************************************************************************/
-
+/**
+ * @brief Enables / Disables the use of lvgl libraries
+ */
+#define USE_LVGL		(1)
+#if USE_LVGL
+#define SCREEN_RAM_WIDTH 			(DISPLAY_WIDTH)
+#define SCREEN_RAM_HEIGHT			(DISPLAY_HEIGHT)
+/**
+ * @brief Set the display buffer size to 1/10th the size of the screen
+ */
+#define LVGL_BUFF_SIZE	(SCREEN_RAM_WIDTH * SCREEN_RAM_HEIGHT / 10)
+#endif
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
@@ -46,6 +59,12 @@
 /** Handle for the LTDC module
  */
 static LTDC_HandleTypeDef hltdc;
+#if USE_LVGL
+/**
+ * @brief Frame buffer stored in ram used for drawing the graphics on screen by the LTDC module
+ */
+static uint8_t frame_buff[SCREEN_RAM_HEIGHT][SCREEN_RAM_WIDTH] __attribute__((section(".FrameBuffer")));
+#endif
 /********************************************************************************
  * Global Variables
  *******************************************************************************/
@@ -53,10 +72,50 @@ static LTDC_HandleTypeDef hltdc;
 /********************************************************************************
  * Function Prototypes
  *******************************************************************************/
-
+extern void MainScreen_Draw(void);
 /********************************************************************************
  * Code
  *******************************************************************************/
+#if USE_LVGL
+
+/**
+ * @brief
+ * @param disp
+ * @param area
+ * @param color_p
+ */
+static void FlushLVGLScreen(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t * color_p)
+{
+	int32_t x, y;
+	for(y = area->y1; y <= area->y2; y++) {
+		for(x = area->x1; x <= area->x2; x++) {
+			frame_buff[SCREEN_RAM_HEIGHT -y][SCREEN_RAM_WIDTH - x] = color_map[((uint16_t)(color_p->full))];
+			color_p++;
+		}
+	}
+	lv_disp_flush_ready(disp); /* Indicate you are ready with the flushing*/
+}
+
+/**
+ * @brief
+ */
+static void ConfigLVGL(void)
+{
+	static lv_disp_draw_buf_t disp_buf;
+	static lv_color_t lv_buff[LVGL_BUFF_SIZE];
+	lv_disp_draw_buf_init(&disp_buf, lv_buff, NULL, LVGL_BUFF_SIZE);
+
+	static lv_disp_drv_t disp_drv; /*Descriptor of a display driver*/
+	lv_disp_drv_init(&disp_drv); /*Basic initialization*/
+	disp_drv.flush_cb = FlushLVGLScreen; /*Set your driver function*/
+	disp_drv.draw_buf = &disp_buf; /*Assign the buffer to the display*/
+	disp_drv.hor_res = DISPLAY_WIDTH; /*Set the horizontal resolution of the display*/
+	disp_drv.ver_res = DISPLAY_HEIGHT; /*Set the vertical resolution of the display*/
+	lv_disp_drv_register(&disp_drv); /*Finally register the driver*/
+}
+
+#endif
+
 /**
  * @brief Configure the clock for LTDC module
  * @retval None
@@ -225,6 +284,7 @@ void BSP_Display_ShowFirstLayer(const uint8_t* framePtr, image_config_t* config)
  */
 void BSP_Display_ShowLogo(void)
 {
+#if !USE_LVGL
 	image_config_t config = {0};
 	config.xAlign = LOGO_ALIGN_X;
 	config.yAlign = LOGO_ALIGN_Y;
@@ -232,6 +292,7 @@ void BSP_Display_ShowLogo(void)
 	config.ImageWidth = LOGO_WIDTH;
 	config.PixelFormat = LOGO_FORMAT;
 	BSP_Display_ShowFirstLayer(logo, &config);
+#endif
 }
 
 static void ConfigLTDC(void)
@@ -256,6 +317,41 @@ static void ConfigLTDC(void)
 		Error_Handler();
 }
 
+#if USE_LVGL
+static void ConfigLvglLayer(int layerIdx)
+{
+	LTDC_LayerCfgTypeDef pLayerCfg;
+	pLayerCfg.WindowX0 = 0;
+	pLayerCfg.WindowX1 = SCREEN_RAM_WIDTH;
+	pLayerCfg.WindowY0 = 0;
+	pLayerCfg.WindowY1 = SCREEN_RAM_HEIGHT;
+
+	pLayerCfg.PixelFormat = LTDC_PIXEL_FORMAT_L8;
+	pLayerCfg.FBStartAdress = (uint32_t)frame_buff;
+	pLayerCfg.Alpha = 255;
+	pLayerCfg.Alpha0 = 0; /* fully transparent */
+	pLayerCfg.Backcolor.Blue = 0;
+	pLayerCfg.Backcolor.Green = 255;
+	pLayerCfg.Backcolor.Red = 0;
+
+	/* Configure blending factors */
+	pLayerCfg.BlendingFactor1 = LTDC_BLENDING_FACTOR1_PAxCA;//LTDC_BLENDING_FACTOR1_CA;
+	pLayerCfg.BlendingFactor2 = LTDC_BLENDING_FACTOR2_PAxCA;//LTDC_BLENDING_FACTOR2_CA;
+
+	/* Configure the number of lines and number of pixels per line */
+	pLayerCfg.ImageWidth  = SCREEN_RAM_WIDTH;
+	pLayerCfg.ImageHeight = SCREEN_RAM_HEIGHT;
+	for (int i = 0; i < DISPLAY_HEIGHT; i++)
+	{
+		for (int j = 0; j < DISPLAY_WIDTH; j++)
+			frame_buff[i][j] = 0;
+	}
+	BSP_Display_ShowLayer(&pLayerCfg);
+	HAL_LTDC_ConfigCLUT(&hltdc, (uint32_t *)clut_data, 256, layerIdx);
+	HAL_LTDC_EnableCLUT(&hltdc, layerIdx);
+}
+#endif
+
 /**
  * @brief Initializes the display module
  */
@@ -263,7 +359,15 @@ void BSP_Display_Init(void)
 {
 	ConfigClock();
 	ConfigIO();
+#if USE_LVGL
+	lv_init();
+	ConfigLVGL();
+	MainScreen_Draw();
+#endif
 	ConfigLTDC();
+#if USE_LVGL
+	ConfigLvglLayer(0);
+#endif
 }
 
 /**

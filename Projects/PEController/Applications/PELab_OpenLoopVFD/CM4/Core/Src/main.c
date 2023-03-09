@@ -30,6 +30,7 @@
 #if ENABLE_INTELLISENS
 #include "intelliSENS.h"
 #endif
+#include "lvgl.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -93,6 +94,8 @@ static void DataProcessingCallback(adc_measures_t* result)
 #pragma GCC pop_options
 /* USER CODE END 0 */
 
+void MainScreen_Update(void);
+
 /**
   * @brief  The application entry point.
   * @retval int
@@ -154,6 +157,10 @@ int main(void)
 #if ENABLE_INTELLISENS
 	  intelliSENS.Poll();
 #endif
+	  HAL_Delay(5);
+	  lv_tick_inc(5);
+	  lv_timer_handler();
+	  MainScreen_Update();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

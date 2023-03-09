@@ -60,6 +60,16 @@
 			<locationURI>PARENT-5-PROJECT_LOC/Drivers/BSP/PEController/DigitalPins/Src/pecontroller_digital_pins.c</locationURI>
 		</link>
 		<link>
+			<name>BSP/Display/lvgl</name>
+			<type>2</type>
+			<locationURI>PARENT-5-PROJECT_LOC/Middleware/Third_Party/lvgl</locationURI>
+		</link>
+		<link>
+			<name>BSP/Display/pecontroller_clut.c</name>
+			<type>1</type>
+			<locationURI>PARENT-5-PROJECT_LOC/Drivers/BSP/PEController/Display/Src/pecontroller_clut.c</locationURI>
+		</link>
+		<link>
 			<name>BSP/Display/pecontroller_display.c</name>
 			<type>1</type>
 			<locationURI>PARENT-5-PROJECT_LOC/Drivers/BSP/PEController/Display/Src/pecontroller_display.c</locationURI>

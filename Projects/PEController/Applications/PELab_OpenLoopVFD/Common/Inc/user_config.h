@@ -63,7 +63,7 @@ extern "C" {
 /**
  * @brief Select LCD variant installed on PEController
  */
-#define DISPLAY					(LCD_AFY800480A0)
+#define DISPLAY					(LCD_AFY800480B0)
 
 #define LOGO_DEFAULT			(0)
 #define LOGO_CUSTOM				(1)
