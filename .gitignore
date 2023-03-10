@@ -56,3 +56,6 @@ dkms.conf
 **/Docs/
 *.prefs
 *.bak
+Projects/PEController/Applications/PELab_OpenLoopVFD/Drivers/CMSIS/Device/ST/STM32H7xx/License.md
+Projects/PEController/Applications/PELab_OpenLoopVFD/Drivers/CMSIS/LICENSE.txt
+Projects/PEController/Applications/PELab_OpenLoopVFD/Drivers/STM32H7xx_HAL_Driver/License.md

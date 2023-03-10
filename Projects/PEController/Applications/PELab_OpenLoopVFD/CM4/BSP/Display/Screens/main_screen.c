@@ -156,7 +156,7 @@ void MainScreen_Update(void)
 	else
 	{
 		static int activate = 0;
-		if(++activate >= 1000)
+		if(++activate >= 300)
 		{
 			//lv_scr_load_anim(lv_screen_main, LV_SCR_LOAD_ANIM_OVER_LEFT, 1000, 0, false);
 			lv_scr_load(lv_screen_main);
