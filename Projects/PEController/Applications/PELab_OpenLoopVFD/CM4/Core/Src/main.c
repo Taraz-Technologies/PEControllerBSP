@@ -158,9 +158,9 @@ int main(void)
 	  intelliSENS.Poll();
 #endif
 	  HAL_Delay(5);
+	  MainScreen_Update();
 	  lv_tick_inc(5);
 	  lv_timer_handler();
-	  MainScreen_Update();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
