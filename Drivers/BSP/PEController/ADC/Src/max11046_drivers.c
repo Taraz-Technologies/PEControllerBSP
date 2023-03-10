@@ -126,7 +126,8 @@ static inline void Measure_BothADCs(uint16_t* dataPtr)
 #endif
 	maxCS2_GPIO_Port->BSRR = maxCS2_Pin;
 }
-
+#pragma GCC push_options
+#pragma GCC optimize ("-O0")
 /**
  * @brief Measure data from all channels - optimized version
  * @param tempData
@@ -159,6 +160,7 @@ static inline void Measure_AllChannels(uint16_t* tempData)
 
 	maxCS2_GPIO_Port->BSRR = maxCS2_Pin;
 }
+#pragma GCC pop_options
 
 #pragma GCC push_options
 #pragma GCC optimize ("-Ofast")

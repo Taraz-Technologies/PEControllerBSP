@@ -60,7 +60,7 @@ static const char* readings[16] = {
 /********************************************************************************
  * Global Variables
  *******************************************************************************/
-
+static lv_obj_t * lv_screen_main = NULL;
 /********************************************************************************
  * Function Prototypes
  *******************************************************************************/
@@ -72,7 +72,7 @@ static void grid_style_init(void)
 {
 	lv_style_t* style = &gridStyle;
 	lv_coord_t pad = 0;
-	lv_coord_t border = 1;
+	lv_coord_t border = 3;
 	lv_style_init(style);
 	lv_style_set_radius(style, 0);
 	lv_style_set_pad_row(style, pad);
@@ -118,9 +118,13 @@ static void draw_data_view(void)
 
 	grid_style_init();
 
-	lv_obj_t * grid = lv_obj_create(lv_scr_act());
+	if (!lv_screen_main)
+		lv_screen_main = lv_obj_create(NULL);
+
+	lv_obj_t * grid = lv_obj_create(lv_screen_main);
 	lv_obj_set_grid_dsc_array(grid, col_dsc, row_dsc);
 	lv_obj_set_size(grid, 600, 480);
+	lv_obj_set_style_border_width(grid, 0, 0);
 	lv_obj_align(grid, LV_ALIGN_TOP_LEFT, 0, 0);
 	lv_obj_set_layout(grid, LV_LAYOUT_GRID);
 	lv_obj_add_style(grid, &gridStyle, 0);
@@ -138,12 +142,26 @@ void MainScreen_Update(void)
 {
 	static int i = 0;
 	static int mod = 0;
-	if (++i > 200)
+	static bool mainLoad = false;
+	if(mainLoad)
 	{
-		++mod;
-		for (int k = 0; k < 16; k++)
-			lv_label_set_text(chDisplay[k].lblName, mod % 2 ? "xx" : "No man");
-		i = 0;
+		if (++i > 50)
+		{
+			++mod;
+			for (int k = 0; k < 16; k++)
+				lv_label_set_text(chDisplay[k].lblReading, mod % 2 ? "15.5V" : "15.0V");
+			i = 0;
+		}
+	}
+	else
+	{
+		static int activate = 0;
+		if(++activate >= 1000)
+		{
+			//lv_scr_load_anim(lv_screen_main, LV_SCR_LOAD_ANIM_OVER_LEFT, 1000, 0, false);
+			lv_scr_load(lv_screen_main);
+			mainLoad = true;
+		}
 	}
 }
 
