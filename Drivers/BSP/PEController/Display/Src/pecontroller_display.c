@@ -30,20 +30,18 @@
 #include "pecontroller_clut.h"
 #include "logo.h"
 #include "lvgl.h"
+//#include "screen_manager.h"
+
 /********************************************************************************
  * Defines
  *******************************************************************************/
-/**
- * @brief Enables / Disables the use of lvgl libraries
- */
-#define USE_LVGL		(1)
-#if USE_LVGL
+#if LCD_DATA_MONITORING
 #define SCREEN_RAM_WIDTH 			(DISPLAY_WIDTH)
 #define SCREEN_RAM_HEIGHT			(DISPLAY_HEIGHT)
 /**
  * @brief Set the display buffer size to 1/10th the size of the screen
  */
-#define LVGL_BUFF_SIZE	((SCREEN_RAM_WIDTH * SCREEN_RAM_HEIGHT * 10) / 60)
+#define LVGL_BUFF_SIZE	((SCREEN_RAM_WIDTH * SCREEN_RAM_HEIGHT * 10) / 100)
 #endif
 /********************************************************************************
  * Typedefs
@@ -59,7 +57,7 @@
 /** Handle for the LTDC module
  */
 static LTDC_HandleTypeDef hltdc;
-#if USE_LVGL
+#if LCD_DATA_MONITORING
 /**
  * @brief Frame buffer stored in ram used for drawing the graphics on screen by the LTDC module
  */
@@ -72,11 +70,11 @@ static uint8_t frame_buff[SCREEN_RAM_HEIGHT][SCREEN_RAM_WIDTH] __attribute__((se
 /********************************************************************************
  * Function Prototypes
  *******************************************************************************/
-extern void MainScreen_Draw(void);
+extern void ScreenManager_Init(void);
 /********************************************************************************
  * Code
  *******************************************************************************/
-#if USE_LVGL
+#if LCD_DATA_MONITORING
 
 /**
  * @brief
@@ -89,7 +87,7 @@ static void FlushLVGLScreen(lv_disp_drv_t * disp, const lv_area_t * area, lv_col
 	int32_t x, y;
 	for(y = area->y1; y <= area->y2; y++) {
 		for(x = area->x1; x <= area->x2; x++) {
-			frame_buff[SCREEN_RAM_HEIGHT -y][SCREEN_RAM_WIDTH - x] = color_map[((uint16_t)(color_p->full))];
+			frame_buff[y][x] = color_map[((uint16_t)(color_p->full))];
 			color_p++;
 		}
 	}
@@ -111,6 +109,8 @@ static void ConfigLVGL(void)
 	disp_drv.draw_buf = &disp_buf; /*Assign the buffer to the display*/
 	disp_drv.hor_res = DISPLAY_WIDTH; /*Set the horizontal resolution of the display*/
 	disp_drv.ver_res = DISPLAY_HEIGHT; /*Set the vertical resolution of the display*/
+	disp_drv.rotated = LV_DISP_ROT_180;
+	disp_drv.sw_rotate = 1;
 	lv_disp_drv_register(&disp_drv); /*Finally register the driver*/
 }
 
@@ -284,7 +284,7 @@ void BSP_Display_ShowFirstLayer(const uint8_t* framePtr, image_config_t* config)
  */
 void BSP_Display_ShowLogo(void)
 {
-#if !USE_LVGL
+#if !LCD_DATA_MONITORING
 	image_config_t config = {0};
 	config.xAlign = LOGO_ALIGN_X;
 	config.yAlign = LOGO_ALIGN_Y;
@@ -317,7 +317,7 @@ static void ConfigLTDC(void)
 		Error_Handler();
 }
 
-#if USE_LVGL
+#if LCD_DATA_MONITORING
 static void ConfigLvglLayer(int layerIdx)
 {
 	LTDC_LayerCfgTypeDef pLayerCfg;
@@ -359,13 +359,13 @@ void BSP_Display_Init(void)
 {
 	ConfigClock();
 	ConfigIO();
-#if USE_LVGL
+#if LCD_DATA_MONITORING
 	lv_init();
 	ConfigLVGL();
-	MainScreen_Draw();
+	ScreenManager_Init();
 #endif
 	ConfigLTDC();
-#if USE_LVGL
+#if LCD_DATA_MONITORING
 	ConfigLvglLayer(0);
 #endif
 }

@@ -63,7 +63,7 @@ extern "C" {
 /**
  * @brief Select LCD variant installed on PEController
  */
-#define DISPLAY					(LCD_AFY800480B0)
+#define DISPLAY					(LCD_AFY800480A0)
 
 #define LOGO_DEFAULT			(0)
 #define LOGO_CUSTOM				(1)
@@ -76,6 +76,11 @@ extern "C" {
  * @brief Selects the display brightness value between 0-100
  */
 #define LCD_BRIGHTNESS			(100)
+
+/**
+ * Set this to 1 to enable data monitoring on the display
+ */
+#define LCD_DATA_MONITORING		(1)
 /********** DISPLAY CONFIGURATION ************/
 
 /******** MEASUREMENT CONFIGURATION ***********/

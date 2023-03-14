@@ -23,8 +23,11 @@
 /********************************************************************************
  * Includes
  *******************************************************************************/
-#include "logo.h"
-#include "lvgl.h"
+#include "user_config.h"
+#if LCD_DATA_MONITORING
+#include "main_screen.h"
+#include "screen_styles.h"
+#include "screen_data.h"
 /********************************************************************************
  * Defines
  *******************************************************************************/
@@ -36,31 +39,20 @@
 /********************************************************************************
  * Structures
  *******************************************************************************/
-typedef struct
-{
-	lv_obj_t* lblName;
-	lv_obj_t* lblReading;
-	lv_obj_t* lblValue;
-} ch_display_t;
+
 /********************************************************************************
  * Static Variables
  *******************************************************************************/
+static lv_obj_t* screen;
+static lv_style_t screenGridStyle, monGridStyle;
+static lv_style_t cellGridStyle;
+static lv_style_t chNameGridStyle, chValueTypeGridStyle;
+static lv_style_t chNameLblStyle, chReadingTypeLblStyle, chValueLblStyle;
 static ch_display_t chDisplay[16];
-static lv_style_t gridStyle;
-static const char* names[16] = {
-		"Vdc1", "Va" , "Vb", "Vc",
-		"Vdc2", "Vpv", "V1", "V2",
-		"Idc1", "Ia", "Ib", "Ic",
-		"Idc2", "I1", "I2", "I3"};
-static const char* readings[16] = {
-		"RMS", "Avg" , "Pk-Pk", "RMS",
-		"Avg" , "Pk-Pk", "NA", "Pk-Pk",
-		"RMS", "NA", "NA", "NA",
-		"NA", "NA", "NA", "NA"};
 /********************************************************************************
  * Global Variables
  *******************************************************************************/
-static lv_obj_t * lv_screen_main = NULL;
+
 /********************************************************************************
  * Function Prototypes
  *******************************************************************************/
@@ -68,102 +60,126 @@ static lv_obj_t * lv_screen_main = NULL;
 /********************************************************************************
  * Code
  *******************************************************************************/
-static void grid_style_init(void)
-{
-	lv_style_t* style = &gridStyle;
-	lv_coord_t pad = 0;
-	lv_coord_t border = 3;
-	lv_style_init(style);
-	lv_style_set_radius(style, 0);
-	lv_style_set_pad_row(style, pad);
-	lv_style_set_pad_column(style, pad);
-	lv_style_set_pad_left(style, pad);
-	lv_style_set_pad_right(style, pad);
-	lv_style_set_pad_top(style, pad);
-	lv_style_set_pad_bottom(style, pad);
-	lv_style_set_border_width(style, border);
-}
-
-static void draw_ch_data(lv_obj_t * grid, int index, const char* name, const char* reading, char* value)
+static void MonitoringCell_Create(lv_obj_t * parent, int index)
 {
 	int col = index % 4;
 	int row = index / 4;
 
-	static lv_coord_t col_dsc[] = {LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
-	static lv_coord_t row_dsc[] = {LV_GRID_FR(2), LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
-	lv_obj_t * grid_in = lv_obj_create(grid);
-	lv_obj_set_grid_cell(grid_in, LV_GRID_ALIGN_STRETCH, col, 1, LV_GRID_ALIGN_STRETCH, row, 1);
-	lv_obj_set_grid_dsc_array(grid_in, col_dsc, row_dsc);
-	//lv_obj_set_size(grid_in, 360, 272);
-	lv_obj_align(grid_in, LV_ALIGN_TOP_LEFT, 0, 0);
-	lv_obj_set_layout(grid_in, LV_LAYOUT_GRID);
-	lv_obj_add_style(grid_in, &gridStyle, 0);
-
 	ch_display_t* disp = &chDisplay[index];
-	disp->lblName = lv_label_create(grid_in);
-	lv_obj_set_grid_cell(disp->lblName, LV_GRID_ALIGN_CENTER, 0, 1, LV_GRID_ALIGN_CENTER, 1, 1);
-	lv_label_set_text(disp->lblName, name);
-	lv_obj_center(disp->lblName);
 
-	disp->lblReading = lv_label_create(grid_in);
-	lv_obj_set_grid_cell(disp->lblReading, LV_GRID_ALIGN_CENTER, 0, 1, LV_GRID_ALIGN_CENTER, 0, 1);
-	lv_label_set_text(disp->lblReading, reading);
+	// Set main grid element
+	static lv_coord_t colsMain[] = {LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
+	static lv_coord_t rowsMain[] = {LV_GRID_FR(5), LV_GRID_FR(2), LV_GRID_TEMPLATE_LAST};
+	lv_obj_t * gridMain = lv_obj_create(parent);
+	lv_obj_set_grid_cell(gridMain, LV_GRID_ALIGN_STRETCH, col, 1, LV_GRID_ALIGN_STRETCH, row, 1);
+	lv_obj_set_grid_dsc_array(gridMain, colsMain, rowsMain);
+	lv_obj_set_layout(gridMain, LV_LAYOUT_GRID);
+	lv_obj_add_style(gridMain, &cellGridStyle, 0);
+
+	// Set value and type portion
+	static lv_coord_t colsValueType[] = {LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
+	static lv_coord_t rowsValueType[] = {LV_GRID_FR(4), LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
+	lv_obj_t * gridValueType = lv_obj_create(gridMain);
+	lv_obj_set_grid_cell(gridValueType, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
+	lv_obj_set_grid_dsc_array(gridValueType, colsValueType, rowsValueType);
+	lv_obj_set_layout(gridValueType, LV_LAYOUT_GRID);
+	lv_obj_add_style(gridValueType, &chValueTypeGridStyle, 0);
+
+	disp->lblValue = lv_label_create(gridValueType);
+	lv_obj_set_grid_cell(disp->lblValue, LV_GRID_ALIGN_CENTER, 0, 1, LV_GRID_ALIGN_CENTER, 0, 1);
+	lv_obj_center(disp->lblValue);
+	lv_obj_add_style(disp->lblValue, &chValueLblStyle, 0);
+
+	disp->lblReading = lv_label_create(gridValueType);
+	lv_obj_set_grid_cell(disp->lblReading, LV_GRID_ALIGN_START, 0, 1, LV_GRID_ALIGN_CENTER, 1, 1);
 	lv_obj_center(disp->lblReading);
+	lv_obj_add_style(disp->lblReading, &chReadingTypeLblStyle, 0);
+
+	// set the name portion
+	static lv_coord_t colsName[] = {LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
+	static lv_coord_t rowsName[] = {LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
+	lv_obj_t * gridName = lv_obj_create(gridMain);
+	lv_obj_set_grid_cell(gridName, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 1, 1);
+	lv_obj_set_grid_dsc_array(gridName, colsName, rowsName);
+	lv_obj_set_layout(gridName, LV_LAYOUT_GRID);
+	lv_obj_add_style(gridName, &chNameGridStyle, 0);
+
+	disp->lblName = lv_label_create(gridName);
+	lv_obj_set_grid_cell(disp->lblName, LV_GRID_ALIGN_CENTER, 0, 1, LV_GRID_ALIGN_CENTER, 0, 1);
+	lv_obj_center(disp->lblName);
+	lv_obj_add_style(disp->lblName, &chNameLblStyle, 0);
+
+	lv_label_set_text(disp->lblName, chDisplayParams[index].srcName);
+	lv_label_set_text(disp->lblReading, measureTxts[(uint8_t)chDisplayParams[index].src.measure.type]);				// configure for other things --TODO--
 }
 
-static void draw_data_view(void)
+void MainScreen_Init(void)
 {
-	static lv_coord_t col_dsc[] = {LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
-	static lv_coord_t row_dsc[] = {LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
+	BSP_Screen_InitGridStyle(&screenGridStyle, 0, 0, 0, lv_palette_lighten(LV_PALETTE_GREY, 3));
 
-	grid_style_init();
+	// Initialize monitoring grid
+	BSP_Screen_InitGridStyle(&monGridStyle, 0, 0, 0, lv_palette_lighten(LV_PALETTE_GREY, 3));
 
-	if (!lv_screen_main)
-		lv_screen_main = lv_obj_create(NULL);
+	// Initialize monitoring cell main grid
+	BSP_Screen_InitGridStyle(&cellGridStyle, 2, 0, 0, lv_palette_lighten(LV_PALETTE_GREY, 2));
 
-	lv_obj_t * grid = lv_obj_create(lv_screen_main);
-	lv_obj_set_grid_dsc_array(grid, col_dsc, row_dsc);
-	lv_obj_set_size(grid, 600, 480);
-	lv_obj_set_style_border_width(grid, 0, 0);
-	lv_obj_align(grid, LV_ALIGN_TOP_LEFT, 0, 0);
-	lv_obj_set_layout(grid, LV_LAYOUT_GRID);
-	lv_obj_add_style(grid, &gridStyle, 0);
+	// Initialize the basic grid cell container styles
+	BSP_Screen_InitGridStyle(&chValueTypeGridStyle, 0, 0, 4, lv_palette_lighten(LV_PALETTE_GREEN, 1));
+	BSP_Screen_InitGridStyle(&chNameGridStyle, 0, 0, 4, lv_palette_lighten(LV_PALETTE_BLUE, 1));
 
+	// Initialize the basic grid cell label styles
+	BSP_Screen_InitLabelStyle(&chValueLblStyle, &lv_font_montserrat_26, LV_TEXT_ALIGN_CENTER, lv_palette_darken(LV_PALETTE_GREY, 3));
+	BSP_Screen_InitLabelStyle(&chReadingTypeLblStyle, &lv_font_montserrat_14, LV_TEXT_ALIGN_RIGHT, lv_palette_darken(LV_PALETTE_GREY, 3));
+	BSP_Screen_InitLabelStyle(&chNameLblStyle, &lv_font_montserrat_22, LV_TEXT_ALIGN_CENTER, lv_palette_darken(LV_PALETTE_GREY, 3));
+}
+
+void MainScreen_Load(void)
+{
+	// create the screen
+	screen = lv_obj_create(NULL);
+
+	// create basic grid
+	lv_obj_t* screenGrid = lv_obj_create(screen);
+	static lv_coord_t colsScreen[] = {LV_GRID_FR(MONITORING_VIEW_WIDTH), LV_GRID_FR(CONTROL_VIEW_WIDTH), LV_GRID_TEMPLATE_LAST};
+	static lv_coord_t rowsScreen[] = {LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
+	lv_obj_set_size(screenGrid, 800, 480);
+	lv_obj_set_grid_dsc_array(screenGrid, colsScreen, rowsScreen);
+	lv_obj_set_layout(screenGrid, LV_LAYOUT_GRID);
+	lv_obj_add_style(screenGrid, &screenGridStyle, 0);
+
+	// create monitoring grid
+	lv_obj_t* monGrid = lv_obj_create(screenGrid);
+	static lv_coord_t colsMon[] = {LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
+	static lv_coord_t rowsMon[] = {LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
+	lv_obj_set_grid_cell(monGrid, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
+	lv_obj_set_grid_dsc_array(monGrid, colsMon, rowsMon);
+	lv_obj_set_layout(monGrid, LV_LAYOUT_GRID);
+	lv_obj_add_style(monGrid, &monGridStyle, 0);
+	// create all cells
 	for (int i = 0; i < 16; i++)
-		draw_ch_data(grid, i, names[i], readings[i], NULL);
+		MonitoringCell_Create(monGrid, i);
+
+
+	// create control grid --TODO--
+
+	lv_scr_load(screen);
 }
 
-void MainScreen_Draw(void)
+void MainScreen_Unload(void)
 {
-	draw_data_view();
+	//lv_obj_delete(screen);
 }
 
-void MainScreen_Update(void)
+void MainScreen_Refresh(void)
 {
-	static int i = 0;
-	static int mod = 0;
-	static bool mainLoad = false;
-	if(mainLoad)
+	for (int i = 0; i < 16; i++)
 	{
-		if (++i > 50)
+		if (chDisplayParams[i].isUpdated)
 		{
-			++mod;
-			for (int k = 0; k < 16; k++)
-				lv_label_set_text(chDisplay[k].lblReading, mod % 2 ? "15.5V" : "15.0V");
-			i = 0;
-		}
-	}
-	else
-	{
-		static int activate = 0;
-		if(++activate >= 300)
-		{
-			//lv_scr_load_anim(lv_screen_main, LV_SCR_LOAD_ANIM_OVER_LEFT, 1000, 0, false);
-			lv_scr_load(lv_screen_main);
-			mainLoad = true;
+			//lv_label_set_text(disp->lblName, chDisplayParams[i].srcName);
 		}
 	}
 }
 
-
+#endif
 /* EOF */

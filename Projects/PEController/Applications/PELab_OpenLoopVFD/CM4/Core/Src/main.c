@@ -98,6 +98,7 @@ static void MX_I2C2_Init(void);
 void StartDefaultTask(void *argument);
 
 /* USER CODE BEGIN PFP */
+void ScreenManager_Poll(void);
 #if ENABLE_INTELLISENS
 void StartintelliSENSTask(void *argument);
 #endif
@@ -468,8 +469,8 @@ void StartLvglScreenTask(void *argument)
 {
 	for(;;)
 	{
-		MainScreen_Update();
-		osDelay(5);
+		ScreenManager_Poll();
+		osDelay(300);
 	}
 }
 /* USER CODE END 4 */
