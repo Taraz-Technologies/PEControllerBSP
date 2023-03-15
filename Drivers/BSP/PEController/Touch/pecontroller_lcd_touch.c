@@ -1,8 +1,8 @@
 /**
  ********************************************************************************
- * @file    	screen_data.c
+ * @file    	pecontroller_lcd_touch.c
  * @author 		Waqas Ehsan Butt
- * @date    	Mar 14, 2023
+ * @date    	Mar 15, 2023
  *
  * @brief   
  ********************************************************************************
@@ -25,7 +25,7 @@
  *******************************************************************************/
 #include "user_config.h"
 #if LCD_DATA_MONITORING
-#include "screen_data.h"
+#include "pecontroller_lcd_touch.h"
 /********************************************************************************
  * Defines
  *******************************************************************************/
@@ -45,8 +45,7 @@
 /********************************************************************************
  * Global Variables
  *******************************************************************************/
-disp_param_t chDisplayParams[16];
-const char* measureTxts[5] = {"RMS", "Avg", "Max", "Min", "Pk-Pk"};
+
 /********************************************************************************
  * Function Prototypes
  *******************************************************************************/
@@ -54,81 +53,50 @@ const char* measureTxts[5] = {"RMS", "Avg", "Max", "Min", "Pk-Pk"};
 /********************************************************************************
  * Code
  *******************************************************************************/
-/**
- * @brief Update all measurements required in the GUI interface
- * @note Make sure that this function is called every time a new set of values is acquired by the ADC drivers.
- * @param adcData Pointer to the raw data provided by the ADC unit
- */
-void BSP_Display_UpdateMeasurements(float* dataPtr)
+static inline uint16_t GetReg(uint16_t reg)
 {
-	for (int i = 0; i < 16; i++)
-	{
-		disp_param_t* param = &chDisplayParams[i];
-		if (param->srcType == PARAM_SRC_MEASUREMENT)
-		{
-			param_measures_t* measure = &param->src.measure;
-			param_measures_temp_vars_t* temps = &(measure->temps);
-			float data = dataPtr[measure->channelIndex];//((adcData[measure->channelIndex] - 32768.f) * measure->sensitivity) - measure->offset;
-			switch (measure->type)
-			{
-			case DISP_RMS:
-				temps->temp += data * data;
-				break;
-			case DISP_AVG:
-				temps->temp += data;
-				break;
-			case DISP_MAX:
-				if (temps->temp1 < data)
-					temps->temp1 = data;
-				break;
-			case DISP_MIN:
-				if (temps->temp1 > data)
-					temps->temp1 = data;
-				break;
-			case DISP_PkToPk:
-				if (temps->temp1 < data)
-					temps->temp1 = data;
-				if (temps->temp2 > data)
-					temps->temp2 = data;
-				break;
-			default:
-				temps->temp = 0;
-				break;
-			}
-			if (--temps->index <= 0)
-			{
-				switch (measure->type)
-				{
-				case DISP_RMS:
-					temps->temp = sqrtf(temps->temp / temps->maxIndex);
-					break;
-				case DISP_AVG:
-					temps->temp = temps->temp / temps->maxIndex;
-					break;
-				case DISP_PkToPk:
-					temps->temp = temps->temp1 - temps->temp2;
-					temps->temp1 = -2147483647;
-					temps->temp2 = 2147483647;
-					break;
-				case DISP_MAX:
-					temps->temp = temps->temp1;
-					temps->temp1 = -2147483647;
-					break;
-				case DISP_MIN:
-					temps->temp = temps->temp1;
-					temps->temp1 = 2147483647;
-					break;
-				default:
-					break;
-				}
-				measure->value = temps->temp; //((temps->temp - 32768.f) * measure->sensitivity) - measure->offset;
-				temps->temp = 0;
-				param->isUpdated = true;
-				temps->index = temps->maxIndex;
-			}
+	return ((reg & 0xff) << 8) | ((reg & 0xff00) >> 8);
+}
 
-		}
-	}
+void BSP_Touch_WriteReg(uint8_t addr, uint16_t reg, uint8_t value)
+{
+	HAL_I2C_Mem_Write(&hi2c2, addr, GetReg(reg), I2C_MEMADD_SIZE_16BIT, &value, 1, 100);
+}
+
+uint8_t  BSP_Touch_ReadReg(uint8_t addr, uint16_t reg)
+{
+	HAL_StatusTypeDef status = HAL_OK;
+  uint8_t  Value = 0;
+	uint16_t index = 0;
+	do {
+		status = HAL_I2C_Mem_Read(&hi2c2, addr, GetReg(reg), I2C_MEMADD_SIZE_16BIT, &Value, 1, HAL_MAX_DELAY);
+	} while(status != HAL_OK && index < 256);
+
+	if(status == HAL_OK)
+		return Value;
+	else
+		return 0;
+}
+
+uint16_t BSP_Touch_ReadRegisters(uint8_t addr, uint16_t reg, uint8_t *buffer, uint16_t len)
+{
+	HAL_StatusTypeDef status = HAL_OK;
+	uint16_t index = 0;
+	do
+	{
+		status = HAL_I2C_Mem_Read(&hi2c2, addr, GetReg(reg), I2C_MEMADD_SIZE_16BIT, buffer, len, HAL_MAX_DELAY);
+	} while(status != HAL_OK && index++ < 256);
+	return status;
+}
+
+void BSP_Touch_Init(void)
+{
+
+}
+
+void BSP_Touch_Poll(void)
+{
+
 }
 
 #endif

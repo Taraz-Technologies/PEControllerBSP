@@ -69,7 +69,12 @@ void ScreenManager_Init(void)
 	{
 		chDisplayParams[i].srcName = chNames[i];
 		chDisplayParams[i].srcType = PARAM_SRC_MEASUREMENT;
-		chDisplayParams[i].src.measure.type = DISP_RMS;
+		chDisplayParams[i].src.measure.type = 1;
+		chDisplayParams[i].src.measure.offset = 0;
+		chDisplayParams[i].src.measure.sensitivity = 1000.f / 32768;
+		chDisplayParams[i].src.measure.channelIndex = i;
+		chDisplayParams[i].src.measure.temps.maxIndex = 2000;
+		chDisplayParams[i].src.measure.temps.index = 2000;
 	}
 	MainScreen_Init();
 	MainScreen_Load();
@@ -79,7 +84,6 @@ void ScreenManager_Poll(void)
 {
 	MainScreen_Refresh();
 }
-
 
 
 #endif

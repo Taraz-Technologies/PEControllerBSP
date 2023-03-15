@@ -60,6 +60,107 @@ static ch_display_t chDisplay[16];
 /********************************************************************************
  * Code
  *******************************************************************************/
+/*!
+ * @brief shift the provided string
+ *
+ * @param txt pointer to the shifted txt index
+ */
+void ShiftStringOneLeft(char* txt)
+{
+	do
+	{
+		*txt = *(txt + 1);
+		txt++;
+	}while(*txt != 0);
+}
+/*!
+ * @brief convert a floating value to string with specified precision, minimum 1 before dot digit required
+ *
+ * @param txt pointer to the text
+ * @param precision precison of the value
+ * @param val value to be converted
+ * @retval
+ */
+ char GetStringFromAbsFloat_PreciseDigits(char* txt, int beforeDotDigits, int afterDotDigits, float val)
+{
+	char* oldLoc = txt;
+	int div = 1;
+	// only for positive nos
+	if (val < 0)
+		val *= -1;
+	float addVal = 0.5f;
+
+	// get the valid part only
+	for(int i = 0; i < afterDotDigits; i++)
+		div *= 10;
+	addVal /= div;
+	val *= div;
+	// get valid divider
+	for(int i = 0; i < beforeDotDigits - 1; i++)
+		div *= 10;
+
+	// discard other digits
+	int IntVal = (int)val;
+
+	//
+	for(int i = 0; i < beforeDotDigits; i++)
+	{
+		*txt++ = IntVal / div + '0';
+		IntVal %= div;
+		div /= 10;
+	}
+
+	if(afterDotDigits > 0)
+	{
+		*txt++ = '.';
+		for(int i = 0; i < afterDotDigits; i++)
+		{
+			*txt++ = IntVal / div + '0';
+			IntVal %= div;
+			div /= 10;
+		}
+	}
+
+	*txt = 0;
+	return txt - oldLoc;
+}
+/*!
+ * @brief convert a floating value to string with specified precision
+ *
+ * @param txt pointer to the text
+ * @param precision precison of the value
+ * @param val value to be converted
+ * @retval
+ */
+ char GetStringFromFloat_PreciseDigits(char* txt, int beforeDotDigits, int afterDotDigits, float val)
+{
+	if(val < 0)
+	{
+		char c = GetStringFromAbsFloat_PreciseDigits(&txt[1], beforeDotDigits, afterDotDigits, val);
+		bool isNegZero = true;
+		for(char a = c; a > 0; a--)
+		{
+			if(txt[a] != '0' && txt[a] != '.')
+			{
+				isNegZero = false;
+				break;
+			}
+		}
+		if(isNegZero == true)
+		{
+			ShiftStringOneLeft(txt);
+			return c;
+		}
+		else
+		{
+			txt[0] = '-';
+			return c + 1;
+		}
+	}
+	else
+		return GetStringFromAbsFloat_PreciseDigits(txt, beforeDotDigits, afterDotDigits, val);
+}
+
 static void MonitoringCell_Create(lv_obj_t * parent, int index)
 {
 	int col = index % 4;
@@ -110,7 +211,13 @@ static void MonitoringCell_Create(lv_obj_t * parent, int index)
 	lv_obj_add_style(disp->lblName, &chNameLblStyle, 0);
 
 	lv_label_set_text(disp->lblName, chDisplayParams[index].srcName);
-	lv_label_set_text(disp->lblReading, measureTxts[(uint8_t)chDisplayParams[index].src.measure.type]);				// configure for other things --TODO--
+	if (chDisplayParams[index].srcType == PARAM_SRC_MEASUREMENT)
+	{
+		lv_label_set_text(disp->lblReading, measureTxts[(uint8_t)chDisplayParams[index].src.measure.type]);
+		char txt[10];
+		GetStringFromFloat_PreciseDigits(txt, 4, 1, chDisplayParams[index].src.measure.value);
+		lv_label_set_text(disp->lblValue, txt);
+	}	// configure for other things --TODO--
 }
 
 void MainScreen_Init(void)
@@ -128,9 +235,10 @@ void MainScreen_Init(void)
 	BSP_Screen_InitGridStyle(&chNameGridStyle, 0, 0, 4, lv_palette_lighten(LV_PALETTE_BLUE, 1));
 
 	// Initialize the basic grid cell label styles
-	BSP_Screen_InitLabelStyle(&chValueLblStyle, &lv_font_montserrat_26, LV_TEXT_ALIGN_CENTER, lv_palette_darken(LV_PALETTE_GREY, 3));
-	BSP_Screen_InitLabelStyle(&chReadingTypeLblStyle, &lv_font_montserrat_14, LV_TEXT_ALIGN_RIGHT, lv_palette_darken(LV_PALETTE_GREY, 3));
-	BSP_Screen_InitLabelStyle(&chNameLblStyle, &lv_font_montserrat_22, LV_TEXT_ALIGN_CENTER, lv_palette_darken(LV_PALETTE_GREY, 3));
+	BSP_Screen_InitLabelStyle(&chValueLblStyle, &lv_font_montserrat_26, LV_TEXT_ALIGN_CENTER, lv_palette_darken(LV_PALETTE_GREY, 4));
+	BSP_Screen_InitLabelStyle(&chReadingTypeLblStyle, &lv_font_montserrat_14, LV_TEXT_ALIGN_RIGHT, lv_palette_darken(LV_PALETTE_GREY, 4));
+	lv_style_set_pad_left(&chReadingTypeLblStyle, 2);
+	BSP_Screen_InitLabelStyle(&chNameLblStyle, &lv_font_montserrat_22, LV_TEXT_ALIGN_CENTER, lv_palette_darken(LV_PALETTE_GREY, 4));
 }
 
 void MainScreen_Load(void)
@@ -167,8 +275,10 @@ void MainScreen_Load(void)
 
 void MainScreen_Unload(void)
 {
-	//lv_obj_delete(screen);
+	lv_obj_del(screen);
 }
+
+
 
 void MainScreen_Refresh(void)
 {
@@ -176,7 +286,10 @@ void MainScreen_Refresh(void)
 	{
 		if (chDisplayParams[i].isUpdated)
 		{
-			//lv_label_set_text(disp->lblName, chDisplayParams[i].srcName);
+			chDisplayParams[i].isUpdated = false;
+			char txt[10];
+			GetStringFromFloat_PreciseDigits(txt, 4, 1, chDisplayParams[i].src.measure.value);
+			lv_label_set_text_fmt(chDisplay[i].lblValue, txt);
 		}
 	}
 }

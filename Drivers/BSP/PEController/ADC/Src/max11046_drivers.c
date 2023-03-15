@@ -72,7 +72,7 @@ adc_measures_t adcOffsets = {0};
 /********************************************************************************
  * Function Prototypes
  *******************************************************************************/
-
+void BSP_Display_UpdateMeasurements(float* adcData);
 /********************************************************************************
  * Code
  *******************************************************************************/
@@ -174,6 +174,7 @@ static inline void MeasureConvert_BothADCs(float* dataPtr, const float* mults, c
 {
 	uint64_t intelliSENSDataPtr[4];
 	uint16_t* tempData = (uint16_t*)intelliSENSDataPtr;
+	float* dataPtrOriginal = dataPtr;
 	Measure_AllChannels(tempData);
 
 #if ENABLE_INTELLISENS
@@ -185,6 +186,13 @@ static inline void MeasureConvert_BothADCs(float* dataPtr, const float* mults, c
 	{
 		*dataPtr++ =  (*tempData++ - *offsets++) * (*mults++);
 	} while (i--);
+
+
+#if LCD_DATA_MONITORING
+	//static int ind = 0;
+	//if (++ind % 10 == 0)
+		BSP_Display_UpdateMeasurements(dataPtrOriginal);
+#endif
 }
 #pragma GCC pop_options
 

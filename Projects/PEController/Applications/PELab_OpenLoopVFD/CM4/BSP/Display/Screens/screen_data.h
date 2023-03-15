@@ -79,8 +79,8 @@ typedef struct
 {
 	int index;
 	int maxIndex;
-	int temp1;
-	int temp2;
+	float temp1;
+	float temp2;
 	float temp;
 } param_measures_temp_vars_t;
 typedef struct
