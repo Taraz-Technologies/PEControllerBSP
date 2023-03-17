@@ -62,7 +62,28 @@ osThreadId_t defaultTaskHandle;
 const osThreadAttr_t defaultTask_attributes = {
   .name = "defaultTask",
   .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
+/* Definitions for lvglGUITask */
+osThreadId_t lvglGUITaskHandle;
+const osThreadAttr_t lvglGUITask_attributes = {
+  .name = "lvglGUITask",
+  .stack_size = 1024 * 4,
   .priority = (osPriority_t) osPriorityNormal,
+};
+/* Definitions for lvglTickTask */
+osThreadId_t lvglTickTaskHandle;
+const osThreadAttr_t lvglTickTask_attributes = {
+  .name = "lvglTickTask",
+  .stack_size = 512 * 4,
+  .priority = (osPriority_t) osPriorityHigh,
+};
+/* Definitions for tsTask */
+osThreadId_t tsTaskHandle;
+const osThreadAttr_t tsTask_attributes = {
+  .name = "tsTask",
+  .stack_size = 256 * 4,
+  .priority = (osPriority_t) osPriorityLow,
 };
 /* USER CODE BEGIN PV */
 // intelliSENS
@@ -71,37 +92,24 @@ osThreadId_t intelliSENSTaskHandle;
 const osThreadAttr_t intelliSENSTask_attributes = {
 		.name = "intelliSENSTask",
 		.stack_size = 128 * 16,
-		.priority = (osPriority_t) osPriorityNormal1,
+		.priority = (osPriority_t) osPriorityHigh,
 };
 #endif
-// lvgl
-osThreadId_t lvglTaskHandle;
-const osThreadAttr_t lvglTask_attributes = {
-		.name = "lvglTask",
-		.stack_size = 128 * 16,
-		.priority = (osPriority_t) osPriorityNormal,
-};
-// lvgl screen
-osThreadId_t lvglScreenTaskHandle;
-const osThreadAttr_t lvglScreenTask_attributes = {
-		.name = "lvglScreenTask",
-		.stack_size = 128 * 32,
-		.priority = (osPriority_t) osPriorityNormal,
-};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 static void MX_GPIO_Init(void);
 static void MX_TIM17_Init(void);
 void StartDefaultTask(void *argument);
+void StartLvglGUITask(void *argument);
+void StartLvglTickTask(void *argument);
+void StartTSTask(void *argument);
 
 /* USER CODE BEGIN PFP */
 void ScreenManager_Poll(void);
 #if ENABLE_INTELLISENS
 void StartintelliSENSTask(void *argument);
 #endif
-void StartLvglTask(void *argument);
-void StartLvglScreenTask(void *argument);
 
 /* USER CODE END PFP */
 
@@ -206,12 +214,19 @@ int main(void)
   /* creation of defaultTask */
   defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
 
+  /* creation of lvglGUITask */
+  lvglGUITaskHandle = osThreadNew(StartLvglGUITask, NULL, &lvglGUITask_attributes);
+
+  /* creation of lvglTickTask */
+  lvglTickTaskHandle = osThreadNew(StartLvglTickTask, NULL, &lvglTickTask_attributes);
+
+  /* creation of tsTask */
+  tsTaskHandle = osThreadNew(StartTSTask, NULL, &tsTask_attributes);
+
   /* USER CODE BEGIN RTOS_THREADS */
 #if ENABLE_INTELLISENS
 	intelliSENSTaskHandle = osThreadNew(StartintelliSENSTask, NULL, &intelliSENSTask_attributes);
 #endif
-	lvglTaskHandle = osThreadNew(StartLvglTask, NULL, &lvglTask_attributes);
-	lvglScreenTaskHandle = osThreadNew(StartLvglScreenTask, NULL, &lvglScreenTask_attributes);
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */
@@ -390,31 +405,6 @@ void StartintelliSENSTask(void *argument)
 	}
 }
 #endif
-void StartLvglTask(void *argument)
-{
-	for(;;)
-	{
-		lv_tick_inc(1);
-		lv_timer_handler();
-		osDelay(1);
-	}
-}
-extern uint16_t XDisp;
-extern uint16_t YDisp;
-TS_StateTypeDef stateObserve;
-void StartLvglScreenTask(void *argument)
-{
-	//HAL_Delay(20000);
-	BSP_TS_Init(800, 480);
-	for(;;)
-	{
-		BSP_TS_GetState(&stateObserve);
-		XDisp = stateObserve.touchX;
-		YDisp = stateObserve.touchY;
-		ScreenManager_Poll();
-		osDelay(200);
-	}
-}
 /* USER CODE END 4 */
 
 /* USER CODE BEGIN Header_StartDefaultTask */
@@ -433,6 +423,71 @@ void StartDefaultTask(void *argument)
 		osDelay(1);
 	}
   /* USER CODE END 5 */
+}
+
+/* USER CODE BEGIN Header_StartLvglGUITask */
+/**
+* @brief Function implementing the lvglGUITask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartLvglGUITask */
+void StartLvglGUITask(void *argument)
+{
+  /* USER CODE BEGIN StartLvglGUITask */
+  /* Infinite loop */
+  for(;;)
+  {
+	ScreenManager_Poll();
+    osDelay(200);
+  }
+  /* USER CODE END StartLvglGUITask */
+}
+
+/* USER CODE BEGIN Header_StartLvglTickTask */
+/**
+* @brief Function implementing the lvglTickTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartLvglTickTask */
+void StartLvglTickTask(void *argument)
+{
+  /* USER CODE BEGIN StartLvglTickTask */
+  /* Infinite loop */
+  for(;;)
+  {
+	lv_tick_inc(1);
+	lv_timer_handler();
+    osDelay(1);
+  }
+  /* USER CODE END StartLvglTickTask */
+}
+
+/* USER CODE BEGIN Header_StartTSTask */
+extern uint16_t XDisp;
+extern uint16_t YDisp;
+TS_StateTypeDef stateObserve;
+/**
+* @brief Function implementing the tsTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartTSTask */
+void StartTSTask(void *argument)
+{
+  /* USER CODE BEGIN StartTSTask */
+  while(BSP_TS_Init(800, 480) != TS_OK)
+	osDelay(100);
+  /* Infinite loop */
+  for(;;)
+  {
+	BSP_TS_GetState(&stateObserve);
+	XDisp = stateObserve.touchX;
+	YDisp = stateObserve.touchY;
+    osDelay(1);
+  }
+  /* USER CODE END StartTSTask */
 }
 
  /**
