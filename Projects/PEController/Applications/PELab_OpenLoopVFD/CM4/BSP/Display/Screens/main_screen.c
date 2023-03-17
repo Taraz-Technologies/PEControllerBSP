@@ -52,7 +52,8 @@ static ch_display_t chDisplay[16];
 /********************************************************************************
  * Global Variables
  *******************************************************************************/
-
+uint16_t XDisp;
+uint16_t YDisp;
 /********************************************************************************
  * Function Prototypes
  *******************************************************************************/
@@ -136,9 +137,9 @@ void ShiftStringOneLeft(char* txt)
 {
 	if(val < 0)
 	{
-		char c = GetStringFromAbsFloat_PreciseDigits(&txt[1], beforeDotDigits, afterDotDigits, val);
+		uint8_t c = GetStringFromAbsFloat_PreciseDigits(&txt[1], beforeDotDigits, afterDotDigits, val);
 		bool isNegZero = true;
-		for(char a = c; a > 0; a--)
+		for(uint8_t a = c; a > 0; a--)
 		{
 			if(txt[a] != '0' && txt[a] != '.')
 			{
@@ -282,16 +283,18 @@ void MainScreen_Unload(void)
 
 void MainScreen_Refresh(void)
 {
-	for (int i = 0; i < 16; i++)
+	for (int i = 0; i < 14; i++)
 	{
 		if (chDisplayParams[i].isUpdated)
 		{
 			chDisplayParams[i].isUpdated = false;
 			char txt[10];
 			GetStringFromFloat_PreciseDigits(txt, 4, 1, chDisplayParams[i].src.measure.value);
-			lv_label_set_text_fmt(chDisplay[i].lblValue, txt);
+			lv_label_set_text(chDisplay[i].lblValue, txt);
 		}
 	}
+	lv_label_set_text_fmt(chDisplay[14].lblValue, "%d", XDisp);
+	lv_label_set_text_fmt(chDisplay[15].lblValue, "%d", YDisp);
 }
 
 #endif

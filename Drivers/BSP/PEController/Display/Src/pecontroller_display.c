@@ -41,7 +41,7 @@
 /**
  * @brief Set the display buffer size to 1/10th the size of the screen
  */
-#define LVGL_BUFF_SIZE	((SCREEN_RAM_WIDTH * SCREEN_RAM_HEIGHT * 10) / 50)
+#define LVGL_BUFF_SIZE	((SCREEN_RAM_WIDTH * SCREEN_RAM_HEIGHT * 10) / 100)
 #endif
 /********************************************************************************
  * Typedefs

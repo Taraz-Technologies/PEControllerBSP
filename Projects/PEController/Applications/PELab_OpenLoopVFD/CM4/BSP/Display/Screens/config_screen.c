@@ -24,7 +24,7 @@
  * Includes
  *******************************************************************************/
 #include "user_config.h"
-#if LCD_DATA_MONITORING
+#if 0 //LCD_DATA_MONITORING
 #include "config_screen.h"
 /********************************************************************************
  * Defines

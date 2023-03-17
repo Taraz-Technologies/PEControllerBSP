@@ -32,6 +32,7 @@
 #include "intelliSENS.h"
 #endif
 #include "lvgl.h"
+#include "pecontroller_lcd_touch.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -414,10 +415,18 @@ void StartLvglTask(void *argument)
 		osDelay(1);
 	}
 }
+extern uint16_t XDisp;
+extern uint16_t YDisp;
+TS_StateTypeDef stateObserve;
 void StartLvglScreenTask(void *argument)
 {
+	//HAL_Delay(20000);
+	BSP_TS_Init(800, 480);
 	for(;;)
 	{
+		BSP_TS_GetState(&stateObserve);
+		XDisp = stateObserve.touchX[0];
+		YDisp = stateObserve.touchY[0];
 		ScreenManager_Poll();
 		osDelay(300);
 	}
