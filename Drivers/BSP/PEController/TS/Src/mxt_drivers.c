@@ -25,6 +25,7 @@
  *******************************************************************************/
 #include "user_config.h"
 #if LCD_DATA_MONITORING
+#include "mXT336T.c"
 #include "mxt_drivers.h"
 /********************************************************************************
  * Defines
@@ -401,7 +402,7 @@ static void SetResolution(mxt_data_t *data, uint16_t x, uint16_t y)
 	//	mxt_write_object(data, MXT_TOUCH_MULTI_T100, MXT_MULTITOUCH_TCHTHR, 40);
 }
 // gets the object table
-static int mxt_get_object_table(mxt_data_t *data)
+static uint16_t mxt_get_object_table(mxt_data_t *data)
 {
 	uint16_t error;
 	int i;
@@ -415,7 +416,8 @@ static int mxt_get_object_table(mxt_data_t *data)
 		return error;
 
 	data->info.object_num = OBJECT_COUNT;
-	data->object_table = malloc(sizeof(mxt_object_t) * data->info.object_num);
+	if (data->object_table == NULL)
+		data->object_table = malloc(sizeof(mxt_object_t) * data->info.object_num);
 
 	for (i = 0; i < data->info.object_num; i++) {
 		// set destination object
@@ -549,7 +551,7 @@ static int mxt_get_object_table(mxt_data_t *data)
 }
 
 // initialize the mxt object
-static int mxt_initialize(mxt_data_t *data, uint16_t ts_SizeX, uint16_t ts_SizeY)
+static uint16_t mxt_initialize(mxt_data_t *data, uint16_t ts_SizeX, uint16_t ts_SizeY)
 {
 	mxt_info_t *info = &data->info;
 	uint16_t error = HAL_OK;
@@ -631,32 +633,25 @@ static int mxt_initialize(mxt_data_t *data, uint16_t ts_SizeX, uint16_t ts_SizeY
 	//	if (error != HAL_OK)
 	//		return error;
 
-	return 0;
+	return error;
 }
-
-void MXTDrivers_Init(uint16_t ts_SizeX, uint16_t ts_SizeY)
-{
-	mxt_initialize(&mxtData, ts_SizeX, ts_SizeY);
-}
-
-/*
-void MXTDrivers_GetState(TS_StateTypeDef *TS_State)
-{
-	mxt_read_messages_t44(&mxtData);
-	for (int i = 0; i < MXT_MAX_FINGER_NUM; i++)
-	{
-		if(mxtData.finger_down[i] == true)
-		{
-			TS_State->touchDetected = true;
-			TS_State->touchX[0] = xPress;
-			TS_State->touchY[0] = yPress;
-			return;
-		}
-	}
-	TS_State->touchDetected = false;
-}
+/**
+ * @brief Initialize the internal touch screen drivers
+ * @param ts_SizeX Horizontal screen resolution
+ * @param ts_SizeY Vertical screen resolution
+ * @return <c>HAL_OK</c> if successful else error
  */
+uint16_t MXTDrivers_Init(uint16_t ts_SizeX, uint16_t ts_SizeY)
+{
+	return mxt_initialize(&mxtData, ts_SizeX, ts_SizeY);
+}
 
+/**
+ * @brief Detect the state and locations of the touch screen
+ * @param x Location to be filled with x position
+ * @param y Location to be filled with y position
+ * @return <c>true</c> if touch screen pressed else <c>false</c>
+ */
 bool MXTDrivers_GetState(uint16_t* x, uint16_t* y)
 {
 	mxt_read_messages_t44(&mxtData);

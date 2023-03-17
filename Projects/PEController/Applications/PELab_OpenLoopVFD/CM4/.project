@@ -60,11 +60,6 @@
 			<locationURI>PARENT-5-PROJECT_LOC/Drivers/BSP/PEController/DigitalPins/Src/pecontroller_digital_pins.c</locationURI>
 		</link>
 		<link>
-			<name>BSP/Display/Touch</name>
-			<type>2</type>
-			<locationURI>PARENT-5-PROJECT_LOC/Drivers/BSP/PEController/Touch</locationURI>
-		</link>
-		<link>
 			<name>BSP/Display/lvgl</name>
 			<type>2</type>
 			<locationURI>PARENT-5-PROJECT_LOC/Middleware/Third_Party/lvgl</locationURI>
@@ -183,6 +178,11 @@
 			<name>Drivers/STM32H7xx_HAL_Driver/stm32h7xx_hal_tim_ex.c</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_tim_ex.c</locationURI>
+		</link>
+		<link>
+			<name>BSP/Display/TS/pecontroller_ts.c</name>
+			<type>1</type>
+			<locationURI>PARENT-5-PROJECT_LOC/Drivers/BSP/PEController/TS/Src/pecontroller_ts.c</locationURI>
 		</link>
 		<link>
 			<name>Middlewares/Third_Party/FreeRTOS/cmsis_os2.c</name>

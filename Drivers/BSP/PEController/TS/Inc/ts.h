@@ -81,7 +81,7 @@ typedef struct
 
 typedef struct
 {
-  void (*Write)(uint8_t addr, uint16_t reg, uint8_t value);
+  uint16_t (*Write)(uint8_t addr, uint16_t reg, uint8_t value);
   uint8_t  (*Read)(uint8_t addr, uint16_t reg);
   uint16_t (*ReadMultiple)(uint8_t addr, uint16_t reg, uint8_t *buffer, uint16_t len);
   void (*Init)(void);

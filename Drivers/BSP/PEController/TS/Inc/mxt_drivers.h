@@ -19,8 +19,8 @@
  ********************************************************************************
  */
 
-#ifndef DISPLAY_TOUCH_MXT_DRIVERS_H_
-#define DISPLAY_TOUCH_MXT_DRIVERS_H_
+#ifndef MXT_DRIVERS_H_
+#define MXT_DRIVERS_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -681,7 +681,19 @@ typedef struct {
 /********************************************************************************
  * Global Function Prototypes
  *******************************************************************************/
-extern void MXTDrivers_Init(uint16_t ts_SizeX, uint16_t ts_SizeY);
+/**
+ * @brief Initialize the internal touch screen drivers
+ * @param ts_SizeX Horizontal screen resolution
+ * @param ts_SizeY Vertical screen resolution
+ * @return <c>HAL_OK</c> if successful else error
+ */
+extern uint16_t MXTDrivers_Init(uint16_t ts_SizeX, uint16_t ts_SizeY);
+/**
+ * @brief Detect the state and locations of the touch screen
+ * @param x Location to be filled with x position
+ * @param y Location to be filled with y position
+ * @return <c>true</c> if touch screen pressed else <c>false</c>
+ */
 extern bool MXTDrivers_GetState(uint16_t* x, uint16_t* y);
 /********************************************************************************
  * Code
