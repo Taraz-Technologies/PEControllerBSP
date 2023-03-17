@@ -153,6 +153,8 @@ static void ConfigIO(void)
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
 	HAL_GPIO_Init(CTP_RST_GPIO_Port, &GPIO_InitStruct);
+
+	HAL_GPIO_WritePin(CTP_RST_GPIO_Port, CTP_RST_Pin, GPIO_PIN_SET);
 }
 static void ConfigI2C(void)
 {
@@ -195,12 +197,10 @@ static void TS_Init(void)
 }
 static void TS_Reset(void)
 {
-	/*
 	HAL_GPIO_WritePin(CTP_RST_GPIO_Port, CTP_RST_Pin, GPIO_PIN_RESET);
 	HAL_Delay(20);
 	HAL_GPIO_WritePin(CTP_RST_GPIO_Port, CTP_RST_Pin, GPIO_PIN_SET);
 	HAL_Delay(200);
-	*/
 }
 
 uint8_t BSP_TS_Init(uint16_t ts_SizeX, uint16_t ts_SizeY)
