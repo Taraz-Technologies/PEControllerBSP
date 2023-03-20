@@ -44,11 +44,11 @@
  *******************************************************************************/
 static I2C_HandleTypeDef hi2c2;
 static bool initComplete = false;
-TS_BSPTypeDef ts_bsp_drv;
+static TS_StateTypeDef tsState;
 /********************************************************************************
  * Global Variables
  *******************************************************************************/
-
+TS_BSPTypeDef ts_bsp_drv;
 /********************************************************************************
  * Function Prototypes
  *******************************************************************************/
@@ -87,10 +87,10 @@ static uint8_t TS_Read(uint8_t addr, uint16_t reg)
 {
 	HAL_StatusTypeDef status = HAL_OK;
 	uint8_t  Value = 0;
-	uint16_t index = 0;
+	int retry_count = 2;
 	do {
-		status = HAL_I2C_Mem_Read(&hi2c2, addr, GetReg(reg), I2C_MEMADD_SIZE_16BIT, &Value, 1, HAL_MAX_DELAY);
-	} while(status != HAL_OK && ++index < 256);
+		status = HAL_I2C_Mem_Read(&hi2c2, addr, GetReg(reg), I2C_MEMADD_SIZE_16BIT, &Value, 1, 1);
+	} while(status != HAL_OK && retry_count-- >= 0);
 
 	if(status == HAL_OK)
 		return Value;
@@ -108,11 +108,14 @@ static uint8_t TS_Read(uint8_t addr, uint16_t reg)
 static uint16_t TS_ReadMultiple(uint8_t addr, uint16_t reg, uint8_t *buffer, uint16_t len)
 {
 	HAL_StatusTypeDef status = HAL_OK;
-	uint16_t index = 0;
+	uint16_t wait_ms = len;// / 4;
+	if (wait_ms == 0)
+		wait_ms = 1;
+	int retry_count = 2;
 	do
 	{
-		status = HAL_I2C_Mem_Read(&hi2c2, addr, GetReg(reg), I2C_MEMADD_SIZE_16BIT, buffer, len, HAL_MAX_DELAY);
-	} while(status != HAL_OK && index++ < 256);
+		status = HAL_I2C_Mem_Read(&hi2c2, addr, GetReg(reg), I2C_MEMADD_SIZE_16BIT, buffer, len, len*3);
+	} while(status != HAL_OK && retry_count-- >= 0);
 	return status;
 }
 /**
@@ -255,18 +258,31 @@ uint8_t BSP_TS_Init(uint16_t ts_SizeX, uint16_t ts_SizeY)
 
 /**
  * @brief  Returns status and positions of the touch screen.
- * @param  TS_State: Pointer to touch screen current state structure
- * @return <c>TS_OK</c> if initialization is successful else <c>TS_DEVICE_NOT_FOUND</c>
+ * @return  TS_State: Pointer to touch screen state structure
  */
-uint8_t BSP_TS_GetState(TS_StateTypeDef *TS_State)
+TS_StateTypeDef* BSP_TS_GetState(void)
+{
+	return &tsState;
+}
+
+/**
+ * @brief Poll the touch screen drivers to get touch events
+ */
+void BSP_TS_Poll(void)
 {
 	if (initComplete == false)
 	{
-		TS_State->touchDetected = false;
-		return TS_DEVICE_NOT_FOUND;
+		tsState.touchDetected = false;
+		tsState.touchX = 0;
+		tsState.touchY = 0;
+		return;
 	}
-	TS_State->touchDetected = MXTDrivers_GetState(&TS_State->touchX, &TS_State->touchY);
-	return (TS_OK);
+	volatile uint16_t x;
+	volatile uint16_t y;
+	tsState.touchDetected = MXTDrivers_GetState(&x, &y);
+	tsState.touchX = x;
+	tsState.touchY = y;
+	return;
 }
 
 #endif

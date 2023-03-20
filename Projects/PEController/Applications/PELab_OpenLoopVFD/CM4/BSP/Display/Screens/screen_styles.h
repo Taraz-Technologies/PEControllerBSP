@@ -63,6 +63,7 @@ extern "C" {
 extern void BSP_Screen_InitGridStyle(lv_style_t* style, lv_coord_t pad, lv_coord_t border, lv_coord_t radius, lv_color_t bgColor);
 
 extern void BSP_Screen_InitLabelStyle(lv_style_t* style, const lv_font_t * font, lv_text_align_t align, lv_color_t txtColor);
+extern lv_color_t MakeColor(uint8_t r, uint8_t g, uint8_t b);
 /********************************************************************************
  * Code
  *******************************************************************************/

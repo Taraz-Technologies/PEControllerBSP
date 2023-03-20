@@ -53,6 +53,14 @@
 /********************************************************************************
  * Code
  *******************************************************************************/
+lv_color_t MakeColor(uint8_t r, uint8_t g, uint8_t b)
+{
+	lv_color_t bgColor;
+	bgColor.ch.red = (r >> 3) & 0x1f;
+	bgColor.ch.green = (g >> 2) & 0x3f;
+	bgColor.ch.blue = (b >> 3) & 0x1f;
+	return bgColor;
+}
 /**
  * Initializes the grid style according to the given basic properties
  * @param style Style to be initialized

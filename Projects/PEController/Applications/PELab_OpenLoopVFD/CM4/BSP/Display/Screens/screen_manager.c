@@ -65,6 +65,7 @@ static char* chNames[] =
  *******************************************************************************/
 void ScreenManager_Init(void)
 {
+/*
 	for (int i = 0; i < 16; i++)
 	{
 		chDisplayParams[i].srcName = chNames[i];
@@ -78,11 +79,17 @@ void ScreenManager_Init(void)
 	}
 	MainScreen_Init();
 	MainScreen_Load();
+*/
+	//HAL_Delay(40000);
+	//MessageScreen_Init();
+	//MessageScreen_Load("Error: 0x2015", "Unable to set desired value. Input value is out of limit. Kindly, enter a new value", true, true);
+	ConfigScreen_Init();
+	ConfigScreen_Load();
 }
 
 void ScreenManager_Poll(void)
 {
-	MainScreen_Refresh();
+	//MainScreen_Refresh();
 }
 
 

@@ -223,20 +223,26 @@ static void MonitoringCell_Create(lv_obj_t * parent, int index)
 
 void MainScreen_Init(void)
 {
-	BSP_Screen_InitGridStyle(&screenGridStyle, 0, 0, 0, lv_palette_lighten(LV_PALETTE_GREY, 3));
+	lv_color_t bgColor = MakeColor(155, 155, 155);
+	BSP_Screen_InitGridStyle(&screenGridStyle, 0, 0, 0, bgColor);
 
 	// Initialize monitoring grid
-	BSP_Screen_InitGridStyle(&monGridStyle, 0, 0, 0, lv_palette_lighten(LV_PALETTE_GREY, 3));
+	bgColor = MakeColor(155, 155, 155);
+	BSP_Screen_InitGridStyle(&monGridStyle, 0, 0, 0, bgColor);
 
 	// Initialize monitoring cell main grid
-	BSP_Screen_InitGridStyle(&cellGridStyle, 2, 0, 0, lv_palette_lighten(LV_PALETTE_GREY, 2));
+	bgColor = MakeColor(200, 200, 200);
+	BSP_Screen_InitGridStyle(&cellGridStyle, 2, 0, 0, bgColor);
 
 	// Initialize the basic grid cell container styles
-	BSP_Screen_InitGridStyle(&chValueTypeGridStyle, 0, 0, 4, lv_palette_lighten(LV_PALETTE_GREEN, 1));
-	BSP_Screen_InitGridStyle(&chNameGridStyle, 0, 0, 4, lv_palette_lighten(LV_PALETTE_BLUE, 1));
+	bgColor = MakeColor(20, 155, 80);
+	BSP_Screen_InitGridStyle(&chValueTypeGridStyle, 0, 0, 4, bgColor);
+	bgColor = MakeColor(0, 155, 155);
+	BSP_Screen_InitGridStyle(&chNameGridStyle, 0, 0, 4, bgColor);
 
 	// Initialize the basic grid cell label styles
 	BSP_Screen_InitLabelStyle(&chValueLblStyle, &lv_font_montserrat_26, LV_TEXT_ALIGN_CENTER, lv_palette_darken(LV_PALETTE_GREY, 4));
+	lv_style_set_text_decor(&chValueLblStyle, LV_TEXT_DECOR_UNDERLINE);
 	BSP_Screen_InitLabelStyle(&chReadingTypeLblStyle, &lv_font_montserrat_14, LV_TEXT_ALIGN_RIGHT, lv_palette_darken(LV_PALETTE_GREY, 4));
 	lv_style_set_pad_left(&chReadingTypeLblStyle, 2);
 	BSP_Screen_InitLabelStyle(&chNameLblStyle, &lv_font_montserrat_22, LV_TEXT_ALIGN_CENTER, lv_palette_darken(LV_PALETTE_GREY, 4));

@@ -24,8 +24,9 @@
  * Includes
  *******************************************************************************/
 #include "user_config.h"
-#if 0 //LCD_DATA_MONITORING
+#if LCD_DATA_MONITORING
 #include "message_screen.h"
+#include "screen_styles.h"
 /********************************************************************************
  * Defines
  *******************************************************************************/
@@ -42,6 +43,8 @@
  * Static Variables
  *******************************************************************************/
 static lv_obj_t* screen;
+static lv_style_t screenGridStyle, headingGridStyle, msgGridStyle;
+static lv_style_t msgLblStyle, headingLblStyle, btnLblStyle;
 /********************************************************************************
  * Global Variables
  *******************************************************************************/
@@ -55,16 +58,107 @@ static lv_obj_t* screen;
  *******************************************************************************/
 void MessageScreen_Init(void)
 {
+	lv_color_t bgColor = MakeColor(155, 155, 155);
+	BSP_Screen_InitGridStyle(&screenGridStyle, 0, 0, 0, bgColor);
 
+	bgColor = MakeColor(0, 155, 155);
+	BSP_Screen_InitGridStyle(&headingGridStyle, 0, 0, 10, bgColor);
+	bgColor = MakeColor(155, 155, 155);
+	BSP_Screen_InitGridStyle(&msgGridStyle, 0, 0, 10, bgColor);
+
+	// Initialize the basic grid cell label styles
+	bgColor = MakeColor(0, 0, 0);
+	BSP_Screen_InitLabelStyle(&headingLblStyle, &lv_font_montserrat_40, LV_TEXT_ALIGN_CENTER, bgColor);
+	BSP_Screen_InitLabelStyle(&msgLblStyle, &lv_font_montserrat_30, LV_TEXT_ALIGN_CENTER, bgColor);
+	lv_style_set_pad_all(&msgLblStyle, 10);
+	lv_style_set_text_line_space(&msgLblStyle, 10);
+	BSP_Screen_InitLabelStyle(&btnLblStyle, &lv_font_montserrat_26, LV_TEXT_ALIGN_CENTER, bgColor);
 }
 
-void MessageScreen_Load(char* caption, char* heading, char* msg, bool okBtn, bool cancelBtn)
+void MessageScreen_Load(char* heading, char* msg, bool hasOk, bool hasCancel)
 {
 	// create the screen
 	screen = lv_obj_create(NULL);
+	// create basic grid
+	lv_obj_t* screenGrid = lv_obj_create(screen);
+	static lv_coord_t colsScreen[] = {LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
+	static lv_coord_t rowsScreen[] = {100, LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
+	lv_obj_set_size(screenGrid, 800, 480);
+	lv_obj_set_grid_dsc_array(screenGrid, colsScreen, rowsScreen);
+	lv_obj_set_layout(screenGrid, LV_LAYOUT_GRID);
+	lv_obj_add_style(screenGrid, &screenGridStyle, 0);
+
+	// create monitoring grid
+	lv_obj_t* headingGrid = lv_obj_create(screenGrid);
+	static lv_coord_t rowsHeading[] = {LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
+	lv_obj_set_grid_cell(headingGrid, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
+	lv_obj_set_grid_dsc_array(headingGrid, colsScreen, rowsHeading);
+	lv_obj_set_layout(headingGrid, LV_LAYOUT_GRID);
+	lv_obj_add_style(headingGrid, &headingGridStyle, 0);
+
+	//
+	lv_obj_t * headingLbl = lv_label_create(headingGrid);
+	lv_obj_set_grid_cell(headingLbl, LV_GRID_ALIGN_CENTER, 0, 1, LV_GRID_ALIGN_CENTER, 0, 1);
+	lv_obj_center(headingLbl);
+	lv_obj_add_style(headingLbl, &headingLblStyle, 0);
+	lv_label_set_text(headingLbl, heading);
+
+	// Message Grid
+	lv_obj_t* msgGrid = lv_obj_create(screenGrid);
+	static lv_coord_t colsMsgs[] = {LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
+	static lv_coord_t rowsMsgs[] = {LV_GRID_FR(1), 120, LV_GRID_TEMPLATE_LAST};
+	lv_obj_set_grid_cell(msgGrid, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 1, 1);
+	lv_obj_set_grid_dsc_array(msgGrid, colsMsgs, rowsMsgs);
+	lv_obj_set_layout(msgGrid, LV_LAYOUT_GRID);
+	lv_obj_add_style(msgGrid, &msgGridStyle, 0);
+
+	//
+	/*
+	lv_obj_t * captionLbl = lv_label_create(msgGrid);
+	lv_obj_set_grid_cell(captionLbl, LV_GRID_ALIGN_CENTER, 0, 2, LV_GRID_ALIGN_CENTER, 0, 1);
+	lv_obj_center(captionLbl);
+	lv_obj_add_style(captionLbl, &captionLblStyle, 0);
+	lv_label_set_text(captionLbl, caption);
+	*/
+
+	lv_obj_t * msgLbl = lv_label_create(msgGrid);
+	lv_obj_set_grid_cell(msgLbl, LV_GRID_ALIGN_CENTER, 0, 2, LV_GRID_ALIGN_START, 0, 1);
+	lv_obj_center(msgLbl);
+	lv_obj_add_style(msgLbl, &msgLblStyle, 0);
+	lv_label_set_long_mode(msgLbl, LV_LABEL_LONG_WRAP);
+	lv_obj_set_width(msgLbl, 780);
+	lv_label_set_text(msgLbl, msg);
+
+	if (hasOk)
+	{
+		lv_obj_t * okBtn = lv_btn_create(msgGrid);
+		lv_obj_set_grid_cell(okBtn, LV_GRID_ALIGN_CENTER, 0, hasCancel ? 1 : 2, LV_GRID_ALIGN_CENTER, 1, 1);
+		lv_obj_set_size(okBtn, 240, 70);
+		lv_obj_center(okBtn);
+
+		lv_obj_t * okLbl = lv_label_create(okBtn);
+		lv_obj_center(okLbl);
+		lv_obj_add_style(okLbl, &btnLblStyle, 0);
+		lv_label_set_text(okLbl, "OK");
+	}
+
+	if (hasCancel)
+	{
+		lv_obj_t * cancelBtn = lv_btn_create(msgGrid);
+		lv_obj_set_grid_cell(cancelBtn, LV_GRID_ALIGN_CENTER, hasOk ? 1 : 0, hasOk ? 1 : 2, LV_GRID_ALIGN_CENTER, 1, 1);
+		lv_obj_set_size(cancelBtn, 240, 70);
+		lv_obj_center(cancelBtn);
+
+		lv_obj_t * cancelLbl = lv_label_create(cancelBtn);
+		lv_obj_center(cancelLbl);
+		lv_obj_add_style(cancelLbl, &btnLblStyle, 0);
+		lv_label_set_text(cancelLbl, "Cancel");
+	}
+
+	lv_scr_load(screen);
 }
 
-void MainScreen_Unload(void)
+void MessageScreen_Unload(void)
 {
 	lv_obj_del(screen);
 }

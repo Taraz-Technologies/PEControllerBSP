@@ -170,11 +170,11 @@ static void mxt_proc_t100_messages(mxt_data_t *data, uint8_t *message)
 		x = (message[3] << 8) | (message[2] & 0xFF);
 		y = (message[5] << 8) | (message[4] & 0xFF);
 
-		if(touch_event == 5)
-		{
-			xPress = x;
-			yPress = y;
-		}
+//		if(touch_event == 5)
+//		{
+//			xPress = x;
+//			yPress = y;
+//		}
 		index = 6;
 
 		if (data->t100_tchaux_bits &  MXT_T100_VECT)
@@ -196,7 +196,11 @@ static void mxt_proc_t100_messages(mxt_data_t *data, uint8_t *message)
 				/* Touch in detect, report X/Y position */
 				if (touch_event == MXT_T100_EVENT_DOWN ||
 						touch_event == MXT_T100_EVENT_UNSUP)
-					data->finger_down[id - 2] = true;
+					{
+						data->finger_down[id - 2] = true;
+						xPress = x;
+						yPress = y;
+					}
 				if ((touch_event == MXT_T100_EVENT_MOVE ||
 						touch_event == MXT_T100_EVENT_NONE) &&
 						!data->finger_down[id - 2])

@@ -92,10 +92,13 @@ typedef struct
 uint8_t BSP_TS_Init(uint16_t ts_SizeX, uint16_t ts_SizeY);
 /**
  * @brief  Returns status and positions of the touch screen.
- * @param  TS_State: Pointer to touch screen current state structure
- * @return <c>TS_OK</c> if initialization is successful else <c>TS_DEVICE_NOT_FOUND</c>
+ * @return  TS_State: Pointer to touch screen state structure
  */
-uint8_t BSP_TS_GetState(TS_StateTypeDef *TS_State);
+TS_StateTypeDef* BSP_TS_GetState(void);
+/**
+ * @brief Poll the touch screen drivers to get touch events
+ */
+void BSP_TS_Poll(void);
 /********************************************************************************
  * Code
  *******************************************************************************/

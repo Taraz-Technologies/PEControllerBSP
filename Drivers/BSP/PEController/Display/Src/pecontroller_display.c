@@ -30,6 +30,7 @@
 #include "pecontroller_clut.h"
 #include "logo.h"
 #include "lvgl.h"
+#include "pecontroller_ts.h"
 //#include "screen_manager.h"
 
 /********************************************************************************
@@ -76,6 +77,21 @@ extern void ScreenManager_Init(void);
  *******************************************************************************/
 #if LCD_DATA_MONITORING
 
+extern uint16_t XDisp;
+extern uint16_t YDisp;
+
+static void ReadTouchPad(struct _lv_indev_drv_t * indev, lv_indev_data_t * data)
+{
+	TS_StateTypeDef* state = BSP_TS_GetState();
+	if(state->touchDetected) {
+		data->state = LV_INDEV_STATE_PRESSED;
+		XDisp = data->point.x = state->touchX;
+		YDisp = data->point.y = state->touchY;
+	} else {
+		data->state = LV_INDEV_STATE_RELEASED;
+	}
+}
+
 /**
  * @brief
  * @param disp
@@ -112,6 +128,13 @@ static void ConfigLVGL(void)
 	disp_drv.rotated = LV_DISP_ROT_180;
 	disp_drv.sw_rotate = 1;
 	lv_disp_drv_register(&disp_drv); /*Finally register the driver*/
+
+
+	static lv_indev_drv_t indev_drv; /*Descriptor of a input device driver*/
+	lv_indev_drv_init(&indev_drv); /*Basic initialization*/
+	indev_drv.type = LV_INDEV_TYPE_POINTER; /*Touch pad is a pointer-like device*/
+	indev_drv.read_cb = ReadTouchPad; /*Set your driver function*/
+	lv_indev_drv_register(&indev_drv);
 }
 
 #endif
