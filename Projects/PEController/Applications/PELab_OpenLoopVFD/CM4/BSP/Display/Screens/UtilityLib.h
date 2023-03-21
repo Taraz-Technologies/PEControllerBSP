@@ -1,11 +1,10 @@
 /**
  ********************************************************************************
- * @file    	screen_manager.c
+ * @file 		UtilityLib.h
  * @author 		Waqas Ehsan Butt
- * @date    	Mar 14, 2023
+ * @date 		Mar 21, 2023
  *
- * @brief   
- ********************************************************************************
+ * @brief    
  ********************************************************************************
  * @attention
  *
@@ -20,16 +19,17 @@
  ********************************************************************************
  */
 
+#ifndef DISPLAY_SCREENS_UTILITYLIB_H_
+#define DISPLAY_SCREENS_UTILITYLIB_H_
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /********************************************************************************
  * Includes
  *******************************************************************************/
-#include "user_config.h"
-#if LCD_DATA_MONITORING
-#include "screen_styles.h"
-#include "screen_data.h"
-#include "message_screen.h"
-#include "config_screen.h"
-#include "main_screen.h"
+#include "general_header.h"
 /********************************************************************************
  * Defines
  *******************************************************************************/
@@ -43,55 +43,36 @@
  *******************************************************************************/
 
 /********************************************************************************
- * Static Variables
- *******************************************************************************/
-static char* chNames[] =
-{
-		"CH1", "CH2", "CH3", "CH4",
-		"CH5", "CH6", "CH7", "CH8",
-		"CH9", "CH10", "CH11", "CH12",
-		"CH13", "CH14", "CH15", "CH16",
-};
-/********************************************************************************
- * Global Variables
+ * Exported Variables
  *******************************************************************************/
 
 /********************************************************************************
- * Function Prototypes
+ * Global Function Prototypes
  *******************************************************************************/
-
+/**
+ * @brief This function converts the integer number to character string
+ * @param val Value of the integer
+ * @param txt Pointer to the string
+ * @param digits Integer digits to be printed
+ */
+extern void itoa_custom(int val, char* txt, int digits);
+/**
+ * @brief This function converts the floating point number to character string
+ * @param f Single precision floating point number to be converted
+ * @param txt Pointer to the string
+ * @param maxDigits Max number of digits to be displayed
+ * @param precision Precision of reading to be displayed to avoid showing negligible numbers
+ * @return Number of characters in the string
+ */
+extern int ftoa_custom(float f, char* txt, int maxDigits, int precision);
 /********************************************************************************
  * Code
  *******************************************************************************/
-void ScreenManager_Init(void)
-{
 
-	for (int i = 0; i < 16; i++)
-	{
-		chDisplayParams[i].srcName = chNames[i];
-		chDisplayParams[i].srcType = PARAM_SRC_MEASUREMENT;
-		chDisplayParams[i].src.measure.type = 1;
-		chDisplayParams[i].src.measure.offset = 0;
-		chDisplayParams[i].src.measure.sensitivity = 1000.f / 32768;
-		chDisplayParams[i].src.measure.channelIndex = i;
-		chDisplayParams[i].src.measure.temps.maxIndex = 2000;
-		chDisplayParams[i].src.measure.temps.index = 2000;
-	}
-	MainScreen_Init();
-	MainScreen_Load();
 
-	//HAL_Delay(40000);
-	//MessageScreen_Init();
-	//MessageScreen_Load("Error: 0x2015", "Unable to set desired value. Input value is out of limit. Kindly, enter a new value", true, true);
-	//ConfigScreen_Init();
-	//ConfigScreen_Load();
+#ifdef __cplusplus
 }
-
-void ScreenManager_Poll(void)
-{
-	MainScreen_Refresh();
-}
-
-
 #endif
+
+#endif 
 /* EOF */
