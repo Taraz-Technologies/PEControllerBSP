@@ -131,28 +131,18 @@ void MessageScreen_Load(char* heading, char* msg, bool hasOk, bool hasCancel)
 
 	if (hasOk)
 	{
-		lv_obj_t * okBtn = lv_btn_create(msgGrid);
+		lv_obj_t * okBtn = lv_btn_create_general(msgGrid, NULL, &btnLblStyle, "OK", NULL, NULL);
 		lv_obj_set_grid_cell(okBtn, LV_GRID_ALIGN_CENTER, 0, hasCancel ? 1 : 2, LV_GRID_ALIGN_CENTER, 1, 1);
 		lv_obj_set_size(okBtn, 240, 70);
 		lv_obj_center(okBtn);
-
-		lv_obj_t * okLbl = lv_label_create(okBtn);
-		lv_obj_center(okLbl);
-		lv_obj_add_style(okLbl, &btnLblStyle, 0);
-		lv_label_set_text(okLbl, "OK");
 	}
 
 	if (hasCancel)
 	{
-		lv_obj_t * cancelBtn = lv_btn_create(msgGrid);
+		lv_obj_t * cancelBtn = lv_btn_create_general(msgGrid, NULL, &btnLblStyle, "Cancel", NULL, NULL);
 		lv_obj_set_grid_cell(cancelBtn, LV_GRID_ALIGN_CENTER, hasOk ? 1 : 0, hasOk ? 1 : 2, LV_GRID_ALIGN_CENTER, 1, 1);
 		lv_obj_set_size(cancelBtn, 240, 70);
 		lv_obj_center(cancelBtn);
-
-		lv_obj_t * cancelLbl = lv_label_create(cancelBtn);
-		lv_obj_center(cancelLbl);
-		lv_obj_add_style(cancelLbl, &btnLblStyle, 0);
-		lv_label_set_text(cancelLbl, "Cancel");
 	}
 
 	lv_scr_load(screen);

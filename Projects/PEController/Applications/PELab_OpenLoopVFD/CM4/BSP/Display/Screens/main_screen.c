@@ -83,13 +83,13 @@ static void MonitoringCell_Create(lv_obj_t * parent, int index)
 	// Set main grid element
 	static lv_coord_t colsMain[] = {LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
 	static lv_coord_t rowsMain[] = {LV_GRID_FR(5), LV_GRID_FR(2), LV_GRID_TEMPLATE_LAST};
-	lv_obj_t * gridMain = lv_grid_create(parent, colsMain, rowsMain, &cellGridStyle, NULL, event_handler, (void*)index);
+	lv_obj_t * gridMain = lv_grid_create_general(parent, colsMain, rowsMain, &cellGridStyle, NULL, event_handler, (void*)index);
 	lv_obj_set_grid_cell(gridMain, LV_GRID_ALIGN_STRETCH, col, 1, LV_GRID_ALIGN_STRETCH, row, 1);
 
 	// Set value and type portion
 	static lv_coord_t colsValueType[] = {LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
 	static lv_coord_t rowsValueType[] = {LV_GRID_FR(4), LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
-	lv_obj_t * gridValueType = lv_grid_create(gridMain, colsValueType, rowsValueType, &chValueTypeGridStyle, NULL, event_handler, (void*)index);
+	lv_obj_t * gridValueType = lv_grid_create_general(gridMain, colsValueType, rowsValueType, &chValueTypeGridStyle, NULL, event_handler, (void*)index);
 	lv_obj_set_grid_cell(gridValueType, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
 
 	char txtVal[10];
@@ -100,21 +100,21 @@ static void MonitoringCell_Create(lv_obj_t * parent, int index)
 		ftoa_custom(chDisplayParams[index].src.measure.value, txtVal, 4, 1);
 	}	// configure for other things --TODO--
 
-	disp->lblValue = lv_label_create_custom(gridValueType, &chValueLblStyle, txtVal, event_handler, (void*)index);
+	disp->lblValue = lv_label_create_general(gridValueType, &chValueLblStyle, txtVal, event_handler, (void*)index);
 	lv_obj_set_grid_cell(disp->lblValue, LV_GRID_ALIGN_CENTER, 0, 1, LV_GRID_ALIGN_CENTER, 0, 1);
 	lv_obj_center(disp->lblValue);
 
-	disp->lblReading = lv_label_create_custom(gridValueType, &chReadingTypeLblStyle, txtRead, event_handler, (void*)index);
+	disp->lblReading = lv_label_create_general(gridValueType, &chReadingTypeLblStyle, txtRead, event_handler, (void*)index);
 	lv_obj_set_grid_cell(disp->lblReading, LV_GRID_ALIGN_START, 0, 1, LV_GRID_ALIGN_CENTER, 1, 1);
 	lv_obj_center(disp->lblReading);
 
 	// set the name portion
 	static lv_coord_t colsName[] = {LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
 	static lv_coord_t rowsName[] = {LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
-	lv_obj_t * gridName = lv_grid_create(gridMain, colsName, rowsName, &chNameGridStyle, NULL, event_handler, (void*)index);
+	lv_obj_t * gridName = lv_grid_create_general(gridMain, colsName, rowsName, &chNameGridStyle, NULL, event_handler, (void*)index);
 	lv_obj_set_grid_cell(gridName, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 1, 1);
 
-	disp->lblName = lv_label_create_custom(gridName, &chNameLblStyle, chDisplayParams[index].srcName, event_handler, (void*)index);
+	disp->lblName = lv_label_create_general(gridName, &chNameLblStyle, chDisplayParams[index].srcName, event_handler, (void*)index);
 	lv_obj_set_grid_cell(disp->lblName, LV_GRID_ALIGN_CENTER, 0, 1, LV_GRID_ALIGN_CENTER, 0, 1);
 	lv_obj_center(disp->lblName);
 }
@@ -164,13 +164,13 @@ void MainScreen_Init(void)
 	// create basic grid
 	static lv_coord_t colsScreen[] = {LV_GRID_FR(MONITORING_VIEW_WIDTH), LV_GRID_FR(CONTROL_VIEW_WIDTH), LV_GRID_TEMPLATE_LAST};
 	static lv_coord_t rowsScreen[] = {LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
-	lv_obj_t* screenGrid = lv_grid_create(screen, colsScreen, rowsScreen, &screenGridStyle, NULL, NULL, NULL);
+	lv_obj_t* screenGrid = lv_grid_create_general(screen, colsScreen, rowsScreen, &screenGridStyle, NULL, NULL, NULL);
 	lv_obj_set_size(screenGrid, 800, 480);
 
 	// create monitoring grid
 	static lv_coord_t colsMon[] = {LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
 	static lv_coord_t rowsMon[] = {LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
-	lv_obj_t* monGrid = lv_grid_create(screenGrid, colsMon, rowsMon, &monGridStyle, NULL, NULL, NULL);
+	lv_obj_t* monGrid = lv_grid_create_general(screenGrid, colsMon, rowsMon, &monGridStyle, NULL, NULL, NULL);
 	lv_obj_set_grid_cell(monGrid, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
 	// create all cells
 	for (int i = 0; i < 16; i++)

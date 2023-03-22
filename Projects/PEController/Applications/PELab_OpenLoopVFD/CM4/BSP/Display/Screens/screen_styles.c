@@ -63,7 +63,20 @@ lv_color_t MakeColor(uint8_t r, uint8_t g, uint8_t b)
 	return bgColor;
 }
 
-lv_obj_t* lv_label_create_custom(lv_obj_t* parent, lv_style_t* style, const char* txt, lv_event_cb_t event_cb, void * eventData)
+lv_obj_t* lv_btn_create_general(lv_obj_t* parent, lv_style_t* btnStyle, lv_style_t* lblStyle, const char* txt, lv_event_cb_t event_cb, void * eventData)
+{
+	lv_obj_t* btn = lv_btn_create(parent);
+	if (btnStyle != NULL)
+		lv_obj_add_style(btn, btnStyle, 0);
+	if (event_cb != NULL)
+		lv_obj_add_event_cb(btn, event_cb, LV_EVENT_CLICKED, eventData);
+
+	lv_obj_t* lbl = lv_label_create_general(btn, lblStyle, txt, event_cb, eventData);
+	lv_obj_center(lbl);
+	return btn;
+}
+
+lv_obj_t* lv_label_create_general(lv_obj_t* parent, lv_style_t* style, const char* txt, lv_event_cb_t event_cb, void * eventData)
 {
 	lv_obj_t* lbl = lv_label_create(parent);
 	if (style != NULL)
@@ -71,11 +84,10 @@ lv_obj_t* lv_label_create_custom(lv_obj_t* parent, lv_style_t* style, const char
 	if (event_cb != NULL)
 		lv_obj_add_event_cb(lbl, event_cb, LV_EVENT_CLICKED, eventData);
 	lv_label_set_text(lbl, txt != NULL ? txt : "");
-
 	return lbl;
 }
 
-lv_obj_t* lv_grid_create(lv_obj_t* parent, lv_coord_t* cols, lv_coord_t* rows, lv_style_t* style, lv_color_t* bgColor, lv_event_cb_t event_cb, void * eventData)
+lv_obj_t* lv_grid_create_general(lv_obj_t* parent, lv_coord_t* cols, lv_coord_t* rows, lv_style_t* style, lv_color_t* bgColor, lv_event_cb_t event_cb, void * eventData)
 {
 	lv_obj_t* grid = lv_obj_create(parent);
 	lv_obj_set_grid_dsc_array(grid, cols, rows);
