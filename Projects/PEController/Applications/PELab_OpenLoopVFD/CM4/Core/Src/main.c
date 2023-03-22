@@ -451,7 +451,11 @@ void StartLvglGUITask(void *argument)
 	/* Infinite loop */
 	for(;;)
 	{
-		ScreenManager_Poll();
+		//if(osSemaphoreAcquire(touchSemaphoreHandle, 0) == osOK)
+		//{
+			//ScreenManager_Poll();
+			//osSemaphoreRelease(touchSemaphoreHandle);
+		//}
 		osDelay(200);
 	}
 	/* USER CODE END StartLvglGUITask */
@@ -470,9 +474,19 @@ void StartLvglTickTask(void *argument)
 	/* Infinite loop */
 	for(;;)
 	{
-		lv_tick_inc(1);
-		lv_timer_handler();
-		osDelay(1);
+		//if(osSemaphoreAcquire(touchSemaphoreHandle, 0) == osOK)
+		//{
+		static int i = 0;
+		if (++i > 10)
+		{
+			ScreenManager_Poll();
+			i = 0;
+		}
+			lv_tick_inc(20);
+			lv_timer_handler();
+			//osSemaphoreRelease(touchSemaphoreHandle);
+		//}
+		osDelay(20);
 	}
 	/* USER CODE END StartLvglTickTask */
 }

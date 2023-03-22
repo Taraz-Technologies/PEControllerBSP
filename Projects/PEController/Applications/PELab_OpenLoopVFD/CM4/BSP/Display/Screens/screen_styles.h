@@ -64,6 +64,8 @@ extern void BSP_Screen_InitGridStyle(lv_style_t* style, lv_coord_t pad, lv_coord
 
 extern void BSP_Screen_InitLabelStyle(lv_style_t* style, const lv_font_t * font, lv_text_align_t align, lv_color_t txtColor);
 extern lv_color_t MakeColor(uint8_t r, uint8_t g, uint8_t b);
+extern lv_obj_t* lv_grid_create(lv_obj_t* parent, lv_coord_t* cols, lv_coord_t* rows, lv_style_t* style, lv_color_t* bgColor, lv_event_cb_t event_cb, void * eventData);
+extern lv_obj_t* lv_label_create_custom(lv_obj_t* parent, lv_style_t* style, const char* txt, lv_event_cb_t event_cb, void * eventData);
 /********************************************************************************
  * Code
  *******************************************************************************/

@@ -55,11 +55,53 @@
  *******************************************************************************/
 lv_color_t MakeColor(uint8_t r, uint8_t g, uint8_t b)
 {
+	//LV_COLOR_MAKE
 	lv_color_t bgColor;
 	bgColor.ch.red = (r >> 3) & 0x1f;
 	bgColor.ch.green = (g >> 2) & 0x3f;
 	bgColor.ch.blue = (b >> 3) & 0x1f;
 	return bgColor;
+}
+
+lv_obj_t* lv_label_create_custom(lv_obj_t* parent, lv_style_t* style, const char* txt, lv_event_cb_t event_cb, void * eventData)
+{
+	lv_obj_t* lbl = lv_label_create(parent);
+	if (style != NULL)
+		lv_obj_add_style(lbl, style, 0);
+	if (event_cb != NULL)
+		lv_obj_add_event_cb(lbl, event_cb, LV_EVENT_CLICKED, eventData);
+	lv_label_set_text(lbl, txt != NULL ? txt : "");
+
+	return lbl;
+}
+
+lv_obj_t* lv_grid_create(lv_obj_t* parent, lv_coord_t* cols, lv_coord_t* rows, lv_style_t* style, lv_color_t* bgColor, lv_event_cb_t event_cb, void * eventData)
+{
+	lv_obj_t* grid = lv_obj_create(parent);
+	lv_obj_set_grid_dsc_array(grid, cols, rows);
+	lv_obj_set_layout(grid, LV_LAYOUT_GRID);
+	//if (bgColor != NULL)
+	//	lv_style_set_bg_color(style, *bgColor);
+	if (style != NULL)
+		lv_obj_add_style(grid, style, 0);
+	if (event_cb != NULL)
+		lv_obj_add_event_cb(grid, event_cb, LV_EVENT_CLICKED, eventData);
+	return grid;
+}
+
+
+void BSP_Style_GetDefault(lv_style_t* style)
+{
+	lv_style_init(style);
+}
+
+void BSP_Style_SetSketch(lv_style_t* style, lv_coord_t pad, lv_coord_t border, lv_coord_t radius)
+{
+	lv_style_set_radius(style, radius);
+	lv_style_set_pad_row(style, pad);
+	lv_style_set_pad_column(style, pad);
+	lv_style_set_pad_all(style, pad);
+	lv_style_set_border_width(style, border);
 }
 /**
  * Initializes the grid style according to the given basic properties

@@ -89,7 +89,7 @@ static uint8_t TS_Read(uint8_t addr, uint16_t reg)
 	uint8_t  Value = 0;
 	int retry_count = 2;
 	do {
-		status = HAL_I2C_Mem_Read(&hi2c2, addr, GetReg(reg), I2C_MEMADD_SIZE_16BIT, &Value, 1, 1);
+		status = HAL_I2C_Mem_Read(&hi2c2, addr, GetReg(reg), I2C_MEMADD_SIZE_16BIT, &Value, 1, 1000);
 	} while(status != HAL_OK && retry_count-- >= 0);
 
 	if(status == HAL_OK)
@@ -114,7 +114,7 @@ static uint16_t TS_ReadMultiple(uint8_t addr, uint16_t reg, uint8_t *buffer, uin
 	int retry_count = 2;
 	do
 	{
-		status = HAL_I2C_Mem_Read(&hi2c2, addr, GetReg(reg), I2C_MEMADD_SIZE_16BIT, buffer, len, len*3);
+		status = HAL_I2C_Mem_Read(&hi2c2, addr, GetReg(reg), I2C_MEMADD_SIZE_16BIT, buffer, len, 1000);
 	} while(status != HAL_OK && retry_count-- >= 0);
 	return status;
 }

@@ -27,6 +27,7 @@
 #if 1
 #include "config_screen.h"
 #include "screen_styles.h"
+#include "UtilityLib.h"
 /********************************************************************************
  * Defines
  *******************************************************************************/
@@ -46,6 +47,8 @@ static lv_obj_t* screen;
 static lv_style_t screenGridStyle, numpadGridStyle;
 static lv_style_t numpadLblStyle;
 static lv_obj_t* labelx;
+static bool isActive;
+extern volatile int screenID;
 /********************************************************************************
  * Global Variables
  *******************************************************************************/
@@ -65,9 +68,12 @@ extern uint16_t YDisp;
  *******************************************************************************/
 static void event_handler(lv_event_t * e)
 {
+	if (!isActive)
+		return;
 	uint8_t index = (uint8_t)e->user_data;
 	if (index % 4 != 3)
 		lv_label_set_text(labelx, numTxts[index]);
+	screenID = 0;
 }
 
 void ConfigScreen_Init(void)
@@ -82,10 +88,7 @@ void ConfigScreen_Init(void)
 	// Initialize the basic grid cell label styles
 	bgColor = MakeColor(0, 0, 0);
 	BSP_Screen_InitLabelStyle(&numpadLblStyle, &lv_font_montserrat_40, LV_TEXT_ALIGN_CENTER, bgColor);
-}
 
-void ConfigScreen_Load(void)
-{
 	// create the screen
 	screen = lv_obj_create(NULL);
 
@@ -121,20 +124,31 @@ void ConfigScreen_Load(void)
 		lv_obj_add_style(label, &numpadLblStyle, 0);
 	}
 
-
 	labelx = lv_label_create(screenGrid);
 	lv_obj_set_grid_cell(labelx, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
 	lv_label_set_text(labelx, "");
 	lv_obj_center(labelx);
 	lv_obj_add_style(labelx, &numpadLblStyle, 0);
+}
+
+void ConfigScreen_Load(void)
+{
+	//if (isActive)
+	//	return;
+
 
 	// create control grid --TODO--
 	lv_scr_load(screen);
+	isActive = true;
 }
 
 void ConfigScreen_Unload(void)
 {
-	lv_obj_del(screen);
+	if (isActive)
+	{
+		//lv_obj_del(screen);
+		isActive = false;
+	}
 }
 
 #endif

@@ -90,8 +90,8 @@ typedef struct
 	param_measures_temp_vars_t temps;
 	float value;
 	float freq;
-	float sensitivity;
-	float offset;
+	float* sensitivity;
+	float* offset;
 } param_measures_t;
 typedef struct
 {

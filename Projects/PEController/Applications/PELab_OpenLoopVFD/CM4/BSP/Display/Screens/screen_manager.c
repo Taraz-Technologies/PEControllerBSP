@@ -30,6 +30,7 @@
 #include "message_screen.h"
 #include "config_screen.h"
 #include "main_screen.h"
+#include "max11046_drivers.h"
 /********************************************************************************
  * Defines
  *******************************************************************************/
@@ -55,7 +56,8 @@ static char* chNames[] =
 /********************************************************************************
  * Global Variables
  *******************************************************************************/
-
+extern volatile int screenID;
+static int screenID0 = 0;
 /********************************************************************************
  * Function Prototypes
  *******************************************************************************/
@@ -65,20 +67,24 @@ static char* chNames[] =
  *******************************************************************************/
 void ScreenManager_Init(void)
 {
-
 	for (int i = 0; i < 16; i++)
 	{
 		chDisplayParams[i].srcName = chNames[i];
 		chDisplayParams[i].srcType = PARAM_SRC_MEASUREMENT;
 		chDisplayParams[i].src.measure.type = 1;
-		chDisplayParams[i].src.measure.offset = 0;
-		chDisplayParams[i].src.measure.sensitivity = 1000.f / 32768;
+		chDisplayParams[i].src.measure.offset = ((float*)&adcOffsets) + i;
+		chDisplayParams[i].src.measure.sensitivity = ((float*)&adcMultipiers) + i;
 		chDisplayParams[i].src.measure.channelIndex = i;
 		chDisplayParams[i].src.measure.temps.maxIndex = 2000;
 		chDisplayParams[i].src.measure.temps.index = 2000;
 	}
 	MainScreen_Init();
+	ConfigScreen_Init();
+	MessageScreen_Init();
+
+
 	MainScreen_Load();
+	screenID0 = 0;
 
 	//HAL_Delay(40000);
 	//MessageScreen_Init();
@@ -89,7 +95,26 @@ void ScreenManager_Init(void)
 
 void ScreenManager_Poll(void)
 {
-	MainScreen_Refresh();
+	int screenID1 = screenID;
+	if (screenID1 == screenID0)
+	{
+		if(screenID0 == 0)
+			MainScreen_Refresh();
+	}
+	else
+	{
+		/*
+		if(screenID0 == 0)
+			MainScreen_Unload();
+		else if(screenID0 == 1)
+			ConfigScreen_Unload();
+		 */
+		screenID0 = screenID1;
+		if(screenID0 == 0)
+			MainScreen_Load();
+		else if(screenID0 == 1)
+			ConfigScreen_Load();
+	}
 }
 
 

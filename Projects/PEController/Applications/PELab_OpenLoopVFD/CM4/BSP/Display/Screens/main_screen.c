@@ -51,11 +51,13 @@ static lv_style_t cellGridStyle;
 static lv_style_t chNameGridStyle, chValueTypeGridStyle;
 static lv_style_t chNameLblStyle, chReadingTypeLblStyle, chValueLblStyle;
 static ch_display_t chDisplay[16];
+static bool isActive;
 /********************************************************************************
  * Global Variables
  *******************************************************************************/
 uint16_t XDisp;
 uint16_t YDisp;
+volatile int screenID = 0;
 /********************************************************************************
  * Function Prototypes
  *******************************************************************************/
@@ -63,9 +65,16 @@ uint16_t YDisp;
 /********************************************************************************
  * Code
  *******************************************************************************/
+static void event_handler(lv_event_t * e)
+{
+	if (!isActive)
+		return;
+	uint8_t index = (uint8_t)(e->user_data);
+	screenID = 1;
+}
+
 static void MonitoringCell_Create(lv_obj_t * parent, int index)
 {
-	/////strtof   ////atoff ///gcvt
 	int col = index % 4;
 	int row = index / 4;
 
@@ -74,53 +83,52 @@ static void MonitoringCell_Create(lv_obj_t * parent, int index)
 	// Set main grid element
 	static lv_coord_t colsMain[] = {LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
 	static lv_coord_t rowsMain[] = {LV_GRID_FR(5), LV_GRID_FR(2), LV_GRID_TEMPLATE_LAST};
-	lv_obj_t * gridMain = lv_obj_create(parent);
+	lv_obj_t * gridMain = lv_grid_create(parent, colsMain, rowsMain, &cellGridStyle, NULL, event_handler, (void*)index);
 	lv_obj_set_grid_cell(gridMain, LV_GRID_ALIGN_STRETCH, col, 1, LV_GRID_ALIGN_STRETCH, row, 1);
-	lv_obj_set_grid_dsc_array(gridMain, colsMain, rowsMain);
-	lv_obj_set_layout(gridMain, LV_LAYOUT_GRID);
-	lv_obj_add_style(gridMain, &cellGridStyle, 0);
 
 	// Set value and type portion
 	static lv_coord_t colsValueType[] = {LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
 	static lv_coord_t rowsValueType[] = {LV_GRID_FR(4), LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
-	lv_obj_t * gridValueType = lv_obj_create(gridMain);
+	lv_obj_t * gridValueType = lv_grid_create(gridMain, colsValueType, rowsValueType, &chValueTypeGridStyle, NULL, event_handler, (void*)index);
 	lv_obj_set_grid_cell(gridValueType, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
-	lv_obj_set_grid_dsc_array(gridValueType, colsValueType, rowsValueType);
-	lv_obj_set_layout(gridValueType, LV_LAYOUT_GRID);
-	lv_obj_add_style(gridValueType, &chValueTypeGridStyle, 0);
 
-	disp->lblValue = lv_label_create(gridValueType);
+	char txtVal[10];
+	const char* txtRead = NULL;
+	if (chDisplayParams[index].srcType == PARAM_SRC_MEASUREMENT)
+	{
+		txtRead = measureTxts[(uint8_t)chDisplayParams[index].src.measure.type];
+		ftoa_custom(chDisplayParams[index].src.measure.value, txtVal, 4, 1);
+	}	// configure for other things --TODO--
+
+	disp->lblValue = lv_label_create_custom(gridValueType, &chValueLblStyle, txtVal, event_handler, (void*)index);
 	lv_obj_set_grid_cell(disp->lblValue, LV_GRID_ALIGN_CENTER, 0, 1, LV_GRID_ALIGN_CENTER, 0, 1);
 	lv_obj_center(disp->lblValue);
-	lv_obj_add_style(disp->lblValue, &chValueLblStyle, 0);
 
-	disp->lblReading = lv_label_create(gridValueType);
+	disp->lblReading = lv_label_create_custom(gridValueType, &chReadingTypeLblStyle, txtRead, event_handler, (void*)index);
 	lv_obj_set_grid_cell(disp->lblReading, LV_GRID_ALIGN_START, 0, 1, LV_GRID_ALIGN_CENTER, 1, 1);
 	lv_obj_center(disp->lblReading);
-	lv_obj_add_style(disp->lblReading, &chReadingTypeLblStyle, 0);
 
 	// set the name portion
 	static lv_coord_t colsName[] = {LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
 	static lv_coord_t rowsName[] = {LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
-	lv_obj_t * gridName = lv_obj_create(gridMain);
+	lv_obj_t * gridName = lv_grid_create(gridMain, colsName, rowsName, &chNameGridStyle, NULL, event_handler, (void*)index);
 	lv_obj_set_grid_cell(gridName, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 1, 1);
-	lv_obj_set_grid_dsc_array(gridName, colsName, rowsName);
-	lv_obj_set_layout(gridName, LV_LAYOUT_GRID);
-	lv_obj_add_style(gridName, &chNameGridStyle, 0);
 
-	disp->lblName = lv_label_create(gridName);
+	disp->lblName = lv_label_create_custom(gridName, &chNameLblStyle, chDisplayParams[index].srcName, event_handler, (void*)index);
 	lv_obj_set_grid_cell(disp->lblName, LV_GRID_ALIGN_CENTER, 0, 1, LV_GRID_ALIGN_CENTER, 0, 1);
 	lv_obj_center(disp->lblName);
-	lv_obj_add_style(disp->lblName, &chNameLblStyle, 0);
+}
 
-	lv_label_set_text(disp->lblName, chDisplayParams[index].srcName);
-	if (chDisplayParams[index].srcType == PARAM_SRC_MEASUREMENT)
-	{
-		lv_label_set_text(disp->lblReading, measureTxts[(uint8_t)chDisplayParams[index].src.measure.type]);
-		char txt[10];
-		ftoa_custom(chDisplayParams[index].src.measure.value, txt, 4, 1);
-		lv_label_set_text(disp->lblValue, txt);
-	}	// configure for other things --TODO--
+static lv_obj_t* CreateItem(lv_obj_t* parent, char* name)
+{
+	lv_obj_t* nameLbl = lv_label_create(parent);
+	lv_label_set_text(nameLbl, name);
+	return nameLbl;
+}
+
+void MainScreenControl_Create(lv_obj_t* parent)
+{
+
 }
 
 void MainScreen_Init(void)
@@ -138,9 +146,9 @@ void MainScreen_Init(void)
 
 	// Initialize the basic grid cell container styles
 	bgColor = MakeColor(20, 155, 80);
-	BSP_Screen_InitGridStyle(&chValueTypeGridStyle, 0, 0, 4, bgColor);
+	BSP_Screen_InitGridStyle(&chValueTypeGridStyle, 0, 0, 6, bgColor);
 	bgColor = MakeColor(0, 155, 155);
-	BSP_Screen_InitGridStyle(&chNameGridStyle, 0, 0, 4, bgColor);
+	BSP_Screen_InitGridStyle(&chNameGridStyle, 0, 0, 6, bgColor);
 
 	// Initialize the basic grid cell label styles
 	BSP_Screen_InitLabelStyle(&chValueLblStyle, &lv_font_montserrat_26, LV_TEXT_ALIGN_CENTER, lv_palette_darken(LV_PALETTE_GREY, 4));
@@ -148,59 +156,63 @@ void MainScreen_Init(void)
 	BSP_Screen_InitLabelStyle(&chReadingTypeLblStyle, &lv_font_montserrat_14, LV_TEXT_ALIGN_RIGHT, lv_palette_darken(LV_PALETTE_GREY, 4));
 	lv_style_set_pad_left(&chReadingTypeLblStyle, 2);
 	BSP_Screen_InitLabelStyle(&chNameLblStyle, &lv_font_montserrat_22, LV_TEXT_ALIGN_CENTER, lv_palette_darken(LV_PALETTE_GREY, 4));
-}
 
-void MainScreen_Load(void)
-{
+	// Make the screen
 	// create the screen
 	screen = lv_obj_create(NULL);
 
 	// create basic grid
-	lv_obj_t* screenGrid = lv_obj_create(screen);
 	static lv_coord_t colsScreen[] = {LV_GRID_FR(MONITORING_VIEW_WIDTH), LV_GRID_FR(CONTROL_VIEW_WIDTH), LV_GRID_TEMPLATE_LAST};
 	static lv_coord_t rowsScreen[] = {LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
+	lv_obj_t* screenGrid = lv_grid_create(screen, colsScreen, rowsScreen, &screenGridStyle, NULL, NULL, NULL);
 	lv_obj_set_size(screenGrid, 800, 480);
-	lv_obj_set_grid_dsc_array(screenGrid, colsScreen, rowsScreen);
-	lv_obj_set_layout(screenGrid, LV_LAYOUT_GRID);
-	lv_obj_add_style(screenGrid, &screenGridStyle, 0);
 
 	// create monitoring grid
-	lv_obj_t* monGrid = lv_obj_create(screenGrid);
 	static lv_coord_t colsMon[] = {LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
 	static lv_coord_t rowsMon[] = {LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
+	lv_obj_t* monGrid = lv_grid_create(screenGrid, colsMon, rowsMon, &monGridStyle, NULL, NULL, NULL);
 	lv_obj_set_grid_cell(monGrid, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
-	lv_obj_set_grid_dsc_array(monGrid, colsMon, rowsMon);
-	lv_obj_set_layout(monGrid, LV_LAYOUT_GRID);
-	lv_obj_add_style(monGrid, &monGridStyle, 0);
 	// create all cells
 	for (int i = 0; i < 16; i++)
 		MonitoringCell_Create(monGrid, i);
-
-
 	// create control grid --TODO--
+}
+
+void MainScreen_Load(void)
+{
+	//if(isActive)
+	//	return;
 
 	lv_scr_load(screen);
+	isActive = true;
 }
 
 void MainScreen_Unload(void)
 {
-	lv_obj_del(screen);
+	if (isActive)
+	{
+		isActive = false;
+		//lv_obj_del(screen);
+	}
 }
 
 void MainScreen_Refresh(void)
 {
-	for (int i = 0; i < 14; i++)
+	if (isActive)
 	{
-		if (chDisplayParams[i].isUpdated)
+		for (int i = 0; i < 14; i++)
 		{
-			chDisplayParams[i].isUpdated = false;
-			char txt[10];
-			ftoa_custom(chDisplayParams[i].src.measure.value, txt, 4, 1);
-			lv_label_set_text(chDisplay[i].lblValue, txt);
+			if (chDisplayParams[i].isUpdated)
+			{
+				chDisplayParams[i].isUpdated = false;
+				char txt[10];
+				ftoa_custom(chDisplayParams[i].src.measure.value, txt, 4, 1);
+				lv_label_set_text(chDisplay[i].lblValue, txt);
+			}
 		}
+		lv_label_set_text_fmt(chDisplay[14].lblValue, "%d", XDisp);
+		lv_label_set_text_fmt(chDisplay[15].lblValue, "%d", YDisp);
 	}
-	lv_label_set_text_fmt(chDisplay[14].lblValue, "%d", XDisp);
-	lv_label_set_text_fmt(chDisplay[15].lblValue, "%d", YDisp);
 }
 
 #endif
