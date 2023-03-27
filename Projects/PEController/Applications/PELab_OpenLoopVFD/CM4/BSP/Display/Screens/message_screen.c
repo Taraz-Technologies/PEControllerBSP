@@ -43,7 +43,8 @@
  * Static Variables
  *******************************************************************************/
 static lv_obj_t* screen;
-static lv_style_t screenGridStyle, headingGridStyle, msgGridStyle;
+static lv_color_t lvColorHeadingBg = LV_COLOR_MAKE(0, 155, 155);
+static lv_style_t headingGridStyle;
 static lv_style_t msgLblStyle, headingLblStyle, btnLblStyle;
 /********************************************************************************
  * Global Variables
@@ -58,21 +59,13 @@ static lv_style_t msgLblStyle, headingLblStyle, btnLblStyle;
  *******************************************************************************/
 void MessageScreen_Init(void)
 {
-	lv_color_t bgColor = MakeColor(155, 155, 155);
-	BSP_Screen_InitGridStyle(&screenGridStyle, 0, 0, 0, bgColor);
-
-	bgColor = MakeColor(0, 155, 155);
-	BSP_Screen_InitGridStyle(&headingGridStyle, 0, 0, 10, bgColor);
-	bgColor = MakeColor(155, 155, 155);
-	BSP_Screen_InitGridStyle(&msgGridStyle, 0, 0, 10, bgColor);
-
+	BSP_Screen_InitGridStyle(&headingGridStyle, 0, 0, 0, 10, &lvColorHeadingBg);
 	// Initialize the basic grid cell label styles
-	bgColor = MakeColor(0, 0, 0);
-	BSP_Screen_InitLabelStyle(&headingLblStyle, &lv_font_montserrat_40, LV_TEXT_ALIGN_CENTER, bgColor);
-	BSP_Screen_InitLabelStyle(&msgLblStyle, &lv_font_montserrat_30, LV_TEXT_ALIGN_CENTER, bgColor);
+	BSP_Screen_InitLabelStyle(&headingLblStyle, &lv_font_montserrat_40, LV_TEXT_ALIGN_CENTER, &lvColorDarkFont);
+	BSP_Screen_InitLabelStyle(&msgLblStyle, &lv_font_montserrat_30, LV_TEXT_ALIGN_CENTER, &lvColorDarkFont);
 	lv_style_set_pad_all(&msgLblStyle, 10);
 	lv_style_set_text_line_space(&msgLblStyle, 10);
-	BSP_Screen_InitLabelStyle(&btnLblStyle, &lv_font_montserrat_26, LV_TEXT_ALIGN_CENTER, bgColor);
+	BSP_Screen_InitLabelStyle(&btnLblStyle, &lv_font_montserrat_26, LV_TEXT_ALIGN_CENTER, &lvColorDarkFont);
 }
 
 void MessageScreen_Load(char* heading, char* msg, bool hasOk, bool hasCancel)
@@ -86,7 +79,7 @@ void MessageScreen_Load(char* heading, char* msg, bool hasOk, bool hasCancel)
 	lv_obj_set_size(screenGrid, 800, 480);
 	lv_obj_set_grid_dsc_array(screenGrid, colsScreen, rowsScreen);
 	lv_obj_set_layout(screenGrid, LV_LAYOUT_GRID);
-	lv_obj_add_style(screenGrid, &screenGridStyle, 0);
+	lv_obj_add_style(screenGrid, &basicGridStyle, 0);
 
 	// create monitoring grid
 	lv_obj_t* headingGrid = lv_obj_create(screenGrid);
@@ -110,7 +103,7 @@ void MessageScreen_Load(char* heading, char* msg, bool hasOk, bool hasCancel)
 	lv_obj_set_grid_cell(msgGrid, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 1, 1);
 	lv_obj_set_grid_dsc_array(msgGrid, colsMsgs, rowsMsgs);
 	lv_obj_set_layout(msgGrid, LV_LAYOUT_GRID);
-	lv_obj_add_style(msgGrid, &msgGridStyle, 0);
+	lv_obj_add_style(msgGrid, &basicGridStyle, 0);
 
 	//
 	/*

@@ -61,6 +61,7 @@ const char* measureTxts[5] = {"RMS", "Avg", "Max", "Min", "Pk-Pk"};
  */
 void BSP_Display_UpdateMeasurements(float* dataPtr)
 {
+#if 0
 	for (int i = 0; i < 16; i++)
 	{
 		disp_param_t* param = &chDisplayParams[i];
@@ -129,6 +130,50 @@ void BSP_Display_UpdateMeasurements(float* dataPtr)
 
 		}
 	}
+#elif 0
+	for (int i = 0; i < 16; i++)
+	{
+		disp_param_t* param = &chDisplayParams[i];
+		if (param->srcType == PARAM_SRC_MEASUREMENT)
+		{
+			param_measures_t* measure = &param->src.measure;
+			param_measures_temp_vars_t* temps = &(measure->temps);
+			float data = dataPtr[measure->channelIndex];//((adcData[measure->channelIndex] - 32768.f) * measure->sensitivity) - measure->offset;
+			temps->temp += data * data;
+			if (--temps->index <= 0)
+			{
+				temps->temp = sqrtf(temps->temp / temps->maxIndex);
+				measure->value = temps->temp; //((temps->temp - 32768.f) * measure->sensitivity) - measure->offset;
+				temps->temp = 0;
+				param->isUpdated = true;
+				temps->index = temps->maxIndex;
+			}
+
+		}
+	}
+
+#else
+	static int ret = 4;
+	if (--ret > 0)
+		return;
+	int i = 16;
+	while (i--)
+	{
+		disp_param_t* param = &chDisplayParams[i];
+		param_measures_t* measure = &param->src.measure;
+		param_measures_temp_vars_t* temps = &(measure->temps);
+		temps->temp  += dataPtr[i] * dataPtr[i];
+		if (--temps->index <= 0)
+		{
+			temps->temp = sqrtf(temps->temp / temps->maxIndex);
+			measure->value = temps->temp;
+			temps->temp = 0;
+			param->isUpdated = true;
+			temps->index = temps->maxIndex;
+		}
+	}
+	ret = 4;
+#endif
 }
 
 #endif

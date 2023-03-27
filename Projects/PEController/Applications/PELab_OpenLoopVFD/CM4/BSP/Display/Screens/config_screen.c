@@ -44,7 +44,7 @@
  * Static Variables
  *******************************************************************************/
 static lv_obj_t* screen;
-static lv_style_t screenGridStyle, numpadGridStyle;
+static lv_style_t numpadGridStyle;
 static lv_style_t numpadLblStyle;
 static lv_obj_t* labelx;
 static bool isActive;
@@ -71,23 +71,16 @@ static void event_handler(lv_event_t * e)
 	if (!isActive)
 		return;
 	uint8_t index = (uint8_t)e->user_data;
-	if (index % 4 != 3)
+	if ((index % 4) != 3)
 		lv_label_set_text(labelx, numTxts[index]);
 	screenID = 0;
 }
 
 void ConfigScreen_Init(void)
 {
-	lv_color_t bgColor = MakeColor(155, 155, 155);
-	BSP_Screen_InitGridStyle(&screenGridStyle, 0, 0, 0, bgColor);
-
-	// Initialize monitoring grid
-	bgColor = MakeColor(155, 155, 155);
-	BSP_Screen_InitGridStyle(&numpadGridStyle, 2, 0, 0, bgColor);
-
 	// Initialize the basic grid cell label styles
-	bgColor = MakeColor(0, 0, 0);
-	BSP_Screen_InitLabelStyle(&numpadLblStyle, &lv_font_montserrat_40, LV_TEXT_ALIGN_CENTER, bgColor);
+	BSP_Screen_InitLabelStyle(&numpadLblStyle, &lv_font_montserrat_40, LV_TEXT_ALIGN_CENTER, &lvColorDarkFont);
+	BSP_Screen_InitGridStyle(&numpadGridStyle, 2, 0, 0, 0, &lvColorBg);
 
 	// create the screen
 	screen = lv_obj_create(NULL);
@@ -95,21 +88,26 @@ void ConfigScreen_Init(void)
 	// create basic grid
 	static lv_coord_t colsScreen[] = {LV_GRID_FR(1), 400, LV_GRID_TEMPLATE_LAST};
 	static lv_coord_t rowsScreen[] = {LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
-	lv_obj_t* screenGrid = lv_grid_create_general(screen, colsScreen, rowsScreen, &screenGridStyle, NULL, NULL, NULL);
+	lv_obj_t* screenGrid = lv_grid_create_general(screen, colsScreen, rowsScreen, &basicGridStyle, NULL, NULL, NULL);
 	lv_obj_set_size(screenGrid, 800, 480);
 
 	// create buttons grid
 	static lv_coord_t colsMon[] = {LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
 	static lv_coord_t rowsMon[] = {LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
-	lv_obj_t* numpadGrid = lv_grid_create_general(screenGrid, colsMon, rowsMon, &numpadGridStyle, NULL, NULL, NULL);
+	lv_obj_t* numpadGrid = lv_grid_create_general(screenGrid, colsMon, rowsMon, &basicGridStyle, NULL, NULL, NULL);
 	lv_obj_set_grid_cell(numpadGrid, LV_GRID_ALIGN_STRETCH, 1, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
+
 	// create all cells
+	static lv_coord_t colsBtn[] = {LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
+	static lv_coord_t rowsBtn[] = {LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
 	for (int i = 0; i < 16; i++)
 	{
 		int col = i % 4;
 		int row = i / 4;
-		lv_obj_t* btn = lv_btn_create_general(numpadGrid, NULL, &numpadLblStyle, numTxts[i], event_handler, (void*)i);
-		lv_obj_set_grid_cell(btn, LV_GRID_ALIGN_STRETCH, col, 1, LV_GRID_ALIGN_STRETCH, row, 1);
+		lv_obj_t* btnGrid = lv_grid_create_general(numpadGrid, colsBtn, rowsBtn, &numpadGridStyle, NULL, NULL, NULL);
+		lv_obj_set_grid_cell(btnGrid, LV_GRID_ALIGN_STRETCH, col, 1, LV_GRID_ALIGN_STRETCH, row, 1);
+		lv_obj_t* btn = lv_btn_create_general(btnGrid, NULL, &numpadLblStyle, numTxts[i], event_handler, (void*)i);
+		lv_obj_set_grid_cell(btn, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
 		//lv_obj_align(btn, LV_ALIGN_CENTER, 0, 0);
 	}
 

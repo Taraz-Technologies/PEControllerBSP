@@ -67,6 +67,7 @@ static int screenID0 = 0;
  *******************************************************************************/
 void ScreenManager_Init(void)
 {
+	BSP_Styles_Init();
 	for (int i = 0; i < 16; i++)
 	{
 		chDisplayParams[i].srcName = chNames[i];

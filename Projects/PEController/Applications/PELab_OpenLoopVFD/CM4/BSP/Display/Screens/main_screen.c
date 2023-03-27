@@ -37,20 +37,36 @@
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
-
+typedef enum
+{
+	VAR_BOOL,
+	VAR_STRING,
+	VAR_FLOAT,
+	VAR_INT,
+	VAR_UINT,
+} var_type_t;
 /********************************************************************************
  * Structures
  *******************************************************************************/
-
+typedef struct _disp_var_t_
+{
+	const char* name;
+	void* value;
+	const char* unit;
+	bool isCreated;
+	var_type_t type;
+	lv_obj_t* lbl;
+	struct _disp_var_t_* next;
+} disp_var_t;
 /********************************************************************************
  * Static Variables
  *******************************************************************************/
 static lv_obj_t* screen;
-static lv_style_t screenGridStyle, monGridStyle;
 static lv_style_t cellGridStyle;
-static lv_style_t chNameGridStyle, chValueTypeGridStyle;
+static lv_style_t chNameGridStyle, chValueTypeGridStyle, dispGridStyle, dispOuterGridStyle;
 static lv_style_t chNameLblStyle, chReadingTypeLblStyle, chValueLblStyle;
 static ch_display_t chDisplay[16];
+static disp_var_t* dispVars = NULL;
 static bool isActive;
 /********************************************************************************
  * Global Variables
@@ -69,7 +85,7 @@ static void event_handler(lv_event_t * e)
 {
 	if (!isActive)
 		return;
-	uint8_t index = (uint8_t)(e->user_data);
+	//uint8_t index = (uint8_t)(e->user_data);
 	screenID = 1;
 }
 
@@ -119,43 +135,53 @@ static void MonitoringCell_Create(lv_obj_t * parent, int index)
 	lv_obj_center(disp->lblName);
 }
 
-static lv_obj_t* CreateItem(lv_obj_t* parent, char* name)
+static void VariableCell_Create(lv_obj_t* parent, disp_var_t* var, int index)
 {
-	lv_obj_t* nameLbl = lv_label_create(parent);
-	lv_label_set_text(nameLbl, name);
-	return nameLbl;
-}
+	// Set main grid element
+	static lv_coord_t colsMain[] = {LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
+	static lv_coord_t rowsMain[] = {LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
+	lv_obj_t * grid = lv_grid_create_general(parent, colsMain, rowsMain, &dispGridStyle, NULL, NULL, NULL);
+	lv_obj_set_grid_cell(grid, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, index, 1);
 
-void MainScreenControl_Create(lv_obj_t* parent)
-{
+	lv_obj_t* lblName = lv_label_create_general(grid, &chValueLblStyle, var->name, NULL, NULL);
+	lv_obj_set_grid_cell(lblName, LV_GRID_ALIGN_START, 0, 1, LV_GRID_ALIGN_CENTER, 0, 1);
+	lv_obj_center(lblName);
 
+	char txt[15];
+	int i = ftoa_custom(*((float*)var->value), txt, 4, 1);
+
+	if (var != NULL)
+		txt[i++] = ' ';
+
+	int unitIndex = 0;
+	while (var->unit[unitIndex] != 0)
+		txt[i++] = var->unit[unitIndex++];
+
+	var->lbl = lv_label_create_general(grid, &chValueLblStyle, txt, NULL, NULL);
+	lv_obj_set_grid_cell(var->lbl, LV_GRID_ALIGN_END, 1, 1, LV_GRID_ALIGN_CENTER, 0, 1);
+	lv_obj_center(var->lbl);
 }
 
 void MainScreen_Init(void)
 {
-	lv_color_t bgColor = MakeColor(155, 155, 155);
-	BSP_Screen_InitGridStyle(&screenGridStyle, 0, 0, 0, bgColor);
-
-	// Initialize monitoring grid
-	bgColor = MakeColor(155, 155, 155);
-	BSP_Screen_InitGridStyle(&monGridStyle, 0, 0, 0, bgColor);
-
 	// Initialize monitoring cell main grid
-	bgColor = MakeColor(200, 200, 200);
-	BSP_Screen_InitGridStyle(&cellGridStyle, 2, 0, 0, bgColor);
+	BSP_Screen_InitGridStyle(&cellGridStyle, 2, 0, 0, 0, &lvColorBg);
 
 	// Initialize the basic grid cell container styles
-	bgColor = MakeColor(20, 155, 80);
-	BSP_Screen_InitGridStyle(&chValueTypeGridStyle, 0, 0, 6, bgColor);
+	lv_color_t bgColor = MakeColor(20, 155, 80);
+	BSP_Screen_InitGridStyle(&chValueTypeGridStyle, 0, 0, 0, 6, &bgColor);
 	bgColor = MakeColor(0, 155, 155);
-	BSP_Screen_InitGridStyle(&chNameGridStyle, 0, 0, 6, bgColor);
+	BSP_Screen_InitGridStyle(&chNameGridStyle, 0, 0, 0, 6, &bgColor);
+	BSP_Screen_InitGridStyle(&dispOuterGridStyle, 3, 3, 0, 10, &lvColorBg);
+	bgColor = MakeColor(0, 155, 155);
+	BSP_Screen_InitGridStyle(&dispGridStyle, 3, 0, 0, 10, &bgColor);
 
 	// Initialize the basic grid cell label styles
-	BSP_Screen_InitLabelStyle(&chValueLblStyle, &lv_font_montserrat_26, LV_TEXT_ALIGN_CENTER, lv_palette_darken(LV_PALETTE_GREY, 4));
+	BSP_Screen_InitLabelStyle(&chValueLblStyle, &lv_font_montserrat_26, LV_TEXT_ALIGN_CENTER, &lvColorDarkFont);
 	//lv_style_set_text_decor(&chValueLblStyle, LV_TEXT_DECOR_UNDERLINE);
-	BSP_Screen_InitLabelStyle(&chReadingTypeLblStyle, &lv_font_montserrat_14, LV_TEXT_ALIGN_RIGHT, lv_palette_darken(LV_PALETTE_GREY, 4));
+	BSP_Screen_InitLabelStyle(&chReadingTypeLblStyle, &lv_font_montserrat_14, LV_TEXT_ALIGN_RIGHT, &lvColorDarkFont);
 	lv_style_set_pad_left(&chReadingTypeLblStyle, 2);
-	BSP_Screen_InitLabelStyle(&chNameLblStyle, &lv_font_montserrat_22, LV_TEXT_ALIGN_CENTER, lv_palette_darken(LV_PALETTE_GREY, 4));
+	BSP_Screen_InitLabelStyle(&chNameLblStyle, &lv_font_montserrat_22, LV_TEXT_ALIGN_CENTER, &lvColorDarkFont);
 
 	// Make the screen
 	// create the screen
@@ -164,18 +190,50 @@ void MainScreen_Init(void)
 	// create basic grid
 	static lv_coord_t colsScreen[] = {LV_GRID_FR(MONITORING_VIEW_WIDTH), LV_GRID_FR(CONTROL_VIEW_WIDTH), LV_GRID_TEMPLATE_LAST};
 	static lv_coord_t rowsScreen[] = {LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
-	lv_obj_t* screenGrid = lv_grid_create_general(screen, colsScreen, rowsScreen, &screenGridStyle, NULL, NULL, NULL);
+	lv_obj_t* screenGrid = lv_grid_create_general(screen, colsScreen, rowsScreen, &basicGridStyle, NULL, NULL, NULL);
 	lv_obj_set_size(screenGrid, 800, 480);
 
 	// create monitoring grid
 	static lv_coord_t colsMon[] = {LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
 	static lv_coord_t rowsMon[] = {LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
-	lv_obj_t* monGrid = lv_grid_create_general(screenGrid, colsMon, rowsMon, &monGridStyle, NULL, NULL, NULL);
+	lv_obj_t* monGrid = lv_grid_create_general(screenGrid, colsMon, rowsMon, &basicGridStyle, NULL, NULL, NULL);
 	lv_obj_set_grid_cell(monGrid, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
 	// create all cells
 	for (int i = 0; i < 16; i++)
 		MonitoringCell_Create(monGrid, i);
-	// create control grid --TODO--
+
+	// create control grid
+	static lv_coord_t colsCont[] = {LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
+	static lv_coord_t rowsCont[] = {300, LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
+	lv_obj_t* contGrid = lv_grid_create_general(screenGrid, colsCont, rowsCont, &basicGridStyle, NULL, NULL, NULL);
+	lv_obj_set_grid_cell(contGrid, LV_GRID_ALIGN_STRETCH, 1, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
+
+	static lv_coord_t colsControlDisp[] = {LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
+	static lv_coord_t rowsControlDisp[] = {LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
+	lv_obj_t* dispGrid = lv_grid_create_general(contGrid, colsControlDisp, rowsControlDisp, &dispOuterGridStyle, NULL, NULL, NULL);
+	lv_obj_set_grid_cell(dispGrid, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
+
+	static float vals[] = { 380, 50, 25, 10 };
+	static disp_var_t vars[4] =
+	{
+			{ .name = "Vnominal", .value = &vals[0], .type = VAR_FLOAT, .unit = "V", .next = &vars[1] },
+			{ .name = "fnominal", .value = &vals[1], .type = VAR_FLOAT, .unit = "Hz", .next = &vars[2] },
+			{ .name = "frequired", .value = &vals[2], .type = VAR_FLOAT, .unit = "Hz", .next = &vars[3] },
+			{ .name = "fcurrent", .value = &vals[3], .type = VAR_FLOAT, .unit = "Hz", .next = NULL },
+	};
+
+	dispVars = vars;
+	disp_var_t* var = dispVars;
+	int index = 0;
+	while (var != NULL)
+	{
+		VariableCell_Create(dispGrid, var, index++);
+		var = var->next;
+	}
+
+	lv_obj_t* btn = lv_btn_create_general(contGrid, NULL, &chValueLblStyle, "Click!", NULL, NULL);
+	lv_obj_set_grid_cell(btn, LV_GRID_ALIGN_CENTER, 0, 1, LV_GRID_ALIGN_CENTER, 1, 1);
+	lv_obj_set_size(btn, 180, 70);
 }
 
 void MainScreen_Load(void)
