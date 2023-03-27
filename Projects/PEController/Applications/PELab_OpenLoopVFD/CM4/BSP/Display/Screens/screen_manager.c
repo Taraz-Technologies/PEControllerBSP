@@ -70,15 +70,19 @@ void ScreenManager_Init(void)
 	BSP_Styles_Init();
 	for (int i = 0; i < 16; i++)
 	{
-		chDisplayParams[i].srcName = chNames[i];
+		chDisplayParams[i].srcName = chDispMeasures.disp[i].chName = chNames[i];
+		chDispMeasures.disp[i].chUnit = "V";
 		chDisplayParams[i].srcType = PARAM_SRC_MEASUREMENT;
-		chDisplayParams[i].src.measure.type = 1;
+		chDisplayParams[i].src.measure.type = chDispMeasures.disp[i].type = 1;
 		chDisplayParams[i].src.measure.offset = ((float*)&adcOffsets) + i;
 		chDisplayParams[i].src.measure.sensitivity = ((float*)&adcMultipiers) + i;
-		chDisplayParams[i].src.measure.channelIndex = i;
-		chDisplayParams[i].src.measure.temps.maxIndex = 2000;
-		chDisplayParams[i].src.measure.temps.index = 2000;
+		chDisplayParams[i].src.measure.channelIndex = chDispMeasures.disp[i].channelIndex = i;
+		chDisplayParams[i].src.measure.temps.maxIndex = chDispMeasures.tempStats[i].maxIndex = 2000;
+		chDisplayParams[i].src.measure.temps.index = chDispMeasures.tempStats[i].index = 2000;
 	}
+	chDispMeasures.disp[3].type = 2;
+	chDispMeasures.offsets = ((float*)&adcOffsets);
+	chDispMeasures.sensitivity = ((float*)&adcMultipiers);
 	MainScreen_Init();
 	ConfigScreen_Init();
 	MessageScreen_Init();

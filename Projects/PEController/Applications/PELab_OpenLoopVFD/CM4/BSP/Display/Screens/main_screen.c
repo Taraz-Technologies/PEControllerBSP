@@ -81,6 +81,19 @@ volatile int screenID = 0;
 /********************************************************************************
  * Code
  *******************************************************************************/
+static int InsertUnit(char* txt, const char* unit, int index)
+{
+	if (unit != NULL)
+	{
+		txt[index++] = ' ';
+		int unitIndex = 0;
+		while (unit[unitIndex] != 0)
+			txt[index++] = unit[unitIndex++];
+		txt[index++] = 0;
+	}
+	return index;
+}
+
 static void event_handler(lv_event_t * e)
 {
 	if (!isActive)
@@ -110,11 +123,8 @@ static void MonitoringCell_Create(lv_obj_t * parent, int index)
 
 	char txtVal[10];
 	const char* txtRead = NULL;
-	if (chDisplayParams[index].srcType == PARAM_SRC_MEASUREMENT)
-	{
-		txtRead = measureTxts[(uint8_t)chDisplayParams[index].src.measure.type];
-		ftoa_custom(chDisplayParams[index].src.measure.value, txtVal, 4, 1);
-	}	// configure for other things --TODO--
+	txtRead = measureTxts[(uint8_t)chDispMeasures.disp[index].type];
+	ftoa_custom(0, txtVal, 4, 1);
 
 	disp->lblValue = lv_label_create_general(gridValueType, &chValueLblStyle, txtVal, event_handler, (void*)index);
 	lv_obj_set_grid_cell(disp->lblValue, LV_GRID_ALIGN_CENTER, 0, 1, LV_GRID_ALIGN_CENTER, 0, 1);
@@ -130,7 +140,7 @@ static void MonitoringCell_Create(lv_obj_t * parent, int index)
 	lv_obj_t * gridName = lv_grid_create_general(gridMain, colsName, rowsName, &chNameGridStyle, NULL, event_handler, (void*)index);
 	lv_obj_set_grid_cell(gridName, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 1, 1);
 
-	disp->lblName = lv_label_create_general(gridName, &chNameLblStyle, chDisplayParams[index].srcName, event_handler, (void*)index);
+	disp->lblName = lv_label_create_general(gridName, &chNameLblStyle, chDispMeasures.disp[index].chName, event_handler, (void*)index);
 	lv_obj_set_grid_cell(disp->lblName, LV_GRID_ALIGN_CENTER, 0, 1, LV_GRID_ALIGN_CENTER, 0, 1);
 	lv_obj_center(disp->lblName);
 }
@@ -149,13 +159,7 @@ static void VariableCell_Create(lv_obj_t* parent, disp_var_t* var, int index)
 
 	char txt[15];
 	int i = ftoa_custom(*((float*)var->value), txt, 4, 1);
-
-	if (var != NULL)
-		txt[i++] = ' ';
-
-	int unitIndex = 0;
-	while (var->unit[unitIndex] != 0)
-		txt[i++] = var->unit[unitIndex++];
+	InsertUnit(txt, var->unit, i);
 
 	var->lbl = lv_label_create_general(grid, &chValueLblStyle, txt, NULL, NULL);
 	lv_obj_set_grid_cell(var->lbl, LV_GRID_ALIGN_END, 1, 1, LV_GRID_ALIGN_CENTER, 0, 1);
@@ -258,13 +262,16 @@ void MainScreen_Refresh(void)
 {
 	if (isActive)
 	{
-		for (int i = 0; i < 14; i++)
+		if (chDispMeasures.isUpdated)
 		{
-			if (chDisplayParams[i].isUpdated)
+			chDispMeasures.isUpdated = false;
+			for (int i = 0; i < 14; i++)
 			{
-				chDisplayParams[i].isUpdated = false;
+				param_measure_type_t type = chDispMeasures.disp[i].type;
+				float* stats = ((float*)&chDispMeasures.disp[i].stats);
 				char txt[10];
-				ftoa_custom(chDisplayParams[i].src.measure.value, txt, 4, 1);
+				int len = ftoa_custom(stats[(uint8_t)type], txt, 4, 1);
+				InsertUnit(txt, chDispMeasures.disp[i].chUnit, len);
 				lv_label_set_text(chDisplay[i].lblValue, txt);
 			}
 		}

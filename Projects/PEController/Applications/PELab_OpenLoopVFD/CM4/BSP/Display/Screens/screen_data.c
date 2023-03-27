@@ -46,6 +46,7 @@
  * Global Variables
  *******************************************************************************/
 disp_param_t chDisplayParams[16];
+disp_measure_t chDispMeasures;
 const char* measureTxts[5] = {"RMS", "Avg", "Max", "Min", "Pk-Pk"};
 /********************************************************************************
  * Function Prototypes
@@ -152,7 +153,7 @@ void BSP_Display_UpdateMeasurements(float* dataPtr)
 		}
 	}
 
-#else
+#elif 0
 	static int ret = 4;
 	if (--ret > 0)
 		return;
@@ -170,6 +171,38 @@ void BSP_Display_UpdateMeasurements(float* dataPtr)
 			temps->temp = 0;
 			param->isUpdated = true;
 			temps->index = temps->maxIndex;
+		}
+	}
+	ret = 4;
+#else
+	static int ret = 4;
+	if (--ret > 0)
+		return;
+	int i = 16;
+	while (i--)
+	{
+		chDispMeasures.tempStats[i].rms += (dataPtr[i] * dataPtr[i]);
+		chDispMeasures.tempStats[i].avg += dataPtr[i];
+		if (chDispMeasures.tempStats[i].max < dataPtr[i])
+			chDispMeasures.tempStats[i].max = dataPtr[i];
+		if (chDispMeasures.tempStats[i].min > dataPtr[i])
+			chDispMeasures.tempStats[i].min = dataPtr[i];
+		if (--chDispMeasures.tempStats[i].index <= 0)
+		{
+			// get new values
+			chDispMeasures.disp[i].stats.rms = sqrtf(chDispMeasures.tempStats[i].rms / chDispMeasures.tempStats[i].maxIndex);
+			chDispMeasures.disp[i].stats.avg = chDispMeasures.tempStats[i].avg / chDispMeasures.tempStats[i].maxIndex;
+			chDispMeasures.disp[i].stats.max = chDispMeasures.tempStats[i].max;
+			chDispMeasures.disp[i].stats.min = chDispMeasures.tempStats[i].min;
+			chDispMeasures.disp[i].stats.pkTopk = chDispMeasures.tempStats[i].max - chDispMeasures.tempStats[i].min;
+
+			// reset temp stats
+			chDispMeasures.tempStats[i].rms = 0;
+			chDispMeasures.tempStats[i].avg = 0;
+			chDispMeasures.tempStats[i].max = -4294967296;
+			chDispMeasures.tempStats[i].min = 4294967296;
+			chDispMeasures.tempStats[i].index = chDispMeasures.tempStats[i].maxIndex;
+			chDispMeasures.isUpdated = true;
 		}
 	}
 	ret = 4;

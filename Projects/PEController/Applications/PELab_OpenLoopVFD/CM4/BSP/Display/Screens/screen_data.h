@@ -113,6 +113,40 @@ typedef struct
 } disp_param_t;
 typedef struct
 {
+	float rms;
+	float avg;
+	float max;
+	float min;
+	int index;
+	int maxIndex;
+} measure_ch_tempstats_t;
+typedef struct
+{
+	float rms;
+	float avg;
+	float max;
+	float min;
+	float pkTopk;
+} measure_ch_stats_t;
+typedef struct
+{
+	param_measure_type_t type;
+	const char* chName;
+	const char* chUnit;
+	measure_ch_stats_t stats;
+	int channelIndex;
+	float freq;
+} disp_ch_measure_t;
+typedef struct
+{
+	bool isUpdated;
+	disp_ch_measure_t disp[16];
+	measure_ch_tempstats_t tempStats[16];
+	float* sensitivity;
+	float* offsets;
+} disp_measure_t;
+typedef struct
+{
 	lv_obj_t* lblName;
 	lv_obj_t* lblReading;
 	lv_obj_t* lblValue;
@@ -120,6 +154,7 @@ typedef struct
 /********************************************************************************
  * Exported Variables
  *******************************************************************************/
+extern disp_measure_t chDispMeasures;
 extern disp_param_t chDisplayParams[16];
 extern const char* measureTxts[5];
 /********************************************************************************

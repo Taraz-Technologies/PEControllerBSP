@@ -82,7 +82,6 @@ int ftoa_custom(float f, char* txt, int maxDigits, int precision)
 	char* txt0 = txt;
 
 	int val;
-	bool isNeg = false;
 	if (f < 0)
 	{
 		*txt++ = '-';
