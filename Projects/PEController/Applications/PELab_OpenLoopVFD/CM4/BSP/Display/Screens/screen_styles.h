@@ -56,6 +56,9 @@ extern lv_color_t lvColorDarkFont;
 extern lv_color_t lvColorMixFont;
 extern lv_color_t lvColorLightFont;
 extern lv_style_t basicGridStyle;
+extern lv_style_t marginedGridStyle;
+extern lv_style_t basicBtnStyle;
+extern lv_coord_t* singleRowCol;
 /********************************************************************************
  * Global Function Prototypes
  *******************************************************************************/

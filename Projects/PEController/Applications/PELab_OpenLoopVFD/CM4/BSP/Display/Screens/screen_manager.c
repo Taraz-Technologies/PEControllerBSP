@@ -46,12 +46,28 @@
 /********************************************************************************
  * Static Variables
  *******************************************************************************/
-static char* chNames[] =
+static const char* chNames[] =
 {
 		"CH1", "CH2", "CH3", "CH4",
 		"CH5", "CH6", "CH7", "CH8",
 		"CH9", "CH10", "CH11", "CH12",
 		"CH13", "CH14", "CH15", "CH16",
+};
+
+static const char* chUnits[] =
+{
+		"V", "V", "V", "V",
+		"V", "V", "V", "V",
+		"A", "A", "A", "A",
+		"A", "A", "A", "A",
+};
+
+static param_measure_type_t chMeasurementType[] =
+{
+		DISP_RMS, DISP_AVG, DISP_MAX, DISP_MIN,
+		DISP_PkToPk, DISP_RMS, DISP_RMS, DISP_RMS,
+		DISP_RMS, DISP_RMS, DISP_RMS, DISP_RMS,
+		DISP_AVG, DISP_AVG, DISP_AVG, DISP_AVG,
 };
 /********************************************************************************
  * Global Variables
@@ -68,21 +84,26 @@ static int screenID0 = 0;
 void ScreenManager_Init(void)
 {
 	BSP_Styles_Init();
+
 	for (int i = 0; i < 16; i++)
 	{
-		chDisplayParams[i].srcName = chDispMeasures.disp[i].chName = chNames[i];
-		chDispMeasures.disp[i].chUnit = "V";
-		chDisplayParams[i].srcType = PARAM_SRC_MEASUREMENT;
-		chDisplayParams[i].src.measure.type = chDispMeasures.disp[i].type = 1;
-		chDisplayParams[i].src.measure.offset = ((float*)&adcOffsets) + i;
-		chDisplayParams[i].src.measure.sensitivity = ((float*)&adcMultipiers) + i;
-		chDisplayParams[i].src.measure.channelIndex = chDispMeasures.disp[i].channelIndex = i;
-		chDisplayParams[i].src.measure.temps.maxIndex = chDispMeasures.tempStats[i].maxIndex = 2000;
-		chDisplayParams[i].src.measure.temps.index = chDispMeasures.tempStats[i].index = 2000;
+		chDispMeasures.disp[i].chName = chNames[i];
+		chDispMeasures.disp[i].chUnit = chUnits[i];
+		chDispMeasures.disp[i].type = chMeasurementType[i];
+		chDispMeasures.disp[i].channelIndex = i;
+		chDispMeasures.tempStats[i].maxIndex = 2000;
+		chDispMeasures.tempStats[i].index = 2000;
 	}
-	chDispMeasures.disp[3].type = 2;
 	chDispMeasures.offsets = ((float*)&adcOffsets);
 	chDispMeasures.sensitivity = ((float*)&adcMultipiers);
+
+	for (int i = 0; i < 5; i++)
+	{
+		dispVars[i].type = VAR_FLOAT;
+		dispVars[i].name = "";
+		dispVars[i].unit = "";
+	}
+
 	MainScreen_Init();
 	ConfigScreen_Init();
 	MessageScreen_Init();

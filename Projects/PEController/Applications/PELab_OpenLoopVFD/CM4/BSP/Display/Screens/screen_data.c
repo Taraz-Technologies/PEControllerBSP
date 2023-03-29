@@ -45,8 +45,8 @@
 /********************************************************************************
  * Global Variables
  *******************************************************************************/
-disp_param_t chDisplayParams[16];
 disp_measure_t chDispMeasures;
+disp_var_t dispVars[5];
 const char* measureTxts[5] = {"RMS", "Avg", "Max", "Min", "Pk-Pk"};
 /********************************************************************************
  * Function Prototypes

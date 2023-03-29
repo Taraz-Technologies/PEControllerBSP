@@ -72,45 +72,19 @@ typedef enum
 	ERR_NOT_AVAILABLE,
 	ERR_LAST,
 } param_set_err_t;
+typedef enum
+{
+	VAR_NONE = 0,
+	VAR_BOOL,
+	VAR_STRING,
+	VAR_FLOAT,
+	VAR_UFLOAT,
+	VAR_INT,
+	VAR_UINT,
+} var_type_t;
 /********************************************************************************
  * Structures
  *******************************************************************************/
-typedef struct
-{
-	int index;
-	int maxIndex;
-	float temp1;
-	float temp2;
-	float temp;
-} param_measures_temp_vars_t;
-typedef struct
-{
-	param_measure_type_t type;
-	int channelIndex;
-	param_measures_temp_vars_t temps;
-	float value;
-	float freq;
-	float* sensitivity;
-	float* offset;
-} param_measures_t;
-typedef struct
-{
-	void* ptrToValue;
-	char* selectionPtr;
-	//param_set_err_t SetEnteredValue(void*);
-} param_value_t;
-typedef union
-{
-	param_measures_t measure;
-	param_value_t value;
-} param_src_t;
-typedef struct
-{
-	param_src_type_t srcType;
-	param_src_t src;
-	bool isUpdated;
-	char* srcName;
-} disp_param_t;
 typedef struct
 {
 	float rms;
@@ -147,15 +121,22 @@ typedef struct
 } disp_measure_t;
 typedef struct
 {
-	lv_obj_t* lblName;
 	lv_obj_t* lblReading;
 	lv_obj_t* lblValue;
 } ch_display_t;
+typedef struct
+{
+	var_type_t type;
+	const char* name;
+	const char* unit;
+	void* value;
+	lv_obj_t* lbl;
+} disp_var_t;
 /********************************************************************************
  * Exported Variables
  *******************************************************************************/
+extern disp_var_t dispVars[5];
 extern disp_measure_t chDispMeasures;
-extern disp_param_t chDisplayParams[16];
 extern const char* measureTxts[5];
 /********************************************************************************
  * Global Function Prototypes

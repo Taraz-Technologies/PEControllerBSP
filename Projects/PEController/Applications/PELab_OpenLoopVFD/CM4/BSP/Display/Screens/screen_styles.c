@@ -41,7 +41,7 @@
 /********************************************************************************
  * Static Variables
  *******************************************************************************/
-
+static lv_color_t defaultBtnColor;
 /********************************************************************************
  * Global Variables
  *******************************************************************************/
@@ -52,7 +52,11 @@ lv_color_t lvColorGray;
 lv_color_t lvColorDarkFont;
 lv_color_t lvColorMixFont;
 lv_color_t lvColorLightFont;
+lv_color_t lvColorTaraz;
 lv_style_t basicGridStyle;
+lv_style_t marginedGridStyle;
+lv_style_t basicBtnStyle;
+lv_coord_t* singleRowCol;
 /********************************************************************************
  * Function Prototypes
  *******************************************************************************/
@@ -145,9 +149,9 @@ void BSP_Screen_InitGridStyle(lv_style_t* style, lv_coord_t pad, lv_coord_t marg
 {
 	lv_style_init(style);
 	lv_style_set_radius(style, radius);
-	lv_style_set_pad_row(style, pad);
-	lv_style_set_pad_column(style, pad);
 	lv_style_set_pad_all(style, pad);
+	lv_style_set_pad_row(style, margin);
+	lv_style_set_pad_column(style, margin);
 	lv_style_set_border_width(style, border);
 	if (bgColor != NULL)
 		lv_style_set_bg_color(style, *bgColor);
@@ -172,6 +176,24 @@ void BSP_Screen_InitLabelStyle(lv_style_t* style, const lv_font_t * font, lv_tex
 		lv_style_set_text_color(style, *txtColor);
 }
 
+void BSP_Screen_InitBtnStyle(lv_style_t* style, lv_coord_t border, lv_coord_t radius, lv_color_t* bgColor)
+{
+	lv_style_init(style);
+	lv_style_set_radius(style, radius);
+	lv_style_set_bg_opa(style, LV_OPA_100);
+	if (bgColor != NULL)
+		lv_style_set_bg_color(style, *bgColor);
+	lv_style_set_border_opa(style, LV_OPA_40);
+	lv_style_set_border_width(style, border);
+	lv_style_set_shadow_width(style, 0);
+	lv_style_set_border_color(style, lv_palette_main(LV_PALETTE_GREY));
+	lv_style_set_outline_opa(style, LV_OPA_COVER);
+	if (bgColor != NULL)
+		lv_style_set_outline_color(style, *bgColor);
+	lv_style_set_text_color(style, lv_color_black());
+	lv_style_set_pad_all(style, 0);
+}
+
 void BSP_Styles_Init(void)
 {
 	lvColorBg = MakeColor(210, 210, 210);
@@ -181,7 +203,13 @@ void BSP_Styles_Init(void)
 	lvColorDarkFont = MakeColor(0, 0, 0);
 	lvColorMixFont = MakeColor(127, 127, 127);
 	lvColorLightFont = MakeColor(255, 255, 255);
+	lvColorTaraz = MakeColor(0, 155, 155);
+	defaultBtnColor = MakeColor(0, 210, 210);
+	static lv_coord_t singleCoord[] = {LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
+	singleRowCol = singleCoord;
+	BSP_Screen_InitBtnStyle(&basicBtnStyle, 1, 10, &defaultBtnColor);
 	BSP_Screen_InitGridStyle(&basicGridStyle, 0, 0, 0, 0, &lvColorBg);
+	BSP_Screen_InitGridStyle(&marginedGridStyle, 2, 2, 0, 0, &lvColorBg);
 }
 
 

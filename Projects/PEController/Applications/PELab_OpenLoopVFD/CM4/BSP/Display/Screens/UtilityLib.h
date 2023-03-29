@@ -50,6 +50,15 @@ extern "C" {
  * Global Function Prototypes
  *******************************************************************************/
 /**
+ * @brief Concatenates two strings
+ * @param dest Destination string containing the first part where the src part will be appended
+ * @param src String to be appened in destination
+ * @param destLen Length of the first string
+ * @param insertSpace Selects if a space characters needs to be inserted in between the strings
+ * @return Length of the resulting string
+ */
+extern int strcat_custom(char* dest, const char* src, int destLen, bool insertSpace);
+/**
  * @brief This function converts the integer number to character string
  * @param val Value of the integer
  * @param txt Pointer to the string
