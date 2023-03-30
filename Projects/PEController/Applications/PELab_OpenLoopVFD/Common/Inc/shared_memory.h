@@ -96,7 +96,7 @@ typedef struct
 	uint32_t avgCount;								/**< @brief Averaging count for the moving average filter */
 } m7_to_m4_data_t;
 /**
- * @brief Buffer containg all shared data between both cores
+ * @brief Buffer containing all shared data between both cores
  */
 typedef struct
 {

@@ -137,7 +137,7 @@ typedef struct
  *******************************************************************************/
 extern disp_var_t dispVars[5];
 extern disp_measure_t chDispMeasures;
-extern const char* measureTxts[5];
+extern const char* measureTxts[DISP_LAST];
 /********************************************************************************
  * Global Function Prototypes
  *******************************************************************************/

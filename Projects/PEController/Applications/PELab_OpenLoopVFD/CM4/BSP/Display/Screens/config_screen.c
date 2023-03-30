@@ -35,7 +35,11 @@
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
-
+typedef struct
+{
+	lv_obj_t* itemGrid;
+	lv_obj_t* focusItem;
+} screen_objs_t;
 /********************************************************************************
  * Structures
  *******************************************************************************/
@@ -44,10 +48,11 @@
  * Static Variables
  *******************************************************************************/
 static lv_obj_t* screen;
-static lv_style_t numpadLblStyle;
 static lv_obj_t* labelx;
 static bool isActive;
 extern volatile int screenID;
+static screen_objs_t screenObjs = {0};
+
 /********************************************************************************
  * Global Variables
  *******************************************************************************/
@@ -77,45 +82,126 @@ static void NumericBtn_Clicked(lv_event_t * e)
 {
 	if (!isActive)
 		return;
-	lv_label_set_text(labelx, (e->user_data));
+	lv_textarea_add_char(screenObjs.focusItem, ((char*)(e->user_data))[0]);
+	//lv_label_set_text(labelx, (e->user_data));
 	screenID = 0;
+}
+
+static void Numpad_Create(lv_obj_t * parent)
+{
+	static lv_style_t btnLblStyle;
+	static bool init = false;
+	// initialize styles once
+	if (!init)
+	{
+		BSP_Screen_InitLabelStyle(&btnLblStyle, &lv_font_montserrat_40, LV_TEXT_ALIGN_CENTER, &lvColorStore.darkFont);
+		init = true;
+	}
+
+	// create buttons grid
+	static lv_coord_t colRows[] = {LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
+	lv_obj_t* grid = lv_grid_create_general(parent, colRows, colRows, &lvStyleStore.thinMarginGrid, NULL, NULL, NULL);
+	lv_obj_set_grid_cell(grid, LV_GRID_ALIGN_STRETCH, 1, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
+
+	// create all numeric cells
+	for (int i = 0; i < 12; i++)
+	{
+		lv_obj_t* btn = lv_btn_create_general(grid, &lvStyleStore.defaultBtn, &btnLblStyle, numTxts[i], NumericBtn_Clicked, (void*)numTxts[i]);
+		lv_obj_set_grid_cell(btn, LV_GRID_ALIGN_STRETCH, i % 3, 1, LV_GRID_ALIGN_STRETCH, i / 3, 1);
+	}
+
+	// Create the deletion buttons
+	lv_obj_t* ceBtn = lv_btn_create_general(grid, &lvStyleStore.defaultBtn, &btnLblStyle, "CE", DeleteBtn_Clicked, NULL);
+	lv_obj_set_grid_cell(ceBtn, LV_GRID_ALIGN_STRETCH, 3, 1, LV_GRID_ALIGN_STRETCH, 0, 2);
+	lv_obj_t* cBtn = lv_btn_create_general(grid, &lvStyleStore.defaultBtn, &btnLblStyle, "C", DeleteBtn_Clicked, &btnLblStyle);
+	lv_obj_set_grid_cell(cBtn, LV_GRID_ALIGN_STRETCH, 3, 1, LV_GRID_ALIGN_STRETCH, 2, 2);
+}
+
+static void FormActionBtns_Create(lv_obj_t * parent)
+{
+	const lv_coord_t btnWidth = 180;
+	static lv_style_t btnLblStyle;
+	static bool init = false;
+	// initialize styles once
+	if (!init)
+	{
+		BSP_Screen_InitLabelStyle(&btnLblStyle, &lv_font_montserrat_40, LV_TEXT_ALIGN_CENTER, &lvColorStore.darkFont);
+		init = true;
+	}
+
+	static lv_coord_t cols[] = {LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
+	lv_obj_t* grid = lv_grid_create_general(parent, cols, singleRowCol, &lvStyleStore.thickMarginGrid, NULL, NULL, NULL);
+	lv_obj_set_grid_cell(grid, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 1, 1);
+
+	lv_obj_t* okBtn = lv_btn_create_general(grid, &lvStyleStore.auxBtn, &btnLblStyle, "Save", NULL, NULL);
+	lv_obj_set_grid_cell(okBtn, LV_GRID_ALIGN_CENTER, 0, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
+	lv_obj_set_width(okBtn, btnWidth);
+	lv_obj_t* cancelBtn = lv_btn_create_general(grid, &lvStyleStore.auxBtn, &btnLblStyle, "Cancel", NULL, &btnLblStyle);
+	lv_obj_set_grid_cell(cancelBtn, LV_GRID_ALIGN_CENTER, 1, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
+	lv_obj_set_width(cancelBtn, btnWidth);
+}
+
+static void StaticForm_Create(lv_obj_t * parent)
+{
+	static lv_coord_t rows[] = {LV_GRID_FR(1), 80, LV_GRID_TEMPLATE_LAST};
+	screenObjs.itemGrid = lv_grid_create_general(parent, singleRowCol, rows, &lvStyleStore.defaultGrid, NULL, NULL, NULL);
+	lv_obj_set_grid_cell(screenObjs.itemGrid, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
+
+	FormActionBtns_Create(screenObjs.itemGrid);
+}
+
+void ConfigScreen_LoadMeasurement(int measurementIndex)
+{
+	if (screenObjs.itemGrid == NULL)
+		return;
+	static lv_style_t lblStyle;
+	static bool init = false;
+	// initialize styles once
+	if (!init)
+	{
+		BSP_Screen_InitLabelStyle(&lblStyle, &lv_font_montserrat_26, LV_TEXT_ALIGN_CENTER, &lvColorStore.darkFont);
+		init = true;
+	}
+
+	static lv_coord_t rows[] = {60, 60, 60, 60, 60, 60, LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
+	static lv_coord_t cols[] = {LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
+	lv_obj_t* grid = lv_grid_create_general(screenObjs.itemGrid, cols, rows, &lvStyleStore.thickMarginGrid, NULL, NULL, NULL);
+	lv_obj_set_grid_cell(grid, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
+
+	disp_ch_measure_t* measure = chDispMeasures.disp + measurementIndex;
+	screenObjs.focusItem = lv_create_textfield_display(grid, &lblStyle, NULL, "Name", measure->chName, NULL, NULL, 0);
+
+	lv_obj_t * dd = lv_dropdown_create(grid);
+	lv_dropdown_set_options_static(dd, measureTxts[0]);
+	for (int i = 1; i < DISP_LAST; i++)
+		lv_dropdown_add_option(dd, measureTxts[i], i);
+	lv_dropdown_set_selected(dd, measure->type);
+
+	lv_create_field(grid, &lblStyle, "Type", dd, 1);
+
+	lv_create_textfield_display(grid, &lblStyle, NULL, "Sensitivity", "0", NULL, NULL, 2);
+	lv_create_textfield_display(grid, &lblStyle, NULL, "Offset", "0", NULL, NULL, 3);
 }
 
 void ConfigScreen_Init(void)
 {
-	// Initialize the basic grid cell label styles
-	BSP_Screen_InitLabelStyle(&numpadLblStyle, &lv_font_montserrat_40, LV_TEXT_ALIGN_CENTER, &lvColorDarkFont);
-
 	// create the screen
 	screen = lv_obj_create(NULL);
 
 	// create basic grid
-	static lv_coord_t colsScreen[] = {LV_GRID_FR(1), 400, LV_GRID_TEMPLATE_LAST};
-	lv_obj_t* screenGrid = lv_grid_create_general(screen, colsScreen, singleRowCol, &basicGridStyle, NULL, NULL, NULL);
+	static lv_coord_t colsScreen[] = {LV_GRID_FR(1), 350, LV_GRID_TEMPLATE_LAST};
+	lv_obj_t* screenGrid = lv_grid_create_general(screen, colsScreen, singleRowCol, &lvStyleStore.defaultGrid, NULL, NULL, NULL);
 	lv_obj_set_size(screenGrid, 800, 480);
 
-	// create buttons grid
-	static lv_coord_t colsMon[] = {LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
-	static lv_coord_t rowsMon[] = {LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
-	lv_obj_t* numpadGrid = lv_grid_create_general(screenGrid, colsMon, rowsMon, &marginedGridStyle, NULL, NULL, NULL);
-	lv_obj_set_grid_cell(numpadGrid, LV_GRID_ALIGN_STRETCH, 1, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
+	Numpad_Create(screenGrid);
+	StaticForm_Create(screenGrid);
+	ConfigScreen_LoadMeasurement(0);
 
-	// create all cells
-	for (int i = 0; i < 12; i++)
-	{
-		lv_obj_t* btn = lv_btn_create_general(numpadGrid, &basicBtnStyle, &numpadLblStyle, numTxts[i], NumericBtn_Clicked, (void*)numTxts[i]);
-		lv_obj_set_grid_cell(btn, LV_GRID_ALIGN_STRETCH, i % 3, 1, LV_GRID_ALIGN_STRETCH, i / 3, 1);
-	}
-
-	lv_obj_t* ceBtn = lv_btn_create_general(numpadGrid, &basicBtnStyle, &numpadLblStyle, "CE", DeleteBtn_Clicked, NULL);
-	lv_obj_set_grid_cell(ceBtn, LV_GRID_ALIGN_STRETCH, 3, 1, LV_GRID_ALIGN_STRETCH, 0, 2);
-	lv_obj_t* cBtn = lv_btn_create_general(numpadGrid, &basicBtnStyle, &numpadLblStyle, "C", DeleteBtn_Clicked, &numpadLblStyle);
-	lv_obj_set_grid_cell(cBtn, LV_GRID_ALIGN_STRETCH, 3, 1, LV_GRID_ALIGN_STRETCH, 2, 2);
-
-
-	labelx = lv_label_create_general(screenGrid, &numpadLblStyle, "", NULL, NULL);
-	lv_obj_set_grid_cell(labelx, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
+	//labelx = lv_label_create_general(screenGrid, &numpadLblStyle, "", NULL, NULL);
+	//lv_obj_set_grid_cell(labelx, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
 }
+
+
 
 void ConfigScreen_Load(void)
 {

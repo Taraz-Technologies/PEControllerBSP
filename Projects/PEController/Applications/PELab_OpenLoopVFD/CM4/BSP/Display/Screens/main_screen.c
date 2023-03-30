@@ -92,11 +92,11 @@ static void MeasurementCell_Create(lv_obj_t * parent, int index)
 		bgColor = MakeColor(0, 155, 155);
 		BSP_Screen_InitGridStyle(&chNameGridStyle, 0, 0, 0, 0, &bgColor);
 		// Initialize the basic grid cell label styles
-		BSP_Screen_InitLabelStyle(&chValueLblStyle, &lv_font_montserrat_26, LV_TEXT_ALIGN_CENTER, &lvColorDarkFont);
+		BSP_Screen_InitLabelStyle(&chValueLblStyle, &lv_font_montserrat_26, LV_TEXT_ALIGN_CENTER, &lvColorStore.darkFont);
 		//lv_style_set_text_decor(&chValueLblStyle, LV_TEXT_DECOR_UNDERLINE);
-		BSP_Screen_InitLabelStyle(&chReadingTypeLblStyle, &lv_font_montserrat_14, LV_TEXT_ALIGN_RIGHT, &lvColorDarkFont);
+		BSP_Screen_InitLabelStyle(&chReadingTypeLblStyle, &lv_font_montserrat_14, LV_TEXT_ALIGN_RIGHT, &lvColorStore.darkFont);
 		lv_style_set_pad_left(&chReadingTypeLblStyle, 2);
-		BSP_Screen_InitLabelStyle(&chNameLblStyle, &lv_font_montserrat_22, LV_TEXT_ALIGN_CENTER, &lvColorDarkFont);
+		BSP_Screen_InitLabelStyle(&chNameLblStyle, &lv_font_montserrat_22, LV_TEXT_ALIGN_CENTER, &lvColorStore.darkFont);
 		init = true;
 	}
 
@@ -150,7 +150,7 @@ static void MeasurementGrid_Create(lv_obj_t* parent)
 	// create monitoring grid
 	static lv_coord_t cols[] = {LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
 	static lv_coord_t rows[] = {LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
-	lv_obj_t* grid = lv_grid_create_general(parent, cols, rows, &marginedGridStyle, NULL, NULL, NULL);
+	lv_obj_t* grid = lv_grid_create_general(parent, cols, rows, &lvStyleStore.thinMarginGrid, NULL, NULL, NULL);
 	lv_obj_set_grid_cell(grid, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
 	// create all cells
 	for (int i = 0; i < 16; i++)
@@ -191,7 +191,7 @@ static void ControlVariables_Create(lv_obj_t* parent)
 	// initialize styles once
 	if (!init)
 	{
-		BSP_Screen_InitGridStyle(&gridStyle, 0, 2, 0, 0, &lvColorBg);
+		BSP_Screen_InitGridStyle(&gridStyle, 0, 2, 0, 0, &lvColorStore.background);
 		init = true;
 	}
 
@@ -212,17 +212,17 @@ static void StartStopControl_Create(lv_obj_t* parent)
 	// initialize styles once
 	if (!init)
 	{
-		BSP_Screen_InitGridStyle(&gridStyle, 5, 5, 0, 0, &lvColorBg);
+		BSP_Screen_InitGridStyle(&gridStyle, 5, 5, 0, 0, &lvColorStore.background);
 		init = true;
 	}
 	static lv_coord_t cols[] = {LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
 	lv_obj_t* grid = lv_grid_create_general(parent, cols, singleRowCol, &gridStyle, NULL, NULL, NULL);
 	lv_obj_set_grid_cell(grid, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 2, 1);
 
-	lv_obj_t* startBtn = lv_btn_create_general(grid, &basicBtnStyle, NULL, "Start", NULL, NULL);
+	lv_obj_t* startBtn = lv_btn_create_general(grid, &lvStyleStore.defaultBtn, NULL, "Start", NULL, NULL);
 	lv_obj_set_grid_cell(startBtn, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
 
-	lv_obj_t* stopBtn = lv_btn_create_general(grid, &basicBtnStyle, NULL, "Stop", NULL, NULL);
+	lv_obj_t* stopBtn = lv_btn_create_general(grid, &lvStyleStore.defaultBtn, NULL, "Stop", NULL, NULL);
 	lv_obj_set_grid_cell(stopBtn, LV_GRID_ALIGN_STRETCH, 1, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
 }
 
@@ -230,7 +230,7 @@ static void ControlGrid_Create(lv_obj_t* parent)
 {
 	// create control grid
 	static lv_coord_t rows[] = {200, 200, LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
-	lv_obj_t* grid = lv_grid_create_general(parent, singleRowCol, rows, &basicGridStyle, NULL, NULL, NULL);
+	lv_obj_t* grid = lv_grid_create_general(parent, singleRowCol, rows, &lvStyleStore.defaultGrid, NULL, NULL, NULL);
 	lv_obj_set_grid_cell(grid, LV_GRID_ALIGN_STRETCH, 1, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
 
 	static lv_coord_t colsVar[] = {LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
@@ -258,7 +258,7 @@ static void ControlGrid_Create(lv_obj_t* parent)
 		VariableCell_Create(varGrid, var, index++);
 		var = var->next;
 	}
-	 */
+	*/
 
 	//lv_obj_t* btn = lv_btn_create_general(grid, NULL, &chValueLblStyle, "Click!", NULL, NULL);
 	//lv_obj_set_grid_cell(btn, LV_GRID_ALIGN_CENTER, 0, 1, LV_GRID_ALIGN_CENTER, 1, 1);
@@ -273,8 +273,7 @@ static void InitStyles(void)
 	// Initialize the basic grid cell container styles
 	lv_color_t bgColor = MakeColor(0, 155, 155);
 	BSP_Screen_InitGridStyle(&varCellGridStyle, 3, 0, 0, 10, &bgColor);
-	BSP_Screen_InitGridStyle(&varGridStyle, 3, 3, 0, 10, &lvColorBg);
-
+	BSP_Screen_InitGridStyle(&varGridStyle, 3, 3, 0, 10, &lvColorStore.background);
 }
 
 void MainScreen_Init(void)
@@ -285,13 +284,11 @@ void MainScreen_Init(void)
 
 	// create basic grid
 	static lv_coord_t colsScreen[] = {LV_GRID_FR(MONITORING_VIEW_WIDTH), LV_GRID_FR(CONTROL_VIEW_WIDTH), LV_GRID_TEMPLATE_LAST};
-	static lv_coord_t rowsScreen[] = {LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
-	lv_obj_t* screenGrid = lv_grid_create_general(screen, colsScreen, rowsScreen, &basicGridStyle, NULL, NULL, NULL);
+	lv_obj_t* screenGrid = lv_grid_create_general(screen, colsScreen, singleRowCol, &lvStyleStore.defaultGrid, NULL, NULL, NULL);
 	lv_obj_set_size(screenGrid, 800, 480);
 
 	MeasurementGrid_Create(screenGrid);
 	ControlGrid_Create(screenGrid);
-
 }
 
 void MainScreen_Load(void)

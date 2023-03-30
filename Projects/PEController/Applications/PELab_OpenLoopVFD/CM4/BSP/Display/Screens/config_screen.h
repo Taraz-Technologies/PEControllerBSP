@@ -32,6 +32,7 @@ extern "C" {
 #include "user_config.h"
 #if LCD_DATA_MONITORING
 #include "general_header.h"
+#include "screen_data.h"
 /********************************************************************************
  * Defines
  *******************************************************************************/

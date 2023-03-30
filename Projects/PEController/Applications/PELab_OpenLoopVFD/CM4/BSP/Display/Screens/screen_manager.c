@@ -109,8 +109,8 @@ void ScreenManager_Init(void)
 	MessageScreen_Init();
 
 
-	MainScreen_Load();
-	screenID0 = 0;
+	ConfigScreen_Load();
+	screenID0 = 1;
 
 	//HAL_Delay(40000);
 	//MessageScreen_Init();
@@ -136,10 +136,10 @@ void ScreenManager_Poll(void)
 			ConfigScreen_Unload();
 		 */
 		screenID0 = screenID1;
-		if(screenID0 == 0)
-			MainScreen_Load();
-		else if(screenID0 == 1)
-			ConfigScreen_Load();
+		//if(screenID0 == 0)
+			//MainScreen_Load();
+		//else if(screenID0 == 1)
+			//ConfigScreen_Load();
 	}
 }
 

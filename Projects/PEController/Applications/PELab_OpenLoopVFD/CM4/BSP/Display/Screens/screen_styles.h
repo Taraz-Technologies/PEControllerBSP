@@ -44,20 +44,32 @@ extern "C" {
 /********************************************************************************
  * Structures
  *******************************************************************************/
-
+typedef struct
+{
+	lv_color_t background;
+	lv_color_t black;
+	lv_color_t white;
+	lv_color_t gray;
+	lv_color_t lightFont;
+	lv_color_t mediumFont;
+	lv_color_t darkFont;
+	lv_color_t lightTaraz;
+	lv_color_t mediumTaraz;
+	lv_color_t darkTaraz;
+} lv_color_store_t;
+typedef struct
+{
+	lv_style_t defaultGrid;
+	lv_style_t thinMarginGrid;
+	lv_style_t thickMarginGrid;
+	lv_style_t defaultBtn;
+	lv_style_t auxBtn;
+} lv_style_store;
 /********************************************************************************
  * Exported Variables
  *******************************************************************************/
-extern lv_color_t lvColorBg;
-extern lv_color_t lvColorBlack;
-extern lv_color_t lvColorWhite;
-extern lv_color_t lvColorGray;
-extern lv_color_t lvColorDarkFont;
-extern lv_color_t lvColorMixFont;
-extern lv_color_t lvColorLightFont;
-extern lv_style_t basicGridStyle;
-extern lv_style_t marginedGridStyle;
-extern lv_style_t basicBtnStyle;
+extern lv_color_store_t lvColorStore;
+extern lv_style_store lvStyleStore;
 extern lv_coord_t* singleRowCol;
 /********************************************************************************
  * Global Function Prototypes
@@ -79,7 +91,8 @@ extern lv_obj_t* lv_grid_create_general(lv_obj_t* parent, lv_coord_t* cols, lv_c
 extern lv_obj_t* lv_label_create_general(lv_obj_t* parent, lv_style_t* style, const char* txt, lv_event_cb_t event_cb, void * eventData);
 extern lv_obj_t* lv_btn_create_general(lv_obj_t* parent, lv_style_t* btnStyle, lv_style_t* lblStyle, const char* txt, lv_event_cb_t event_cb, void * eventData);
 extern lv_obj_t* lv_textarea_create_general(lv_obj_t* parent, lv_style_t* style, const char* txt, lv_event_cb_t event_cb, void * eventData);
-lv_obj_t* lv_create_field_display(lv_obj_t* parent, lv_style_t* nameLblStyle, lv_style_t* fieldStyle, const char* fieldName, uint8_t row);
+extern lv_obj_t* lv_create_textfield_display(lv_obj_t* parent, lv_style_t* nameLblStyle, lv_style_t* fieldStyle, const char* fieldName,  const char* fieldValue, lv_event_cb_t event_cb, void * eventData, uint8_t row);
+extern lv_obj_t* lv_create_field(lv_obj_t* parent, lv_style_t* nameLblStyle, const char* fieldName, lv_obj_t* field, uint8_t row);
 extern void BSP_Styles_Init(void);
 /********************************************************************************
  * Code

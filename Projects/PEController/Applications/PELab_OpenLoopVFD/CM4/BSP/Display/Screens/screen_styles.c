@@ -41,21 +41,25 @@
 /********************************************************************************
  * Static Variables
  *******************************************************************************/
-static lv_color_t defaultBtnColor;
+static lv_color_t basicBtnColor;
+static lv_color_t basicBtn2Color;
 /********************************************************************************
  * Global Variables
  *******************************************************************************/
-lv_color_t lvColorBg;
-lv_color_t lvColorBlack;
-lv_color_t lvColorWhite;
-lv_color_t lvColorGray;
-lv_color_t lvColorDarkFont;
-lv_color_t lvColorMixFont;
-lv_color_t lvColorLightFont;
-lv_color_t lvColorTaraz;
-lv_style_t basicGridStyle;
-lv_style_t marginedGridStyle;
-lv_style_t basicBtnStyle;
+lv_color_store_t lvColorStore;
+lv_style_store lvStyleStore;
+//lv_color_t lvColorBg;
+//lv_color_t lvColorBlack;
+//lv_color_t lvColorWhite;
+//lv_color_t lvColorGray;
+//lv_color_t lvColorDarkFont;
+//lv_color_t lvColorMixFont;
+//lv_color_t lvColorLightFont;
+//lv_color_t lvColorTaraz;
+//lv_style_t basicGridStyle;
+//lv_style_t marginedGridStyle;
+//lv_style_t basicBtnStyle;
+//lv_style_t basicBtn2Style;
 lv_coord_t* singleRowCol;
 /********************************************************************************
  * Function Prototypes
@@ -75,15 +79,25 @@ lv_color_t MakeColor(uint8_t r, uint8_t g, uint8_t b)
 	return bgColor;
 }
 
-lv_obj_t* lv_create_field_display(lv_obj_t* parent, lv_style_t* nameLblStyle, lv_style_t* fieldStyle, const char* fieldName, uint8_t row)
+lv_obj_t* lv_create_textfield_display(lv_obj_t* parent, lv_style_t* nameLblStyle, lv_style_t* fieldStyle, const char* fieldName, const char* fieldValue, lv_event_cb_t event_cb, void * eventData, uint8_t row)
 {
 	lv_obj_t* lblName = lv_label_create_general(parent, nameLblStyle, fieldName, NULL, NULL);
 	lv_obj_set_grid_cell(lblName, LV_GRID_ALIGN_START, 0, 1, LV_GRID_ALIGN_CENTER, row, 1);
 
-	lv_obj_t* lblField = lv_textarea_create_general(parent, nameLblStyle, "text", NULL, NULL);
-	lv_obj_set_grid_cell(lblField, LV_GRID_ALIGN_STRETCH, 1, 1, LV_GRID_ALIGN_STRETCH, row, 1);
+	lv_obj_t* taField = lv_textarea_create_general(parent, nameLblStyle, fieldValue, event_cb, eventData);
+	lv_obj_set_grid_cell(taField, LV_GRID_ALIGN_STRETCH, 1, 1, LV_GRID_ALIGN_STRETCH, row, 1);
 
-	return lblField;
+	return taField;
+}
+
+lv_obj_t* lv_create_field(lv_obj_t* parent, lv_style_t* nameLblStyle, const char* fieldName, lv_obj_t* field, uint8_t row)
+{
+	lv_obj_t* lblName = lv_label_create_general(parent, nameLblStyle, fieldName, NULL, NULL);
+	lv_obj_set_grid_cell(lblName, LV_GRID_ALIGN_START, 0, 1, LV_GRID_ALIGN_CENTER, row, 1);
+
+	lv_obj_set_grid_cell(field, LV_GRID_ALIGN_STRETCH, 1, 1, LV_GRID_ALIGN_STRETCH, row, 1);
+
+	return field;
 }
 
 lv_obj_t* lv_btn_create_general(lv_obj_t* parent, lv_style_t* btnStyle, lv_style_t* lblStyle, const char* txt, lv_event_cb_t event_cb, void * eventData)
@@ -112,13 +126,15 @@ lv_obj_t* lv_label_create_general(lv_obj_t* parent, lv_style_t* style, const cha
 
 lv_obj_t* lv_textarea_create_general(lv_obj_t* parent, lv_style_t* style, const char* txt, lv_event_cb_t event_cb, void * eventData)
 {
-	lv_obj_t* lbl = lv_textarea_create(parent);
+	lv_obj_t* ta = lv_textarea_create(parent);
 	if (style != NULL)
-		lv_obj_add_style(lbl, style, 0);
+		lv_obj_add_style(ta, style, 0);
 	if (event_cb != NULL)
-		lv_obj_add_event_cb(lbl, event_cb, LV_EVENT_CLICKED, eventData);
-	//lv_label_set_text(lbl, txt != NULL ? txt : "");
-	return lbl;
+		lv_obj_add_event_cb(ta, event_cb, LV_EVENT_CLICKED, eventData);
+	lv_textarea_set_one_line(ta, true);
+	lv_obj_align(ta, LV_ALIGN_TOP_LEFT, 0, 0);
+	lv_textarea_add_text(ta, txt);
+	return ta;
 }
 
 lv_obj_t* lv_grid_create_general(lv_obj_t* parent, lv_coord_t* cols, lv_coord_t* rows, lv_style_t* style, lv_color_t* bgColor, lv_event_cb_t event_cb, void * eventData)
@@ -196,20 +212,26 @@ void BSP_Screen_InitBtnStyle(lv_style_t* style, lv_coord_t border, lv_coord_t ra
 
 void BSP_Styles_Init(void)
 {
-	lvColorBg = MakeColor(210, 210, 210);
-	lvColorBlack = MakeColor(0, 0, 0);
-	lvColorWhite = MakeColor(127, 127, 127);
-	lvColorGray = MakeColor(255, 255, 255);
-	lvColorDarkFont = MakeColor(0, 0, 0);
-	lvColorMixFont = MakeColor(127, 127, 127);
-	lvColorLightFont = MakeColor(255, 255, 255);
-	lvColorTaraz = MakeColor(0, 155, 155);
-	defaultBtnColor = MakeColor(0, 210, 210);
+	// initialize colors
+	lvColorStore.background = MakeColor(210, 210, 210);
+	lvColorStore.black = MakeColor(0, 0, 0);
+	lvColorStore.white = MakeColor(127, 127, 127);
+	lvColorStore.gray = MakeColor(255, 255, 255);
+	lvColorStore.darkFont = MakeColor(0, 0, 0);
+	lvColorStore.mediumFont = MakeColor(127, 127, 127);
+	lvColorStore.lightFont = MakeColor(255, 255, 255);
+	lvColorStore.darkTaraz = MakeColor(0, 75, 75);
+	lvColorStore.mediumTaraz = MakeColor(0, 155, 155);
+	lvColorStore.lightTaraz = MakeColor(0, 200, 200);
+	basicBtnColor = MakeColor(0, 180, 180);
+	basicBtn2Color = MakeColor(30, 150, 120);
 	static lv_coord_t singleCoord[] = {LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
 	singleRowCol = singleCoord;
-	BSP_Screen_InitBtnStyle(&basicBtnStyle, 1, 10, &defaultBtnColor);
-	BSP_Screen_InitGridStyle(&basicGridStyle, 0, 0, 0, 0, &lvColorBg);
-	BSP_Screen_InitGridStyle(&marginedGridStyle, 2, 2, 0, 0, &lvColorBg);
+	BSP_Screen_InitGridStyle(&lvStyleStore.defaultGrid, 0, 0, 0, 0, &lvColorStore.background);
+	BSP_Screen_InitGridStyle(&lvStyleStore.thinMarginGrid, 2, 2, 0, 0, &lvColorStore.background);
+	BSP_Screen_InitGridStyle(&lvStyleStore.thickMarginGrid, 8, 8, 0, 0, &lvColorStore.background);
+	BSP_Screen_InitBtnStyle(&lvStyleStore.defaultBtn, 1, 10, &basicBtnColor);
+	BSP_Screen_InitBtnStyle(&lvStyleStore.auxBtn, 1, 10, &basicBtn2Color);
 }
 
 
