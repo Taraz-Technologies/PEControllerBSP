@@ -53,6 +53,9 @@ typedef struct
 	lv_color_t lightFont;
 	lv_color_t mediumFont;
 	lv_color_t darkFont;
+	lv_color_t btnBg1;
+	lv_color_t btnBg2;
+	lv_color_t btnBg3;
 	lv_color_t lightTaraz;
 	lv_color_t mediumTaraz;
 	lv_color_t darkTaraz;
@@ -62,8 +65,10 @@ typedef struct
 	lv_style_t defaultGrid;
 	lv_style_t thinMarginGrid;
 	lv_style_t thickMarginGrid;
-	lv_style_t defaultBtn;
-	lv_style_t auxBtn;
+	lv_style_t defaultTextArea;
+	lv_style_t btn1;
+	lv_style_t btn2;
+	lv_style_t btn3;
 } lv_style_store;
 /********************************************************************************
  * Exported Variables

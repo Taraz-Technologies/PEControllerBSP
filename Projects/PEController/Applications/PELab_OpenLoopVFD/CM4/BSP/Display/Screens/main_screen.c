@@ -85,12 +85,9 @@ static void MeasurementCell_Create(lv_obj_t * parent, int index)
 	// initialize styles once
 	if (!init)
 	{
-		lv_color_t bgColor = MakeColor(20, 155, 155);
-		BSP_Screen_InitGridStyle(&cellGridStyle, 1, 0, 0, 5, &bgColor);
-		bgColor = MakeColor(20, 200, 50);
-		BSP_Screen_InitGridStyle(&chValueTypeGridStyle, 0, 0, 0, 0, &bgColor);
-		bgColor = MakeColor(0, 155, 155);
-		BSP_Screen_InitGridStyle(&chNameGridStyle, 0, 0, 0, 0, &bgColor);
+		BSP_Screen_InitGridStyle(&cellGridStyle, 1, 0, 0, 5, &lvColorStore.mediumTaraz);
+		BSP_Screen_InitGridStyle(&chValueTypeGridStyle, 0, 0, 0, 0, &lvColorStore.background);
+		BSP_Screen_InitGridStyle(&chNameGridStyle, 0, 0, 0, 0, &lvColorStore.mediumTaraz);
 		// Initialize the basic grid cell label styles
 		BSP_Screen_InitLabelStyle(&chValueLblStyle, &lv_font_montserrat_26, LV_TEXT_ALIGN_CENTER, &lvColorStore.darkFont);
 		//lv_style_set_text_decor(&chValueLblStyle, LV_TEXT_DECOR_UNDERLINE);
@@ -219,10 +216,10 @@ static void StartStopControl_Create(lv_obj_t* parent)
 	lv_obj_t* grid = lv_grid_create_general(parent, cols, singleRowCol, &gridStyle, NULL, NULL, NULL);
 	lv_obj_set_grid_cell(grid, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 2, 1);
 
-	lv_obj_t* startBtn = lv_btn_create_general(grid, &lvStyleStore.defaultBtn, NULL, "Start", NULL, NULL);
+	lv_obj_t* startBtn = lv_btn_create_general(grid, &lvStyleStore.btn2, NULL, "Start", NULL, NULL);
 	lv_obj_set_grid_cell(startBtn, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
 
-	lv_obj_t* stopBtn = lv_btn_create_general(grid, &lvStyleStore.defaultBtn, NULL, "Stop", NULL, NULL);
+	lv_obj_t* stopBtn = lv_btn_create_general(grid, &lvStyleStore.btn2, NULL, "Stop", NULL, NULL);
 	lv_obj_set_grid_cell(stopBtn, LV_GRID_ALIGN_STRETCH, 1, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
 }
 
