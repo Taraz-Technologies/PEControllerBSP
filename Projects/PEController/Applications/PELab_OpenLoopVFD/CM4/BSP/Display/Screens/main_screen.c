@@ -89,7 +89,7 @@ static void MeasurementCell_Create(lv_obj_t * parent, int index)
 		BSP_Screen_InitGridStyle(&chValueTypeGridStyle, 0, 0, 0, 0, &lvColorStore.background);
 		BSP_Screen_InitGridStyle(&chNameGridStyle, 0, 0, 0, 0, &lvColorStore.mediumTaraz);
 		// Initialize the basic grid cell label styles
-		BSP_Screen_InitLabelStyle(&chValueLblStyle, &lv_font_montserrat_26, LV_TEXT_ALIGN_CENTER, &lvColorStore.darkFont);
+		BSP_Screen_InitLabelStyle(&chValueLblStyle, &lv_font_montserrat_22, LV_TEXT_ALIGN_CENTER, &lvColorStore.darkFont);
 		//lv_style_set_text_decor(&chValueLblStyle, LV_TEXT_DECOR_UNDERLINE);
 		BSP_Screen_InitLabelStyle(&chReadingTypeLblStyle, &lv_font_montserrat_14, LV_TEXT_ALIGN_RIGHT, &lvColorStore.darkFont);
 		lv_style_set_pad_left(&chReadingTypeLblStyle, 2);
