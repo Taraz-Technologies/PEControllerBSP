@@ -98,6 +98,8 @@ void Error_Handler(void);
 #define CTP_I2C_SCL_GPIO_Port GPIOH
 #define CTP_I2C_SDA_Pin GPIO_PIN_5
 #define CTP_I2C_SDA_GPIO_Port GPIOH
+#define CS1_Pin GPIO_PIN_2
+#define CS1_GPIO_Port GPIOB
 #define maxD11_Pin GPIO_PIN_11
 #define maxD11_GPIO_Port GPIOF
 #define maxD12_Pin GPIO_PIN_12
@@ -114,6 +116,8 @@ void Error_Handler(void);
 #define maxCNV2_GPIO_Port GPIOB
 #define LCD_Disp_Pin GPIO_PIN_2
 #define LCD_Disp_GPIO_Port GPIOI
+#define CS2_Pin GPIO_PIN_15
+#define CS2_GPIO_Port GPIOA
 #define RD_Pin GPIO_PIN_10
 #define RD_GPIO_Port GPIOC
 #define VAL_Pin GPIO_PIN_11

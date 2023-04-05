@@ -191,7 +191,7 @@ static inline void MeasureConvert_BothADCs(float* dataPtr, const float* mults, c
 #if LCD_DATA_MONITORING
 	//static int ind = 0;
 	//if (++ind % 10 == 0)
-		BSP_Display_UpdateMeasurements(dataPtrOriginal);
+	BSP_Display_UpdateMeasurements(dataPtrOriginal);
 #endif
 }
 #pragma GCC pop_options
@@ -301,12 +301,13 @@ void BSP_MAX11046_Init(adc_acq_mode_t type, adc_cont_config_t* contConfig)
 	intelliSENS_Configure();
 #endif
 
-	HAL_DMA_Start(&hdma_tim8_ch1, (uint32_t)&rd1, (uint32_t)&GPIOC->BSRR, 1);
+	HAL_DMA_Start(&hdma_tim8_ch1, (uint32_t)&rd1, (uint32_t)&GPIOC->BSRR, 16);
 	HAL_DMA_Start(&hdma_tim8_ch2, (uint32_t)&rdd[0], (uint32_t)&GPIOC->BSRR, 2);
-	HAL_DMA_Start(&hdma_tim8_ch3, (uint32_t)&rd2, (uint32_t)&GPIOC->BSRR, 1);
+	HAL_DMA_Start(&hdma_tim8_ch3, (uint32_t)&rd2, (uint32_t)&GPIOC->BSRR, 16);
 	htim8.Instance->DIER = 0xe00;
 	htim8.Instance->CCER |= (uint32_t)(1U << ((TIM_CHANNEL_1 | TIM_CHANNEL_2| TIM_CHANNEL_3) & 0x1FU));
 	__HAL_TIM_MOE_ENABLE(&htim8);
+	__HAL_TIM_ENABLE_IT(&htim8, TIM_IT_UPDATE);
 
 	acqType = type;
 	adcContConfig.conversionCycleTimeUs = contConfig->conversionCycleTimeUs;
@@ -434,20 +435,45 @@ void BSP_MAX11046_DeInit(void)
 	moduleActive = false;
 }
 
+static bool reset = true;
+
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
 	if(GPIO_Pin == maxBusy1_Pin)
 	{
+		reset = true;
+		GPIOB->BSRR = (1U << 2);
+		GPIOA->BSRR = (1U << (15 + 16));
 		__HAL_TIM_ENABLE(&htim8);
 		//HAL_TIM_PWM_Start(&htim8,TIM_CHANNEL_1);
 		//HAL_TIM_PWM_Start(&htim8,TIM_CHANNEL_2);
-/*
+		/*
 		MeasureConvert_BothADCs((float*)&adcVals, (const float*)&adcMultipiers, (const float*)&adcOffsets);
 		if(adcContConfig.callback)
 			adcContConfig.callback(&adcVals);
-*/
+		 */
 
 	}
 }
+
+//void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+void TIM8_UP_TIM13_IRQHandler(void)
+{
+	__HAL_TIM_CLEAR_IT(&htim8, TIM_IT_UPDATE);
+	if (reset == true)
+	{
+		reset = false;
+		GPIOB->BSRR = (1U << (2 + 16));
+		GPIOA->BSRR = (1U << 15);
+		__HAL_TIM_ENABLE(&htim8);
+	}
+	else
+	{
+		GPIOB->BSRR = (1U << (2 + 16));
+		GPIOA->BSRR = (1U << (15 + 16));
+	}
+}
+
+
 
 /* EOF */
