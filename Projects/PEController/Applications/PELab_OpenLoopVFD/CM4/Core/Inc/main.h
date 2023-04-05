@@ -114,6 +114,10 @@ void Error_Handler(void);
 #define maxCNV2_GPIO_Port GPIOB
 #define LCD_Disp_Pin GPIO_PIN_2
 #define LCD_Disp_GPIO_Port GPIOI
+#define RD_Pin GPIO_PIN_10
+#define RD_GPIO_Port GPIOC
+#define VAL_Pin GPIO_PIN_11
+#define VAL_GPIO_Port GPIOC
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */

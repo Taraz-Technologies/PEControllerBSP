@@ -278,7 +278,13 @@ static void ConfigureMeasurements(void)
 	}
 #endif
 }
-
+uint32_t rd1 = (1U << 10);
+uint32_t rd2 = (1U << 26);
+uint32_t rdd[] = {(1U << 11), (1U << 27)};
+extern TIM_HandleTypeDef htim8;
+extern DMA_HandleTypeDef hdma_tim8_ch1;
+extern DMA_HandleTypeDef hdma_tim8_ch2;
+extern DMA_HandleTypeDef hdma_tim8_ch3;
 /**
  * @brief Initializes the MAX11046 drivers
  * @param type- ADC_MODE_SINGLE or ADC_MODE_CONT for single or continuous conversions respectively
@@ -294,6 +300,13 @@ void BSP_MAX11046_Init(adc_acq_mode_t type, adc_cont_config_t* contConfig)
 #if ENABLE_INTELLISENS
 	intelliSENS_Configure();
 #endif
+
+	HAL_DMA_Start(&hdma_tim8_ch1, (uint32_t)&rd1, (uint32_t)&GPIOC->BSRR, 1);
+	HAL_DMA_Start(&hdma_tim8_ch2, (uint32_t)&rdd[0], (uint32_t)&GPIOC->BSRR, 2);
+	HAL_DMA_Start(&hdma_tim8_ch3, (uint32_t)&rd2, (uint32_t)&GPIOC->BSRR, 1);
+	htim8.Instance->DIER = 0xe00;
+	htim8.Instance->CCER |= (uint32_t)(1U << ((TIM_CHANNEL_1 | TIM_CHANNEL_2| TIM_CHANNEL_3) & 0x1FU));
+	__HAL_TIM_MOE_ENABLE(&htim8);
 
 	acqType = type;
 	adcContConfig.conversionCycleTimeUs = contConfig->conversionCycleTimeUs;
@@ -425,9 +438,15 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
 	if(GPIO_Pin == maxBusy1_Pin)
 	{
+		__HAL_TIM_ENABLE(&htim8);
+		//HAL_TIM_PWM_Start(&htim8,TIM_CHANNEL_1);
+		//HAL_TIM_PWM_Start(&htim8,TIM_CHANNEL_2);
+/*
 		MeasureConvert_BothADCs((float*)&adcVals, (const float*)&adcMultipiers, (const float*)&adcOffsets);
 		if(adcContConfig.callback)
 			adcContConfig.callback(&adcVals);
+*/
+
 	}
 }
 

@@ -53,6 +53,7 @@
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
+static void MX_DMA_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -106,6 +107,7 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   /* USER CODE BEGIN 2 */
 	sharedData->m7Tom4.periodUs = SAMPLING_TIME_US;
 	MainControl_Init();
@@ -200,6 +202,17 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+}
+
+/**
+  * Enable DMA controller clock
+  */
+static void MX_DMA_Init(void)
+{
+
+  /* DMA controller clock enable */
+  __HAL_RCC_DMA1_CLK_ENABLE();
+
 }
 
 /**

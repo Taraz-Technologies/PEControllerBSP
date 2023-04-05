@@ -24,6 +24,11 @@
 /* USER CODE BEGIN Includes */
 
 /* USER CODE END Includes */
+extern DMA_HandleTypeDef hdma_tim8_ch1;
+
+extern DMA_HandleTypeDef hdma_tim8_ch2;
+
+extern DMA_HandleTypeDef hdma_tim8_up;
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN TD */
@@ -81,6 +86,84 @@ void HAL_MspInit(void)
 }
 
 /**
+* @brief TIM_PWM MSP Initialization
+* This function configures the hardware resources used in this example
+* @param htim_pwm: TIM_PWM handle pointer
+* @retval None
+*/
+void HAL_TIM_PWM_MspInit(TIM_HandleTypeDef* htim_pwm)
+{
+  if(htim_pwm->Instance==TIM8)
+  {
+  /* USER CODE BEGIN TIM8_MspInit 0 */
+
+  /* USER CODE END TIM8_MspInit 0 */
+    /* Peripheral clock enable */
+    __HAL_RCC_TIM8_CLK_ENABLE();
+
+    /* TIM8 DMA Init */
+    /* TIM8_CH1 Init */
+    hdma_tim8_ch1.Instance = DMA1_Stream0;
+    hdma_tim8_ch1.Init.Request = DMA_REQUEST_TIM8_CH1;
+    hdma_tim8_ch1.Init.Direction = DMA_MEMORY_TO_PERIPH;
+    hdma_tim8_ch1.Init.PeriphInc = DMA_PINC_DISABLE;
+    hdma_tim8_ch1.Init.MemInc = DMA_MINC_DISABLE;
+    hdma_tim8_ch1.Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD;
+    hdma_tim8_ch1.Init.MemDataAlignment = DMA_MDATAALIGN_WORD;
+    hdma_tim8_ch1.Init.Mode = DMA_CIRCULAR;
+    hdma_tim8_ch1.Init.Priority = DMA_PRIORITY_HIGH;
+    hdma_tim8_ch1.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
+    if (HAL_DMA_Init(&hdma_tim8_ch1) != HAL_OK)
+    {
+      Error_Handler();
+    }
+
+    __HAL_LINKDMA(htim_pwm,hdma[TIM_DMA_ID_CC1],hdma_tim8_ch1);
+
+    /* TIM8_CH2 Init */
+    hdma_tim8_ch2.Instance = DMA1_Stream1;
+    hdma_tim8_ch2.Init.Request = DMA_REQUEST_TIM8_CH2;
+    hdma_tim8_ch2.Init.Direction = DMA_MEMORY_TO_PERIPH;
+    hdma_tim8_ch2.Init.PeriphInc = DMA_PINC_DISABLE;
+    hdma_tim8_ch2.Init.MemInc = DMA_MINC_ENABLE;
+    hdma_tim8_ch2.Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD;
+    hdma_tim8_ch2.Init.MemDataAlignment = DMA_MDATAALIGN_WORD;
+    hdma_tim8_ch2.Init.Mode = DMA_CIRCULAR;
+    hdma_tim8_ch2.Init.Priority = DMA_PRIORITY_HIGH;
+    hdma_tim8_ch2.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
+    if (HAL_DMA_Init(&hdma_tim8_ch2) != HAL_OK)
+    {
+      Error_Handler();
+    }
+
+    __HAL_LINKDMA(htim_pwm,hdma[TIM_DMA_ID_CC2],hdma_tim8_ch2);
+
+    /* TIM8_UP Init */
+    hdma_tim8_up.Instance = DMA1_Stream2;
+    hdma_tim8_up.Init.Request = DMA_REQUEST_TIM8_UP;
+    hdma_tim8_up.Init.Direction = DMA_MEMORY_TO_PERIPH;
+    hdma_tim8_up.Init.PeriphInc = DMA_PINC_DISABLE;
+    hdma_tim8_up.Init.MemInc = DMA_MINC_DISABLE;
+    hdma_tim8_up.Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD;
+    hdma_tim8_up.Init.MemDataAlignment = DMA_MDATAALIGN_WORD;
+    hdma_tim8_up.Init.Mode = DMA_CIRCULAR;
+    hdma_tim8_up.Init.Priority = DMA_PRIORITY_HIGH;
+    hdma_tim8_up.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
+    if (HAL_DMA_Init(&hdma_tim8_up) != HAL_OK)
+    {
+      Error_Handler();
+    }
+
+    __HAL_LINKDMA(htim_pwm,hdma[TIM_DMA_ID_UPDATE],hdma_tim8_up);
+
+  /* USER CODE BEGIN TIM8_MspInit 1 */
+
+  /* USER CODE END TIM8_MspInit 1 */
+  }
+
+}
+
+/**
 * @brief TIM_Base MSP Initialization
 * This function configures the hardware resources used in this example
 * @param htim_base: TIM_Base handle pointer
@@ -128,6 +211,33 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef* htim)
   }
 
 }
+/**
+* @brief TIM_PWM MSP De-Initialization
+* This function freeze the hardware resources used in this example
+* @param htim_pwm: TIM_PWM handle pointer
+* @retval None
+*/
+void HAL_TIM_PWM_MspDeInit(TIM_HandleTypeDef* htim_pwm)
+{
+  if(htim_pwm->Instance==TIM8)
+  {
+  /* USER CODE BEGIN TIM8_MspDeInit 0 */
+
+  /* USER CODE END TIM8_MspDeInit 0 */
+    /* Peripheral clock disable */
+    __HAL_RCC_TIM8_CLK_DISABLE();
+
+    /* TIM8 DMA DeInit */
+    HAL_DMA_DeInit(htim_pwm->hdma[TIM_DMA_ID_CC1]);
+    HAL_DMA_DeInit(htim_pwm->hdma[TIM_DMA_ID_CC2]);
+    HAL_DMA_DeInit(htim_pwm->hdma[TIM_DMA_ID_UPDATE]);
+  /* USER CODE BEGIN TIM8_MspDeInit 1 */
+
+  /* USER CODE END TIM8_MspDeInit 1 */
+  }
+
+}
+
 /**
 * @brief TIM_Base MSP De-Initialization
 * This function freeze the hardware resources used in this example

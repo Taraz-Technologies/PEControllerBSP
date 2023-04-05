@@ -56,43 +56,47 @@ typedef StaticSemaphore_t osStaticSemaphoreDef_t;
 
 /* Private variables ---------------------------------------------------------*/
 
+TIM_HandleTypeDef htim8;
 TIM_HandleTypeDef htim17;
+DMA_HandleTypeDef hdma_tim8_ch1;
+DMA_HandleTypeDef hdma_tim8_ch2;
+DMA_HandleTypeDef hdma_tim8_up;
 
 /* Definitions for defaultTask */
 osThreadId_t defaultTaskHandle;
 const osThreadAttr_t defaultTask_attributes = {
-		.name = "defaultTask",
-		.stack_size = 128 * 4,
-		.priority = (osPriority_t) osPriorityLow,
+  .name = "defaultTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityLow,
 };
 /* Definitions for lvglGUITask */
 osThreadId_t lvglGUITaskHandle;
 const osThreadAttr_t lvglGUITask_attributes = {
-		.name = "lvglGUITask",
-		.stack_size = 1024 * 4,
-		.priority = (osPriority_t) osPriorityNormal,
+  .name = "lvglGUITask",
+  .stack_size = 1024 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for lvglTickTask */
 osThreadId_t lvglTickTaskHandle;
 const osThreadAttr_t lvglTickTask_attributes = {
-		.name = "lvglTickTask",
-		.stack_size = 512 * 4,
-		.priority = (osPriority_t) osPriorityHigh,
+  .name = "lvglTickTask",
+  .stack_size = 512 * 4,
+  .priority = (osPriority_t) osPriorityHigh,
 };
 /* Definitions for tsTask */
 osThreadId_t tsTaskHandle;
 const osThreadAttr_t tsTask_attributes = {
-		.name = "tsTask",
-		.stack_size = 256 * 4,
-		.priority = (osPriority_t) osPriorityLow,
+  .name = "tsTask",
+  .stack_size = 256 * 4,
+  .priority = (osPriority_t) osPriorityLow,
 };
 /* Definitions for touchSemaphore */
 osSemaphoreId_t touchSemaphoreHandle;
 osStaticSemaphoreDef_t touchSemaphoreControlBlock;
 const osSemaphoreAttr_t touchSemaphore_attributes = {
-		.name = "touchSemaphore",
-		.cb_mem = &touchSemaphoreControlBlock,
-		.cb_size = sizeof(touchSemaphoreControlBlock),
+  .name = "touchSemaphore",
+  .cb_mem = &touchSemaphoreControlBlock,
+  .cb_size = sizeof(touchSemaphoreControlBlock),
 };
 /* USER CODE BEGIN PV */
 // intelliSENS
@@ -108,7 +112,9 @@ const osThreadAttr_t intelliSENSTask_attributes = {
 
 /* Private function prototypes -----------------------------------------------*/
 static void MX_GPIO_Init(void);
+static void MX_DMA_Init(void);
 static void MX_TIM17_Init(void);
+static void MX_TIM8_Init(void);
 void StartDefaultTask(void *argument);
 void StartLvglGUITask(void *argument);
 void StartLvglTickTask(void *argument);
@@ -148,17 +154,17 @@ static void DataProcessingCallback(adc_measures_t* result)
 /* USER CODE END 0 */
 
 /**
- * @brief  The application entry point.
- * @retval int
- */
+  * @brief  The application entry point.
+  * @retval int
+  */
 int main(void)
 {
-	/* USER CODE BEGIN 1 */
+  /* USER CODE BEGIN 1 */
 	memset((void*)&(sharedData->m4Tom7), 0, sizeof(m4_to_m7_data_t));
 	sharedData->m4Tom7.lastDataPointer = sharedData->m4Tom7.dataRecord;
-	/* USER CODE END 1 */
+  /* USER CODE END 1 */
 
-	/* USER CODE BEGIN Boot_Mode_Sequence_1 */
+/* USER CODE BEGIN Boot_Mode_Sequence_1 */
 	/*HW semaphore Clock enable*/
 	__HAL_RCC_HSEM_CLK_ENABLE();
 	/* Activate HSEM notification for Cortex-M4*/
@@ -172,24 +178,26 @@ int main(void)
 	/* Clear HSEM flag */
 	__HAL_HSEM_CLEAR_FLAG(__HAL_HSEM_SEMID_TO_MASK(HSEM_ID_0));
 
-	/* USER CODE END Boot_Mode_Sequence_1 */
-	/* MCU Configuration--------------------------------------------------------*/
+/* USER CODE END Boot_Mode_Sequence_1 */
+  /* MCU Configuration--------------------------------------------------------*/
 
-	/* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-	HAL_Init();
+  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+  HAL_Init();
 
-	/* USER CODE BEGIN Init */
+  /* USER CODE BEGIN Init */
 
-	/* USER CODE END Init */
+  /* USER CODE END Init */
 
-	/* USER CODE BEGIN SysInit */
+  /* USER CODE BEGIN SysInit */
 
-	/* USER CODE END SysInit */
+  /* USER CODE END SysInit */
 
-	/* Initialize all configured peripherals */
-	MX_GPIO_Init();
-	MX_TIM17_Init();
-	/* USER CODE BEGIN 2 */
+  /* Initialize all configured peripherals */
+  MX_GPIO_Init();
+  MX_DMA_Init();
+  MX_TIM17_Init();
+  MX_TIM8_Init();
+  /* USER CODE BEGIN 2 */
 	BSP_Display_Init();
 	BSP_Display_ShowLogo();
 	HAL_TIM_PWM_Start(&htim17,TIM_CHANNEL_1);			// LCD Brightness
@@ -198,212 +206,322 @@ int main(void)
 			.conversionCycleTimeUs = sharedData->m7Tom4.periodUs };
 	BSP_MAX11046_Init(ADC_MODE_CONT, &adcConfig);
 	BSP_MAX11046_Run();
-	/* USER CODE END 2 */
+  /* USER CODE END 2 */
 
-	/* Init scheduler */
-	osKernelInitialize();
+  /* Init scheduler */
+  osKernelInitialize();
 
-	/* USER CODE BEGIN RTOS_MUTEX */
+  /* USER CODE BEGIN RTOS_MUTEX */
 	/* add mutexes, ... */
-	/* USER CODE END RTOS_MUTEX */
+  /* USER CODE END RTOS_MUTEX */
 
-	/* Create the semaphores(s) */
-	/* creation of touchSemaphore */
-	touchSemaphoreHandle = osSemaphoreNew(1, 1, &touchSemaphore_attributes);
+  /* Create the semaphores(s) */
+  /* creation of touchSemaphore */
+  touchSemaphoreHandle = osSemaphoreNew(1, 1, &touchSemaphore_attributes);
 
-	/* USER CODE BEGIN RTOS_SEMAPHORES */
+  /* USER CODE BEGIN RTOS_SEMAPHORES */
 	/* add semaphores, ... */
-	/* USER CODE END RTOS_SEMAPHORES */
+  /* USER CODE END RTOS_SEMAPHORES */
 
-	/* USER CODE BEGIN RTOS_TIMERS */
+  /* USER CODE BEGIN RTOS_TIMERS */
 	/* start timers, add new ones, ... */
-	/* USER CODE END RTOS_TIMERS */
+  /* USER CODE END RTOS_TIMERS */
 
-	/* USER CODE BEGIN RTOS_QUEUES */
+  /* USER CODE BEGIN RTOS_QUEUES */
 	/* add queues, ... */
-	/* USER CODE END RTOS_QUEUES */
+  /* USER CODE END RTOS_QUEUES */
 
-	/* Create the thread(s) */
-	/* creation of defaultTask */
-	defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
+  /* Create the thread(s) */
+  /* creation of defaultTask */
+  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
 
-	/* creation of lvglGUITask */
-	lvglGUITaskHandle = osThreadNew(StartLvglGUITask, NULL, &lvglGUITask_attributes);
+  /* creation of lvglGUITask */
+  lvglGUITaskHandle = osThreadNew(StartLvglGUITask, NULL, &lvglGUITask_attributes);
 
-	/* creation of lvglTickTask */
-	lvglTickTaskHandle = osThreadNew(StartLvglTickTask, NULL, &lvglTickTask_attributes);
+  /* creation of lvglTickTask */
+  lvglTickTaskHandle = osThreadNew(StartLvglTickTask, NULL, &lvglTickTask_attributes);
 
-	/* creation of tsTask */
-	tsTaskHandle = osThreadNew(StartTSTask, NULL, &tsTask_attributes);
+  /* creation of tsTask */
+  tsTaskHandle = osThreadNew(StartTSTask, NULL, &tsTask_attributes);
 
-	/* USER CODE BEGIN RTOS_THREADS */
+  /* USER CODE BEGIN RTOS_THREADS */
 #if ENABLE_INTELLISENS
 	intelliSENSTaskHandle = osThreadNew(StartintelliSENSTask, NULL, &intelliSENSTask_attributes);
 #endif
-	/* USER CODE END RTOS_THREADS */
+  /* USER CODE END RTOS_THREADS */
 
-	/* USER CODE BEGIN RTOS_EVENTS */
+  /* USER CODE BEGIN RTOS_EVENTS */
 	/* add events, ... */
-	/* USER CODE END RTOS_EVENTS */
+  /* USER CODE END RTOS_EVENTS */
 
-	/* Start scheduler */
-	osKernelStart();
+  /* Start scheduler */
+  osKernelStart();
 
-	/* We should never get here as control is now taken by the scheduler */
-	/* Infinite loop */
-	/* USER CODE BEGIN WHILE */
+  /* We should never get here as control is now taken by the scheduler */
+  /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
 	while (1)
 	{
 
-		/* USER CODE END WHILE */
+    /* USER CODE END WHILE */
 
-		/* USER CODE BEGIN 3 */
+    /* USER CODE BEGIN 3 */
 	}
-	/* USER CODE END 3 */
+  /* USER CODE END 3 */
 }
 
 /**
- * @brief TIM17 Initialization Function
- * @param None
- * @retval None
- */
+  * @brief TIM8 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM8_Init(void)
+{
+
+  /* USER CODE BEGIN TIM8_Init 0 */
+
+  /* USER CODE END TIM8_Init 0 */
+
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+  TIM_OC_InitTypeDef sConfigOC = {0};
+  TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig = {0};
+
+  /* USER CODE BEGIN TIM8_Init 1 */
+
+  /* USER CODE END TIM8_Init 1 */
+  htim8.Instance = TIM8;
+  htim8.Init.Prescaler = 0;
+  htim8.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim8.Init.Period = 44;
+  htim8.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim8.Init.RepetitionCounter = 15;
+  htim8.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_PWM_Init(&htim8) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_TIM_OnePulse_Init(&htim8, TIM_OPMODE_SINGLE) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterOutputTrigger2 = TIM_TRGO2_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim8, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  sConfigOC.Pulse = 9;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
+  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+  sConfigOC.OCIdleState = TIM_OCIDLESTATE_RESET;
+  sConfigOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
+  if (HAL_TIM_PWM_ConfigChannel(&htim8, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfigOC.Pulse = 15;
+  if (HAL_TIM_PWM_ConfigChannel(&htim8, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sBreakDeadTimeConfig.OffStateRunMode = TIM_OSSR_DISABLE;
+  sBreakDeadTimeConfig.OffStateIDLEMode = TIM_OSSI_DISABLE;
+  sBreakDeadTimeConfig.LockLevel = TIM_LOCKLEVEL_OFF;
+  sBreakDeadTimeConfig.DeadTime = 0;
+  sBreakDeadTimeConfig.BreakState = TIM_BREAK_DISABLE;
+  sBreakDeadTimeConfig.BreakPolarity = TIM_BREAKPOLARITY_HIGH;
+  sBreakDeadTimeConfig.BreakFilter = 0;
+  sBreakDeadTimeConfig.Break2State = TIM_BREAK2_DISABLE;
+  sBreakDeadTimeConfig.Break2Polarity = TIM_BREAK2POLARITY_HIGH;
+  sBreakDeadTimeConfig.Break2Filter = 0;
+  sBreakDeadTimeConfig.AutomaticOutput = TIM_AUTOMATICOUTPUT_DISABLE;
+  if (HAL_TIMEx_ConfigBreakDeadTime(&htim8, &sBreakDeadTimeConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM8_Init 2 */
+
+  /* USER CODE END TIM8_Init 2 */
+
+}
+
+/**
+  * @brief TIM17 Initialization Function
+  * @param None
+  * @retval None
+  */
 static void MX_TIM17_Init(void)
 {
 
-	/* USER CODE BEGIN TIM17_Init 0 */
+  /* USER CODE BEGIN TIM17_Init 0 */
 
-	/* USER CODE END TIM17_Init 0 */
+  /* USER CODE END TIM17_Init 0 */
 
-	TIM_OC_InitTypeDef sConfigOC = {0};
-	TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig = {0};
+  TIM_OC_InitTypeDef sConfigOC = {0};
+  TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig = {0};
 
-	/* USER CODE BEGIN TIM17_Init 1 */
+  /* USER CODE BEGIN TIM17_Init 1 */
 
-	/* USER CODE END TIM17_Init 1 */
-	htim17.Instance = TIM17;
-	htim17.Init.Prescaler = 10;
-	htim17.Init.CounterMode = TIM_COUNTERMODE_UP;
-	htim17.Init.Period = 960;
-	htim17.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-	htim17.Init.RepetitionCounter = 0;
-	htim17.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
-	if (HAL_TIM_Base_Init(&htim17) != HAL_OK)
-	{
-		Error_Handler();
-	}
-	if (HAL_TIM_PWM_Init(&htim17) != HAL_OK)
-	{
-		Error_Handler();
-	}
-	sConfigOC.OCMode = TIM_OCMODE_PWM1;
-	sConfigOC.Pulse = 950;
-	sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
-	sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
-	sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
-	sConfigOC.OCIdleState = TIM_OCIDLESTATE_RESET;
-	sConfigOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
-	if (HAL_TIM_PWM_ConfigChannel(&htim17, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
-	{
-		Error_Handler();
-	}
-	sBreakDeadTimeConfig.OffStateRunMode = TIM_OSSR_DISABLE;
-	sBreakDeadTimeConfig.OffStateIDLEMode = TIM_OSSI_DISABLE;
-	sBreakDeadTimeConfig.LockLevel = TIM_LOCKLEVEL_OFF;
-	sBreakDeadTimeConfig.DeadTime = 0;
-	sBreakDeadTimeConfig.BreakState = TIM_BREAK_DISABLE;
-	sBreakDeadTimeConfig.BreakPolarity = TIM_BREAKPOLARITY_HIGH;
-	sBreakDeadTimeConfig.BreakFilter = 0;
-	sBreakDeadTimeConfig.AutomaticOutput = TIM_AUTOMATICOUTPUT_DISABLE;
-	if (HAL_TIMEx_ConfigBreakDeadTime(&htim17, &sBreakDeadTimeConfig) != HAL_OK)
-	{
-		Error_Handler();
-	}
-	/* USER CODE BEGIN TIM17_Init 2 */
+  /* USER CODE END TIM17_Init 1 */
+  htim17.Instance = TIM17;
+  htim17.Init.Prescaler = 10;
+  htim17.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim17.Init.Period = 960;
+  htim17.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim17.Init.RepetitionCounter = 0;
+  htim17.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
+  if (HAL_TIM_Base_Init(&htim17) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_TIM_PWM_Init(&htim17) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  sConfigOC.Pulse = 950;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
+  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+  sConfigOC.OCIdleState = TIM_OCIDLESTATE_RESET;
+  sConfigOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
+  if (HAL_TIM_PWM_ConfigChannel(&htim17, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sBreakDeadTimeConfig.OffStateRunMode = TIM_OSSR_DISABLE;
+  sBreakDeadTimeConfig.OffStateIDLEMode = TIM_OSSI_DISABLE;
+  sBreakDeadTimeConfig.LockLevel = TIM_LOCKLEVEL_OFF;
+  sBreakDeadTimeConfig.DeadTime = 0;
+  sBreakDeadTimeConfig.BreakState = TIM_BREAK_DISABLE;
+  sBreakDeadTimeConfig.BreakPolarity = TIM_BREAKPOLARITY_HIGH;
+  sBreakDeadTimeConfig.BreakFilter = 0;
+  sBreakDeadTimeConfig.AutomaticOutput = TIM_AUTOMATICOUTPUT_DISABLE;
+  if (HAL_TIMEx_ConfigBreakDeadTime(&htim17, &sBreakDeadTimeConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM17_Init 2 */
 	sConfigOC.Pulse = (htim17.Init.Prescaler - 1) * LCD_BRIGHTNESS;
 	if (HAL_TIM_PWM_ConfigChannel(&htim17, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
 		Error_Handler();
-	/* USER CODE END TIM17_Init 2 */
-	HAL_TIM_MspPostInit(&htim17);
+  /* USER CODE END TIM17_Init 2 */
+  HAL_TIM_MspPostInit(&htim17);
 
 }
 
 /**
- * @brief GPIO Initialization Function
- * @param None
- * @retval None
- */
+  * Enable DMA controller clock
+  */
+static void MX_DMA_Init(void)
+{
+
+  /* DMA controller clock enable */
+  __HAL_RCC_DMA1_CLK_ENABLE();
+
+  /* DMA interrupt init */
+  /* DMA1_Stream0_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Stream0_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Stream0_IRQn);
+  /* DMA1_Stream1_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Stream1_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Stream1_IRQn);
+  /* DMA1_Stream2_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Stream2_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Stream2_IRQn);
+
+}
+
+/**
+  * @brief GPIO Initialization Function
+  * @param None
+  * @retval None
+  */
 static void MX_GPIO_Init(void)
 {
-	GPIO_InitTypeDef GPIO_InitStruct = {0};
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
 
-	/* GPIO Ports Clock Enable */
-	__HAL_RCC_GPIOE_CLK_ENABLE();
-	__HAL_RCC_GPIOI_CLK_ENABLE();
-	__HAL_RCC_GPIOC_CLK_ENABLE();
-	__HAL_RCC_GPIOF_CLK_ENABLE();
-	__HAL_RCC_GPIOH_CLK_ENABLE();
-	__HAL_RCC_GPIOB_CLK_ENABLE();
-	__HAL_RCC_GPIOD_CLK_ENABLE();
-	__HAL_RCC_GPIOK_CLK_ENABLE();
-	__HAL_RCC_GPIOG_CLK_ENABLE();
+  /* GPIO Ports Clock Enable */
+  __HAL_RCC_GPIOE_CLK_ENABLE();
+  __HAL_RCC_GPIOI_CLK_ENABLE();
+  __HAL_RCC_GPIOC_CLK_ENABLE();
+  __HAL_RCC_GPIOF_CLK_ENABLE();
+  __HAL_RCC_GPIOH_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
+  __HAL_RCC_GPIOD_CLK_ENABLE();
+  __HAL_RCC_GPIOK_CLK_ENABLE();
+  __HAL_RCC_GPIOG_CLK_ENABLE();
 
-	/*Configure GPIO pin Output Level */
-	HAL_GPIO_WritePin(GPIOE, maxCS1_Pin|maxCS2_Pin, GPIO_PIN_SET);
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOE, maxCS1_Pin|maxCS2_Pin, GPIO_PIN_SET);
 
-	/*Configure GPIO pin Output Level */
-	HAL_GPIO_WritePin(GPIOI, maxWrite_Pin|LCD_Disp_Pin, GPIO_PIN_SET);
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOI, maxWrite_Pin|LCD_Disp_Pin, GPIO_PIN_SET);
 
-	/*Configure GPIO pin Output Level */
-	HAL_GPIO_WritePin(maxRead_GPIO_Port, maxRead_Pin, GPIO_PIN_SET);
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(maxRead_GPIO_Port, maxRead_Pin, GPIO_PIN_SET);
 
-	/*Configure GPIO pins : maxCS1_Pin maxCS2_Pin */
-	GPIO_InitStruct.Pin = maxCS1_Pin|maxCS2_Pin;
-	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-	GPIO_InitStruct.Pull = GPIO_NOPULL;
-	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-	HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOC, RD_Pin|VAL_Pin, GPIO_PIN_RESET);
 
-	/*Configure GPIO pins : maxWrite_Pin LCD_Disp_Pin */
-	GPIO_InitStruct.Pin = maxWrite_Pin|LCD_Disp_Pin;
-	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-	GPIO_InitStruct.Pull = GPIO_NOPULL;
-	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-	HAL_GPIO_Init(GPIOI, &GPIO_InitStruct);
+  /*Configure GPIO pins : maxCS1_Pin maxCS2_Pin */
+  GPIO_InitStruct.Pin = maxCS1_Pin|maxCS2_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+  HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 
-	/*Configure GPIO pin : maxRead_Pin */
-	GPIO_InitStruct.Pin = maxRead_Pin;
-	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-	GPIO_InitStruct.Pull = GPIO_NOPULL;
-	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-	HAL_GPIO_Init(maxRead_GPIO_Port, &GPIO_InitStruct);
+  /*Configure GPIO pins : maxWrite_Pin LCD_Disp_Pin */
+  GPIO_InitStruct.Pin = maxWrite_Pin|LCD_Disp_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOI, &GPIO_InitStruct);
 
-	/*Configure GPIO pin : maxBusy1_Pin */
-	GPIO_InitStruct.Pin = maxBusy1_Pin;
-	GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
-	GPIO_InitStruct.Pull = GPIO_NOPULL;
-	HAL_GPIO_Init(maxBusy1_GPIO_Port, &GPIO_InitStruct);
+  /*Configure GPIO pin : maxRead_Pin */
+  GPIO_InitStruct.Pin = maxRead_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(maxRead_GPIO_Port, &GPIO_InitStruct);
 
-	/*Configure GPIO pin : maxBusy2_Pin */
-	GPIO_InitStruct.Pin = maxBusy2_Pin;
-	GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-	GPIO_InitStruct.Pull = GPIO_NOPULL;
-	HAL_GPIO_Init(maxBusy2_GPIO_Port, &GPIO_InitStruct);
+  /*Configure GPIO pin : maxBusy1_Pin */
+  GPIO_InitStruct.Pin = maxBusy1_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(maxBusy1_GPIO_Port, &GPIO_InitStruct);
 
-	/*Configure GPIO pins : maxD0_Pin maxD1_Pin maxD2_Pin maxD3_Pin
+  /*Configure GPIO pin : maxBusy2_Pin */
+  GPIO_InitStruct.Pin = maxBusy2_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(maxBusy2_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : maxD0_Pin maxD1_Pin maxD2_Pin maxD3_Pin
                            maxD4_Pin maxD5_Pin maxD6_Pin maxD7_Pin
                            maxD8_Pin maxD9_Pin maxD10_Pin maxD11_Pin
                            maxD12_Pin maxD13_Pin maxD14_Pin maxD15_Pin */
-	GPIO_InitStruct.Pin = maxD0_Pin|maxD1_Pin|maxD2_Pin|maxD3_Pin
-			|maxD4_Pin|maxD5_Pin|maxD6_Pin|maxD7_Pin
-			|maxD8_Pin|maxD9_Pin|maxD10_Pin|maxD11_Pin
-			|maxD12_Pin|maxD13_Pin|maxD14_Pin|maxD15_Pin;
-	GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-	GPIO_InitStruct.Pull = GPIO_NOPULL;
-	HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
+  GPIO_InitStruct.Pin = maxD0_Pin|maxD1_Pin|maxD2_Pin|maxD3_Pin
+                          |maxD4_Pin|maxD5_Pin|maxD6_Pin|maxD7_Pin
+                          |maxD8_Pin|maxD9_Pin|maxD10_Pin|maxD11_Pin
+                          |maxD12_Pin|maxD13_Pin|maxD14_Pin|maxD15_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
 
-	/* EXTI interrupt init*/
-	HAL_NVIC_SetPriority(EXTI15_10_IRQn, 5, 0);
-	HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
+  /*Configure GPIO pins : RD_Pin VAL_Pin */
+  GPIO_InitStruct.Pin = RD_Pin|VAL_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
 }
 
@@ -429,13 +547,13 @@ void StartintelliSENSTask(void *argument)
 /* USER CODE END Header_StartDefaultTask */
 void StartDefaultTask(void *argument)
 {
-	/* USER CODE BEGIN 5 */
+  /* USER CODE BEGIN 5 */
 	/* Infinite loop */
 	for(;;)
 	{
 		osDelay(1);
 	}
-	/* USER CODE END 5 */
+  /* USER CODE END 5 */
 }
 
 /* USER CODE BEGIN Header_StartLvglGUITask */
@@ -447,7 +565,7 @@ void StartDefaultTask(void *argument)
 /* USER CODE END Header_StartLvglGUITask */
 void StartLvglGUITask(void *argument)
 {
-	/* USER CODE BEGIN StartLvglGUITask */
+  /* USER CODE BEGIN StartLvglGUITask */
 	/* Infinite loop */
 	for(;;)
 	{
@@ -458,7 +576,7 @@ void StartLvglGUITask(void *argument)
 		//}
 		osDelay(200);
 	}
-	/* USER CODE END StartLvglGUITask */
+  /* USER CODE END StartLvglGUITask */
 }
 
 /* USER CODE BEGIN Header_StartLvglTickTask */
@@ -470,7 +588,7 @@ void StartLvglGUITask(void *argument)
 /* USER CODE END Header_StartLvglTickTask */
 void StartLvglTickTask(void *argument)
 {
-	/* USER CODE BEGIN StartLvglTickTask */
+  /* USER CODE BEGIN StartLvglTickTask */
 	/* Infinite loop */
 	for(;;)
 	{
@@ -488,7 +606,7 @@ void StartLvglTickTask(void *argument)
 		//}
 		osDelay(20);
 	}
-	/* USER CODE END StartLvglTickTask */
+  /* USER CODE END StartLvglTickTask */
 }
 
 /* USER CODE BEGIN Header_StartTSTask */
@@ -500,7 +618,7 @@ void StartLvglTickTask(void *argument)
 /* USER CODE END Header_StartTSTask */
 void StartTSTask(void *argument)
 {
-	/* USER CODE BEGIN StartTSTask */
+  /* USER CODE BEGIN StartTSTask */
 	while(BSP_TS_Init(800, 480) != TS_OK)
 		osDelay(100);
 	/* Infinite loop */
@@ -509,59 +627,59 @@ void StartTSTask(void *argument)
 		BSP_TS_Poll();
 		osDelay(10);
 	}
-	/* USER CODE END StartTSTask */
+  /* USER CODE END StartTSTask */
 }
 
-/**
- * @brief  Period elapsed callback in non blocking mode
- * @note   This function is called  when TIM7 interrupt took place, inside
- * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment
- * a global variable "uwTick" used as application time base.
- * @param  htim : TIM handle
- * @retval None
- */
+ /**
+  * @brief  Period elapsed callback in non blocking mode
+  * @note   This function is called  when TIM7 interrupt took place, inside
+  * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment
+  * a global variable "uwTick" used as application time base.
+  * @param  htim : TIM handle
+  * @retval None
+  */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-	/* USER CODE BEGIN Callback 0 */
+  /* USER CODE BEGIN Callback 0 */
 
-	/* USER CODE END Callback 0 */
-	if (htim->Instance == TIM7) {
-		HAL_IncTick();
-	}
-	/* USER CODE BEGIN Callback 1 */
+  /* USER CODE END Callback 0 */
+  if (htim->Instance == TIM7) {
+    HAL_IncTick();
+  }
+  /* USER CODE BEGIN Callback 1 */
 
-	/* USER CODE END Callback 1 */
+  /* USER CODE END Callback 1 */
 }
 
 /**
- * @brief  This function is executed in case of error occurrence.
- * @retval None
- */
+  * @brief  This function is executed in case of error occurrence.
+  * @retval None
+  */
 void Error_Handler(void)
 {
-	/* USER CODE BEGIN Error_Handler_Debug */
+  /* USER CODE BEGIN Error_Handler_Debug */
 	/* User can add his own implementation to report the HAL error return state */
 	__disable_irq();
 	while (1)
 	{
 	}
-	/* USER CODE END Error_Handler_Debug */
+  /* USER CODE END Error_Handler_Debug */
 }
 
 #ifdef  USE_FULL_ASSERT
 /**
- * @brief  Reports the name of the source file and the source line number
- *         where the assert_param error has occurred.
- * @param  file: pointer to the source file name
- * @param  line: assert_param error line source number
- * @retval None
- */
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @param  line: assert_param error line source number
+  * @retval None
+  */
 void assert_failed(uint8_t *file, uint32_t line)
 {
-	/* USER CODE BEGIN 6 */
+  /* USER CODE BEGIN 6 */
 	/* User can add his own implementation to report the file name and line number,
      ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-	/* USER CODE END 6 */
+  /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
 
