@@ -54,6 +54,7 @@ static adc_cont_config_t adcContConfig = { .conversionCycleTimeUs = 40, .callbac
 /** Current ADC acquisition mode
  */
 static adc_acq_mode_t acqType = ADC_MODE_CONT;
+static uint64_t intelliSENSDataPtr[4];
 /********************************************************************************
  * Global Variables
  *******************************************************************************/
@@ -172,10 +173,10 @@ static inline void Measure_AllChannels(uint16_t* tempData)
  */
 static inline void MeasureConvert_BothADCs(float* dataPtr, const float* mults, const float* offsets)
 {
-	uint64_t intelliSENSDataPtr[4];
+	//uint64_t intelliSENSDataPtr[4];
 	uint16_t* tempData = (uint16_t*)intelliSENSDataPtr;
 	float* dataPtrOriginal = dataPtr;
-	Measure_AllChannels(tempData);
+	//Measure_AllChannels(tempData);
 
 #if ENABLE_INTELLISENS
 	intelliSENS.SetADCData((uint64_t*)(intelliSENSDataPtr));
@@ -278,8 +279,8 @@ static void ConfigureMeasurements(void)
 	}
 #endif
 }
-uint32_t rd2 = (1U << 10);
-uint32_t rd1 = (1U << 26);
+uint32_t rd2 = maxRead_Pin;
+uint32_t rd1 = maxRead_Pin << 16;
 uint32_t rdd[] = {(1U << 11), (1U << 27)};
 extern TIM_HandleTypeDef htim8;
 extern DMA_HandleTypeDef hdma_tim8_ch1;
@@ -301,8 +302,8 @@ void BSP_MAX11046_Init(adc_acq_mode_t type, adc_cont_config_t* contConfig)
 	intelliSENS_Configure();
 #endif
 
-	HAL_DMA_Start(&hdma_tim8_ch1, (uint32_t)&rd1, (uint32_t)&GPIOC->BSRR, 16);
-	HAL_DMA_Start(&hdma_tim8_ch2, (uint32_t)&rdd[0], (uint32_t)&GPIOC->BSRR, 2);
+	HAL_DMA_Start(&hdma_tim8_ch1, (uint32_t)&rd1, (uint32_t)&maxRead_GPIO_Port->BSRR, 16);
+	HAL_DMA_Start(&hdma_tim8_ch2, (uint32_t)&MAX11046_GPIO->IDR, (uint32_t)&intelliSENSDataPtr[0], 16);
 	HAL_DMA_Start(&hdma_tim8_ch3, (uint32_t)&rd2, (uint32_t)&GPIOC->BSRR, 16);
 	htim8.Instance->DIER = 0xe00;
 	htim8.Instance->CCER |= (uint32_t)(1U << ((TIM_CHANNEL_1 | TIM_CHANNEL_2| TIM_CHANNEL_3) & 0x1FU));
@@ -442,8 +443,9 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 	if(GPIO_Pin == maxBusy1_Pin)
 	{
 		reset = true;
-		GPIOB->BSRR = (1U << 2);
-		GPIOA->BSRR = (1U << (15 + 16));
+		//GPIOB->BSRR = (1U << 2);
+		//GPIOA->BSRR = (1U << (15 + 16));
+		maxCS1_GPIO_Port->BSRR = ((uint32_t)maxCS2_Pin << 0) | ((uint32_t)maxCS1_Pin << 16U);
 		__HAL_TIM_ENABLE(&htim8);
 		//HAL_TIM_PWM_Start(&htim8,TIM_CHANNEL_1);
 		//HAL_TIM_PWM_Start(&htim8,TIM_CHANNEL_2);
@@ -463,14 +465,19 @@ void TIM8_UP_TIM13_IRQHandler(void)
 	if (reset == true)
 	{
 		reset = false;
-		GPIOB->BSRR = (1U << (2 + 16));
-		GPIOA->BSRR = (1U << 15);
+		//GPIOB->BSRR = (1U << (2 + 16));
+		//GPIOA->BSRR = (1U << 15);
+		maxCS1_GPIO_Port->BSRR = ((uint32_t)maxCS1_Pin << 0) | ((uint32_t)maxCS2_Pin << 16U);
 		__HAL_TIM_ENABLE(&htim8);
 	}
 	else
 	{
-		GPIOB->BSRR = (1U << (2 + 16));
-		GPIOA->BSRR = (1U << (15 + 16));
+		//GPIOB->BSRR = (1U << (2));
+		//GPIOA->BSRR = (1U << (15));
+		maxCS1_GPIO_Port->BSRR = ((uint32_t)maxCS2_Pin << 0) | ((uint32_t)maxCS1_Pin << 0);
+		MeasureConvert_BothADCs((float*)&adcVals, (const float*)&adcMultipiers, (const float*)&adcOffsets);
+		if(adcContConfig.callback)
+			adcContConfig.callback(&adcVals);
 	}
 }
 
