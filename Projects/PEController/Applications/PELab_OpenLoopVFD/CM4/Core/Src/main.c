@@ -60,7 +60,7 @@ TIM_HandleTypeDef htim8;
 TIM_HandleTypeDef htim17;
 DMA_HandleTypeDef hdma_tim8_ch1;
 DMA_HandleTypeDef hdma_tim8_ch2;
-DMA_HandleTypeDef hdma_tim8_up;
+DMA_HandleTypeDef hdma_tim8_ch3;
 
 /* Definitions for defaultTask */
 osThreadId_t defaultTaskHandle;
@@ -324,6 +324,11 @@ static void MX_TIM8_Init(void)
   }
   sConfigOC.Pulse = 15;
   if (HAL_TIM_PWM_ConfigChannel(&htim8, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfigOC.Pulse = 32;
+  if (HAL_TIM_PWM_ConfigChannel(&htim8, &sConfigOC, TIM_CHANNEL_3) != HAL_OK)
   {
     Error_Handler();
   }

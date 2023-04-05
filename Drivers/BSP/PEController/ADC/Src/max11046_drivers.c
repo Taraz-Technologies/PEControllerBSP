@@ -278,8 +278,8 @@ static void ConfigureMeasurements(void)
 	}
 #endif
 }
-uint32_t rd1 = (1U << 10);
-uint32_t rd2 = (1U << 26);
+uint32_t rd2 = (1U << 10);
+uint32_t rd1 = (1U << 26);
 uint32_t rdd[] = {(1U << 11), (1U << 27)};
 extern TIM_HandleTypeDef htim8;
 extern DMA_HandleTypeDef hdma_tim8_ch1;
