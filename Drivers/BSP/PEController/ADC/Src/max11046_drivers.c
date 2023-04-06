@@ -283,6 +283,7 @@ static void ConfigureMeasurements(void)
 	}
 #endif
 }
+#if !OLD_WAY
 uint32_t rd2 = maxRead_Pin;
 uint32_t rd1 = maxRead_Pin << 16;
 uint32_t rdd[] = {(1U << 11), (1U << 27)};
@@ -290,6 +291,11 @@ extern TIM_HandleTypeDef htim8;
 extern DMA_HandleTypeDef hdma_tim8_ch1;
 extern DMA_HandleTypeDef hdma_tim8_ch2;
 extern DMA_HandleTypeDef hdma_tim8_ch3;
+//extern DMA_HandleTypeDef hdma_tim8_up;
+//extern DMA_HandleTypeDef hdma_dma_generator3;
+uint32_t csList[] = {((uint32_t)maxCS1_Pin) | ((uint32_t)maxCS2_Pin << 16U), ((uint32_t)maxCS1_Pin) | ((uint32_t)maxCS2_Pin)};
+uint16_t timList[] = {TIM_CR1_CEN | TIM_CR1_OPM_Pos, TIM_CR1_OPM_Pos};
+#endif
 /**
  * @brief Initializes the MAX11046 drivers
  * @param type- ADC_MODE_SINGLE or ADC_MODE_CONT for single or continuous conversions respectively
@@ -310,6 +316,8 @@ void BSP_MAX11046_Init(adc_acq_mode_t type, adc_cont_config_t* contConfig)
 	HAL_DMA_Start(&hdma_tim8_ch1, (uint32_t)&rd1, (uint32_t)&maxRead_GPIO_Port->BSRR, 16);
 	HAL_DMA_Start(&hdma_tim8_ch2, (uint32_t)&MAX11046_GPIO->IDR, (uint32_t)&intelliSENSDataPtr[0], 16);
 	HAL_DMA_Start(&hdma_tim8_ch3, (uint32_t)&rd2, (uint32_t)&GPIOC->BSRR, 16);
+	//HAL_DMA_Start(&hdma_tim8_up, (uint32_t)&csList[0], (uint32_t)&maxCS1_GPIO_Port->BSRR, 2);
+	//HAL_DMA_Start(&hdma_dma_generator3, (uint32_t)&timList[0], (uint32_t)&TIM8->CR1, 2);
 	htim8.Instance->DIER = 0xe00;
 	htim8.Instance->CCER |= (uint32_t)(1U << ((TIM_CHANNEL_1 | TIM_CHANNEL_2| TIM_CHANNEL_3) & 0x1FU));
 	__HAL_TIM_MOE_ENABLE(&htim8);
