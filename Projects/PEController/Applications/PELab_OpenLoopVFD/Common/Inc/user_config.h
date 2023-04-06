@@ -88,7 +88,7 @@ extern "C" {
  * @brief Enable intelliSENS support for PEController
  * @note Make sure that the binary intelliSENS.elf is also loaded in run configuration and correct linker file is selected
  */
-#define ENABLE_INTELLISENS		(1)
+#define ENABLE_INTELLISENS		(0)
 /**
  * @brief Sampling Time in micro-seconds
  * @note Minimum setting value is 10 (100KHz) with intelliSENS but may vary if additional logic is added.

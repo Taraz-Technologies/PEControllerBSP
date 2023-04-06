@@ -55,6 +55,10 @@ extern "C" {
  */
 #define MEASURE_SAVE_COUNT		(32)
 /**
+ * @brief Number of raw measurement logs to be kept for communication systems
+ */
+#define RAW_MEASURE_SAVE_COUNT	(256)
+/**
  * @}
  */
 /********************************************************************************
@@ -73,6 +77,33 @@ extern "C" {
 /** @defgroup SHAREDMEM_Exported_Structures Structures
   * @{
   */
+
+typedef struct
+{
+	int recordIndex;
+	uint16_t dataRecord[RAW_MEASURE_SAVE_COUNT * TOTAL_MEASUREMENT_COUNT] __attribute__ ((aligned (8)));
+} adc_raw_data_t;
+
+typedef struct
+{
+	volatile bool isNewDataAvaialble;
+	int recordIndex;
+	volatile adc_measures_t* lastDataPointer;
+	adc_measures_t dataRecord[MEASURE_SAVE_COUNT];
+} adc_processed_data_t;
+
+typedef struct
+{
+	adc_raw_data_t rawAdcData;
+	adc_processed_data_t processedAdcData;
+} m7_to_m4_data_t;
+
+typedef struct
+{
+	bool item;
+} m4_to_m7_data_t;
+
+#if 0
 /**
  * @brief Defines parameters of Cortex-M4 core to be shared with Cortex-M7
  */
@@ -95,6 +126,7 @@ typedef struct
 													CM7 can control the adc conversion rate from this variable */
 	uint32_t avgCount;								/**< @brief Averaging count for the moving average filter */
 } m7_to_m4_data_t;
+#endif
 /**
  * @brief Buffer containing all shared data between both cores
  */

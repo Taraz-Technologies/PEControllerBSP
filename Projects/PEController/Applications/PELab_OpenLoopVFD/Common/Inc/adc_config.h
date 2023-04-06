@@ -89,6 +89,7 @@ extern "C" {
 #define MEASUREMENT_COUNT_VOLTAGE		(3)
 #endif
 
+#define TOTAL_MEASUREMENT_COUNT			(16)
 /**
  * @}
  */

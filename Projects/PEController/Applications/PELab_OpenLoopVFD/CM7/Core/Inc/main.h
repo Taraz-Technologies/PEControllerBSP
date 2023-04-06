@@ -58,6 +58,10 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define maxCNV1_Pin GPIO_PIN_6
+#define maxCNV1_GPIO_Port GPIOH
+#define maxCNV2_Pin GPIO_PIN_15
+#define maxCNV2_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
