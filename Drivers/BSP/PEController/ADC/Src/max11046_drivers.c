@@ -36,7 +36,11 @@
 		*tempData++ = (uint16_t)MAX11046_GPIO->IDR; \
 		maxRead_GPIO_Port->BSRR = maxRead_Pin;
 
-#define OLD_WAY				(0)
+#define MANUAL_RD_SWITCH			(0)
+#define VIEW_OSCILLOSCOPE			(1)
+#define USE_DMA						(!MANUAL_RD_SWITCH || VIEW_OSCILLOSCOPE)
+#define COMPUTE_STATS				(1)
+#define USE_CS_DMA					(0)
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
@@ -67,8 +71,7 @@ static adc_measures_t adcMultipiers = {0};
  * These values are used to convert ADC data to meaningful measurements according to the formula <b>value = (adcData - adcOffsets) * adcMultipiers</b>
  */
 static adc_measures_t adcOffsets = {0};
-static adc_ch_stats_t adcStats = {0};
-static adc_ch_temp_stats_t adcTempStats = {0};
+static stats_t stats = {0};
 static adc_info_t adcInfo = {0};
 static adc_raw_data_t* rawData;
 static adc_processed_data_t* processedData;
@@ -82,10 +85,11 @@ TIM_HandleTypeDef maxTimerHandle;
 /********************************************************************************
  * Function Prototypes
  *******************************************************************************/
-void BSP_Display_UpdateMeasurements(float* adcData);
+
 /********************************************************************************
  * Code
  *******************************************************************************/
+#if MANUAL_RD_SWITCH
 #pragma GCC push_options
 #pragma GCC optimize ("-O0")
 /**
@@ -121,6 +125,7 @@ static inline void Measure_AllChannels(uint16_t* tempData)
 	maxCS2_GPIO_Port->BSRR = maxCS2_Pin;
 }
 #pragma GCC pop_options
+#endif
 
 #pragma GCC push_options
 #pragma GCC optimize ("-Ofast")
@@ -132,10 +137,9 @@ static inline void Measure_AllChannels(uint16_t* tempData)
  */
 static inline void MeasureConvert_BothADCs(float* dataPtr, const float* mults, const float* offsets)
 {
-	//uint64_t intelliSENSDataPtr[4];
 	uint16_t* tempData = (uint16_t*)intelliSENSDataPtr;
 	float* dataPtrOriginal = dataPtr;
-#if OLD_WAY
+#if MANUAL_RD_SWITCH
 	Measure_AllChannels(tempData);
 #endif
 
@@ -150,8 +154,8 @@ static inline void MeasureConvert_BothADCs(float* dataPtr, const float* mults, c
 	} while (i--);
 
 
-#if LCD_DATA_MONITORING
-	BSP_Display_UpdateMeasurements(dataPtrOriginal);
+#if COMPUTE_STATS
+	Stats_Insert_Compute(dataPtrOriginal, &stats, 16);
 #endif
 }
 #pragma GCC pop_options
@@ -208,17 +212,117 @@ static void Timer_Config(void)
 	if(acqType == ADC_MODE_SINGLE)
 		HAL_TIM_OnePulse_Init(&maxTimerHandle, TIM_OPMODE_SINGLE);
 }
+DMA_HandleTypeDef hdma_tim8_ch1;
+DMA_HandleTypeDef hdma_tim8_ch2;
+DMA_HandleTypeDef hdma_tim8_ch3;
+TIM_HandleTypeDef htim8;
+
+static void DMA_Init(void)
+{
+	__HAL_RCC_DMA1_CLK_ENABLE();
+	/* DMA interrupt init */
+	/* DMA1_Stream0_IRQn interrupt configuration */
+	HAL_NVIC_SetPriority(DMA1_Stream0_IRQn, 5, 0);
+	HAL_NVIC_EnableIRQ(DMA1_Stream0_IRQn);
+	/* DMA1_Stream1_IRQn interrupt configuration */
+	HAL_NVIC_SetPriority(DMA1_Stream1_IRQn, 5, 0);
+	HAL_NVIC_EnableIRQ(DMA1_Stream1_IRQn);
+	/* DMA1_Stream2_IRQn interrupt configuration */
+	HAL_NVIC_SetPriority(DMA1_Stream2_IRQn, 5, 0);
+	HAL_NVIC_EnableIRQ(DMA1_Stream2_IRQn);
+}
+
+/**
+ * @brief TIM8 Initialization Function
+ * @param None
+ * @retval None
+ */
+static void MX_TIM8_Init(void)
+{
+
+	/* USER CODE BEGIN TIM8_Init 0 */
+
+	/* USER CODE END TIM8_Init 0 */
+
+	TIM_MasterConfigTypeDef sMasterConfig = {0};
+	TIM_OC_InitTypeDef sConfigOC = {0};
+	TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig = {0};
+
+	/* USER CODE BEGIN TIM8_Init 1 */
+
+	/* USER CODE END TIM8_Init 1 */
+	htim8.Instance = TIM8;
+	htim8.Init.Prescaler = 0;
+	htim8.Init.CounterMode = TIM_COUNTERMODE_UP;
+	htim8.Init.Period = 44;
+	htim8.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+	htim8.Init.RepetitionCounter = 7;
+	htim8.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+	if (HAL_TIM_PWM_Init(&htim8) != HAL_OK)
+	{
+		Error_Handler();
+	}
+	if (HAL_TIM_OnePulse_Init(&htim8, TIM_OPMODE_SINGLE) != HAL_OK)
+	{
+		Error_Handler();
+	}
+	sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+	sMasterConfig.MasterOutputTrigger2 = TIM_TRGO2_RESET;
+	sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+	if (HAL_TIMEx_MasterConfigSynchronization(&htim8, &sMasterConfig) != HAL_OK)
+	{
+		Error_Handler();
+	}
+	sConfigOC.OCMode = TIM_OCMODE_PWM1;
+	sConfigOC.Pulse = 9;
+	sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+	sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
+	sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+	sConfigOC.OCIdleState = TIM_OCIDLESTATE_RESET;
+	sConfigOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
+	if (HAL_TIM_PWM_ConfigChannel(&htim8, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+	{
+		Error_Handler();
+	}
+	sConfigOC.Pulse = 15;
+	if (HAL_TIM_PWM_ConfigChannel(&htim8, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
+	{
+		Error_Handler();
+	}
+	sConfigOC.Pulse = 32;
+	if (HAL_TIM_PWM_ConfigChannel(&htim8, &sConfigOC, TIM_CHANNEL_3) != HAL_OK)
+	{
+		Error_Handler();
+	}
+	sBreakDeadTimeConfig.OffStateRunMode = TIM_OSSR_DISABLE;
+	sBreakDeadTimeConfig.OffStateIDLEMode = TIM_OSSI_DISABLE;
+	sBreakDeadTimeConfig.LockLevel = TIM_LOCKLEVEL_OFF;
+	sBreakDeadTimeConfig.DeadTime = 0;
+	sBreakDeadTimeConfig.BreakState = TIM_BREAK_DISABLE;
+	sBreakDeadTimeConfig.BreakPolarity = TIM_BREAKPOLARITY_HIGH;
+	sBreakDeadTimeConfig.BreakFilter = 0;
+	sBreakDeadTimeConfig.Break2State = TIM_BREAK2_DISABLE;
+	sBreakDeadTimeConfig.Break2Polarity = TIM_BREAK2POLARITY_HIGH;
+	sBreakDeadTimeConfig.Break2Filter = 0;
+	sBreakDeadTimeConfig.AutomaticOutput = TIM_AUTOMATICOUTPUT_DISABLE;
+	if (HAL_TIMEx_ConfigBreakDeadTime(&htim8, &sBreakDeadTimeConfig) != HAL_OK)
+	{
+		Error_Handler();
+	}
+	/* USER CODE BEGIN TIM8_Init 2 */
+
+	/* USER CODE END TIM8_Init 2 */
+}
 
 /**
  * @brief Configures the sensitivities and offsets for all measurements
  */
 static void ConfigureMeasurements(void)
 {
-	adcConfig.offsets = (float*)&adcOffsets;
-	adcConfig.sensitivty = (float*)&adcMultipiers;
+	adcInfo.offsets = (float*)&adcOffsets;
+	adcInfo.sensitivty = (float*)&adcMultipiers;
 	///////////// --TODO-- configure the measurement frequency etc
-	adcConfig.stats = &adcStats;
-	adcConfig.tempStats = &adcTempStats;
+	adcInfo.stats = &stats;
 
 	// implementation of Custom PEControllers is user controlled
 #if	PECONTROLLER_CONFIG == PEC_CUSTOM
@@ -240,18 +344,25 @@ static void ConfigureMeasurements(void)
 	}
 #endif
 }
-#if !OLD_WAY
-uint32_t rd2 = maxRead_Pin;
-uint32_t rd1 = maxRead_Pin << 16;
-uint32_t rdd[] = {(1U << 11), (1U << 27)};
+#if USE_DMA
+#if !MANUAL_RD_SWITCH
+uint32_t rdHigh = maxRead_Pin;
+uint32_t rdLow = maxRead_Pin << 16;
+#else
+uint32_t rdHigh = maxRead_Pin;
+uint32_t rdLow = maxRead_Pin << 16;
+uint32_t toggle[] = {(1U << 11), (1U << 27)};
+#endif
 extern TIM_HandleTypeDef htim8;
 extern DMA_HandleTypeDef hdma_tim8_ch1;
 extern DMA_HandleTypeDef hdma_tim8_ch2;
 extern DMA_HandleTypeDef hdma_tim8_ch3;
-//extern DMA_HandleTypeDef hdma_tim8_up;
-//extern DMA_HandleTypeDef hdma_dma_generator3;
-//uint32_t csList[] = {((uint32_t)maxCS1_Pin) | ((uint32_t)maxCS2_Pin << 16U), ((uint32_t)maxCS1_Pin) | ((uint32_t)maxCS2_Pin)};
-//uint16_t timList[] = {TIM_CR1_CEN | TIM_CR1_OPM_Pos, TIM_CR1_OPM_Pos};
+#if USE_CS_DMA
+extern DMA_HandleTypeDef hdma_tim8_up;
+extern DMA_HandleTypeDef hdma_dma_generator3;
+uint32_t csList[] = {((uint32_t)maxCS1_Pin) | ((uint32_t)maxCS2_Pin << 16U), ((uint32_t)maxCS1_Pin) | ((uint32_t)maxCS2_Pin)};
+uint16_t timList[] = {TIM_CR1_CEN | TIM_CR1_OPM_Pos, TIM_CR1_OPM_Pos};
+#endif
 #endif
 /**
  * @brief Initializes the MAX11046 drivers
@@ -273,13 +384,18 @@ void BSP_MAX11046_Init(adc_acq_mode_t type, adc_cont_config_t* contConfig, adc_r
 	intelliSENS_Configure();
 #endif
 
-#if !OLD_WAY
-	HAL_DMA_Start(&hdma_tim8_ch1, (uint32_t)&rd1, (uint32_t)&maxRead_GPIO_Port->BSRR, 16);
+#if USE_DMA
+	HAL_DMA_Start(&hdma_tim8_ch1, (uint32_t)&rdLow, (uint32_t)&maxRead_GPIO_Port->BSRR, 16);
+#if !MANUAL_RD_SWITCH
 	HAL_DMA_Start(&hdma_tim8_ch2, (uint32_t)&MAX11046_GPIO->IDR, (uint32_t)&rawData->dataRecord[recordIndex << 4], 16);
-	// --TODO-- ((DMA_Stream_TypeDef *)hdma->Instance)->M0AR = DstAddress;
-	HAL_DMA_Start(&hdma_tim8_ch3, (uint32_t)&rd2, (uint32_t)&GPIOC->BSRR, 16);
-	//HAL_DMA_Start(&hdma_tim8_up, (uint32_t)&csList[0], (uint32_t)&maxCS1_GPIO_Port->BSRR, 2);
-	//HAL_DMA_Start(&hdma_dma_generator3, (uint32_t)&timList[0], (uint32_t)&TIM8->CR1, 2);
+#else
+	HAL_DMA_Start(&hdma_tim8_ch2, (uint32_t)&toggle[0], (uint32_t)&maxRead_GPIO_Port->BSRR, 2);
+#endif
+	HAL_DMA_Start(&hdma_tim8_ch3, (uint32_t)&rdHigh, (uint32_t)&maxRead_GPIO_Port->BSRR, 16);
+#if USE_CS_DMA
+	HAL_DMA_Start(&hdma_tim8_up, (uint32_t)&csList[0], (uint32_t)&maxCS1_GPIO_Port->BSRR, 2);
+	HAL_DMA_Start(&hdma_dma_generator3, (uint32_t)&timList[0], (uint32_t)&TIM8->CR1, 2);
+#endif
 	htim8.Instance->DIER = 0xe00;
 	htim8.Instance->CCER |= (uint32_t)(1U << ((TIM_CHANNEL_1 | TIM_CHANNEL_2| TIM_CHANNEL_3) & 0x1FU));
 	__HAL_TIM_MOE_ENABLE(&htim8);
@@ -418,23 +534,27 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
 	if(GPIO_Pin == maxBusy1_Pin)
 	{
-#if OLD_WAY
+#if MANUAL_RD_SWITCH
 		MeasureConvert_BothADCs((float*)&adcVals, (const float*)&adcMultipiers, (const float*)&adcOffsets);
 		if(adcContConfig.callback)
 			adcContConfig.callback(&adcVals);
-#else
+#endif
+#if USE_DMA
 		reset = true;
-		//GPIOB->BSRR = (1U << 2);
-		//GPIOA->BSRR = (1U << (15 + 16));
+#if !MANUAL_RD_SWITCH
 		__HAL_DMA_DISABLE(&hdma);
 		hdma_tim8_ch2.Instance->M0AR = (uint32_t)&rawData->dataRecord[rawData->recordIndex << 4];
 		__HAL_DMA_ENABLE(&hdma);
 		maxCS1_GPIO_Port->BSRR = ((uint32_t)maxCS2_Pin << 0) | ((uint32_t)maxCS1_Pin << 16U);
+#else
+		GPIOB->BSRR = (1U << 2);
+		GPIOA->BSRR = (1U << (15 + 16));
+#endif
 		__HAL_TIM_ENABLE(&htim8);
 #endif
 	}
 }
-#if !OLD_WAY
+#if USE_DMA
 //void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 void TIM8_UP_TIM13_IRQHandler(void)
 {
@@ -442,15 +562,17 @@ void TIM8_UP_TIM13_IRQHandler(void)
 	if (reset == true)
 	{
 		reset = false;
-		//GPIOB->BSRR = (1U << (2 + 16));
-		//GPIOA->BSRR = (1U << 15);
+#if !MANUAL_RD_SWITCH
 		maxCS1_GPIO_Port->BSRR = ((uint32_t)maxCS1_Pin << 0) | ((uint32_t)maxCS2_Pin << 16U);
+#else
+		GPIOB->BSRR = (1U << (2 + 16));
+		GPIOA->BSRR = (1U << 15);
+#endif
 		__HAL_TIM_ENABLE(&htim8);
 	}
 	else
 	{
-		//GPIOB->BSRR = (1U << (2));
-		//GPIOA->BSRR = (1U << (15));
+#if !MANUAL_RD_SWITCH
 		maxCS1_GPIO_Port->BSRR = ((uint32_t)maxCS2_Pin << 0) | ((uint32_t)maxCS1_Pin << 0);
 		MeasureConvert_BothADCs((float*)&processedData->dataRecord[processedData->recordIndex], adcConfig.sensitivity, adcConfig.offsets);
 		if(adcContConfig.callback)
@@ -458,6 +580,10 @@ void TIM8_UP_TIM13_IRQHandler(void)
 		rawData->recordIndex = (rawData->recordIndex + 1) % RAW_MEASURE_SAVE_COUNT;
 		data->lastDataPointer = &processedData->dataRecord[processedData->recordIndex];
 		processedData->recordIndex = (processedData->recordIndex + 1) % MEASURE_SAVE_COUNT;
+#else
+		GPIOB->BSRR = (1U << (2));
+		GPIOA->BSRR = (1U << (15));
+#endif
 	}
 }
 #endif

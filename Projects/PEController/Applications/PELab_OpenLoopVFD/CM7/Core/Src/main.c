@@ -69,27 +69,7 @@ static void MX_TIM8_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-#pragma GCC push_options
-#pragma GCC optimize ("-Ofast")
-static void DataProcessingCallback(adc_measures_t* result)
-{
-	volatile m4_to_m7_data_t* data = &sharedData->m7tom4;
-	int index = (data->recordIndex + 1) & (MEASURE_SAVE_COUNT - 1);
-	uint64_t* resultU64 = (uint64_t*)result;
-	uint64_t* copyU64 = (uint64_t*)&data->dataRecord[index];
-	*copyU64++ = *resultU64++;
-	*copyU64++ = *resultU64++;
-	*copyU64++ = *resultU64++;
-	*copyU64++ = *resultU64++;
-	*copyU64++ = *resultU64++;
-	*copyU64++ = *resultU64++;
-	*copyU64++ = *resultU64++;
-	*copyU64 = *resultU64;
-	data->recordIndex = index;
-	data->lastDataPointer = &data->dataRecord[index];
-	data->sts = true;
-}
-#pragma GCC pop_options
+
 /* USER CODE END 0 */
 
 /**

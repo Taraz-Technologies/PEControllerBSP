@@ -43,6 +43,7 @@ extern "C" {
  * Includes
  *******************************************************************************/
 #include "user_config.h"
+#include "monitoring_library.h"
 /********************************************************************************
  * Defines
  *******************************************************************************/
@@ -226,37 +227,13 @@ typedef struct
 } adc_measures_t;
 #endif
 
-/**
- * @brief Structure containing statistics for single channel of the ADC
- */
-typedef struct
-{
-	float rms;				/**< @brief RMS measurement */
-	float avg;				/**< @brief Average measurement */
-	float max;				/**< @brief Maximum measurement */
-	float min;				/**< @brief Minimum measurement */
-	float pkTopk;			/**< @brief Peak to peak measurement */
-} adc_ch_stats_t;
 
-/**
- * @brief Structure containing temporary statistics for single channel of the ADC
- */
-typedef struct
-{
-	float rms;				/**< @brief RMS measurement */
-	float avg;				/**< @brief Average measurement */
-	float max;				/**< @brief Maximum measurement */
-	float min;				/**< @brief Minimum measurement */
-	int index;				/**< @brief Current index of measurement */
-	int sampleCount;		/**< @brief No of samples to be used for statistics computation */
-} adc_ch_temp_stats_t;
 
 typedef struct
 {
 	float* offsets;
 	float* sensitivty;
-	adc_ch_stats_t* stats;
-	adc_ch_temp_stats_t* tempStats;
+	stats_t* stats;
 } adc_info_t;
 
 typedef struct

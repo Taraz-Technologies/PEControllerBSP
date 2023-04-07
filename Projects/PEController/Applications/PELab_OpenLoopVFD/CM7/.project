@@ -35,11 +35,6 @@
 			<locationURI>PARENT-1-PROJECT_LOC/Common</locationURI>
 		</link>
 		<link>
-			<name>BSP/ADC/max11046_drivers.c</name>
-			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/Drivers/BSP/PEController/ADC/Src/max11046_drivers.c</locationURI>
-		</link>
-		<link>
 			<name>BSP/DigitalPins/pecontroller_digital_in.c</name>
 			<type>1</type>
 			<locationURI>PARENT-5-PROJECT_LOC/Drivers/BSP/PEController/DigitalPins/Src/pecontroller_digital_in.c</locationURI>
@@ -168,6 +163,11 @@
 			<name>UserFiles/Src/control_library.c</name>
 			<type>1</type>
 			<locationURI>PARENT-5-PROJECT_LOC/Middleware/Taraz/ControlLib/Src/control_library.c</locationURI>
+		</link>
+		<link>
+			<name>UserFiles/Src/monitoring_library.c</name>
+			<type>1</type>
+			<locationURI>PARENT-5-PROJECT_LOC/Middleware/Taraz/MiscLib/Src/monitoring_library.c</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>
