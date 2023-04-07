@@ -88,8 +88,18 @@ extern "C" {
  */
 #define MEASUREMENT_COUNT_VOLTAGE		(3)
 #endif
-
+/**
+ * @brief Total no of measurements in the PEController
+ */
 #define TOTAL_MEASUREMENT_COUNT			(16)
+/**
+ * @brief Number of measurement logs to be kept
+ */
+#define MEASURE_SAVE_COUNT				(32)
+/**
+ * @brief Number of raw measurement logs to be kept for communication systems
+ */
+#define RAW_MEASURE_SAVE_COUNT			(256)
 /**
  * @}
  */
@@ -215,6 +225,54 @@ typedef struct
 	float Reserved10;		/**< @brief RESERVED */
 } adc_measures_t;
 #endif
+
+/**
+ * @brief Structure containing statistics for single channel of the ADC
+ */
+typedef struct
+{
+	float rms;				/**< @brief RMS measurement */
+	float avg;				/**< @brief Average measurement */
+	float max;				/**< @brief Maximum measurement */
+	float min;				/**< @brief Minimum measurement */
+	float pkTopk;			/**< @brief Peak to peak measurement */
+} adc_ch_stats_t;
+
+/**
+ * @brief Structure containing temporary statistics for single channel of the ADC
+ */
+typedef struct
+{
+	float rms;				/**< @brief RMS measurement */
+	float avg;				/**< @brief Average measurement */
+	float max;				/**< @brief Maximum measurement */
+	float min;				/**< @brief Minimum measurement */
+	int index;				/**< @brief Current index of measurement */
+	int sampleCount;		/**< @brief No of samples to be used for statistics computation */
+} adc_ch_temp_stats_t;
+
+typedef struct
+{
+	float* offsets;
+	float* sensitivty;
+	adc_ch_stats_t* stats;
+	adc_ch_temp_stats_t* tempStats;
+} adc_info_t;
+
+typedef struct
+{
+	int recordIndex;
+	uint16_t dataRecord[RAW_MEASURE_SAVE_COUNT * TOTAL_MEASUREMENT_COUNT] __attribute__ ((aligned (8)));
+} adc_raw_data_t;
+
+typedef struct
+{
+	volatile bool isNewDataAvaialble;
+	int recordIndex;
+	volatile adc_measures_t* lastDataPointer;
+	adc_measures_t dataRecord[MEASURE_SAVE_COUNT];
+	adc_info_t* info;
+} adc_processed_data_t;
 /**
  * @}
  */

@@ -56,8 +56,8 @@ extern "C" {
  * Typedefs
  *******************************************************************************/
 /** @defgroup MAX11046_Exported_Typedefs Type Definitions
-  * @{
-  */
+ * @{
+ */
 /**
  * @brief ADC acquisition mode definitions
  */
@@ -78,8 +78,8 @@ typedef void (*adcMeauresDataCallback)(adc_measures_t* result);
  * Structures
  *******************************************************************************/
 /** @defgroup MAX11046_Exported_Structures Structures
-  * @{
-  */
+ * @{
+ */
 /**
  * @brief Defines the parameters for continuous conversions
  */
@@ -88,6 +88,7 @@ typedef struct
 	int conversionCycleTimeUs;			/**< @brief Period In micro-seconds */
 	adcMeauresDataCallback callback;	/**< @brief Callback function called when results are ready */
 } adc_cont_config_t;
+
 /**
  * @}
  */
@@ -95,19 +96,9 @@ typedef struct
  * Exported Variables
  *******************************************************************************/
 /** @defgroup MAX11046_Exported_Variables Variables
-  * @{
-  */
-/** Contains the latest values of the acquired ADC readings
+ * @{
  */
-extern adc_measures_t adcVals;
-/** Defines the multipliers for each member of the ADC measurement
- * These values are used to convert ADC data to meaningful measurements according to the formula <b>value = (adcData - adcOffsets) * adcMultipiers</b>
- */
-extern adc_measures_t adcMultipiers;
-/** Defines the offsets for each member of the ADC measurement.
- * These values are used to convert ADC data to meaningful measurements according to the formula <b>value = (adcData - adcOffsets) * adcMultipiers</b>
- */
-extern adc_measures_t adcOffsets;
+extern adc_config_t adcConfig;
 /**
  * @}
  */
@@ -115,8 +106,8 @@ extern adc_measures_t adcOffsets;
  * Global Function Prototypes
  *******************************************************************************/
 /** @defgroup MAX11046_Exported_Functions Functions
-  * @{
-  */
+ * @{
+ */
 /**
  * @brief Initializes the MAX11046 drivers
  * @param type- ADC_MODE_SINGLE or ADC_MODE_CONT for single or continuous conversions respectively

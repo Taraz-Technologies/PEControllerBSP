@@ -1,10 +1,11 @@
 /**
  ********************************************************************************
- * @file 		screen_data.h
+ * @file    	monitoring_library.c
  * @author 		Waqas Ehsan Butt
- * @date 		Mar 14, 2023
+ * @date    	Apr 7, 2023
  *
- * @brief    
+ * @brief   
+ ********************************************************************************
  ********************************************************************************
  * @attention
  *
@@ -19,20 +20,10 @@
  ********************************************************************************
  */
 
-#ifndef DISPLAY_SCREENS_SCREEN_DATA_H_
-#define DISPLAY_SCREENS_SCREEN_DATA_H_
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /********************************************************************************
  * Includes
  *******************************************************************************/
-#include "user_config.h"
-#if LCD_DATA_MONITORING
-#include "general_header.h"
-#include "lvgl.h"
+#include "monitoring_library.h"
 /********************************************************************************
  * Defines
  *******************************************************************************/
@@ -40,105 +31,68 @@ extern "C" {
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
-/**
- * @brief Defines the parameter sources for the GUI display screens
- */
-typedef enum
-{
-	PARAM_SRC_MEASUREMENT,			/**< PARAM_SRC_MEASUREMENT */
-	PARAM_SRC_FLOAT_VALUE,   		/**< PARAM_SRC_RO_VALUE */
-	PARAM_SRC_UINT_VALUE,    		/**< PARAM_SRC_RW_VALUE */
-	PARAM_SRC_INT_VALUE,    		/**< PARAM_SRC_RW_VALUE */
-	PARAM_SRC_BINARY_VALUE,			/**< PARAM_SRC_BINARY_VALUE */
-	PARAM_SRC_SELECTABLE_VALUE, 	/**< PARAM_SRC_SELECTABLE_VALUE */
-	PARAM_SRC_LAST,					/**< PARAM_SRC_SELECTABLE_VALUE */
-} param_src_type_t;
 
-typedef enum
-{
-	ERR_ILLEGAL,
-	ERR_OUT_OF_RANGE,
-	ERR_NOT_AVAILABLE,
-	ERR_LAST,
-} param_set_err_t;
-typedef enum
-{
-	VAR_NONE = 0,
-	VAR_BOOL,
-	VAR_STRING,
-	VAR_FLOAT,
-	VAR_UFLOAT,
-	VAR_INT,
-	VAR_UINT,
-} var_type_t;
 /********************************************************************************
  * Structures
  *******************************************************************************/
-typedef struct
-{
-	float rms;
-	float avg;
-	float max;
-	float min;
-	int index;
-	int maxIndex;
-} measure_ch_tempstats_t;
-typedef struct
-{
-	float rms;
-	float avg;
-	float max;
-	float min;
-	float pkTopk;
-} measure_ch_stats_t;
-typedef struct
-{
-	param_measure_type_t type;
-	const char* chName;
-	const char* chUnit;
-	measure_ch_stats_t stats;
-	int channelIndex;
-	float freq;
-} disp_ch_measure_t;
-typedef struct
-{
-	bool isUpdated;
-	disp_ch_measure_t disp[16];
-	measure_ch_tempstats_t tempStats[16];
-	float* sensitivity;
-	float* offsets;
-} disp_measure_t;
-typedef struct
-{
-	lv_obj_t* lblReading;
-	lv_obj_t* lblValue;
-} ch_display_t;
-typedef struct
-{
-	var_type_t type;
-	const char* name;
-	const char* unit;
-	void* value;
-	lv_obj_t* lbl;
-} disp_var_t;
+
 /********************************************************************************
- * Exported Variables
+ * Static Variables
  *******************************************************************************/
-extern disp_var_t dispVars[5];
-extern disp_measure_t chDispMeasures;
-extern const char* measureTxts[DISP_LAST];
+
 /********************************************************************************
- * Global Function Prototypes
+ * Global Variables
+ *******************************************************************************/
+
+/********************************************************************************
+ * Function Prototypes
  *******************************************************************************/
 
 /********************************************************************************
  * Code
  *******************************************************************************/
+#pragma GCC push_options
+#pragma GCC optimize ("-Ofast")
+/**
+ * @brief Insert new data for computation of statistics. If samples are enough statistics will be computed.
+ * @param data Pointer to the first element of the new data array
+ * @param stats Pointer to the first element of the statistics array
+ * @param count Number of consecutive statistics computations
+ */
+void Stats_Insert_Compute(float* data, stats_t* stats, int count)
+{
+	while (count--)
+	{
+		// Compute the temporary values
+		stats->tempData.rms += ((*data) * (*data));
+		stats->tempData.avg += (*data);
+		if (stats->tempData.max < *data)
+			stats->tempData.max = *data;
+		if (stats->tempData.min > *data)
+			stats->tempData.min = *data;
 
-#endif
-#ifdef __cplusplus
+		// Compute results if required
+		if (--stats->samplesLeft <= 0)
+		{
+			// get new values
+			stats->result.rms = stats->tempData.rms / stats->sampleCount;
+			stats->result.avg = stats->tempData.avg / stats->sampleCount;
+			stats->result.max = stats->tempData.max;
+			stats->result.min = stats->tempData.min;
+			stats->result.pkTopk = stats->tempData.max - stats->tempData.min;
+
+			// reset temp stats
+			stats->tempData.rms = 0;
+			stats->tempData.avg = 0;
+			stats->tempData.max = -4294967296;
+			stats->tempData.min = 4294967296;
+			stats->samplesLeft = stats->sampleCount;
+			stats->isUpdated = 0xFFFFFFFF;
+		}
+		stats++;
+		data++;
+	}
 }
-#endif
+#pragma GCC pop_options
 
-#endif 
 /* EOF */
