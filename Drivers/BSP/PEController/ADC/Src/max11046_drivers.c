@@ -75,10 +75,30 @@ static stats_t stats = {0};
 static adc_info_t adcInfo = {0};
 static adc_raw_data_t* rawData;
 static adc_processed_data_t* processedData;
+static TIM_HandleTypeDef htimCnv;			// TIM12
+#if USE_DMA
+static TIM_HandleTypeDef htimRead;			// TIM8
+static DMA_HandleTypeDef hdma_rd_low;
+static DMA_HandleTypeDef hdma_acq_data;
+static DMA_HandleTypeDef hdma_rd_high;
+#if !MANUAL_RD_SWITCH
+uint32_t rdHigh = maxRead_Pin;
+uint32_t rdLow = maxRead_Pin << 16;
+#else
+uint32_t rdHigh = maxRead_Pin;
+uint32_t rdLow = maxRead_Pin << 16;
+uint32_t toggle[] = {(1U << 11), (1U << 27)};
+#endif
+#if USE_CS_DMA
+extern DMA_HandleTypeDef hdma_tim8_up;
+extern DMA_HandleTypeDef hdma_dma_generator3;
+uint32_t csList[] = {((uint32_t)maxCS1_Pin) | ((uint32_t)maxCS2_Pin << 16U), ((uint32_t)maxCS1_Pin) | ((uint32_t)maxCS2_Pin)};
+uint16_t timList[] = {TIM_CR1_CEN | TIM_CR1_OPM_Pos, TIM_CR1_OPM_Pos};
+#endif
+#endif
 /********************************************************************************
  * Global Variables
  *******************************************************************************/
-TIM_HandleTypeDef maxTimerHandle;
 /** Contains the latest values of the acquired ADC readings
  */
 //adc_measures_t adcVals;
@@ -91,15 +111,15 @@ TIM_HandleTypeDef maxTimerHandle;
  *******************************************************************************/
 #if MANUAL_RD_SWITCH
 #pragma GCC push_options
-#pragma GCC optimize ("-O0")
+#pragma GCC optimize ("-O0")   // optimization may effect acquisition
 /**
  * @brief Measure data from all channels - optimized version
  * @param tempData
  */
-static inline void Measure_AllChannels(uint16_t* tempData)
+static inline void CollectData_BothADCs(uint16_t* tempData)
 {
 	// ADC1
-	maxCS1_GPIO_Port->BSRR = (uint32_t)maxCS1_Pin << 16U;
+	maxCS1_GPIO_Port->BSRR = (uint32_t)maxCS1_Pin << 16U | maxCS2_Pin;
 
 	READ_ADC_CH(tempData);
 	READ_ADC_CH(tempData);
@@ -122,7 +142,7 @@ static inline void Measure_AllChannels(uint16_t* tempData)
 	READ_ADC_CH(tempData);
 	READ_ADC_CH(tempData);
 
-	maxCS2_GPIO_Port->BSRR = maxCS2_Pin;
+	maxCS2_GPIO_Port->BSRR = maxCS2_Pin | maxCS1_Pin;
 }
 #pragma GCC pop_options
 #endif
@@ -135,12 +155,12 @@ static inline void Measure_AllChannels(uint16_t* tempData)
  * @param *mults Pointer to the multiplier information
  * @param *offsets Pointer to the offset information
  */
-static inline void MeasureConvert_BothADCs(float* dataPtr, const float* mults, const float* offsets)
+static inline void CollectConvertData_BothADCs(float* dataPtr, const float* mults, const float* offsets)
 {
 	uint16_t* tempData = (uint16_t*)intelliSENSDataPtr;
 	float* dataPtrOriginal = dataPtr;
 #if MANUAL_RD_SWITCH
-	Measure_AllChannels(tempData);
+	CollectData_BothADCs(tempData);
 #endif
 
 #if ENABLE_INTELLISENS
@@ -160,255 +180,13 @@ static inline void MeasureConvert_BothADCs(float* dataPtr, const float* mults, c
 }
 #pragma GCC pop_options
 
-static void Timer_Config(void)
+#if 1 // Peripheral Initialization
+
+static void GPIOs_Init(void)
 {
-	TIM_OC_InitTypeDef sConfigOC = {0};
-	GPIO_InitTypeDef GPIO_InitStruct = {0};
-
-	__HAL_RCC_TIM12_CLK_ENABLE();
-
-	maxTimerHandle.Instance = TIM12;
-	maxTimerHandle.Init.Prescaler = 0;
-	maxTimerHandle.Init.CounterMode = TIM_COUNTERMODE_UP;
-	maxTimerHandle.Init.Period = (uint16_t)(MAX11046_CLK_Us * adcContConfig.conversionCycleTimeUs) - 1;
-#if ENABLE_INTELLISENS
-	intelliSENS.Init(adcContConfig.conversionCycleTimeUs, (const float*)&adcMultipiers, (const float*)&adcOffsets);
-	intelliSENS.SetADCTicks(adcContConfig.conversionCycleTimeUs * 240);
-#endif
-	maxTimerHandle.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-	maxTimerHandle.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
-	if (HAL_TIM_PWM_Init(&maxTimerHandle) != HAL_OK)
-		Error_Handler();
-	sConfigOC.OCMode = TIM_OCMODE_PWM1;
-	sConfigOC.Pulse = MAX11046_CLK_Us * 2;				// 2Usec pulse
-	sConfigOC.OCPolarity = TIM_OCPOLARITY_LOW;
-	sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
-	if (HAL_TIM_PWM_ConfigChannel(&maxTimerHandle, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
-		Error_Handler();
-	if (HAL_TIM_PWM_ConfigChannel(&maxTimerHandle, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
-		Error_Handler();
-
-	__HAL_RCC_GPIOH_CLK_ENABLE();
-	__HAL_RCC_GPIOB_CLK_ENABLE();
-	/**TIM12 GPIO Configuration
-	    PH6     ------> TIM12_CH1
-	    PB15     ------> TIM12_CH2
-	 */
-	GPIO_InitStruct.Pin = maxCNV1_Pin;
-	GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-	GPIO_InitStruct.Pull = GPIO_NOPULL;
-	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-	GPIO_InitStruct.Alternate = GPIO_AF2_TIM12;
-	HAL_GPIO_Init(maxCNV1_GPIO_Port, &GPIO_InitStruct);
-
-	GPIO_InitStruct.Pin = maxCNV2_Pin;
-	GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-	GPIO_InitStruct.Pull = GPIO_NOPULL;
-	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-	GPIO_InitStruct.Alternate = GPIO_AF2_TIM12;
-	HAL_GPIO_Init(maxCNV2_GPIO_Port, &GPIO_InitStruct);
-
-	MAX11046_TIMER->CCR1 = MAX11046_TIMER->CCR2 = MAX11046_CLK_Us * 2;				// 2Usec pulse
-	if(acqType == ADC_MODE_SINGLE)
-		HAL_TIM_OnePulse_Init(&maxTimerHandle, TIM_OPMODE_SINGLE);
-}
-DMA_HandleTypeDef hdma_tim8_ch1;
-DMA_HandleTypeDef hdma_tim8_ch2;
-DMA_HandleTypeDef hdma_tim8_ch3;
-TIM_HandleTypeDef htim8;
-
-static void DMA_Init(void)
-{
-	__HAL_RCC_DMA1_CLK_ENABLE();
-	/* DMA interrupt init */
-	/* DMA1_Stream0_IRQn interrupt configuration */
-	HAL_NVIC_SetPriority(DMA1_Stream0_IRQn, 5, 0);
-	HAL_NVIC_EnableIRQ(DMA1_Stream0_IRQn);
-	/* DMA1_Stream1_IRQn interrupt configuration */
-	HAL_NVIC_SetPriority(DMA1_Stream1_IRQn, 5, 0);
-	HAL_NVIC_EnableIRQ(DMA1_Stream1_IRQn);
-	/* DMA1_Stream2_IRQn interrupt configuration */
-	HAL_NVIC_SetPriority(DMA1_Stream2_IRQn, 5, 0);
-	HAL_NVIC_EnableIRQ(DMA1_Stream2_IRQn);
-}
-
-/**
- * @brief TIM8 Initialization Function
- * @param None
- * @retval None
- */
-static void MX_TIM8_Init(void)
-{
-
-	/* USER CODE BEGIN TIM8_Init 0 */
-
-	/* USER CODE END TIM8_Init 0 */
-
-	TIM_MasterConfigTypeDef sMasterConfig = {0};
-	TIM_OC_InitTypeDef sConfigOC = {0};
-	TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig = {0};
-
-	/* USER CODE BEGIN TIM8_Init 1 */
-
-	/* USER CODE END TIM8_Init 1 */
-	htim8.Instance = TIM8;
-	htim8.Init.Prescaler = 0;
-	htim8.Init.CounterMode = TIM_COUNTERMODE_UP;
-	htim8.Init.Period = 44;
-	htim8.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-	htim8.Init.RepetitionCounter = 7;
-	htim8.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-	if (HAL_TIM_PWM_Init(&htim8) != HAL_OK)
-	{
-		Error_Handler();
-	}
-	if (HAL_TIM_OnePulse_Init(&htim8, TIM_OPMODE_SINGLE) != HAL_OK)
-	{
-		Error_Handler();
-	}
-	sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
-	sMasterConfig.MasterOutputTrigger2 = TIM_TRGO2_RESET;
-	sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-	if (HAL_TIMEx_MasterConfigSynchronization(&htim8, &sMasterConfig) != HAL_OK)
-	{
-		Error_Handler();
-	}
-	sConfigOC.OCMode = TIM_OCMODE_PWM1;
-	sConfigOC.Pulse = 9;
-	sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
-	sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
-	sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
-	sConfigOC.OCIdleState = TIM_OCIDLESTATE_RESET;
-	sConfigOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
-	if (HAL_TIM_PWM_ConfigChannel(&htim8, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
-	{
-		Error_Handler();
-	}
-	sConfigOC.Pulse = 15;
-	if (HAL_TIM_PWM_ConfigChannel(&htim8, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
-	{
-		Error_Handler();
-	}
-	sConfigOC.Pulse = 32;
-	if (HAL_TIM_PWM_ConfigChannel(&htim8, &sConfigOC, TIM_CHANNEL_3) != HAL_OK)
-	{
-		Error_Handler();
-	}
-	sBreakDeadTimeConfig.OffStateRunMode = TIM_OSSR_DISABLE;
-	sBreakDeadTimeConfig.OffStateIDLEMode = TIM_OSSI_DISABLE;
-	sBreakDeadTimeConfig.LockLevel = TIM_LOCKLEVEL_OFF;
-	sBreakDeadTimeConfig.DeadTime = 0;
-	sBreakDeadTimeConfig.BreakState = TIM_BREAK_DISABLE;
-	sBreakDeadTimeConfig.BreakPolarity = TIM_BREAKPOLARITY_HIGH;
-	sBreakDeadTimeConfig.BreakFilter = 0;
-	sBreakDeadTimeConfig.Break2State = TIM_BREAK2_DISABLE;
-	sBreakDeadTimeConfig.Break2Polarity = TIM_BREAK2POLARITY_HIGH;
-	sBreakDeadTimeConfig.Break2Filter = 0;
-	sBreakDeadTimeConfig.AutomaticOutput = TIM_AUTOMATICOUTPUT_DISABLE;
-	if (HAL_TIMEx_ConfigBreakDeadTime(&htim8, &sBreakDeadTimeConfig) != HAL_OK)
-	{
-		Error_Handler();
-	}
-	/* USER CODE BEGIN TIM8_Init 2 */
-
-	/* USER CODE END TIM8_Init 2 */
-}
-
-/**
- * @brief Configures the sensitivities and offsets for all measurements
- */
-static void ConfigureMeasurements(void)
-{
-	adcInfo.offsets = (float*)&adcOffsets;
-	adcInfo.sensitivty = (float*)&adcMultipiers;
-	///////////// --TODO-- configure the measurement frequency etc
-	adcInfo.stats = &stats;
-
-	// implementation of Custom PEControllers is user controlled
-#if	PECONTROLLER_CONFIG == PEC_CUSTOM
-	for (int i = 0; i < 16; i++)
-	{
-		adcConfig.sensitivty[i] = 10.f / (32768.f);
-		adcConfig.offsets[i] = 32768;
-	}
-#else
-	for (int i = 0; i < MEASUREMENT_COUNT_CURRENT; i++)
-	{
-		adcConfig.sensitivty[i] = 10000.f / (CURRENT_SENSITIVITY_mVA * 32768.f);
-		adcConfig.offsets[i] = 32768;
-	}
-	for (int i = 0; i < MEASUREMENT_COUNT_VOLTAGE; i++)
-	{
-		adcConfig.sensitivty[i + 8] = 1000 / 32768.f;
-		adcConfig.offsets[i + 8] = 32768;
-	}
-#endif
-}
-#if USE_DMA
-#if !MANUAL_RD_SWITCH
-uint32_t rdHigh = maxRead_Pin;
-uint32_t rdLow = maxRead_Pin << 16;
-#else
-uint32_t rdHigh = maxRead_Pin;
-uint32_t rdLow = maxRead_Pin << 16;
-uint32_t toggle[] = {(1U << 11), (1U << 27)};
-#endif
-extern TIM_HandleTypeDef htim8;
-extern DMA_HandleTypeDef hdma_tim8_ch1;
-extern DMA_HandleTypeDef hdma_tim8_ch2;
-extern DMA_HandleTypeDef hdma_tim8_ch3;
-#if USE_CS_DMA
-extern DMA_HandleTypeDef hdma_tim8_up;
-extern DMA_HandleTypeDef hdma_dma_generator3;
-uint32_t csList[] = {((uint32_t)maxCS1_Pin) | ((uint32_t)maxCS2_Pin << 16U), ((uint32_t)maxCS1_Pin) | ((uint32_t)maxCS2_Pin)};
-uint16_t timList[] = {TIM_CR1_CEN | TIM_CR1_OPM_Pos, TIM_CR1_OPM_Pos};
-#endif
-#endif
-/**
- * @brief Initializes the MAX11046 drivers
- * @param type- ADC_MODE_SINGLE or ADC_MODE_CONT for single or continuous conversions respectively
- * @param *contConfig- adc_cont_config_t contains the continuous transfer configuration
- */
-void BSP_MAX11046_Init(adc_acq_mode_t type, adc_cont_config_t* contConfig, adc_raw_data_t* rawAdcData, adc_processed_data_t* processedAdcData)
-{
-	// DeInitialize if already initialized
-	if(moduleActive)
-		BSP_MAX11046_DeInit();
-
-	// set parameters
-	rawData = rawAdcData;
-	processedData = processedAdcData;
-	ConfigureMeasurements();
-
-#if ENABLE_INTELLISENS
-	intelliSENS_Configure();
-#endif
-
-#if USE_DMA
-	HAL_DMA_Start(&hdma_tim8_ch1, (uint32_t)&rdLow, (uint32_t)&maxRead_GPIO_Port->BSRR, 16);
-#if !MANUAL_RD_SWITCH
-	HAL_DMA_Start(&hdma_tim8_ch2, (uint32_t)&MAX11046_GPIO->IDR, (uint32_t)&rawData->dataRecord[recordIndex << 4], 16);
-#else
-	HAL_DMA_Start(&hdma_tim8_ch2, (uint32_t)&toggle[0], (uint32_t)&maxRead_GPIO_Port->BSRR, 2);
-#endif
-	HAL_DMA_Start(&hdma_tim8_ch3, (uint32_t)&rdHigh, (uint32_t)&maxRead_GPIO_Port->BSRR, 16);
-#if USE_CS_DMA
-	HAL_DMA_Start(&hdma_tim8_up, (uint32_t)&csList[0], (uint32_t)&maxCS1_GPIO_Port->BSRR, 2);
-	HAL_DMA_Start(&hdma_dma_generator3, (uint32_t)&timList[0], (uint32_t)&TIM8->CR1, 2);
-#endif
-	htim8.Instance->DIER = 0xe00;
-	htim8.Instance->CCER |= (uint32_t)(1U << ((TIM_CHANNEL_1 | TIM_CHANNEL_2| TIM_CHANNEL_3) & 0x1FU));
-	__HAL_TIM_MOE_ENABLE(&htim8);
-	__HAL_TIM_ENABLE_IT(&htim8, TIM_IT_UPDATE);
-#endif
-
-	acqType = type;
-	adcContConfig.conversionCycleTimeUs = contConfig->conversionCycleTimeUs;
-	adcContConfig.callback = contConfig->callback;
-
 	/*Configure GPIO pin Output Level */
 	HAL_GPIO_WritePin(GPIOE, maxCS1_Pin|maxCS2_Pin, GPIO_PIN_SET);
-	HAL_GPIO_WritePin(GPIOI, maxWrite_Pin|LCD_Disp_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOI, maxWrite_Pin, GPIO_PIN_SET);
 	HAL_GPIO_WritePin(maxRead_GPIO_Port, maxRead_Pin, GPIO_PIN_SET);
 
 	GPIO_InitTypeDef GPIO_InitStruct = {0};
@@ -456,8 +234,307 @@ void BSP_MAX11046_Init(adc_acq_mode_t type, adc_cont_config_t* contConfig, adc_r
 	GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
+}
 
-	Timer_Config();
+static void ConversionTimer_Init(void)
+{
+	TIM_OC_InitTypeDef sConfigOC = {0};
+	GPIO_InitTypeDef GPIO_InitStruct = {0};
+
+	__HAL_RCC_TIM12_CLK_ENABLE();
+
+	htimCnv.Instance = TIM12;
+	htimCnv.Init.Prescaler = 0;
+	htimCnv.Init.CounterMode = TIM_COUNTERMODE_UP;
+	htimCnv.Init.Period = (uint16_t)(MAX11046_CLK_Us * adcContConfig.conversionCycleTimeUs) - 1;
+#if ENABLE_INTELLISENS
+	intelliSENS.Init(adcContConfig.conversionCycleTimeUs, (const float*)&adcMultipiers, (const float*)&adcOffsets);
+	intelliSENS.SetADCTicks(adcContConfig.conversionCycleTimeUs * 240);
+#endif
+	htimCnv.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+	htimCnv.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
+	if (HAL_TIM_PWM_Init(&htimCnv) != HAL_OK)
+		Error_Handler();
+	sConfigOC.OCMode = TIM_OCMODE_PWM1;
+	sConfigOC.Pulse = MAX11046_CLK_Us * 2;				// 2Usec pulse
+	sConfigOC.OCPolarity = TIM_OCPOLARITY_LOW;
+	sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+	if (HAL_TIM_PWM_ConfigChannel(&htimCnv, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+		Error_Handler();
+	if (HAL_TIM_PWM_ConfigChannel(&htimCnv, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
+		Error_Handler();
+
+	__HAL_RCC_GPIOH_CLK_ENABLE();
+	__HAL_RCC_GPIOB_CLK_ENABLE();
+	/**TIM12 GPIO Configuration
+	    PH6     ------> TIM12_CH1
+	    PB15     ------> TIM12_CH2
+	 */
+	GPIO_InitStruct.Pin = maxCNV1_Pin;
+	GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+	GPIO_InitStruct.Alternate = GPIO_AF2_TIM12;
+	HAL_GPIO_Init(maxCNV1_GPIO_Port, &GPIO_InitStruct);
+
+	GPIO_InitStruct.Pin = maxCNV2_Pin;
+	GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+	GPIO_InitStruct.Alternate = GPIO_AF2_TIM12;
+	HAL_GPIO_Init(maxCNV2_GPIO_Port, &GPIO_InitStruct);
+
+	MAX11046_TIMER->CCR1 = MAX11046_TIMER->CCR2 = MAX11046_CLK_Us * 2;				// 2Usec pulse
+	if(acqType == ADC_MODE_SINGLE)
+		HAL_TIM_OnePulse_Init(&htimCnv, TIM_OPMODE_SINGLE);
+}
+
+#if USE_DMA
+
+/**
+ * @brief TIM8 Initialization Function
+ * @param None
+ * @retval None
+ */
+static void ReadTimer_Init(void)
+{
+	TIM_MasterConfigTypeDef sMasterConfig = {0};
+	TIM_OC_InitTypeDef sConfigOC = {0};
+	TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig = {0};
+	__HAL_RCC_TIM8_CLK_ENABLE();
+
+	htimRead.Instance = TIM8;
+	htimRead.Init.Prescaler = 0;
+	htimRead.Init.CounterMode = TIM_COUNTERMODE_UP;
+	htimRead.Init.Period = 44;
+	htimRead.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+	htimRead.Init.RepetitionCounter = 7;
+	htimRead.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+	if (HAL_TIM_PWM_Init(&htimRead) != HAL_OK)
+	{
+		Error_Handler();
+	}
+	if (HAL_TIM_OnePulse_Init(&htimRead, TIM_OPMODE_SINGLE) != HAL_OK)
+	{
+		Error_Handler();
+	}
+	sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+	sMasterConfig.MasterOutputTrigger2 = TIM_TRGO2_RESET;
+	sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+	if (HAL_TIMEx_MasterConfigSynchronization(&htimRead, &sMasterConfig) != HAL_OK)
+	{
+		Error_Handler();
+	}
+	sConfigOC.OCMode = TIM_OCMODE_PWM1;
+	sConfigOC.Pulse = 9;
+	sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+	sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
+	sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+	sConfigOC.OCIdleState = TIM_OCIDLESTATE_RESET;
+	sConfigOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
+	if (HAL_TIM_PWM_ConfigChannel(&htimRead, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+	{
+		Error_Handler();
+	}
+	sConfigOC.Pulse = 15;
+	if (HAL_TIM_PWM_ConfigChannel(&htimRead, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
+	{
+		Error_Handler();
+	}
+	sConfigOC.Pulse = 32;
+	if (HAL_TIM_PWM_ConfigChannel(&htimRead, &sConfigOC, TIM_CHANNEL_3) != HAL_OK)
+	{
+		Error_Handler();
+	}
+	sBreakDeadTimeConfig.OffStateRunMode = TIM_OSSR_DISABLE;
+	sBreakDeadTimeConfig.OffStateIDLEMode = TIM_OSSI_DISABLE;
+	sBreakDeadTimeConfig.LockLevel = TIM_LOCKLEVEL_OFF;
+	sBreakDeadTimeConfig.DeadTime = 0;
+	sBreakDeadTimeConfig.BreakState = TIM_BREAK_DISABLE;
+	sBreakDeadTimeConfig.BreakPolarity = TIM_BREAKPOLARITY_HIGH;
+	sBreakDeadTimeConfig.BreakFilter = 0;
+	sBreakDeadTimeConfig.Break2State = TIM_BREAK2_DISABLE;
+	sBreakDeadTimeConfig.Break2Polarity = TIM_BREAK2POLARITY_HIGH;
+	sBreakDeadTimeConfig.Break2Filter = 0;
+	sBreakDeadTimeConfig.AutomaticOutput = TIM_AUTOMATICOUTPUT_DISABLE;
+	if (HAL_TIMEx_ConfigBreakDeadTime(&htimRead, &sBreakDeadTimeConfig) != HAL_OK)
+	{
+		Error_Handler();
+	}
+
+	// Custom configuration
+	htimRead.Instance->DIER = 0xe00;
+	htimRead.Instance->CCER |= (uint32_t)(1U << ((TIM_CHANNEL_1 | TIM_CHANNEL_2| TIM_CHANNEL_3) & 0x1FU));
+	__HAL_TIM_MOE_ENABLE(&htimRead);
+	__HAL_TIM_ENABLE_IT(&htimRead, TIM_IT_UPDATE);
+	/* TIM8 interrupt Init */
+	HAL_NVIC_SetPriority(TIM8_UP_TIM13_IRQn, 5, 0);
+	HAL_NVIC_EnableIRQ(TIM8_UP_TIM13_IRQn);
+}
+
+static void DataCollectDMAs_Init(void)
+{
+	__HAL_RCC_DMA1_CLK_ENABLE();
+	__HAL_RCC_TIM8_CLK_ENABLE();
+
+	/* TIM8 DMA Init */
+	/* TIM8_CH1 Init */
+	hdma_rd_low.Instance = DMA1_Stream0;
+	hdma_rd_low.Init.Request = DMA_REQUEST_TIM8_CH1;
+	hdma_rd_low.Init.Direction = DMA_MEMORY_TO_PERIPH;
+	hdma_rd_low.Init.PeriphInc = DMA_PINC_DISABLE;
+	hdma_rd_low.Init.MemInc = DMA_MINC_DISABLE;
+	hdma_rd_low.Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD;
+	hdma_rd_low.Init.MemDataAlignment = DMA_MDATAALIGN_WORD;
+	hdma_rd_low.Init.Mode = DMA_CIRCULAR;
+	hdma_rd_low.Init.Priority = DMA_PRIORITY_HIGH;
+	hdma_rd_low.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
+	if (HAL_DMA_Init(&hdma_rd_low) != HAL_OK)
+	{
+		Error_Handler();
+	}
+
+	__HAL_LINKDMA(htim_pwm,hdma[TIM_DMA_ID_CC1],hdma_rd_low);
+
+	/* TIM8_CH2 Init */
+	hdma_acq_data.Instance = DMA1_Stream1;
+	hdma_acq_data.Init.Request = DMA_REQUEST_TIM8_CH2;
+	hdma_acq_data.Init.Direction = DMA_PERIPH_TO_MEMORY;
+	hdma_acq_data.Init.PeriphInc = DMA_PINC_DISABLE;
+	hdma_acq_data.Init.MemInc = DMA_MINC_ENABLE;
+	hdma_acq_data.Init.PeriphDataAlignment = DMA_PDATAALIGN_HALFWORD;
+	hdma_acq_data.Init.MemDataAlignment = DMA_MDATAALIGN_HALFWORD;
+	hdma_acq_data.Init.Mode = DMA_CIRCULAR;
+	hdma_acq_data.Init.Priority = DMA_PRIORITY_HIGH;
+	hdma_acq_data.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
+	if (HAL_DMA_Init(&hdma_acq_data) != HAL_OK)
+	{
+		Error_Handler();
+	}
+
+	__HAL_LINKDMA(htim_pwm,hdma[TIM_DMA_ID_CC2],hdma_acq_data);
+
+	/* TIM8_CH3 Init */
+	hdma_rd_high.Instance = DMA1_Stream2;
+	hdma_rd_high.Init.Request = DMA_REQUEST_TIM8_CH3;
+	hdma_rd_high.Init.Direction = DMA_MEMORY_TO_PERIPH;
+	hdma_rd_high.Init.PeriphInc = DMA_PINC_DISABLE;
+	hdma_rd_high.Init.MemInc = DMA_MINC_DISABLE;
+	hdma_rd_high.Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD;
+	hdma_rd_high.Init.MemDataAlignment = DMA_MDATAALIGN_WORD;
+	hdma_rd_high.Init.Mode = DMA_CIRCULAR;
+	hdma_rd_high.Init.Priority = DMA_PRIORITY_HIGH;
+	hdma_rd_high.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
+	if (HAL_DMA_Init(&hdma_rd_high) != HAL_OK)
+	{
+		Error_Handler();
+	}
+
+	__HAL_LINKDMA(htim_pwm,hdma[TIM_DMA_ID_CC3],hdma_rd_high);
+
+	/* DMA interrupt init */
+	HAL_NVIC_SetPriority(DMA1_Stream2_IRQn, 5, 0);
+	HAL_NVIC_EnableIRQ(DMA1_Stream2_IRQn);
+
+	// Enable the DMAs
+	HAL_DMA_Start(&hdma_rd_low, (uint32_t)&rdLow, (uint32_t)&maxRead_GPIO_Port->BSRR, 16);
+#if MANUAL_RD_SWITCH
+	HAL_DMA_Start(&hdma_acq_data, (uint32_t)&toggle[0], (uint32_t)&maxRead_GPIO_Port->BSRR, 2);
+#else
+	HAL_DMA_Start(&hdma_acq_data, (uint32_t)&MAX11046_GPIO->IDR, (uint32_t)&rawData->dataRecord[recordIndex << 4], 16);
+#endif
+	HAL_DMA_Start(&hdma_rd_high, (uint32_t)&rdHigh, (uint32_t)&maxRead_GPIO_Port->BSRR, 16);
+#if USE_CS_DMA
+	HAL_DMA_Start(&hdma_tim8_up, (uint32_t)&csList[0], (uint32_t)&maxCS1_GPIO_Port->BSRR, 2);
+	HAL_DMA_Start(&hdma_dma_generator3, (uint32_t)&timList[0], (uint32_t)&TIM8->CR1, 2);
+#endif
+}
+/**
+ * @brief TIM_PWM MSP De-Initialization
+ * This function freeze the hardware resources used in this example
+ * @param htim_pwm: TIM_PWM handle pointer
+ * @retval None
+ */
+void DataCollectDMAs_DeInit(TIM_HandleTypeDef* htim_pwm)
+{
+	__HAL_RCC_TIM8_CLK_DISABLE();
+
+	/* TIM8 DMA DeInit */
+	HAL_DMA_DeInit(htim_pwm->hdma[TIM_DMA_ID_CC1]);
+	HAL_DMA_DeInit(htim_pwm->hdma[TIM_DMA_ID_CC2]);
+	HAL_DMA_DeInit(htim_pwm->hdma[TIM_DMA_ID_CC3]);
+
+	/* TIM8 interrupt DeInit */
+	HAL_NVIC_DisableIRQ(TIM8_UP_TIM13_IRQn);
+
+}
+
+void DMA1_Stream2_IRQHandler(void)
+{
+	HAL_DMA_IRQHandler(&hdma_rd_high);
+}
+
+#endif
+
+/**
+ * @brief Configures the sensitivities and offsets for all measurements
+ */
+static void ConfigureMeasurements(void)
+{
+	adcInfo.offsets = (float*)&adcOffsets;
+	adcInfo.sensitivty = (float*)&adcMultipiers;
+	///////////// --TODO-- configure the measurement frequency etc
+	adcInfo.stats = &stats;
+
+	// implementation of Custom PEControllers is user controlled
+#if	PECONTROLLER_CONFIG == PEC_CUSTOM
+	for (int i = 0; i < 16; i++)
+	{
+		adcConfig.sensitivty[i] = 10.f / (32768.f);
+		adcConfig.offsets[i] = 32768;
+	}
+#else
+	for (int i = 0; i < MEASUREMENT_COUNT_CURRENT; i++)
+	{
+		adcConfig.sensitivty[i] = 10000.f / (CURRENT_SENSITIVITY_mVA * 32768.f);
+		adcConfig.offsets[i] = 32768;
+	}
+	for (int i = 0; i < MEASUREMENT_COUNT_VOLTAGE; i++)
+	{
+		adcConfig.sensitivty[i + 8] = 1000 / 32768.f;
+		adcConfig.offsets[i + 8] = 32768;
+	}
+#endif
+}
+
+/**
+ * @brief Initializes the MAX11046 drivers
+ * @param type- ADC_MODE_SINGLE or ADC_MODE_CONT for single or continuous conversions respectively
+ * @param *contConfig- adc_cont_config_t contains the continuous transfer configuration
+ */
+void BSP_MAX11046_Init(adc_acq_mode_t type, adc_cont_config_t* contConfig, adc_raw_data_t* rawAdcData, adc_processed_data_t* processedAdcData)
+{
+	// DeInitialize if already initialized
+	if(moduleActive)
+		BSP_MAX11046_DeInit();
+
+	// set parameters
+	rawData = rawAdcData;
+	processedData = processedAdcData;
+	ConfigureMeasurements();
+
+#if ENABLE_INTELLISENS
+	intelliSENS_Configure();
+#endif
+
+	acqType = type;
+	adcContConfig.conversionCycleTimeUs = contConfig->conversionCycleTimeUs;
+	adcContConfig.callback = contConfig->callback;
+
+	GPIOs_Init();
+	DataCollectDMAs_Init();
+	ReadTimer_Init();
+	ConversionTimer_Init();
 
 	moduleActive = true;
 }
@@ -480,14 +557,14 @@ adc_measures_t* BSP_MAX11046_Run(void)
 	{
 		// wait for the pending operations to end
 		while(HAL_GPIO_ReadPin(maxBusy1_GPIO_Port,maxBusy1_Pin));
-		HAL_TIM_OnePulse_Start(&maxTimerHandle,TIM_OPMODE_SINGLE);
+		HAL_TIM_OnePulse_Start(&htimCnv,TIM_OPMODE_SINGLE);
 		return &adcVals;
 	}
 	else
 	{
 		// enable PWM to produce continuous data
-		HAL_TIM_PWM_Start(&maxTimerHandle,TIM_CHANNEL_1);
-		HAL_TIM_PWM_Start(&maxTimerHandle,TIM_CHANNEL_2);
+		HAL_TIM_PWM_Start(&htimCnv,TIM_CHANNEL_1);
+		HAL_TIM_PWM_Start(&htimCnv,TIM_CHANNEL_2);
 		return NULL;
 	}
 }
@@ -500,13 +577,13 @@ void BSP_MAX11046_Stop(void)
 	if(acqType != ADC_MODE_SINGLE)
 	{
 		// stop timer
-		HAL_TIM_PWM_Stop(&maxTimerHandle,TIM_CHANNEL_1);
-		HAL_TIM_PWM_Stop(&maxTimerHandle,TIM_CHANNEL_2);
+		HAL_TIM_PWM_Stop(&htimCnv,TIM_CHANNEL_1);
+		HAL_TIM_PWM_Stop(&htimCnv,TIM_CHANNEL_2);
 	}
 	else
 	{
-		HAL_TIM_OnePulse_Stop(&maxTimerHandle,TIM_CHANNEL_1);
-		HAL_TIM_OnePulse_Stop(&maxTimerHandle,TIM_CHANNEL_2);
+		HAL_TIM_OnePulse_Stop(&htimCnv,TIM_CHANNEL_1);
+		HAL_TIM_OnePulse_Stop(&htimCnv,TIM_CHANNEL_2);
 	}
 	// clear the flag
 	__HAL_GPIO_EXTI_CLEAR_IT(maxBusy1_Pin);
@@ -524,7 +601,7 @@ void BSP_MAX11046_DeInit(void)
 	__HAL_GPIO_EXTI_CLEAR_IT(maxBusy1_Pin);
 	__HAL_GPIO_EXTI_CLEAR_IT(maxBusy2_Pin);
 
-	HAL_TIM_PWM_DeInit(&maxTimerHandle);
+	HAL_TIM_PWM_DeInit(&htimCnv);
 	moduleActive = false;
 }
 
@@ -535,22 +612,22 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 	if(GPIO_Pin == maxBusy1_Pin)
 	{
 #if MANUAL_RD_SWITCH
-		MeasureConvert_BothADCs((float*)&adcVals, (const float*)&adcMultipiers, (const float*)&adcOffsets);
+		CollectConvertData_BothADCs((float*)&adcVals, (const float*)&adcMultipiers, (const float*)&adcOffsets);
 		if(adcContConfig.callback)
 			adcContConfig.callback(&adcVals);
 #endif
 #if USE_DMA
 		reset = true;
-#if !MANUAL_RD_SWITCH
-		__HAL_DMA_DISABLE(&hdma);
-		hdma_tim8_ch2.Instance->M0AR = (uint32_t)&rawData->dataRecord[rawData->recordIndex << 4];
-		__HAL_DMA_ENABLE(&hdma);
-		maxCS1_GPIO_Port->BSRR = ((uint32_t)maxCS2_Pin << 0) | ((uint32_t)maxCS1_Pin << 16U);
-#else
+#if MANUAL_RD_SWITCH
 		GPIOB->BSRR = (1U << 2);
 		GPIOA->BSRR = (1U << (15 + 16));
+#else
+		__HAL_DMA_DISABLE(&hdma);
+		hdma_acq_data.Instance->M0AR = (uint32_t)&rawData->dataRecord[rawData->recordIndex << 4];
+		__HAL_DMA_ENABLE(&hdma);
+		maxCS1_GPIO_Port->BSRR = ((uint32_t)maxCS2_Pin << 0) | ((uint32_t)maxCS1_Pin << 16U);
 #endif
-		__HAL_TIM_ENABLE(&htim8);
+		__HAL_TIM_ENABLE(&htimRead);
 #endif
 	}
 }
@@ -558,31 +635,31 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 //void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 void TIM8_UP_TIM13_IRQHandler(void)
 {
-	__HAL_TIM_CLEAR_IT(&htim8, TIM_IT_UPDATE);
+	__HAL_TIM_CLEAR_IT(&htimRead, TIM_IT_UPDATE);
 	if (reset == true)
 	{
 		reset = false;
-#if !MANUAL_RD_SWITCH
-		maxCS1_GPIO_Port->BSRR = ((uint32_t)maxCS1_Pin << 0) | ((uint32_t)maxCS2_Pin << 16U);
-#else
+#if MANUAL_RD_SWITCH
 		GPIOB->BSRR = (1U << (2 + 16));
 		GPIOA->BSRR = (1U << 15);
+#else
+		maxCS1_GPIO_Port->BSRR = ((uint32_t)maxCS1_Pin << 0) | ((uint32_t)maxCS2_Pin << 16U);
 #endif
-		__HAL_TIM_ENABLE(&htim8);
+		__HAL_TIM_ENABLE(&htimRead);
 	}
 	else
 	{
-#if !MANUAL_RD_SWITCH
+#if MANUAL_RD_SWITCH
+		GPIOB->BSRR = (1U << (2));
+		GPIOA->BSRR = (1U << (15));
+#else
 		maxCS1_GPIO_Port->BSRR = ((uint32_t)maxCS2_Pin << 0) | ((uint32_t)maxCS1_Pin << 0);
-		MeasureConvert_BothADCs((float*)&processedData->dataRecord[processedData->recordIndex], adcConfig.sensitivity, adcConfig.offsets);
+		CollectConvertData_BothADCs((float*)&processedData->dataRecord[processedData->recordIndex], adcConfig.sensitivity, adcConfig.offsets);
 		if(adcContConfig.callback)
 			adcContConfig.callback(&adcVals);
 		rawData->recordIndex = (rawData->recordIndex + 1) % RAW_MEASURE_SAVE_COUNT;
 		data->lastDataPointer = &processedData->dataRecord[processedData->recordIndex];
 		processedData->recordIndex = (processedData->recordIndex + 1) % MEASURE_SAVE_COUNT;
-#else
-		GPIOB->BSRR = (1U << (2));
-		GPIOA->BSRR = (1U << (15));
 #endif
 	}
 }
