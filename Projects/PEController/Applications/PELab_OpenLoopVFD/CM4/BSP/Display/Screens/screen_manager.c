@@ -25,6 +25,7 @@
  *******************************************************************************/
 #include "user_config.h"
 #if LCD_DATA_MONITORING
+#include "shared_memory.h"
 #include "screen_styles.h"
 #include "screen_data.h"
 #include "message_screen.h"
@@ -56,10 +57,10 @@ static const char* chNames[] =
 
 static const char* chUnits[] =
 {
-		"V", "V", "V", "V",
-		"V", "V", "V", "V",
 		"A", "A", "A", "A",
 		"A", "A", "A", "A",
+		"V", "V", "V", "V",
+		"V", "V", "V", "V",
 };
 
 static measure_type_t chMeasurementType[] =
@@ -91,8 +92,11 @@ void ScreenManager_Init(void)
 		chDispMeasures.disp[i].chUnit = chUnits[i];
 		chDispMeasures.disp[i].type = chMeasurementType[i];
 		chDispMeasures.disp[i].channelIndex = i;
-		chDispMeasures.tempStats[i].maxIndex = 2000;
-		chDispMeasures.tempStats[i].index = 2000;
+#if ADC_CORE == ADC_CM4
+		chDispMeasures.disp[i].stats = &sharedData->m4Tom7.processedAdcData.info->stats[i];
+#else
+		chDispMeasures.disp[i].stats = &sharedData->m7Tom4.processedAdcData.info->stats[i];
+#endif
 	}
 	// --TODO-- chDispMeasures.offsets = ((float*)&adcOffsets);
 	// --TODO-- chDispMeasures.sensitivity = ((float*)&adcMultipiers);

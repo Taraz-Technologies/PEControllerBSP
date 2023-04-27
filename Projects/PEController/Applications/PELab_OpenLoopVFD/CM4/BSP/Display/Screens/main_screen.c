@@ -284,7 +284,7 @@ void MainScreen_Init(void)
 	lv_obj_t* screenGrid = lv_grid_create_general(screen, colsScreen, singleRowCol, &lvStyleStore.defaultGrid, NULL, NULL, NULL);
 	lv_obj_set_size(screenGrid, 800, 480);
 
-	//MeasurementGrid_Create(screenGrid);
+	MeasurementGrid_Create(screenGrid);
 	ControlGrid_Create(screenGrid);
 }
 
@@ -310,20 +310,20 @@ void MainScreen_Refresh(void)
 {
 	if (isActive)
 	{
-		/*
-		if (chDispMeasures.isUpdated)
-		{
-			chDispMeasures.isUpdated = false;
+
+		//if (chDispMeasures.isUpdated)
+		//{
+		//	chDispMeasures.isUpdated = false;
 			for (int i = 0; i < 14; i++)
 			{
 				measure_type_t type = chDispMeasures.disp[i].type;
-				float* stats = ((float*)&chDispMeasures.disp[i].stats);
+				float* stats = ((float*)&chDispMeasures.disp[i].stats->result);
 				char txt[10];
 				int len = ftoa_custom(stats[(uint8_t)type], txt, 4, 1);
 				strcat_custom(txt, chDispMeasures.disp[i].chUnit, len, false);
 				lv_label_set_text(chDisplay[i].lblValue, txt);
 			}
-		}*/
+		//}
 		lv_label_set_text_fmt(chDisplay[14].lblValue, "%d", XDisp);
 		lv_label_set_text_fmt(chDisplay[15].lblValue, "%d", YDisp);
 	}

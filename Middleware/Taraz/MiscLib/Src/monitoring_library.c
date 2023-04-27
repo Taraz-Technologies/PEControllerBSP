@@ -87,7 +87,7 @@ void Stats_Insert_Compute(float* data, stats_t* stats, int count)
 			stats->tempData.avg = 0;
 			stats->tempData.max = -4294967296;
 			stats->tempData.min = 4294967296;
-			stats->samplesLeft = stats->sampleCount;
+			stats->samplesLeft = stats->sampleCount = 10000;
 			stats->isUpdated = 0xFFFFFFFF;
 		}
 		stats++;

@@ -173,14 +173,16 @@ int main(void)
   MX_GPIO_Init();
   MX_TIM17_Init();
   /* USER CODE BEGIN 2 */
-	BSP_Display_Init();
-	BSP_Display_ShowLogo();
-	HAL_TIM_PWM_Start(&htim17,TIM_CHANNEL_1);			// LCD Brightness
 #if ADC_CORE == ADC_CM4
 	adc_cont_config_t adcConfig = {
 			.callback = NULL,
 			.conversionCycleTimeUs = sharedData->m7Tom4.periodUs };
 	BSP_MAX11046_Init(ADC_MODE_CONT, &adcConfig, &sharedData->m4Tom7.rawAdcData, &sharedData->m4Tom7.processedAdcData);
+#endif
+	BSP_Display_Init();
+	BSP_Display_ShowLogo();
+	HAL_TIM_PWM_Start(&htim17,TIM_CHANNEL_1);			// LCD Brightness
+#if ADC_CORE == ADC_CM4
 	BSP_MAX11046_Run();
 #endif
   /* USER CODE END 2 */
@@ -493,7 +495,7 @@ void StartLvglTickTask(void *argument)
 		//if(osSemaphoreAcquire(touchSemaphoreHandle, 0) == osOK)
 		//{
 		static int i = 0;
-		if (++i > 10)
+		if (++i > 4)
 		{
 			ScreenManager_Poll();
 			i = 0;

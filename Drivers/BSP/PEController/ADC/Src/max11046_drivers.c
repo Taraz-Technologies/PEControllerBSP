@@ -73,7 +73,7 @@ static adc_measures_t adcMultipiers = {0};
  * These values are used to convert ADC data to meaningful measurements according to the formula <b>value = (adcData - adcOffsets) * adcMultipiers</b>
  */
 static adc_measures_t adcOffsets = {0};
-static stats_t stats = {0};
+static stats_t stats[16] = {0};
 static adc_info_t adcInfo = {0};
 static volatile adc_raw_data_t* rawData;
 static volatile adc_processed_data_t* processedData;
@@ -177,7 +177,7 @@ static inline void CollectConvertData_BothADCs(float* fData, uint16_t* uData, co
 
 
 #if COMPUTE_STATS
-	Stats_Insert_Compute(dataPtrOriginal, &stats, 16);
+	Stats_Insert_Compute(dataPtrOriginal, stats, 16);
 #endif
 }
 #pragma GCC pop_options
@@ -486,7 +486,7 @@ static void ConfigureMeasurements(void)
 	adcInfo.offsets = (float*)&adcOffsets;
 	adcInfo.sensitivty = (float*)&adcMultipiers;
 	///////////// --TODO-- configure the measurement frequency etc
-	adcInfo.stats = &stats;
+	adcInfo.stats = stats;
 
 	// implementation of Custom PEControllers is user controlled
 #if	PECONTROLLER_CONFIG == PEC_CUSTOM
@@ -523,6 +523,7 @@ void BSP_MAX11046_Init(adc_acq_mode_t type, adc_cont_config_t* contConfig, volat
 	// set parameters
 	rawData = rawAdcData;
 	processedData = processedAdcData;
+	processedData->info = &adcInfo;
 	ConfigureMeasurements();
 
 #if ENABLE_INTELLISENS

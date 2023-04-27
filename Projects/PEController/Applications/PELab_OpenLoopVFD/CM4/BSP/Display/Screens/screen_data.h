@@ -34,6 +34,7 @@ extern "C" {
 #include "monitoring_library.h"
 #include "general_header.h"
 #include "lvgl.h"
+#include "adc_config.h"
 /********************************************************************************
  * Defines
  *******************************************************************************/
@@ -77,27 +78,10 @@ typedef enum
  *******************************************************************************/
 typedef struct
 {
-	float rms;
-	float avg;
-	float max;
-	float min;
-	int index;
-	int maxIndex;
-} measure_ch_tempstats_t;
-typedef struct
-{
-	float rms;
-	float avg;
-	float max;
-	float min;
-	float pkTopk;
-} measure_ch_stats_t;
-typedef struct
-{
 	measure_type_t type;
 	const char* chName;
 	const char* chUnit;
-	measure_ch_stats_t stats;
+	stats_t* stats;
 	int channelIndex;
 	float freq;
 } disp_ch_measure_t;
@@ -105,7 +89,6 @@ typedef struct
 {
 	bool isUpdated;
 	disp_ch_measure_t disp[16];
-	measure_ch_tempstats_t tempStats[16];
 	float* sensitivity;
 	float* offsets;
 } disp_measure_t;
