@@ -315,7 +315,7 @@ void MainScreen_Refresh(void)
 			chDispMeasures.isUpdated = false;
 			for (int i = 0; i < 14; i++)
 			{
-				param_measure_type_t type = chDispMeasures.disp[i].type;
+				measure_type_t type = chDispMeasures.disp[i].type;
 				float* stats = ((float*)&chDispMeasures.disp[i].stats);
 				char txt[10];
 				int len = ftoa_custom(stats[(uint8_t)type], txt, 4, 1);

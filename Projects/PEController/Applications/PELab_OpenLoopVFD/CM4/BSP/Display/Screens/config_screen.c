@@ -215,7 +215,7 @@ void ConfigScreen_LoadMeasurement(int measurementIndex)
 
 	lv_obj_t * dd = lv_dropdown_create(grid);
 	lv_dropdown_set_options_static(dd, measureTxts[0]);
-	for (int i = 1; i < DISP_LAST; i++)
+	for (int i = 1; i < MEASURE_COUNT; i++)
 		lv_dropdown_add_option(dd, measureTxts[i], i);
 	lv_dropdown_set_selected(dd, measure->type);
 	lv_obj_clear_flag(dd, LV_OBJ_FLAG_CLICK_FOCUSABLE);

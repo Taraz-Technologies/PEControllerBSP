@@ -98,7 +98,7 @@ typedef struct
 /** @defgroup MAX11046_Exported_Variables Variables
  * @{
  */
-extern adc_config_t adcConfig;
+
 /**
  * @}
  */
@@ -113,14 +113,14 @@ extern adc_config_t adcConfig;
  * @param type- ADC_MODE_SINGLE or ADC_MODE_CONT for single or continuous conversions respectively
  * @param *contConfig- adc_cont_config_t contains the continuous transfer configuration
  */
-extern void BSP_MAX11046_Init(adc_acq_mode_t type, adc_cont_config_t* contConfig);
+extern void BSP_MAX11046_Init(adc_acq_mode_t type, adc_cont_config_t* contConfig, volatile adc_raw_data_t* rawAdcData, volatile adc_processed_data_t* processedAdcData);
 /**
  * @brief Performs the conversion
  * @details For single conversion mode performs and provides the results in a blocking way.
  * For continuous conversion mode starts the conversions, after each conversion adc_cont_config_t.callback will be called
  * @return adc_measures_t_t*- For single conversion mode returns the pointer to the acquired values. Returns NULL for continuous conversion mode
  */
-extern adc_measures_t* BSP_MAX11046_Run(void);
+extern volatile adc_measures_t* BSP_MAX11046_Run(void);
 /**
  * @brief Stops the ADC data collection module, only effective for ADC_MODE_CONT
  */

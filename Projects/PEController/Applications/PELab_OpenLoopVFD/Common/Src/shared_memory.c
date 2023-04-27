@@ -58,8 +58,13 @@ volatile shared_data_t * const sharedData = (shared_data_t *)0x38001000;
  */
 void SharedMemory_GetRecentMeasurements(adc_measures_t* adc)
 {
-	if(sharedData->m4Tom7.lastDataPointer != NULL)
-		memcpy((void*)adc, (void*)sharedData->m4Tom7.lastDataPointer, sizeof(adc_measures_t));
+#if ADC_CORE == ADC_CM4
+	void* data = (void*)sharedData->m4Tom7.processedAdcData.lastDataPointer;
+#else
+	void* data = (void*)sharedData->m7Tom4.processedAdcData.lastDataPointer;
+#endif
+	if (data != NULL)
+		memcpy((void*)adc, data, sizeof(adc_measures_t));
 }
 
 

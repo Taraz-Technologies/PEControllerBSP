@@ -238,14 +238,14 @@ typedef struct
 
 typedef struct
 {
-	int recordIndex;
+	volatile int recordIndex;
 	uint16_t dataRecord[RAW_MEASURE_SAVE_COUNT * TOTAL_MEASUREMENT_COUNT] __attribute__ ((aligned (8)));
 } adc_raw_data_t;
 
 typedef struct
 {
-	volatile bool isNewDataAvaialble;
-	int recordIndex;
+	volatile uint32_t isNewDataAvaialble;
+	volatile int recordIndex;
 	volatile adc_measures_t* lastDataPointer;
 	adc_measures_t dataRecord[MEASURE_SAVE_COUNT];
 	adc_info_t* info;

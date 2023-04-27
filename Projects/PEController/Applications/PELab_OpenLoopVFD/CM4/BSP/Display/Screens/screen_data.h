@@ -31,6 +31,7 @@ extern "C" {
  *******************************************************************************/
 #include "user_config.h"
 #if LCD_DATA_MONITORING
+#include "monitoring_library.h"
 #include "general_header.h"
 #include "lvgl.h"
 /********************************************************************************
@@ -93,7 +94,7 @@ typedef struct
 } measure_ch_stats_t;
 typedef struct
 {
-	param_measure_type_t type;
+	measure_type_t type;
 	const char* chName;
 	const char* chUnit;
 	measure_ch_stats_t stats;
@@ -126,7 +127,7 @@ typedef struct
  *******************************************************************************/
 extern disp_var_t dispVars[5];
 extern disp_measure_t chDispMeasures;
-extern const char* measureTxts[DISP_LAST];
+extern const char* measureTxts[MEASURE_COUNT];
 /********************************************************************************
  * Global Function Prototypes
  *******************************************************************************/

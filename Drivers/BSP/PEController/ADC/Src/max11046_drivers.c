@@ -24,8 +24,10 @@
  * Includes
  *******************************************************************************/
 #include "user_config.h"
+#if IS_ADC_CORE
 #include "max11046_drivers.h"
 #include "shared_memory.h"
+#include "../../../../../Middleware/Taraz/MiscLib/Src/monitoring_library.c"
 #if ENABLE_INTELLISENS
 #include "intelliSENS.h"
 #endif
@@ -73,8 +75,8 @@ static adc_measures_t adcMultipiers = {0};
 static adc_measures_t adcOffsets = {0};
 static stats_t stats = {0};
 static adc_info_t adcInfo = {0};
-static adc_raw_data_t* rawData;
-static adc_processed_data_t* processedData;
+static volatile adc_raw_data_t* rawData;
+static volatile adc_processed_data_t* processedData;
 static TIM_HandleTypeDef htimCnv;			// TIM12
 #if USE_DMA
 static TIM_HandleTypeDef htimRead;			// TIM8
@@ -82,18 +84,18 @@ static DMA_HandleTypeDef hdma_rd_low;
 static DMA_HandleTypeDef hdma_acq_data;
 static DMA_HandleTypeDef hdma_rd_high;
 #if !MANUAL_RD_SWITCH
-uint32_t rdHigh = maxRead_Pin;
-uint32_t rdLow = maxRead_Pin << 16;
+static uint32_t rdHigh = maxRead_Pin;
+static uint32_t rdLow = maxRead_Pin << 16;
 #else
-uint32_t rdHigh = maxRead_Pin;
-uint32_t rdLow = maxRead_Pin << 16;
-uint32_t toggle[] = {(1U << 11), (1U << 27)};
+static uint32_t rdHigh = maxRead_Pin;
+static uint32_t rdLow = maxRead_Pin << 16;
+static uint32_t toggle[] = {(1U << 11), (1U << 27)};
 #endif
 #if USE_CS_DMA
 extern DMA_HandleTypeDef hdma_tim8_up;
 extern DMA_HandleTypeDef hdma_dma_generator3;
-uint32_t csList[] = {((uint32_t)maxCS1_Pin) | ((uint32_t)maxCS2_Pin << 16U), ((uint32_t)maxCS1_Pin) | ((uint32_t)maxCS2_Pin)};
-uint16_t timList[] = {TIM_CR1_CEN | TIM_CR1_OPM_Pos, TIM_CR1_OPM_Pos};
+static uint32_t csList[] = {((uint32_t)maxCS1_Pin) | ((uint32_t)maxCS2_Pin << 16U), ((uint32_t)maxCS1_Pin) | ((uint32_t)maxCS2_Pin)};
+static uint16_t timList[] = {TIM_CR1_CEN | TIM_CR1_OPM_Pos, TIM_CR1_OPM_Pos};
 #endif
 #endif
 /********************************************************************************
@@ -151,26 +153,26 @@ static inline void CollectData_BothADCs(uint16_t* tempData)
 #pragma GCC optimize ("-Ofast")
 /**
  * @brief Acquire measurements and convert to meaningful data for both ADCs
- * @param *dataPtr Pointer to where the data needs to be stored
+ * @param *fData Pointer to where the data needs to be stored
+ * @param *uData Pointer to where the raw adc data
  * @param *mults Pointer to the multiplier information
  * @param *offsets Pointer to the offset information
  */
-static inline void CollectConvertData_BothADCs(float* dataPtr, const float* mults, const float* offsets)
+static inline void CollectConvertData_BothADCs(float* fData, uint16_t* uData, const float* mults, const float* offsets)
 {
-	uint16_t* tempData = (uint16_t*)intelliSENSDataPtr;
-	float* dataPtrOriginal = dataPtr;
+	float* dataPtrOriginal = fData;
 #if MANUAL_RD_SWITCH
-	CollectData_BothADCs(tempData);
+	CollectData_BothADCs(uData);
 #endif
 
 #if ENABLE_INTELLISENS
-	intelliSENS.SetADCData((uint64_t*)(intelliSENSDataPtr));
+	intelliSENS.SetADCData((uint64_t*)(uData));
 #endif
 
 	int i = 15;
 	do
 	{
-		*dataPtr++ =  (*tempData++ - *offsets++) * (*mults++);
+		*fData++ =  (*uData++ - *offsets++) * (*mults++);
 	} while (i--);
 
 
@@ -394,7 +396,7 @@ static void DataCollectDMAs_Init(void)
 		Error_Handler();
 	}
 
-	__HAL_LINKDMA(htim_pwm,hdma[TIM_DMA_ID_CC1],hdma_rd_low);
+	__HAL_LINKDMA(&htimRead,hdma[TIM_DMA_ID_CC1],hdma_rd_low);
 
 	/* TIM8_CH2 Init */
 	hdma_acq_data.Instance = DMA1_Stream1;
@@ -412,7 +414,7 @@ static void DataCollectDMAs_Init(void)
 		Error_Handler();
 	}
 
-	__HAL_LINKDMA(htim_pwm,hdma[TIM_DMA_ID_CC2],hdma_acq_data);
+	__HAL_LINKDMA(&htimRead,hdma[TIM_DMA_ID_CC2],hdma_acq_data);
 
 	/* TIM8_CH3 Init */
 	hdma_rd_high.Instance = DMA1_Stream2;
@@ -430,7 +432,7 @@ static void DataCollectDMAs_Init(void)
 		Error_Handler();
 	}
 
-	__HAL_LINKDMA(htim_pwm,hdma[TIM_DMA_ID_CC3],hdma_rd_high);
+	__HAL_LINKDMA(&htimRead,hdma[TIM_DMA_ID_CC3],hdma_rd_high);
 
 	/* DMA interrupt init */
 	HAL_NVIC_SetPriority(DMA1_Stream2_IRQn, 5, 0);
@@ -441,7 +443,7 @@ static void DataCollectDMAs_Init(void)
 #if MANUAL_RD_SWITCH
 	HAL_DMA_Start(&hdma_acq_data, (uint32_t)&toggle[0], (uint32_t)&maxRead_GPIO_Port->BSRR, 2);
 #else
-	HAL_DMA_Start(&hdma_acq_data, (uint32_t)&MAX11046_GPIO->IDR, (uint32_t)&rawData->dataRecord[recordIndex << 4], 16);
+	HAL_DMA_Start(&hdma_acq_data, (uint32_t)&MAX11046_GPIO->IDR, (uint32_t)&rawData->dataRecord[rawData->recordIndex << 4], 16);
 #endif
 	HAL_DMA_Start(&hdma_rd_high, (uint32_t)&rdHigh, (uint32_t)&maxRead_GPIO_Port->BSRR, 16);
 #if USE_CS_DMA
@@ -490,19 +492,19 @@ static void ConfigureMeasurements(void)
 #if	PECONTROLLER_CONFIG == PEC_CUSTOM
 	for (int i = 0; i < 16; i++)
 	{
-		adcConfig.sensitivty[i] = 10.f / (32768.f);
-		adcConfig.offsets[i] = 32768;
+		adcInfo.sensitivty[i] = 10.f / (32768.f);
+		adcInfo.offsets[i] = 32768;
 	}
 #else
 	for (int i = 0; i < MEASUREMENT_COUNT_CURRENT; i++)
 	{
-		adcConfig.sensitivty[i] = 10000.f / (CURRENT_SENSITIVITY_mVA * 32768.f);
-		adcConfig.offsets[i] = 32768;
+		adcInfo.sensitivty[i] = 10000.f / (CURRENT_SENSITIVITY_mVA * 32768.f);
+		adcInfo.offsets[i] = 32768;
 	}
 	for (int i = 0; i < MEASUREMENT_COUNT_VOLTAGE; i++)
 	{
-		adcConfig.sensitivty[i + 8] = 1000 / 32768.f;
-		adcConfig.offsets[i + 8] = 32768;
+		adcInfo.sensitivty[i + 8] = 1000 / 32768.f;
+		adcInfo.offsets[i + 8] = 32768;
 	}
 #endif
 }
@@ -512,7 +514,7 @@ static void ConfigureMeasurements(void)
  * @param type- ADC_MODE_SINGLE or ADC_MODE_CONT for single or continuous conversions respectively
  * @param *contConfig- adc_cont_config_t contains the continuous transfer configuration
  */
-void BSP_MAX11046_Init(adc_acq_mode_t type, adc_cont_config_t* contConfig, adc_raw_data_t* rawAdcData, adc_processed_data_t* processedAdcData)
+void BSP_MAX11046_Init(adc_acq_mode_t type, adc_cont_config_t* contConfig, volatile adc_raw_data_t* rawAdcData, volatile adc_processed_data_t* processedAdcData)
 {
 	// DeInitialize if already initialized
 	if(moduleActive)
@@ -545,7 +547,7 @@ void BSP_MAX11046_Init(adc_acq_mode_t type, adc_cont_config_t* contConfig, adc_r
  * For continuous conversion mode starts the conversions, after each conversion adc_cont_config_t.callback will be called
  * @return uint16_t*- For single conversion mode returns the pointer to the eight acquired values. Returns NULL for continuous conversion mode
  */
-adc_measures_t* BSP_MAX11046_Run(void)
+volatile adc_measures_t* BSP_MAX11046_Run(void)
 {
 	/* EXTI interrupt init*/
 	__HAL_GPIO_EXTI_CLEAR_IT(maxBusy1_Pin);
@@ -558,7 +560,7 @@ adc_measures_t* BSP_MAX11046_Run(void)
 		// wait for the pending operations to end
 		while(HAL_GPIO_ReadPin(maxBusy1_GPIO_Port,maxBusy1_Pin));
 		HAL_TIM_OnePulse_Start(&htimCnv,TIM_OPMODE_SINGLE);
-		return &adcVals;
+		return processedData->lastDataPointer;
 	}
 	else
 	{
@@ -607,14 +609,23 @@ void BSP_MAX11046_DeInit(void)
 
 static bool reset = true;
 
+#pragma GCC push_options
+#pragma GCC optimize ("-Ofast")
+
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
 	if(GPIO_Pin == maxBusy1_Pin)
 	{
 #if MANUAL_RD_SWITCH
-		CollectConvertData_BothADCs((float*)&adcVals, (const float*)&adcMultipiers, (const float*)&adcOffsets);
+		float* fData = (float*)&processedData->dataRecord[processedData->recordIndex];
+		uint16_t* uData = (uint16_t*)&rawData->dataRecord[rawData->recordIndex << 4];
+		CollectConvertData_BothADCs(fData, uData, adcInfo.sensitivty, adcInfo.offsets);
 		if(adcContConfig.callback)
-			adcContConfig.callback(&adcVals);
+			adcContConfig.callback((adc_measures_t*)fData);
+		rawData->recordIndex = (rawData->recordIndex + 1) % RAW_MEASURE_SAVE_COUNT;
+		processedData->lastDataPointer = (adc_measures_t*)fData;
+		processedData->recordIndex = (processedData->recordIndex + 1) % MEASURE_SAVE_COUNT;
+		processedData->isNewDataAvaialble = 0xFFFFFFFF;
 #endif
 #if USE_DMA
 		reset = true;
@@ -622,9 +633,9 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 		GPIOB->BSRR = (1U << 2);
 		GPIOA->BSRR = (1U << (15 + 16));
 #else
-		__HAL_DMA_DISABLE(&hdma);
-		hdma_acq_data.Instance->M0AR = (uint32_t)&rawData->dataRecord[rawData->recordIndex << 4];
-		__HAL_DMA_ENABLE(&hdma);
+		__HAL_DMA_DISABLE(&hdma_acq_data);
+		((DMA_Stream_TypeDef *)hdma_acq_data.Instance)->M0AR = (uint32_t)&rawData->dataRecord[rawData->recordIndex << 4];
+		__HAL_DMA_ENABLE(&hdma_acq_data);
 		maxCS1_GPIO_Port->BSRR = ((uint32_t)maxCS2_Pin << 0) | ((uint32_t)maxCS1_Pin << 16U);
 #endif
 		__HAL_TIM_ENABLE(&htimRead);
@@ -654,16 +665,21 @@ void TIM8_UP_TIM13_IRQHandler(void)
 		GPIOA->BSRR = (1U << (15));
 #else
 		maxCS1_GPIO_Port->BSRR = ((uint32_t)maxCS2_Pin << 0) | ((uint32_t)maxCS1_Pin << 0);
-		CollectConvertData_BothADCs((float*)&processedData->dataRecord[processedData->recordIndex], adcConfig.sensitivity, adcConfig.offsets);
+		float* fData = (float*)&processedData->dataRecord[processedData->recordIndex];
+		uint16_t* uData = (uint16_t*)&rawData->dataRecord[rawData->recordIndex << 4];
+		CollectConvertData_BothADCs(fData, uData, adcInfo.sensitivty, adcInfo.offsets);
 		if(adcContConfig.callback)
-			adcContConfig.callback(&adcVals);
+			adcContConfig.callback((adc_measures_t*)fData);
 		rawData->recordIndex = (rawData->recordIndex + 1) % RAW_MEASURE_SAVE_COUNT;
-		data->lastDataPointer = &processedData->dataRecord[processedData->recordIndex];
+		processedData->lastDataPointer = (adc_measures_t*)fData;
 		processedData->recordIndex = (processedData->recordIndex + 1) % MEASURE_SAVE_COUNT;
+		processedData->isNewDataAvaialble = 0xFFFFFFFF;
 #endif
 	}
 }
 #endif
+#pragma GCC pop_options
 
-
+#endif
+#endif
 /* EOF */

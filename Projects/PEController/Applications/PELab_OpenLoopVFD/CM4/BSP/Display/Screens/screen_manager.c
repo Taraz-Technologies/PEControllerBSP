@@ -62,12 +62,12 @@ static const char* chUnits[] =
 		"A", "A", "A", "A",
 };
 
-static param_measure_type_t chMeasurementType[] =
+static measure_type_t chMeasurementType[] =
 {
-		DISP_RMS, DISP_AVG, DISP_MAX, DISP_MIN,
-		DISP_PkToPk, DISP_RMS, DISP_RMS, DISP_RMS,
-		DISP_RMS, DISP_RMS, DISP_RMS, DISP_RMS,
-		DISP_AVG, DISP_AVG, DISP_AVG, DISP_AVG,
+		MEASURE_RMS, MEASURE_AVG, MEASURE_MAX, MEASURE_MIN,
+		MEASURE_PkToPk, MEASURE_RMS, MEASURE_RMS, MEASURE_RMS,
+		MEASURE_RMS, MEASURE_RMS, MEASURE_RMS, MEASURE_RMS,
+		MEASURE_AVG, MEASURE_AVG, MEASURE_AVG, MEASURE_AVG,
 };
 /********************************************************************************
  * Global Variables
@@ -94,8 +94,8 @@ void ScreenManager_Init(void)
 		chDispMeasures.tempStats[i].maxIndex = 2000;
 		chDispMeasures.tempStats[i].index = 2000;
 	}
-	chDispMeasures.offsets = ((float*)&adcOffsets);
-	chDispMeasures.sensitivity = ((float*)&adcMultipiers);
+	// --TODO-- chDispMeasures.offsets = ((float*)&adcOffsets);
+	// --TODO-- chDispMeasures.sensitivity = ((float*)&adcMultipiers);
 
 	for (int i = 0; i < 5; i++)
 	{

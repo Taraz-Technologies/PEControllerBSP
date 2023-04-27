@@ -70,48 +70,40 @@ extern "C" {
 /** @defgroup SHAREDMEM_Exported_Structures Structures
   * @{
   */
-typedef struct
-{
-	adc_raw_data_t rawAdcData;
-	adc_processed_data_t processedAdcData;
-} m7_to_m4_data_t;
-
-typedef struct
-{
-	bool item;
-} m4_to_m7_data_t;
-
-#if 0
-/**
- * @brief Defines parameters of Cortex-M4 core to be shared with Cortex-M7
- */
-typedef struct
-{
-	uint8_t sts;									/**< @brief Status variable */
-	int recordIndex;								/**< @brief Record Index to be written next by the CM4 core */
-	volatile adc_measures_t* lastDataPointer;		/**< @brief Pointer to the last ADC data variable.
-													CM7 should use this pointer to get the most recent data */
-	adc_measures_t movAvg;							/**< @brief Moving average values of the ADC data */
-	adc_measures_t dataRecord[MEASURE_SAVE_COUNT];	/**< @brief Logged circular buffer containing ADC measurement data */
-} m4_to_m7_data_t;
 /**
  * @brief Defines parameters of Cortex-M7 core to be shared with Cortex-M4
  */
 typedef struct
 {
-	uint8_t sts;									/**< @brief Status variable */
+#if ADC_CORE == ADC_CM4
+	volatile uint8_t sts;							/**< @brief Status variable */
 	uint32_t periodUs;								/**< @brief Period of the controller in micro-seconds.
 													CM7 can control the adc conversion rate from this variable */
 	uint32_t avgCount;								/**< @brief Averaging count for the moving average filter */
-} m7_to_m4_data_t;
+#else
+	adc_raw_data_t rawAdcData;
+	adc_processed_data_t processedAdcData;
 #endif
+} m7_to_m4_data_t;
+/**
+ * @brief Defines parameters of Cortex-M4 core to be shared with Cortex-M7
+ */
+typedef struct
+{
+#if ADC_CORE == ADC_CM4
+	adc_raw_data_t rawAdcData;
+	adc_processed_data_t processedAdcData;
+#else
+	volatile uint8_t sts;								/**< @brief Status variable */
+#endif
+} m4_to_m7_data_t;
 /**
  * @brief Buffer containing all shared data between both cores
  */
 typedef struct
 {
-	m4_to_m7_data_t m4Tom7;							/**< @brief Defines parameters of Cortex-M4 core to be shared with Cortex-M7 */
-	m7_to_m4_data_t m7Tom4;							/**< @brief Defines parameters of Cortex-M7 core to be shared with Cortex-M4 */
+	m4_to_m7_data_t m4Tom7;					/**< @brief Defines parameters of Cortex-M4 core to be shared with Cortex-M7 */
+	m7_to_m4_data_t m7Tom4;					/**< @brief Defines parameters of Cortex-M7 core to be shared with Cortex-M4 */
 }shared_data_t;
 /**
  * @}
