@@ -67,7 +67,6 @@ void SharedMemory_GetRecentMeasurements(adc_measures_t* adc)
 		memcpy((void*)adc, data, sizeof(adc_measures_t));
 }
 
-
 /* EOF */
 
 

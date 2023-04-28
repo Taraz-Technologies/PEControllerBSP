@@ -34,11 +34,16 @@
 /********************************************************************************
  * Defines
  *******************************************************************************/
-#define READ_ADC_CH(tempData)			maxRead_GPIO_Port->BSRR = (uint32_t)maxRead_Pin << 16U; \
+#if IS_ADC_CM7
+#define SET_RD_LOW()		maxRead_GPIO_Port->BSRR = (uint32_t)maxRead_Pin << 16U; maxRead_GPIO_Port->BSRR = (uint32_t)maxRead_Pin << 16U;
+#else
+#define SET_RD_LOW()		maxRead_GPIO_Port->BSRR = (uint32_t)maxRead_Pin << 16U;
+#endif
+#define READ_ADC_CH(tempData)			SET_RD_LOW();  \
 		*tempData++ = (uint16_t)MAX11046_GPIO->IDR; \
 		maxRead_GPIO_Port->BSRR = maxRead_Pin;
 
-#define MANUAL_RD_SWITCH			(0)
+#define MANUAL_RD_SWITCH			(1)
 #define VIEW_OSCILLOSCOPE			(0)
 #define USE_DMA						(!MANUAL_RD_SWITCH || VIEW_OSCILLOSCOPE)
 #define COMPUTE_STATS				(1)
@@ -50,7 +55,20 @@
 /********************************************************************************
  * Structures
  *******************************************************************************/
-
+#if USE_DMA
+typedef struct
+{
+	uint32_t rdHigh;
+	uint32_t rdLow;
+#if MANUAL_RD_SWITCH
+	uint32_t toggle[2];
+#endif
+#if USE_CS_DMA
+	uint32_t csList[2];
+	uint16_t timList[2];
+#endif
+} adc_dma_data_t;
+#endif
 /********************************************************************************
  * Static Variables
  *******************************************************************************/
@@ -81,19 +99,10 @@ static TIM_HandleTypeDef htimRead;			// TIM8
 static DMA_HandleTypeDef hdma_rd_low;
 static DMA_HandleTypeDef hdma_acq_data;
 static DMA_HandleTypeDef hdma_rd_high;
-#if !MANUAL_RD_SWITCH
-static uint32_t rdHigh = maxRead_Pin;
-static uint32_t rdLow = maxRead_Pin << 16;
-#else
-static uint32_t rdHigh = maxRead_Pin;
-static uint32_t rdLow = maxRead_Pin << 16;
-static uint32_t toggle[] = {(1U << 11), (1U << 27)};
-#endif
+static adc_dma_data_t* dmaData = (adc_dma_data_t*)0x3800F000;
 #if USE_CS_DMA
-extern DMA_HandleTypeDef hdma_tim8_up;
-extern DMA_HandleTypeDef hdma_dma_generator3;
-static uint32_t csList[] = {((uint32_t)maxCS1_Pin) | ((uint32_t)maxCS2_Pin << 16U), ((uint32_t)maxCS1_Pin) | ((uint32_t)maxCS2_Pin)};
-static uint16_t timList[] = {TIM_CR1_CEN | TIM_CR1_OPM_Pos, TIM_CR1_OPM_Pos};
+static DMA_HandleTypeDef hdma_tim8_up;
+static DMA_HandleTypeDef hdma_dma_generator3;
 #endif
 #endif
 /********************************************************************************
@@ -377,6 +386,21 @@ static void DataCollectDMAs_Init(void)
 	__HAL_RCC_DMA1_CLK_ENABLE();
 	__HAL_RCC_TIM8_CLK_ENABLE();
 
+#if !MANUAL_RD_SWITCH
+	dmaData->rdHigh = maxRead_Pin;
+	dmaData->rdLow = maxRead_Pin << 16;
+#else
+	dmaData->rdHigh = maxRead_Pin;
+	dmaData->rdLow = maxRead_Pin << 16;
+	dmaData->toggle[0] = (1U << 11);
+	dmaData->toggle[1] = (1U << 27);
+#endif
+#if USE_CS_DMA
+	dmaData->csList[0] = ((uint32_t)maxCS1_Pin) | ((uint32_t)maxCS2_Pin << 16U);
+	dmaData->csList[1] = ((uint32_t)maxCS1_Pin) | ((uint32_t)maxCS2_Pin);
+	dmaData->timList[0] = TIM_CR1_CEN | TIM_CR1_OPM_Pos;
+	dmaData->timList[1] = TIM_CR1_OPM_Pos;
+#endif
 	/* TIM8 DMA Init */
 	/* TIM8_CH1 Init */
 	hdma_rd_low.Instance = DMA1_Stream0;
@@ -437,16 +461,16 @@ static void DataCollectDMAs_Init(void)
 	HAL_NVIC_EnableIRQ(DMA1_Stream2_IRQn);
 
 	// Enable the DMAs
-	HAL_DMA_Start(&hdma_rd_low, (uint32_t)&rdLow, (uint32_t)&maxRead_GPIO_Port->BSRR, 16);
+	HAL_DMA_Start(&hdma_rd_low, (uint32_t)&dmaData->rdLow, (uint32_t)&maxRead_GPIO_Port->BSRR, 16);
 #if MANUAL_RD_SWITCH
-	HAL_DMA_Start(&hdma_acq_data, (uint32_t)&toggle[0], (uint32_t)&maxRead_GPIO_Port->BSRR, 2);
+	HAL_DMA_Start(&hdma_acq_data, (uint32_t)&dmaData->toggle[0], (uint32_t)&maxRead_GPIO_Port->BSRR, 2);
 #else
 	HAL_DMA_Start(&hdma_acq_data, (uint32_t)&MAX11046_GPIO->IDR, (uint32_t)&rawData->dataRecord[rawData->recordIndex << 4], 16);
 #endif
-	HAL_DMA_Start(&hdma_rd_high, (uint32_t)&rdHigh, (uint32_t)&maxRead_GPIO_Port->BSRR, 16);
+	HAL_DMA_Start(&hdma_rd_high, (uint32_t)&dmaData->rdHigh, (uint32_t)&maxRead_GPIO_Port->BSRR, 16);
 #if USE_CS_DMA
-	HAL_DMA_Start(&hdma_tim8_up, (uint32_t)&csList[0], (uint32_t)&maxCS1_GPIO_Port->BSRR, 2);
-	HAL_DMA_Start(&hdma_dma_generator3, (uint32_t)&timList[0], (uint32_t)&TIM8->CR1, 2);
+	HAL_DMA_Start(&hdma_tim8_up, (uint32_t)&dmaData->csList[0], (uint32_t)&maxCS1_GPIO_Port->BSRR, 2);
+	HAL_DMA_Start(&hdma_dma_generator3, (uint32_t)&dmaData->timList[0], (uint32_t)&TIM8->CR1, 2);
 #endif
 }
 /**
