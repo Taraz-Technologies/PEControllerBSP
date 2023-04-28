@@ -294,6 +294,7 @@ void MainScreen_Load(void)
 	//	return;
 
 	lv_scr_load(screen);
+	//lv_scr_load_anim(screen, LV_SCR_LOAD_ANIM_MOVE_LEFT, 1000, 0, 0);
 	isActive = true;
 }
 

@@ -38,7 +38,7 @@
 		*tempData++ = (uint16_t)MAX11046_GPIO->IDR; \
 		maxRead_GPIO_Port->BSRR = maxRead_Pin;
 
-#define MANUAL_RD_SWITCH			(1)
+#define MANUAL_RD_SWITCH			(0)
 #define VIEW_OSCILLOSCOPE			(0)
 #define USE_DMA						(!MANUAL_RD_SWITCH || VIEW_OSCILLOSCOPE)
 #define COMPUTE_STATS				(1)

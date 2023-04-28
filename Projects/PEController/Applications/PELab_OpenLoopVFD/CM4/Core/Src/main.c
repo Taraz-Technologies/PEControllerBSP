@@ -478,17 +478,16 @@ void StartLvglTickTask(void *argument)
 	{
 		//if(osSemaphoreAcquire(touchSemaphoreHandle, 0) == osOK)
 		//{
-		static int i = 0;
-		if (++i > 4)
-		{
+		//static int i = 0;
+		//if (++i > 4)
+		//{
 			ScreenManager_Poll();
-			i = 0;
-		}
-		lv_tick_inc(20);
+			//i = 0;
+		//}
 		lv_timer_handler();
 		//osSemaphoreRelease(touchSemaphoreHandle);
 		//}
-		osDelay(20);
+		osDelay(100);
 	}
   /* USER CODE END StartLvglTickTask */
 }
@@ -529,6 +528,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   /* USER CODE END Callback 0 */
   if (htim->Instance == TIM7) {
     HAL_IncTick();
+    lv_tick_inc(1);
   }
   /* USER CODE BEGIN Callback 1 */
 
