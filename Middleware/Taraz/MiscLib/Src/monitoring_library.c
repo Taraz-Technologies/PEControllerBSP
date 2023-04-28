@@ -76,7 +76,7 @@ void Stats_Insert_Compute(float* data, stats_t* stats, int count)
 		if (--stats->samplesLeft <= 0)
 		{
 			// get new values
-			stats->result.rms = stats->tempData.rms / stats->sampleCount;
+			stats->result.rms = sqrtf(stats->tempData.rms / stats->sampleCount);
 			stats->result.avg = stats->tempData.avg / stats->sampleCount;
 			stats->result.max = stats->tempData.max;
 			stats->result.min = stats->tempData.min;
@@ -87,7 +87,7 @@ void Stats_Insert_Compute(float* data, stats_t* stats, int count)
 			stats->tempData.avg = 0;
 			stats->tempData.max = -4294967296;
 			stats->tempData.min = 4294967296;
-			stats->samplesLeft = stats->sampleCount = 10000;
+			stats->samplesLeft = stats->sampleCount = 1000; // --TODO--
 			stats->isUpdated = 0xFFFFFFFF;
 		}
 		stats++;
