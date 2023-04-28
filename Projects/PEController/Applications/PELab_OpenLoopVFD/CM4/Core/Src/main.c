@@ -374,18 +374,6 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(maxRead_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : maxBusy1_Pin */
-  GPIO_InitStruct.Pin = maxBusy1_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(maxBusy1_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : maxBusy2_Pin */
-  GPIO_InitStruct.Pin = maxBusy2_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(maxBusy2_GPIO_Port, &GPIO_InitStruct);
-
   /*Configure GPIO pins : maxD0_Pin maxD1_Pin maxD2_Pin maxD3_Pin
                            maxD4_Pin maxD5_Pin maxD6_Pin maxD7_Pin
                            maxD8_Pin maxD9_Pin maxD10_Pin maxD11_Pin
@@ -418,10 +406,6 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
-
-  /* EXTI interrupt init*/
-  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 5, 0);
-  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
 }
 

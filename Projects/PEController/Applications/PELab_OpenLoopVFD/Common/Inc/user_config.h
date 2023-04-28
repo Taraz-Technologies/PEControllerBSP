@@ -99,6 +99,8 @@ extern "C" {
 #define ADC_CM4					(0)
 #define ADC_CM7					(1)
 #define ADC_CORE				(ADC_CM4)
+#define IS_ADC_CM4				(ADC_CORE == ADC_CM4)
+#define IS_ADC_CM7				(ADC_CORE == ADC_CM7)
 #define IS_ADC_CORE				(((defined(CORE_CM4)) && (ADC_CORE == ADC_CM4)) || ((defined(CORE_CM7)) && (ADC_CORE == ADC_CM7)))
 /******** MEASUREMENT CONFIGURATION ***********/
 

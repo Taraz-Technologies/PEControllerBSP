@@ -221,7 +221,7 @@ static void GPIOs_Init(void)
 
 	/*Configure GPIO pin : maxBusy2_Pin */
 	GPIO_InitStruct.Pin = maxBusy2_Pin;
-	GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+	GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	HAL_GPIO_Init(maxBusy2_GPIO_Port, &GPIO_InitStruct);
 
@@ -608,41 +608,66 @@ void BSP_MAX11046_DeInit(void)
 	moduleActive = false;
 }
 
+
+
 static bool reset = true;
 
 #pragma GCC push_options
 #pragma GCC optimize ("-Ofast")
 
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+/**
+ * @brief Call this function when the acquisition is completed
+ */
+static inline void AcquistionComplete(void)
 {
-	if(GPIO_Pin == maxBusy1_Pin)
-	{
 #if MANUAL_RD_SWITCH
-		float* fData = (float*)&processedData->dataRecord[processedData->recordIndex];
-		uint16_t* uData = (uint16_t*)&rawData->dataRecord[rawData->recordIndex << 4];
-		CollectConvertData_BothADCs(fData, uData, adcInfo.sensitivty, adcInfo.offsets);
-		if(adcContConfig.callback)
-			adcContConfig.callback((adc_measures_t*)fData);
-		rawData->recordIndex = (rawData->recordIndex + 1) % RAW_MEASURE_SAVE_COUNT;
-		processedData->lastDataPointer = (adc_measures_t*)fData;
-		processedData->recordIndex = (processedData->recordIndex + 1) % MEASURE_SAVE_COUNT;
-		processedData->isNewDataAvaialble = 0xFFFFFFFF;
+	float* fData = (float*)&processedData->dataRecord[processedData->recordIndex];
+	uint16_t* uData = (uint16_t*)&rawData->dataRecord[rawData->recordIndex << 4];
+	CollectConvertData_BothADCs(fData, uData, adcInfo.sensitivty, adcInfo.offsets);
+	if(adcContConfig.callback)
+		adcContConfig.callback((adc_measures_t*)fData);
+	rawData->recordIndex = (rawData->recordIndex + 1) % RAW_MEASURE_SAVE_COUNT;
+	processedData->lastDataPointer = (adc_measures_t*)fData;
+	processedData->recordIndex = (processedData->recordIndex + 1) % MEASURE_SAVE_COUNT;
+	processedData->isNewDataAvaialble = 0xFFFFFFFF;
 #endif
 #if USE_DMA
-		reset = true;
+	reset = true;
 #if MANUAL_RD_SWITCH
-		GPIOB->BSRR = (1U << 2);
-		GPIOA->BSRR = (1U << (15 + 16));
+	GPIOB->BSRR = (1U << 2);
+	GPIOA->BSRR = (1U << (15 + 16));
 #else
-		__HAL_DMA_DISABLE(&hdma_acq_data);
-		((DMA_Stream_TypeDef *)hdma_acq_data.Instance)->M0AR = (uint32_t)&rawData->dataRecord[rawData->recordIndex << 4];
-		__HAL_DMA_ENABLE(&hdma_acq_data);
-		maxCS1_GPIO_Port->BSRR = ((uint32_t)maxCS2_Pin << 0) | ((uint32_t)maxCS1_Pin << 16U);
+	__HAL_DMA_DISABLE(&hdma_acq_data);
+	((DMA_Stream_TypeDef *)hdma_acq_data.Instance)->M0AR = (uint32_t)&rawData->dataRecord[rawData->recordIndex << 4];
+	__HAL_DMA_ENABLE(&hdma_acq_data);
+	maxCS1_GPIO_Port->BSRR = ((uint32_t)maxCS2_Pin << 0) | ((uint32_t)maxCS1_Pin << 16U);
 #endif
-		__HAL_TIM_ENABLE(&htimRead);
+	__HAL_TIM_ENABLE(&htimRead);
 #endif
-	}
 }
+
+/**
+ * @brief This function handles EXTI line[15:10] interrupts.
+ */
+void EXTI15_10_IRQHandler(void)
+{
+#if defined(DUAL_CORE) && defined(CORE_CM4)
+	if (__HAL_GPIO_EXTID2_GET_IT(GPIO_PIN_14) != 0x00U)
+	{
+		__HAL_GPIO_EXTID2_CLEAR_IT(GPIO_PIN_14);
+		AcquistionComplete();
+	}
+#else
+	/* EXTI line interrupt detected */
+	if (__HAL_GPIO_EXTI_GET_IT(GPIO_PIN_14) != 0x00U)
+	{
+		__HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_14);
+		AcquistionComplete();
+	}
+#endif
+	__HAL_GPIO_EXTID2_CLEAR_IT(GPIO_PIN_15);
+}
+
 #if USE_DMA
 //void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 void TIM8_UP_TIM13_IRQHandler(void)

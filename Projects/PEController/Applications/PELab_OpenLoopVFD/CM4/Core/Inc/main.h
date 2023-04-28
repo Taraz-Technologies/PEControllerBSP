@@ -68,10 +68,6 @@ void Error_Handler(void);
 #define maxWrite_GPIO_Port GPIOI
 #define maxRead_Pin GPIO_PIN_13
 #define maxRead_GPIO_Port GPIOC
-#define maxBusy1_Pin GPIO_PIN_14
-#define maxBusy1_GPIO_Port GPIOC
-#define maxBusy2_Pin GPIO_PIN_15
-#define maxBusy2_GPIO_Port GPIOC
 #define maxD0_Pin GPIO_PIN_0
 #define maxD0_GPIO_Port GPIOF
 #define maxD1_Pin GPIO_PIN_1

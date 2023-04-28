@@ -227,8 +227,6 @@ typedef struct
 } adc_measures_t;
 #endif
 
-
-
 typedef struct
 {
 	float* offsets;
