@@ -72,7 +72,10 @@ static void MX_GPIO_Init(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
+	memset((void*)&(sharedData->m7Tom4), 0, sizeof(m7_to_m4_data_t));
+#if IS_ADC_CORE
+	sharedData->m7Tom4.processedAdcData.lastDataPointer = sharedData->m7Tom4.processedAdcData.dataRecord;
+#endif
   /* USER CODE END 1 */
 /* USER CODE BEGIN Boot_Mode_Sequence_0 */
 	int32_t timeout;
@@ -109,7 +112,14 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   /* USER CODE BEGIN 2 */
+#if IS_ADC_CORE
+  adc_cont_config_t adcConfig = {
+  			.callback = NULL,
+  			.conversionCycleTimeUs = SAMPLING_TIME_US };
+  	BSP_MAX11046_Init(ADC_MODE_CONT, &adcConfig, &sharedData->m7Tom4.rawAdcData, &sharedData->m7Tom4.processedAdcData);
+#else
 	sharedData->m7Tom4.periodUs = SAMPLING_TIME_US;
+#endif
 	MainControl_Init();
 	MainControl_Run();
 	/* When system initialization is finished, Cortex-M7 will release Cortex-M4 by means of
@@ -131,7 +141,9 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-
+#if IS_ADC_CORE
+	BSP_MAX11046_Run();
+#endif
 	while (1)
 	{
 

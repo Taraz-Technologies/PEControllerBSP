@@ -58,7 +58,7 @@ volatile shared_data_t * const sharedData = (shared_data_t *)0x38001000;
  */
 void SharedMemory_GetRecentMeasurements(adc_measures_t* adc)
 {
-#if ADC_CORE == ADC_CM4
+#if IS_ADC_CM4
 	void* data = (void*)sharedData->m4Tom7.processedAdcData.lastDataPointer;
 #else
 	void* data = (void*)sharedData->m7Tom4.processedAdcData.lastDataPointer;

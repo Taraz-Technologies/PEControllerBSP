@@ -38,8 +38,8 @@
 		*tempData++ = (uint16_t)MAX11046_GPIO->IDR; \
 		maxRead_GPIO_Port->BSRR = maxRead_Pin;
 
-#define MANUAL_RD_SWITCH			(0)
-#define VIEW_OSCILLOSCOPE			(1)
+#define MANUAL_RD_SWITCH			(1)
+#define VIEW_OSCILLOSCOPE			(0)
 #define USE_DMA						(!MANUAL_RD_SWITCH || VIEW_OSCILLOSCOPE)
 #define COMPUTE_STATS				(1)
 #define USE_CS_DMA					(0)
@@ -68,15 +68,13 @@ static adc_acq_mode_t acqType = ADC_MODE_CONT;
 /** Defines the multipliers for each member of the ADC measurement
  * These values are used to convert ADC data to meaningful measurements according to the formula <b>value = (adcData - adcOffsets) * adcMultipiers</b>
  */
-static adc_measures_t adcMultipiers = {0};
+//static adc_measures_t adcMultipiers = {0};
 /** Defines the offsets for each member of the ADC measurement.
  * These values are used to convert ADC data to meaningful measurements according to the formula <b>value = (adcData - adcOffsets) * adcMultipiers</b>
  */
-static adc_measures_t adcOffsets = {0};
-static stats_t stats[16] = {0};
-static adc_info_t adcInfo = {0};
 static volatile adc_raw_data_t* rawData;
 static volatile adc_processed_data_t* processedData;
+static adc_info_t* adcInfo;
 static TIM_HandleTypeDef htimCnv;			// TIM12
 #if USE_DMA
 static TIM_HandleTypeDef htimRead;			// TIM8
@@ -177,7 +175,7 @@ static inline void CollectConvertData_BothADCs(float* fData, uint16_t* uData, co
 
 
 #if COMPUTE_STATS
-	Stats_Insert_Compute(dataPtrOriginal, stats, 16);
+	Stats_Insert_Compute(dataPtrOriginal, adcInfo->stats, 16);
 #endif
 }
 #pragma GCC pop_options
@@ -370,7 +368,7 @@ static void ReadTimer_Init(void)
 	__HAL_TIM_MOE_ENABLE(&htimRead);
 	__HAL_TIM_ENABLE_IT(&htimRead, TIM_IT_UPDATE);
 	/* TIM8 interrupt Init */
-	HAL_NVIC_SetPriority(TIM8_UP_TIM13_IRQn, 5, 0);
+	HAL_NVIC_SetPriority(TIM8_UP_TIM13_IRQn, 0, 0);
 	HAL_NVIC_EnableIRQ(TIM8_UP_TIM13_IRQn);
 }
 
@@ -483,28 +481,28 @@ void DMA1_Stream2_IRQHandler(void)
  */
 static void ConfigureMeasurements(void)
 {
-	adcInfo.offsets = (float*)&adcOffsets;
-	adcInfo.sensitivty = (float*)&adcMultipiers;
+	//adcInfo->offsets = (float*)&adcOffsets;
+	//adcInfo->sensitivty = (float*)&adcMultipiers;
 	///////////// --TODO-- configure the measurement frequency etc
-	adcInfo.stats = stats;
+	//adcInfo->stats = stats;
 
 	// implementation of Custom PEControllers is user controlled
 #if	PECONTROLLER_CONFIG == PEC_CUSTOM
 	for (int i = 0; i < 16; i++)
 	{
-		adcInfo.sensitivty[i] = 10.f / (32768.f);
-		adcInfo.offsets[i] = 32768;
+		adcInfo->sensitivty[i] = 10.f / (32768.f);
+		adcInfo->offsets[i] = 32768;
 	}
 #else
 	for (int i = 0; i < MEASUREMENT_COUNT_CURRENT; i++)
 	{
-		adcInfo.sensitivty[i] = 10000.f / (CURRENT_SENSITIVITY_mVA * 32768.f);
-		adcInfo.offsets[i] = 32768;
+		adcInfo->sensitivty[i] = 10000.f / (CURRENT_SENSITIVITY_mVA * 32768.f);
+		adcInfo->offsets[i] = 32768;
 	}
 	for (int i = 0; i < MEASUREMENT_COUNT_VOLTAGE; i++)
 	{
-		adcInfo.sensitivty[i + 8] = 1000 / 32768.f;
-		adcInfo.offsets[i + 8] = 32768;
+		adcInfo->sensitivty[i + 8] = 1000 / 32768.f;
+		adcInfo->offsets[i + 8] = 32768;
 	}
 #endif
 }
@@ -523,7 +521,7 @@ void BSP_MAX11046_Init(adc_acq_mode_t type, adc_cont_config_t* contConfig, volat
 	// set parameters
 	rawData = rawAdcData;
 	processedData = processedAdcData;
-	processedData->info = &adcInfo;
+	adcInfo = &processedData->info;
 	ConfigureMeasurements();
 
 #if ENABLE_INTELLISENS
@@ -535,8 +533,10 @@ void BSP_MAX11046_Init(adc_acq_mode_t type, adc_cont_config_t* contConfig, volat
 	adcContConfig.callback = contConfig->callback;
 
 	GPIOs_Init();
+#if USE_DMA
 	DataCollectDMAs_Init();
 	ReadTimer_Init();
+#endif
 	ConversionTimer_Init();
 
 	moduleActive = true;
@@ -623,7 +623,7 @@ static inline void AcquistionComplete(void)
 #if MANUAL_RD_SWITCH
 	float* fData = (float*)&processedData->dataRecord[processedData->recordIndex];
 	uint16_t* uData = (uint16_t*)&rawData->dataRecord[rawData->recordIndex << 4];
-	CollectConvertData_BothADCs(fData, uData, adcInfo.sensitivty, adcInfo.offsets);
+	CollectConvertData_BothADCs(fData, uData, adcInfo->sensitivty, adcInfo->offsets);
 	if(adcContConfig.callback)
 		adcContConfig.callback((adc_measures_t*)fData);
 	rawData->recordIndex = (rawData->recordIndex + 1) % RAW_MEASURE_SAVE_COUNT;
@@ -693,7 +693,7 @@ void TIM8_UP_TIM13_IRQHandler(void)
 		maxCS1_GPIO_Port->BSRR = ((uint32_t)maxCS2_Pin << 0) | ((uint32_t)maxCS1_Pin << 0);
 		float* fData = (float*)&processedData->dataRecord[processedData->recordIndex];
 		uint16_t* uData = (uint16_t*)&rawData->dataRecord[rawData->recordIndex << 4];
-		CollectConvertData_BothADCs(fData, uData, adcInfo.sensitivty, adcInfo.offsets);
+		CollectConvertData_BothADCs(fData, uData, adcInfo->sensitivty, adcInfo->offsets);
 		if(adcContConfig.callback)
 			adcContConfig.callback((adc_measures_t*)fData);
 		rawData->recordIndex = (rawData->recordIndex + 1) % RAW_MEASURE_SAVE_COUNT;

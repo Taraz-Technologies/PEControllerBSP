@@ -229,9 +229,9 @@ typedef struct
 
 typedef struct
 {
-	float* offsets;
-	float* sensitivty;
-	stats_t* stats;
+	float offsets[TOTAL_MEASUREMENT_COUNT];
+	float sensitivty[TOTAL_MEASUREMENT_COUNT];
+	stats_t stats[TOTAL_MEASUREMENT_COUNT];
 } adc_info_t;
 
 typedef struct
@@ -246,7 +246,7 @@ typedef struct
 	volatile int recordIndex;
 	volatile adc_measures_t* lastDataPointer;
 	adc_measures_t dataRecord[MEASURE_SAVE_COUNT];
-	adc_info_t* info;
+	adc_info_t info;
 } adc_processed_data_t;
 /**
  * @}

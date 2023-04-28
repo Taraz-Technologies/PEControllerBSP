@@ -135,8 +135,8 @@ void StartintelliSENSTask(void *argument);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-#if ADC_CORE == ADC_CM4
 	memset((void*)&(sharedData->m4Tom7), 0, sizeof(m4_to_m7_data_t));
+#if IS_ADC_CORE
 	sharedData->m4Tom7.processedAdcData.lastDataPointer = sharedData->m4Tom7.processedAdcData.dataRecord;
 #endif
   /* USER CODE END 1 */
@@ -173,7 +173,7 @@ int main(void)
   MX_GPIO_Init();
   MX_TIM17_Init();
   /* USER CODE BEGIN 2 */
-#if ADC_CORE == ADC_CM4
+#if IS_ADC_CORE
 	adc_cont_config_t adcConfig = {
 			.callback = NULL,
 			.conversionCycleTimeUs = sharedData->m7Tom4.periodUs };
@@ -182,7 +182,7 @@ int main(void)
 	BSP_Display_Init();
 	BSP_Display_ShowLogo();
 	HAL_TIM_PWM_Start(&htim17,TIM_CHANNEL_1);			// LCD Brightness
-#if ADC_CORE == ADC_CM4
+#if IS_ADC_CORE
 	BSP_MAX11046_Run();
 #endif
   /* USER CODE END 2 */

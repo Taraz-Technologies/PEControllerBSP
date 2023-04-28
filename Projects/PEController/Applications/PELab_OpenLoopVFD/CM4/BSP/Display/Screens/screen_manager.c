@@ -92,10 +92,10 @@ void ScreenManager_Init(void)
 		chDispMeasures.disp[i].chUnit = chUnits[i];
 		chDispMeasures.disp[i].type = chMeasurementType[i];
 		chDispMeasures.disp[i].channelIndex = i;
-#if ADC_CORE == ADC_CM4
-		chDispMeasures.disp[i].stats = &sharedData->m4Tom7.processedAdcData.info->stats[i];
+#if IS_ADC_CM4
+		chDispMeasures.disp[i].stats = &sharedData->m4Tom7.processedAdcData.info.stats[i];
 #else
-		chDispMeasures.disp[i].stats = &sharedData->m7Tom4.processedAdcData.info->stats[i];
+		chDispMeasures.disp[i].stats = &sharedData->m7Tom4.processedAdcData.info.stats[i];
 #endif
 	}
 	// --TODO-- chDispMeasures.offsets = ((float*)&adcOffsets);
