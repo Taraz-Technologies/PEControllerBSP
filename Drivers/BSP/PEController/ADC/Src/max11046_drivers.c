@@ -43,7 +43,7 @@
 		*tempData++ = (uint16_t)MAX11046_GPIO->IDR; \
 		maxRead_GPIO_Port->BSRR = maxRead_Pin;
 
-#define MANUAL_RD_SWITCH			(1)
+#define MANUAL_RD_SWITCH			(0)
 #define VIEW_OSCILLOSCOPE			(0)
 #define USE_DMA						(!MANUAL_RD_SWITCH || VIEW_OSCILLOSCOPE)
 #define COMPUTE_STATS				(1)
@@ -184,7 +184,10 @@ static inline void CollectConvertData_BothADCs(float* fData, uint16_t* uData, co
 
 
 #if COMPUTE_STATS
+	//static int x = 2;
+	//if(x % 4)
 	Stats_Insert_Compute(dataPtrOriginal, adcInfo->stats, 16);
+	//x = x & 3;
 #endif
 }
 #pragma GCC pop_options
@@ -315,7 +318,7 @@ static void ReadTimer_Init(void)
 	htimRead.Instance = TIM8;
 	htimRead.Init.Prescaler = 0;
 	htimRead.Init.CounterMode = TIM_COUNTERMODE_UP;
-	htimRead.Init.Period = 44;
+	htimRead.Init.Period = 36;
 	htimRead.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
 	htimRead.Init.RepetitionCounter = 7;
 	htimRead.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
@@ -345,12 +348,12 @@ static void ReadTimer_Init(void)
 	{
 		Error_Handler();
 	}
-	sConfigOC.Pulse = 15;
+	sConfigOC.Pulse = 20;
 	if (HAL_TIM_PWM_ConfigChannel(&htimRead, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
 	{
 		Error_Handler();
 	}
-	sConfigOC.Pulse = 32;
+	sConfigOC.Pulse = 35;
 	if (HAL_TIM_PWM_ConfigChannel(&htimRead, &sConfigOC, TIM_CHANNEL_3) != HAL_OK)
 	{
 		Error_Handler();

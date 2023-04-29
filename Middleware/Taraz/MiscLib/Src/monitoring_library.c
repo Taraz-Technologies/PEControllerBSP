@@ -64,31 +64,33 @@ void Stats_Insert_Compute(float* data, stats_t* stats, int count)
 {
 	while (count--)
 	{
-		// Compute the temporary values
-		stats->tempData.rms += ((*data) * (*data));
-		stats->tempData.avg += (*data);
-		if (stats->tempData.max < *data)
-			stats->tempData.max = *data;
-		if (stats->tempData.min > *data)
-			stats->tempData.min = *data;
-
 		// Compute results if required
-		if (--stats->samplesLeft <= 0)
+		if (stats->samplesLeft-- <= 0)
 		{
 			// get new values
 			stats->result.rms = sqrtf(stats->tempData.rms / stats->sampleCount);
 			stats->result.avg = stats->tempData.avg / stats->sampleCount;
 			stats->result.max = stats->tempData.max;
-			stats->result.min = stats->tempData.min;
-			stats->result.pkTopk = stats->tempData.max - stats->tempData.min;
+//			stats->result.min = stats->tempData.min;
+//			stats->result.pkTopk = stats->tempData.max - stats->tempData.min;
 
 			// reset temp stats
 			stats->tempData.rms = 0;
 			stats->tempData.avg = 0;
 			stats->tempData.max = -4294967296;
 			stats->tempData.min = 4294967296;
-			stats->samplesLeft = stats->sampleCount = 1000; // --TODO--
+			stats->samplesLeft = stats->sampleCount = 10000; // --TODO--
 			stats->isUpdated = 0xFFFFFFFF;
+		}
+		else
+		{
+			// Compute the temporary values
+			stats->tempData.rms += ((*data) * (*data));
+			stats->tempData.avg += (*data);
+			if (stats->tempData.max < *data)
+				stats->tempData.max = *data;
+//			if (stats->tempData.min > *data)
+//				stats->tempData.min = *data;
 		}
 		stats++;
 		data++;
