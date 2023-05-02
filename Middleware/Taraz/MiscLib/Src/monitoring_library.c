@@ -54,6 +54,7 @@
  *******************************************************************************/
 #pragma GCC push_options
 #pragma GCC optimize ("-Ofast")
+
 /**
  * @brief Insert new data for computation of statistics. If samples are enough statistics will be computed.
  * @param data Pointer to the first element of the new data array
@@ -65,14 +66,24 @@ void Stats_Insert_Compute(float* data, stats_t* stats, int count)
 	while (count--)
 	{
 		// Compute results if required
-		if (stats->samplesLeft-- <= 0)
+		if (stats->samplesLeft-- > 0)
+		{
+			// Compute the temporary values
+			stats->tempData.rms += ((*data) * (*data));
+			stats->tempData.avg += (*data);
+			if (stats->tempData.max < *data)
+				stats->tempData.max = *data;
+			if (stats->tempData.min > *data)
+				stats->tempData.min = *data;
+		}
+		else
 		{
 			// get new values
 			stats->result.rms = sqrtf(stats->tempData.rms / stats->sampleCount);
 			stats->result.avg = stats->tempData.avg / stats->sampleCount;
 			stats->result.max = stats->tempData.max;
-//			stats->result.min = stats->tempData.min;
-//			stats->result.pkTopk = stats->tempData.max - stats->tempData.min;
+			stats->result.min = stats->tempData.min;
+			stats->result.pkTopk = stats->tempData.max - stats->tempData.min;
 
 			// reset temp stats
 			stats->tempData.rms = 0;
@@ -82,20 +93,11 @@ void Stats_Insert_Compute(float* data, stats_t* stats, int count)
 			stats->samplesLeft = stats->sampleCount = 10000; // --TODO--
 			stats->isUpdated = 0xFFFFFFFF;
 		}
-		else
-		{
-			// Compute the temporary values
-			stats->tempData.rms += ((*data) * (*data));
-			stats->tempData.avg += (*data);
-			if (stats->tempData.max < *data)
-				stats->tempData.max = *data;
-//			if (stats->tempData.min > *data)
-//				stats->tempData.min = *data;
-		}
 		stats++;
 		data++;
 	}
 }
+
 #pragma GCC pop_options
 #endif
 /* EOF */

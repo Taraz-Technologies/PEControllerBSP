@@ -48,6 +48,7 @@
 #define USE_DMA						(!MANUAL_RD_SWITCH || VIEW_OSCILLOSCOPE)
 #define COMPUTE_STATS				(1)
 #define USE_CS_DMA					(0)
+#define MAP_CONV_TIME_SPI			(1)
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
@@ -60,6 +61,7 @@ typedef struct
 {
 	uint32_t rdHigh;
 	uint32_t rdLow;
+	uint16_t data[32];
 #if MANUAL_RD_SWITCH
 	uint32_t toggle[2];
 #endif
@@ -165,7 +167,7 @@ static inline void CollectData_BothADCs(uint16_t* tempData)
  * @param *mults Pointer to the multiplier information
  * @param *offsets Pointer to the offset information
  */
-static inline void CollectConvertData_BothADCs(float* fData, uint16_t* uData, const float* mults, const float* offsets)
+static void CollectConvertData_BothADCs(float* fData, uint16_t* uData, const float* mults, const float* offsets)
 {
 	float* dataPtrOriginal = fData;
 #if MANUAL_RD_SWITCH
@@ -184,10 +186,7 @@ static inline void CollectConvertData_BothADCs(float* fData, uint16_t* uData, co
 
 
 #if COMPUTE_STATS
-	//static int x = 2;
-	//if(x % 4)
 	Stats_Insert_Compute(dataPtrOriginal, adcInfo->stats, 16);
-	//x = x & 3;
 #endif
 }
 #pragma GCC pop_options
@@ -246,6 +245,14 @@ static void GPIOs_Init(void)
 	GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
+
+#if MAP_CONV_TIME_SPI
+	GPIO_InitStruct.Pin = GPIO_PIN_2;
+	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+	HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+#endif
 }
 
 static void ConversionTimer_Init(void)
@@ -469,6 +476,7 @@ static void DataCollectDMAs_Init(void)
 	HAL_DMA_Start(&hdma_acq_data, (uint32_t)&dmaData->toggle[0], (uint32_t)&maxRead_GPIO_Port->BSRR, 2);
 #else
 	HAL_DMA_Start(&hdma_acq_data, (uint32_t)&MAX11046_GPIO->IDR, (uint32_t)&rawData->dataRecord[rawData->recordIndex << 4], 16);
+	//HAL_DMA_Start(&hdma_acq_data, (uint32_t)&MAX11046_GPIO->IDR, (uint32_t)&dmaData->data, 16);
 #endif
 	HAL_DMA_Start(&hdma_rd_high, (uint32_t)&dmaData->rdHigh, (uint32_t)&maxRead_GPIO_Port->BSRR, 16);
 #if USE_CS_DMA
@@ -717,6 +725,9 @@ void TIM8_UP_TIM13_IRQHandler(void)
 		GPIOB->BSRR = (1U << (2));
 		GPIOA->BSRR = (1U << (15));
 #else
+#if MAP_CONV_TIME_SPI
+		GPIOB->BSRR = (1U << 2);
+#endif
 		maxCS1_GPIO_Port->BSRR = ((uint32_t)maxCS2_Pin << 0) | ((uint32_t)maxCS1_Pin << 0);
 		float* fData = (float*)&processedData->dataRecord[processedData->recordIndex];
 		uint16_t* uData = (uint16_t*)&rawData->dataRecord[rawData->recordIndex << 4];
@@ -727,6 +738,9 @@ void TIM8_UP_TIM13_IRQHandler(void)
 		processedData->lastDataPointer = (adc_measures_t*)fData;
 		processedData->recordIndex = (processedData->recordIndex + 1) % MEASURE_SAVE_COUNT;
 		processedData->isNewDataAvaialble = 0xFFFFFFFF;
+#if MAP_CONV_TIME_SPI
+		GPIOB->BSRR = (1U << (2 + 16));
+#endif
 #endif
 	}
 }
