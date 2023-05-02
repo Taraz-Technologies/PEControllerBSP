@@ -61,8 +61,9 @@
  * @param stats Pointer to the first element of the statistics array
  * @param count Number of consecutive statistics computations
  */
-void Stats_Insert_Compute(float* data, stats_t* stats, int count)
+bool Stats_Insert_Compute(float* data, stats_t* stats, int count)
 {
+	bool result = false;
 	while (count--)
 	{
 		// Compute results if required
@@ -92,10 +93,12 @@ void Stats_Insert_Compute(float* data, stats_t* stats, int count)
 			stats->tempData.min = 4294967296;
 			stats->samplesLeft = stats->sampleCount = 10000; // --TODO--
 			stats->isUpdated = 0xFFFFFFFF;
+			result = true;
 		}
 		stats++;
 		data++;
 	}
+	return result;
 }
 
 #pragma GCC pop_options

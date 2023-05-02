@@ -108,7 +108,7 @@ typedef struct
  * @param stats Pointer to the first element of the statistics array
  * @param count Number of consecutive statistics computations
  */
-extern void Stats_Insert_Compute(float* data, stats_t* stats, int count);
+extern bool Stats_Insert_Compute(float* data, stats_t* stats, int count);
 /********************************************************************************
  * Code
  *******************************************************************************/

@@ -49,6 +49,7 @@
 #define COMPUTE_STATS				(1)
 #define USE_CS_DMA					(0)
 #define MAP_CONV_TIME_SPI			(1)
+#define GET_DATA_DIRECT				(0)
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
@@ -94,6 +95,12 @@ static adc_acq_mode_t acqType = ADC_MODE_CONT;
  */
 static volatile adc_raw_data_t* rawData;
 static volatile adc_processed_data_t* processedData;
+#if !GET_DATA_DIRECT
+static stats_t statsLocal[16] = {0};
+static float fDataLocal[16] = {0};
+static float adcOffsets[16] = {0};
+static float adcSensitivity[16] = {0};
+#endif
 static adc_info_t* adcInfo;
 static TIM_HandleTypeDef htimCnv;			// TIM12
 #if USE_DMA
@@ -169,7 +176,12 @@ static inline void CollectData_BothADCs(uint16_t* tempData)
  */
 static void CollectConvertData_BothADCs(float* fData, uint16_t* uData, const float* mults, const float* offsets)
 {
-	float* dataPtrOriginal = fData;
+	float* fData0 = fData;
+#if !GET_DATA_DIRECT
+	fData = fDataLocal;
+#else
+
+#endif
 #if MANUAL_RD_SWITCH
 	CollectData_BothADCs(uData);
 #endif
@@ -186,7 +198,16 @@ static void CollectConvertData_BothADCs(float* fData, uint16_t* uData, const flo
 
 
 #if COMPUTE_STATS
-	Stats_Insert_Compute(dataPtrOriginal, adcInfo->stats, 16);
+#if GET_DATA_DIRECT
+	Stats_Insert_Compute(fData0, adcInfo->stats, 16);
+#else
+	if(Stats_Insert_Compute(fDataLocal, statsLocal, 16))
+	{
+		for (int i = 0; i < 16; i++)
+			memcpy(&adcInfo->stats[i].result, &statsLocal[i].result, sizeof(stats_data_t));
+	}
+	memcpy(fData0, fDataLocal, sizeof(float) * 16);
+#endif
 #endif
 }
 #pragma GCC pop_options
@@ -539,6 +560,13 @@ static void ConfigureMeasurements(void)
 		adcInfo->sensitivty[i + 8] = 1000 / 32768.f;
 		adcInfo->offsets[i + 8] = 32768;
 	}
+#if !GET_DATA_DIRECT
+	for (int i = 0; i < 16; i++)
+	{
+		adcSensitivity[i] = adcInfo->sensitivty[i];
+		adcOffsets[i] = adcInfo->offsets[i];
+	}
+#endif
 #endif
 }
 
@@ -731,7 +759,11 @@ void TIM8_UP_TIM13_IRQHandler(void)
 		maxCS1_GPIO_Port->BSRR = ((uint32_t)maxCS2_Pin << 0) | ((uint32_t)maxCS1_Pin << 0);
 		float* fData = (float*)&processedData->dataRecord[processedData->recordIndex];
 		uint16_t* uData = (uint16_t*)&rawData->dataRecord[rawData->recordIndex << 4];
+#if GET_DATA_DIRECT
 		CollectConvertData_BothADCs(fData, uData, adcInfo->sensitivty, adcInfo->offsets);
+#else
+		CollectConvertData_BothADCs(fData, uData, adcSensitivity, adcOffsets);
+#endif
 		if(adcContConfig.callback)
 			adcContConfig.callback((adc_measures_t*)fData);
 		rawData->recordIndex = (rawData->recordIndex + 1) % RAW_MEASURE_SAVE_COUNT;
