@@ -43,8 +43,8 @@ extern "C" {
  * Typedefs
  *******************************************************************************/
 /** @defgroup MonitoringLib_Exported_Typedefs Type Definitions
-  * @{
-  */
+ * @{
+ */
 /**
  * @brief Defines the available measurements types
  */
@@ -64,8 +64,17 @@ typedef enum
  * Structures
  *******************************************************************************/
 /** @defgroup MonitoringLib_Exported_Strutures Structures
-  * @{
-  */
+ * @{
+ */
+typedef struct
+{
+	float rms;				/**< @brief RMS measurement */
+	float avg;				/**< @brief Average measurement */
+	float max;				/**< @brief Maximum measurement */
+	float min;				/**< @brief Minimum measurement */
+	int samplesLeft;		/**< @brief No of samples left before computation */
+	int sampleCount;		/**< @brief No of samples to be used for statistics computation */
+} temp_stats_data_t;
 /**
  * @brief Contains the required members for statistical analysis
  * @note This structure sequence should be the same with @ref measure_type_t
@@ -78,17 +87,8 @@ typedef struct
 	float min;				/**< @brief Minimum measurement */
 	float pkTopk;			/**< @brief Peak to peak measurement */
 } stats_data_t;
-/**
- * @brief Contains the required members for statistical analysis and its computation
- */
-typedef struct
-{
-	uint32_t isUpdated;		/**< @brief Each bit will set to true if new values computed */
-	int samplesLeft;		/**< @brief No of samples left before computation */
-	int sampleCount;		/**< @brief No of samples to be used for statistics computation */
-	stats_data_t tempData;	/**< @brief Temporary data used for measurement computation */
-	stats_data_t result;	/**< @brief Statistics computation results */
-} stats_t;
+
+
 /**
  * @}
  */
@@ -108,7 +108,7 @@ typedef struct
  * @param stats Pointer to the first element of the statistics array
  * @param count Number of consecutive statistics computations
  */
-extern bool Stats_Insert_Compute(float* data, stats_t* stats, int count);
+extern uint32_t Stats_Compute(float* data, temp_stats_data_t* tempStats, stats_data_t* stats, int count);
 /********************************************************************************
  * Code
  *******************************************************************************/

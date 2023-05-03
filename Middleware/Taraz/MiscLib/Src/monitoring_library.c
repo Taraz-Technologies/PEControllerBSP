@@ -61,42 +61,41 @@
  * @param stats Pointer to the first element of the statistics array
  * @param count Number of consecutive statistics computations
  */
-bool Stats_Insert_Compute(float* data, stats_t* stats, int count)
+uint32_t Stats_Compute(float* data, temp_stats_data_t* tempStats, stats_data_t* stats, int count)
 {
-	bool result = false;
+	uint32_t result = 0;
 	while (count--)
 	{
 		// Compute results if required
-		if (stats->samplesLeft-- > 0)
+		if (tempStats->samplesLeft-- > 0)
 		{
 			// Compute the temporary values
-			stats->tempData.rms += ((*data) * (*data));
-			stats->tempData.avg += (*data);
-			if (stats->tempData.max < *data)
-				stats->tempData.max = *data;
-			if (stats->tempData.min > *data)
-				stats->tempData.min = *data;
+			tempStats->rms += ((*data) * (*data));
+			tempStats->avg += (*data);
+			if (tempStats->max < *data)
+				tempStats->max = *data;
+			if (tempStats->min > *data)
+				tempStats->min = *data;
 		}
 		else
 		{
 			// get new values
-			stats->result.rms = sqrtf(stats->tempData.rms / stats->sampleCount);
-			stats->result.avg = stats->tempData.avg / stats->sampleCount;
-			stats->result.max = stats->tempData.max;
-			stats->result.min = stats->tempData.min;
-			stats->result.pkTopk = stats->tempData.max - stats->tempData.min;
+			tempStats->samplesLeft = tempStats->sampleCount = 10000; // --TODO--
+			stats->rms = sqrtf(tempStats->rms / tempStats->sampleCount);
+			stats->avg = tempStats->avg / tempStats->sampleCount;
+			stats->max = tempStats->max;
+			stats->min = tempStats->min;
+			stats->pkTopk = stats->max - stats->min;
 
 			// reset temp stats
-			stats->tempData.rms = 0;
-			stats->tempData.avg = 0;
-			stats->tempData.max = -4294967296;
-			stats->tempData.min = 4294967296;
-			stats->samplesLeft = stats->sampleCount = 10000; // --TODO--
-			stats->isUpdated = 0xFFFFFFFF;
-			result = true;
+			tempStats->rms = tempStats->avg = 0;
+			tempStats->max = -4294967296;
+			tempStats->min = 4294967296;
+			result = (uint32_t)~(0);
+			stats++;
 		}
-		stats++;
 		data++;
+		tempStats++;
 	}
 	return result;
 }

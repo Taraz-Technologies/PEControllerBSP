@@ -95,8 +95,9 @@ static adc_acq_mode_t acqType = ADC_MODE_CONT;
  */
 static volatile adc_raw_data_t* rawData;
 static volatile adc_processed_data_t* processedData;
+static temp_stats_data_t tempStatsLocal[16] = {0};
 #if !GET_DATA_DIRECT
-static stats_t statsLocal[16] = {0};
+static stats_data_t statsLocal[16] = {0};
 static float fDataLocal[16] = {0};
 static float adcOffsets[16] = {0};
 static float adcSensitivity[16] = {0};
@@ -179,8 +180,6 @@ static void CollectConvertData_BothADCs(float* fData, uint16_t* uData, const flo
 	float* fData0 = fData;
 #if !GET_DATA_DIRECT
 	fData = fDataLocal;
-#else
-
 #endif
 #if MANUAL_RD_SWITCH
 	CollectData_BothADCs(uData);
@@ -199,12 +198,12 @@ static void CollectConvertData_BothADCs(float* fData, uint16_t* uData, const flo
 
 #if COMPUTE_STATS
 #if GET_DATA_DIRECT
-	Stats_Insert_Compute(fData0, adcInfo->stats, 16);
+	Stats_Compute(fData0, tempStatsLocal, adcInfo->stats, 16);
 #else
-	if(Stats_Insert_Compute(fDataLocal, statsLocal, 16))
+	if (Stats_Compute(fDataLocal, tempStatsLocal, statsLocal, 16))
 	{
-		for (int i = 0; i < 16; i++)
-			memcpy(&adcInfo->stats[i].result, &statsLocal[i].result, sizeof(stats_data_t));
+		memcpy(adcInfo->stats, statsLocal, sizeof(stats_data_t) * 16);
+		adcInfo->isUpdated = ~(uint32_t)0;
 	}
 	memcpy(fData0, fDataLocal, sizeof(float) * 16);
 #endif

@@ -81,7 +81,7 @@ typedef struct
 	measure_type_t type;
 	const char* chName;
 	const char* chUnit;
-	stats_t* stats;
+	stats_data_t* stats;
 	int channelIndex;
 	float freq;
 } disp_ch_measure_t;

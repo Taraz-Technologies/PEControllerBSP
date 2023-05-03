@@ -231,7 +231,9 @@ typedef struct
 {
 	float offsets[TOTAL_MEASUREMENT_COUNT];
 	float sensitivty[TOTAL_MEASUREMENT_COUNT];
-	stats_t stats[TOTAL_MEASUREMENT_COUNT];
+	float freq[TOTAL_MEASUREMENT_COUNT];
+	stats_data_t stats[TOTAL_MEASUREMENT_COUNT];
+	uint32_t isUpdated;
 } adc_info_t;
 
 typedef struct

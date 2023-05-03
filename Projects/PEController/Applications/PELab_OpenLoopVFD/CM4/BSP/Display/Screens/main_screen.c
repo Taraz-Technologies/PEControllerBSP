@@ -312,19 +312,19 @@ void MainScreen_Refresh(void)
 	if (isActive)
 	{
 
-		//if (chDispMeasures.isUpdated)
-		//{
-		//	chDispMeasures.isUpdated = false;
+//		if (adcInfo->isUpdated)
+//		{
+//			chDispMeasures.isUpdated = false;
 			for (int i = 0; i < 14; i++)
 			{
 				measure_type_t type = chDispMeasures.disp[i].type;
-				float* stats = ((float*)&chDispMeasures.disp[i].stats->result);
+				float* stats = ((float*)chDispMeasures.disp[i].stats);
 				char txt[10];
 				int len = ftoa_custom(stats[(uint8_t)type], txt, 4, 1);
 				strcat_custom(txt, chDispMeasures.disp[i].chUnit, len, false);
 				lv_label_set_text(chDisplay[i].lblValue, txt);
 			}
-		//}
+//		}
 		lv_label_set_text_fmt(chDisplay[14].lblValue, "%d", XDisp);
 		lv_label_set_text_fmt(chDisplay[15].lblValue, "%d", YDisp);
 	}
