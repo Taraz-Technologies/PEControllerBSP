@@ -175,7 +175,7 @@ static inline void CollectData_BothADCs(uint16_t* tempData)
  * @param *mults Pointer to the multiplier information
  * @param *offsets Pointer to the offset information
  */
-static void CollectConvertData_BothADCs(float* fData, uint16_t* uData, const float* mults, const float* offsets)
+TCritical static void CollectConvertData_BothADCs(float* fData, uint16_t* uData, const float* mults, const float* offsets)
 {
 	float* fData0 = fData;
 #if !GET_DATA_DIRECT
@@ -680,7 +680,7 @@ static bool reset = true;
 /**
  * @brief Call this function when the acquisition is completed
  */
-static inline void AcquistionComplete(void)
+TCritical static inline void AcquistionComplete(void)
 {
 #if MANUAL_RD_SWITCH
 	float* fData = (float*)&processedData->dataRecord[processedData->recordIndex];
@@ -711,8 +711,11 @@ static inline void AcquistionComplete(void)
 /**
  * @brief This function handles EXTI line[15:10] interrupts.
  */
-void EXTI15_10_IRQHandler(void)
+TCritical void EXTI15_10_IRQHandler(void)
 {
+#if MAP_CONV_TIME_SPI
+	GPIOB->BSRR = (1U << 2);
+#endif
 #if defined(DUAL_CORE) && defined(CORE_CM4)
 	if (__HAL_GPIO_EXTID2_GET_IT(GPIO_PIN_14) != 0x00U)
 	{
@@ -728,12 +731,18 @@ void EXTI15_10_IRQHandler(void)
 	}
 #endif
 	__HAL_GPIO_EXTID2_CLEAR_IT(GPIO_PIN_15);
+#if MAP_CONV_TIME_SPI
+	GPIOB->BSRR = (1U << (2 + 16));
+#endif
 }
 
 #if USE_DMA
 //void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
-void TIM8_UP_TIM13_IRQHandler(void)
+TCritical void TIM8_UP_TIM13_IRQHandler(void)
 {
+#if MAP_CONV_TIME_SPI
+		GPIOB->BSRR = (1U << 2);
+#endif
 	__HAL_TIM_CLEAR_IT(&htimRead, TIM_IT_UPDATE);
 	if (reset == true)
 	{
@@ -752,9 +761,6 @@ void TIM8_UP_TIM13_IRQHandler(void)
 		GPIOB->BSRR = (1U << (2));
 		GPIOA->BSRR = (1U << (15));
 #else
-#if MAP_CONV_TIME_SPI
-		GPIOB->BSRR = (1U << 2);
-#endif
 		maxCS1_GPIO_Port->BSRR = ((uint32_t)maxCS2_Pin << 0) | ((uint32_t)maxCS1_Pin << 0);
 		float* fData = (float*)&processedData->dataRecord[processedData->recordIndex];
 		uint16_t* uData = (uint16_t*)&rawData->dataRecord[rawData->recordIndex << 4];
@@ -769,11 +775,11 @@ void TIM8_UP_TIM13_IRQHandler(void)
 		processedData->lastDataPointer = (adc_measures_t*)fData;
 		processedData->recordIndex = (processedData->recordIndex + 1) % MEASURE_SAVE_COUNT;
 		processedData->isNewDataAvaialble = 0xFFFFFFFF;
+#endif
+	}
 #if MAP_CONV_TIME_SPI
 		GPIOB->BSRR = (1U << (2 + 16));
 #endif
-#endif
-	}
 }
 #endif
 #pragma GCC pop_options

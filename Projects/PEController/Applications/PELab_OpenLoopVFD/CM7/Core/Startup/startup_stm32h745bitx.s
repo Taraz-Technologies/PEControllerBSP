@@ -40,6 +40,13 @@ defined in linker script */
 .word  _sdata
 /* end address for the .data section. defined in linker script */
 .word  _edata
+/* start address for the initialization values of the .data section.
+defined in linker script */
+.word  _tCritical
+/* start address for the .data section. defined in linker script */
+.word  _sCritical
+/* end address for the .data section. defined in linker script */
+.word  _eCritical
 /* start address for the .bss section. defined in linker script */
 .word  _sbss
 /* end address for the .bss section. defined in linker script */
@@ -80,6 +87,22 @@ LoopCopyDataInit:
   adds r4, r0, r3
   cmp r4, r1
   bcc CopyDataInit
+
+/* Copy the critical segment from flash to ITCM *//*
+  ldr r0, =_sCritical
+  ldr r1, =_eCritical
+  ldr r2, =_tCritical
+  movs r3, #0
+  b LoopCopyCritical
+CopyCritical:
+  ldr r4, [r2, r3]
+  str r4, [r0, r3]
+  adds r3, r3, #4
+LoopCopyCritical:
+  adds r4, r0, r3
+  cmp r4, r1
+  bcc CopyCritical
+
 /* Zero fill the bss segment. */
   ldr r2, =_sbss
   ldr r4, =_ebss

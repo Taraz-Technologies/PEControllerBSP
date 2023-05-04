@@ -99,6 +99,8 @@ extern "C" {
 #define MAX11046_GPIO GPIOF
 #define MAX11046_TIMER TIM12
 #define MAX11046_CLK_Us	240					// --todo-- configure 240 seperately
+
+#define TCritical	__attribute__((section (".tCritical")))
 /********************************************************************************
  * Typedefs
  *******************************************************************************/

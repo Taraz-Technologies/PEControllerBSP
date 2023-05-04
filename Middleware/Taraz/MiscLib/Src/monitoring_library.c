@@ -61,7 +61,7 @@
  * @param stats Pointer to the first element of the statistics array
  * @param count Number of consecutive statistics computations
  */
-uint32_t Stats_Compute(float* data, temp_stats_data_t* tempStats, stats_data_t* stats, int count)
+TCritical uint32_t Stats_Compute(float* data, temp_stats_data_t* tempStats, stats_data_t* stats, int count)
 {
 	uint32_t result = 0;
 	while (count--)
