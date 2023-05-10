@@ -441,7 +441,7 @@ static void DataCollectDMAs_Init(void)
 	hdma_rd_low.Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD;
 	hdma_rd_low.Init.MemDataAlignment = DMA_MDATAALIGN_WORD;
 	hdma_rd_low.Init.Mode = DMA_CIRCULAR;
-	hdma_rd_low.Init.Priority = DMA_PRIORITY_HIGH;
+	hdma_rd_low.Init.Priority = DMA_PRIORITY_VERY_HIGH;
 	hdma_rd_low.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
 	if (HAL_DMA_Init(&hdma_rd_low) != HAL_OK)
 	{
@@ -459,7 +459,7 @@ static void DataCollectDMAs_Init(void)
 	hdma_acq_data.Init.PeriphDataAlignment = DMA_PDATAALIGN_HALFWORD;
 	hdma_acq_data.Init.MemDataAlignment = DMA_MDATAALIGN_HALFWORD;
 	hdma_acq_data.Init.Mode = DMA_CIRCULAR;
-	hdma_acq_data.Init.Priority = DMA_PRIORITY_HIGH;
+	hdma_acq_data.Init.Priority = DMA_PRIORITY_VERY_HIGH;
 	hdma_acq_data.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
 	if (HAL_DMA_Init(&hdma_acq_data) != HAL_OK)
 	{
@@ -477,7 +477,7 @@ static void DataCollectDMAs_Init(void)
 	hdma_rd_high.Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD;
 	hdma_rd_high.Init.MemDataAlignment = DMA_MDATAALIGN_WORD;
 	hdma_rd_high.Init.Mode = DMA_CIRCULAR;
-	hdma_rd_high.Init.Priority = DMA_PRIORITY_HIGH;
+	hdma_rd_high.Init.Priority = DMA_PRIORITY_VERY_HIGH;
 	hdma_rd_high.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
 	if (HAL_DMA_Init(&hdma_rd_high) != HAL_OK)
 	{
@@ -487,7 +487,7 @@ static void DataCollectDMAs_Init(void)
 	__HAL_LINKDMA(&htimRead,hdma[TIM_DMA_ID_CC3],hdma_rd_high);
 
 	/* DMA interrupt init */
-	HAL_NVIC_SetPriority(DMA1_Stream2_IRQn, 5, 0);
+	HAL_NVIC_SetPriority(DMA1_Stream2_IRQn, 0, 0);
 	HAL_NVIC_EnableIRQ(DMA1_Stream2_IRQn);
 
 	// Enable the DMAs
