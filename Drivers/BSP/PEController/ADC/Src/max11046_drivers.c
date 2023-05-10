@@ -28,9 +28,6 @@
 #include "max11046_drivers.h"
 #include "shared_memory.h"
 #include "../../../../../Middleware/Taraz/MiscLib/Src/monitoring_library.c"
-#if ENABLE_INTELLISENS
-#include "intelliSENS.h"
-#endif
 /********************************************************************************
  * Defines
  *******************************************************************************/
@@ -185,10 +182,6 @@ TCritical static void CollectConvertData_BothADCs(float* fData, uint16_t* uData,
 	CollectData_BothADCs(uData);
 #endif
 
-#if ENABLE_INTELLISENS
-	intelliSENS.SetADCData((uint64_t*)(uData));
-#endif
-
 	int i = 15;
 	do
 	{
@@ -286,10 +279,6 @@ static void ConversionTimer_Init(void)
 	htimCnv.Init.Prescaler = 0;
 	htimCnv.Init.CounterMode = TIM_COUNTERMODE_UP;
 	htimCnv.Init.Period = (uint16_t)(MAX11046_CLK_Us * adcContConfig.conversionCycleTimeUs) - 1;
-#if ENABLE_INTELLISENS
-	intelliSENS.Init(adcContConfig.conversionCycleTimeUs, (const float*)&adcMultipiers, (const float*)&adcOffsets);
-	intelliSENS.SetADCTicks(adcContConfig.conversionCycleTimeUs * 240);
-#endif
 	htimCnv.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
 	htimCnv.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
 	if (HAL_TIM_PWM_Init(&htimCnv) != HAL_OK)
@@ -585,10 +574,6 @@ void BSP_MAX11046_Init(adc_acq_mode_t type, adc_cont_config_t* contConfig, volat
 	processedData = processedAdcData;
 	adcInfo = &processedData->info;
 	ConfigureMeasurements();
-
-#if ENABLE_INTELLISENS
-	intelliSENS_Configure();
-#endif
 
 	acqType = type;
 	adcContConfig.conversionCycleTimeUs = contConfig->conversionCycleTimeUs;
