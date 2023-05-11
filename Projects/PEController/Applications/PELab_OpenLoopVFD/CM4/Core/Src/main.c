@@ -215,13 +215,13 @@ int main(void)
   defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
 
   /* creation of lvglGUITask */
-  //lvglGUITaskHandle = osThreadNew(StartLvglGUITask, NULL, &lvglGUITask_attributes);
+  lvglGUITaskHandle = osThreadNew(StartLvglGUITask, NULL, &lvglGUITask_attributes);
 
   /* creation of lvglTickTask */
-  //lvglTickTaskHandle = osThreadNew(StartLvglTickTask, NULL, &lvglTickTask_attributes);
+  lvglTickTaskHandle = osThreadNew(StartLvglTickTask, NULL, &lvglTickTask_attributes);
 
   /* creation of tsTask */
-  //tsTaskHandle = osThreadNew(StartTSTask, NULL, &tsTask_attributes);
+  tsTaskHandle = osThreadNew(StartTSTask, NULL, &tsTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
 
@@ -502,7 +502,7 @@ void StartTSTask(void *argument)
   /* USER CODE END StartTSTask */
 }
 
- /**
+/**
   * @brief  Period elapsed callback in non blocking mode
   * @note   This function is called  when TIM7 interrupt took place, inside
   * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment
@@ -554,5 +554,3 @@ void assert_failed(uint8_t *file, uint32_t line)
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
-
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

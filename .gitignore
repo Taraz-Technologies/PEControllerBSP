@@ -54,6 +54,8 @@ dkms.conf
 **/Debug/
 **/Release/
 **/Docs/
+**LICENSE.txt
+**Licence.txt
 *.prefs
 *.bak
 Projects/PEController/Applications/PELab_OpenLoopVFD/Drivers/CMSIS/Device/ST/STM32H7xx/License.md

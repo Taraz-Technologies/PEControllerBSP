@@ -62,6 +62,7 @@ void Error_Handler(void);
 #define maxCNV1_GPIO_Port GPIOH
 #define maxCNV2_Pin GPIO_PIN_15
 #define maxCNV2_GPIO_Port GPIOB
+
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
@@ -71,5 +72,3 @@ void Error_Handler(void);
 #endif
 
 #endif /* __MAIN_H */
-
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
