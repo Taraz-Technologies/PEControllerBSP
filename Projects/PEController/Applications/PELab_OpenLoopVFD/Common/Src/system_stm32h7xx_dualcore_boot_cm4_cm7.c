@@ -87,10 +87,10 @@
 /* #define VECT_TAB_SRAM */
 #ifdef CORE_CM4
 #if ENABLE_INTELLISENS
-#define VECT_TAB_OFFSET  0x00020000UL /*!< Vector Table base offset field.
+#define VECT_TAB_OFFSET  0x00000000UL /*!< Vector Table base offset field.
                                       This value must be a multiple of 0x200. */
 #else
-#define VECT_TAB_OFFSET  0x00020000UL /*!< Vector Table base offset field.
+#define VECT_TAB_OFFSET  0x00000000UL /*!< Vector Table base offset field.
                                       This value must be a multiple of 0x200. */
 #endif
 #else

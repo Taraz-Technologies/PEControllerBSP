@@ -30,7 +30,7 @@
 #include <string.h>
 #include "user_config.h"
 #if ENABLE_INTELLISENS
-#include "intelliSENS.h"
+#include "pecontroller_intelliSENS.h"
 #endif
 #include "lvgl.h"
 #include "pecontroller_ts.h"
@@ -96,15 +96,7 @@ const osSemaphoreAttr_t touchSemaphore_attributes = {
   .cb_size = sizeof(touchSemaphoreControlBlock),
 };
 /* USER CODE BEGIN PV */
-// intelliSENS
-#if ENABLE_INTELLISENS
-osThreadId_t intelliSENSTaskHandle;
-const osThreadAttr_t intelliSENSTask_attributes = {
-		.name = "intelliSENSTask",
-		.stack_size = 128 * 16,
-		.priority = (osPriority_t) osPriorityHigh,
-};
-#endif
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -117,9 +109,6 @@ void StartTSTask(void *argument);
 
 /* USER CODE BEGIN PFP */
 void ScreenManager_Poll(void);
-#if ENABLE_INTELLISENS
-void StartintelliSENSTask(void *argument);
-#endif
 
 /* USER CODE END PFP */
 
@@ -173,14 +162,25 @@ int main(void)
   MX_GPIO_Init();
   MX_TIM17_Init();
   /* USER CODE BEGIN 2 */
+  HAL_Delay(30000);
+#if ENABLE_INTELLISENS
+#if IS_ADC_CORE
+	uint16_t* intelliSENSDataStore = sharedData->m4Tom7.rawAdcData.dataRecord;
+	volatile int* wrIndex = sharedData->m4Tom7.rawAdcData.recordIndex;
+#else
+	volatile uint16_t* intelliSENSDataStore = sharedData->m7Tom4.rawAdcData.dataRecord;
+	volatile int* wrIndex = &sharedData->m7Tom4.rawAdcData.recordIndex;
+#endif
+	intelliSENS_Init(NULL, NULL, intelliSENSDataStore, RAW_MEASURE_SAVE_COUNT, SAMPLING_TIME_US * 240, wrIndex);
+#endif
 #if IS_ADC_CORE
 	adc_cont_config_t adcConfig = {
 			.callback = NULL,
 			.conversionCycleTimeUs = sharedData->m7Tom4.periodUs };
 	BSP_MAX11046_Init(ADC_MODE_CONT, &adcConfig, &sharedData->m4Tom7.rawAdcData, &sharedData->m4Tom7.processedAdcData);
 #endif
-	BSP_Display_Init();
-	BSP_Display_ShowLogo();
+	//BSP_Display_Init();
+	//BSP_Display_ShowLogo();
 	HAL_TIM_PWM_Start(&htim17,TIM_CHANNEL_1);			// LCD Brightness
 #if IS_ADC_CORE
 	BSP_MAX11046_Run();
@@ -215,18 +215,16 @@ int main(void)
   defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
 
   /* creation of lvglGUITask */
-  lvglGUITaskHandle = osThreadNew(StartLvglGUITask, NULL, &lvglGUITask_attributes);
+  //lvglGUITaskHandle = osThreadNew(StartLvglGUITask, NULL, &lvglGUITask_attributes);
 
   /* creation of lvglTickTask */
-  lvglTickTaskHandle = osThreadNew(StartLvglTickTask, NULL, &lvglTickTask_attributes);
+  //lvglTickTaskHandle = osThreadNew(StartLvglTickTask, NULL, &lvglTickTask_attributes);
 
   /* creation of tsTask */
-  tsTaskHandle = osThreadNew(StartTSTask, NULL, &tsTask_attributes);
+  //tsTaskHandle = osThreadNew(StartTSTask, NULL, &tsTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
-#if ENABLE_INTELLISENS
-	intelliSENSTaskHandle = osThreadNew(StartintelliSENSTask, NULL, &intelliSENSTask_attributes);
-#endif
+
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */
@@ -410,16 +408,7 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-#if ENABLE_INTELLISENS
-void StartintelliSENSTask(void *argument)
-{
-	for(;;)
-	{
-		intelliSENS.Poll();
-		osDelay(1);
-	}
-}
-#endif
+
 /* USER CODE END 4 */
 
 /* USER CODE BEGIN Header_StartDefaultTask */
@@ -481,8 +470,8 @@ void StartLvglTickTask(void *argument)
 		//static int i = 0;
 		//if (++i > 4)
 		//{
-			ScreenManager_Poll();
-			//i = 0;
+		ScreenManager_Poll();
+		//i = 0;
 		//}
 		lv_timer_handler();
 		//osSemaphoreRelease(touchSemaphoreHandle);
@@ -528,7 +517,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   /* USER CODE END Callback 0 */
   if (htim->Instance == TIM7) {
     HAL_IncTick();
-    lv_tick_inc(1);
   }
   /* USER CODE BEGIN Callback 1 */
 
