@@ -162,7 +162,6 @@ int main(void)
   MX_GPIO_Init();
   MX_TIM17_Init();
   /* USER CODE BEGIN 2 */
-  HAL_Delay(30000);
 #if ENABLE_INTELLISENS
 #if IS_ADC_CORE
 	uint16_t* intelliSENSDataStore = sharedData->m4Tom7.rawAdcData.dataRecord;
@@ -179,8 +178,8 @@ int main(void)
 			.conversionCycleTimeUs = sharedData->m7Tom4.periodUs };
 	BSP_MAX11046_Init(ADC_MODE_CONT, &adcConfig, &sharedData->m4Tom7.rawAdcData, &sharedData->m4Tom7.processedAdcData);
 #endif
-	//BSP_Display_Init();
-	//BSP_Display_ShowLogo();
+	BSP_Display_Init();
+	BSP_Display_ShowLogo();
 	HAL_TIM_PWM_Start(&htim17,TIM_CHANNEL_1);			// LCD Brightness
 #if IS_ADC_CORE
 	BSP_MAX11046_Run();
@@ -215,7 +214,7 @@ int main(void)
   defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
 
   /* creation of lvglGUITask */
-  lvglGUITaskHandle = osThreadNew(StartLvglGUITask, NULL, &lvglGUITask_attributes);
+  //lvglGUITaskHandle = osThreadNew(StartLvglGUITask, NULL, &lvglGUITask_attributes);
 
   /* creation of lvglTickTask */
   lvglTickTaskHandle = osThreadNew(StartLvglTickTask, NULL, &lvglTickTask_attributes);
@@ -442,11 +441,6 @@ void StartLvglGUITask(void *argument)
 	/* Infinite loop */
 	for(;;)
 	{
-		//if(osSemaphoreAcquire(touchSemaphoreHandle, 0) == osOK)
-		//{
-		//ScreenManager_Poll();
-		//osSemaphoreRelease(touchSemaphoreHandle);
-		//}
 		osDelay(200);
 	}
   /* USER CODE END StartLvglGUITask */
@@ -465,17 +459,8 @@ void StartLvglTickTask(void *argument)
 	/* Infinite loop */
 	for(;;)
 	{
-		//if(osSemaphoreAcquire(touchSemaphoreHandle, 0) == osOK)
-		//{
-		//static int i = 0;
-		//if (++i > 4)
-		//{
 		ScreenManager_Poll();
-		//i = 0;
-		//}
 		lv_timer_handler();
-		//osSemaphoreRelease(touchSemaphoreHandle);
-		//}
 		osDelay(100);
 	}
   /* USER CODE END StartLvglTickTask */
@@ -519,7 +504,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
-
+  if (htim->Instance == TIM7)
+	  lv_tick_inc(1);
   /* USER CODE END Callback 1 */
 }
 
