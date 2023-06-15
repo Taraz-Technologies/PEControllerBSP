@@ -7,40 +7,48 @@
  * @{
  */
 
+
+
 /** @defgroup CM4toCm7Integration Dual Core Operation
  * @details
-The PEController is a dual core system, therefore some synchronization and memory sharing between both cores is essential.
-The <b>sharedData</b> variable in "shared_memory.c" contains the data to be shared between both cores. 
-This data can be used to communicate the ADC configuration and result related information between both cores
+ The PEController has two cores that need to work together, so they have to share information and memory. 
+ In the "shared_memory.c" file, there is a variable called <b>sharedData</b> which holds the data that both cores need to share. 
+ This data is stored in SRAM4 so that both cores can access it. 
+ The shared data includes things like the ADC settings, ADC results, and other important control information. 
+ By using this shared data variable, the system can control its different states effectively.
  * @{
  */ 
 /**
  * @}
  */
 
+
+
 /** @defgroup ADCUsage ADC Operation
  * @details
-The ADC acquisiton is controlled by the CM4 core. 
-After clock intializations by CM7 core, CM7 assigns the sampling interval for ADC unit using the 
-<b>periodUs</b> member of <b>m7Tom4</b> member of <b>sharedData</b> variable available in "shared_memory.c".
-Currently period is populated in this variable from the "user_config.h" file.
+ The CM7 core controls the ADC acquisition process. 
+ The sampling rate of the ADC is determined by either <b>MONITORING_FREQUENCY_Hz</b> or <b>CONTROL_FREQUENCY_Hz</b>, which are specified in "user_config.h".
+ The choice between these frequencies depends on whether the system is in control mode or monitoring mode.
+<br> 
+ To calculate basic statistics for each channel, such as RMS, Average, Peak to Peak, minimum, and maximum values, the CM4 core is utilized. 
+ These computations are performed within the defined signal frequency range.
+<br>
+ Furthermore, the sensitivity and offsets can be adjusted and will retain their values even after a power reset.
 <br>
 <br>
-A default measurement structure of each PELab configuration is currently loaded into "adc_config.h" which can be used for the PELabs.
-Incase the PEController is used as a stand-alone product, the measurement value will be displayed in the range -10 to 10, 
-Otherwise the range can be controlled by the CURRENT_SENSITIVITY_mVA variable in the user_config.h
+The callback function defined in <b>adc_cont_config_t</b> is used to inform the controller whenever new results are avilable.
+User should make sure that all interrupts in the systems should have priority lower than 0 to ensure uninterrupted ADC conversions.
 <br>
 <br>
-After a new conversion is completed the <b>sts</b> flag of <b>m7Tom4</b> of <b>sharedData</b> will inform the CM7. 
-The CM7 core can then acquire the new measurement values from the location <b>lastDataPointer</b>
-<br>
-<br>
-The measurements can be viewed using the intelliSENS software also. To purchase the license for USB Acquisition contact sales@taraztechnologies.com
+The measurements can be viewed using the intelliSENS software also. To purchase the license for USB Acquisition contact sales@taraztechnologies.com.
+Once enabled, you set <b>ENABLE_INTELLISENS</b> in "user_config.h" to enable the functionality.
  * @{
  */ 
  /**
  * @}
  */
+ 
+ 
 /** @defgroup PWMUsage PWM Usage
  * @details
 The IO and PWM channels are controlled by the CM7 core as the CM7 core is responsible for all control related requirements.
@@ -57,12 +65,33 @@ PWM No  | Operation as individual channel | Operation as Inverted Pair | Timer U
 11, 12	| One at a time			  		  | Yes						   | TIM1
 13, 14	| One at a time			  		  | Yes						   | TIM1
 15, 16	| One at a time			  		  | Yes						   | TIM1 
-@note All PWMs associated to a unique Timer Unit will have same characteristics. e.g. 11 and 16 will have same alignment, period and deadtime characteristics
+@note All PWMs associated to a unique Timer Unit will have same characteristics. e.g. PWM 11 and 16 will have same alignment, period and deadtime characteristics
  * @{
  */
  /**
  * @}
  */
+ 
+ 
+ 
+/** @defgroup DiplayUsage Display Operation
+ * @details
+The CM4 core handles the display functionality of the system. 
+It provides a straightforward main screen that consistently presents measurement statistics for each channel on the left side. 
+On the right side, there is a customizable area reserved for controls specific to the application being used.
+<br>
+Within the application area, the variables to be monitored are displayed at the top, while the variables to be controlled are displayed at the bottom. 
+Users have the flexibility to personalize the application display area by modifying the "screen_main_app.h" file.
+<br>
+To list the control variables, you can utilize the <b>controlConfs</b> array, and for the monitoring variables, you can use the <b>monitorConfs</b> array.
+ * @{
+ */  
+ /**
+ * @}
+ */
+ 
+ 
+ 
 /** @defgroup NewProject New Project Creation
  * @details
 To make a new project for personal development follow the following steps
