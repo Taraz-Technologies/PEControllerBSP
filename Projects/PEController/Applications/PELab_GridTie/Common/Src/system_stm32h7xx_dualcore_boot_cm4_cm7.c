@@ -87,15 +87,16 @@
 /* #define VECT_TAB_SRAM */
 #ifdef CORE_CM4
 #if ENABLE_INTELLISENS
-#define VECT_TAB_OFFSET  0x00020000UL /*!< Vector Table base offset field.
+#define VECT_TAB_OFFSET  0x00000000UL /*!< Vector Table base offset field.
                                       This value must be a multiple of 0x200. */
 #else
-#define VECT_TAB_OFFSET  0x00020000UL /*!< Vector Table base offset field.
+#define VECT_TAB_OFFSET  0x00000000UL /*!< Vector Table base offset field.
                                       This value must be a multiple of 0x200. */
 #endif
 #else
 #define VECT_TAB_OFFSET  0x00000000UL /*!< Vector Table base offset field.
                                       This value must be a multiple of 0x200. */
+#define VECTOR_TAB_ITCM
 #endif
 /******************************************************************************/
 
@@ -257,8 +258,10 @@ void SystemInit (void)
   /* Configure the Vector Table location add offset address ------------------*/
 #ifdef VECT_TAB_SRAM
   SCB->VTOR = D1_AXISRAM_BASE  | VECT_TAB_OFFSET; /* Vector Table Relocation in Internal D1 AXI-RAM */
+#elif (defined(VECTOR_TAB_ITCM))
+  SCB->VTOR = D1_ITCMRAM_BASE | VECT_TAB_OFFSET;
 #else
-  SCB->VTOR = FLASH_BANK1_BASE | VECT_TAB_OFFSET;       /* Vector Table Relocation in Internal FLASH */
+  SCB->VTOR = FLASH_BANK1_BASE | VECT_TAB_OFFSET; /* Vector Table Relocation in Internal FLASH */
 #endif
 
 #else

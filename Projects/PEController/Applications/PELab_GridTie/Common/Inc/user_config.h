@@ -50,10 +50,6 @@ extern "C" {
  * @brief Select the correct version of PELAB for your configuration
  */
 #define PELAB_VERSION			(4)
-/**
- * @brief For correct measurement sensitivity of channels in mV/A should be provided here
- */
-#define CURRENT_SENSITIVITY_mVA	(400)
 #endif
 /********** SYSTEM CONFIGURATION *************/
 
@@ -64,14 +60,6 @@ extern "C" {
  * @brief Select LCD variant installed on PEController
  */
 #define DISPLAY					(LCD_AFY800480B0)
-
-#define LOGO_DEFAULT			(0)
-#define LOGO_CUSTOM				(1)
-/**
- * @brief Select the LOGO to be displayed on PEController
- */
-#define LOGO_TYPE				(LOGO_DEFAULT)
-
 /**
  * @brief Selects the display brightness value between 0-100
  */
@@ -84,12 +72,9 @@ extern "C" {
  * @note Make sure that the binary intelliSENS.elf is also loaded in run configuration and correct linker file is selected
  */
 #define ENABLE_INTELLISENS		(1)
-/**
- * @brief Sampling Time in micro-seconds
- * @note Minimum setting value is 10 (100KHz) with intelliSENS but may vary if additional logic is added.
- * Minimum setting value is 8 (125KHz) without intelliSENS software
- */
-#define SAMPLING_TIME_US		(10)
+
+#define MONITORING_FREQUENCY_Hz		(100000)
+#define CONTROL_FREQUENCY_Hz		(40000)
 /******** MEASUREMENT CONFIGURATION ***********/
 
 #ifdef __cplusplus

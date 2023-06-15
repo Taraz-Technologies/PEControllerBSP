@@ -38,15 +38,16 @@ ENTRY(Reset_Handler)
 /* Highest address of the user mode stack */
 _estack = 0x10040000;    /* end of RAM */
 /* Generate a link error if heap and stack don't fit into RAM */
-_Min_Heap_Size = 0x200 ;      /* required amount of heap  */
-_Min_Stack_Size = 0x800 ; /* required amount of stack */
+_Min_Heap_Size = 0x200;      /* required amount of heap  */
+_Min_Stack_Size = 0x400; /* required amount of stack */
 
 /* Specify the memory areas */
 MEMORY
 {
-FLASH (rx)      : ORIGIN = 0x08120000, LENGTH = 896K
-RAM (xrw)      : ORIGIN = 0x10000000, LENGTH = 288K
-FRAME_RAM (xrw) : ORIGIN = 0x24000000, LENGTH =  512K
+FLASH (rx)      		: ORIGIN = 0x08100000, LENGTH = 1024K
+SYSTEM_IMAGES (rx)      : ORIGIN = 0x08020000, LENGTH = 640K
+RAM (xrw)      			: ORIGIN = 0x10000000, LENGTH = 256K
+FRAME_RAM (xrw) 		: ORIGIN = 0x24000000, LENGTH = 512K
 }
 
 /* Define output sections */
@@ -114,6 +115,13 @@ SECTIONS
     PROVIDE_HIDDEN (__fini_array_end = .);
   } >FLASH
 
+  .sys_images :
+  {
+  . = ALIGN(4);
+  *(.SystemImages)
+  . = ALIGN(4);
+  } > SYSTEM_IMAGES
+
   /* used by the startup to initialize data */
   _sidata = LOADADDR(.data);
 
@@ -124,6 +132,7 @@ SECTIONS
     _sdata = .;        /* create a global symbol at data start */
     *(.data)           /* .data sections */
     *(.data*)          /* .data* sections */
+    *(.tCritical)
     *(.RamFunc)        /* .RamFunc sections */
     *(.RamFunc*)       /* .RamFunc* sections */
 

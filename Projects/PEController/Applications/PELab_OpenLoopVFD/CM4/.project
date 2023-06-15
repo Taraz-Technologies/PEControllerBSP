@@ -37,47 +37,42 @@
 		<link>
 			<name>BSP/ADC/max11046_drivers.c</name>
 			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/Drivers/BSP/PEController/ADC/Src/max11046_drivers.c</locationURI>
+			<locationURI>PARENT-5-PROJECT_LOC/Drivers/BSP/PEController/ADC/max11046_drivers.c</locationURI>
+		</link>
+		<link>
+			<name>BSP/ADC/pecontroller_adc.c</name>
+			<type>1</type>
+			<locationURI>PARENT-5-PROJECT_LOC/Drivers/BSP/PEController/ADC/pecontroller_adc.c</locationURI>
+		</link>
+		<link>
+			<name>BSP/Components/shared_memory.c</name>
+			<type>1</type>
+			<locationURI>PARENT-5-PROJECT_LOC/Drivers/BSP/PEController/Common/shared_memory.c</locationURI>
 		</link>
 		<link>
 			<name>BSP/DigitalPins/pecontroller_digital_in.c</name>
 			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/Drivers/BSP/PEController/DigitalPins/Src/pecontroller_digital_in.c</locationURI>
+			<locationURI>PARENT-5-PROJECT_LOC/Drivers/BSP/PEController/DigitalPins/pecontroller_digital_in.c</locationURI>
 		</link>
 		<link>
 			<name>BSP/DigitalPins/pecontroller_digital_inout.c</name>
 			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/Drivers/BSP/PEController/DigitalPins/Src/pecontroller_digital_inout.c</locationURI>
+			<locationURI>PARENT-5-PROJECT_LOC/Drivers/BSP/PEController/DigitalPins/pecontroller_digital_inout.c</locationURI>
 		</link>
 		<link>
 			<name>BSP/DigitalPins/pecontroller_digital_out.c</name>
 			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/Drivers/BSP/PEController/DigitalPins/Src/pecontroller_digital_out.c</locationURI>
+			<locationURI>PARENT-5-PROJECT_LOC/Drivers/BSP/PEController/DigitalPins/pecontroller_digital_out.c</locationURI>
 		</link>
 		<link>
 			<name>BSP/DigitalPins/pecontroller_digital_pins.c</name>
 			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/Drivers/BSP/PEController/DigitalPins/Src/pecontroller_digital_pins.c</locationURI>
-		</link>
-		<link>
-			<name>BSP/Display/lvgl</name>
-			<type>2</type>
-			<locationURI>PARENT-5-PROJECT_LOC/Middleware/Third_Party/lvgl</locationURI>
-		</link>
-		<link>
-			<name>BSP/Display/pecontroller_clut.c</name>
-			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/Drivers/BSP/PEController/Display/Src/pecontroller_clut.c</locationURI>
+			<locationURI>PARENT-5-PROJECT_LOC/Drivers/BSP/PEController/DigitalPins/pecontroller_digital_pins.c</locationURI>
 		</link>
 		<link>
 			<name>BSP/Display/pecontroller_display.c</name>
 			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/Drivers/BSP/PEController/Display/Src/pecontroller_display.c</locationURI>
-		</link>
-		<link>
-			<name>BSP/intelliSENS/intelliSENS.c</name>
-			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/Drivers/BSP/PEController/intelliSENS/Src/intelliSENS.c</locationURI>
+			<locationURI>PARENT-5-PROJECT_LOC/Drivers/BSP/PEController/Display/pecontroller_display.c</locationURI>
 		</link>
 		<link>
 			<name>Drivers/STM32H7xx_HAL_Driver/stm32h7xx_hal.c</name>
@@ -135,6 +130,11 @@
 			<locationURI>PARENT-1-PROJECT_LOC/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c_ex.c</locationURI>
 		</link>
 		<link>
+			<name>Drivers/STM32H7xx_HAL_Driver/stm32h7xx_hal_lptim.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_lptim.c</locationURI>
+		</link>
+		<link>
 			<name>Drivers/STM32H7xx_HAL_Driver/stm32h7xx_hal_ltdc.c</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_ltdc.c</locationURI>
@@ -178,6 +178,76 @@
 			<name>Drivers/STM32H7xx_HAL_Driver/stm32h7xx_hal_tim_ex.c</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_tim_ex.c</locationURI>
+		</link>
+		<link>
+			<name>Middlewares/Taraz/Display</name>
+			<type>2</type>
+			<locationURI>PARENT-5-PROJECT_LOC/Middleware/Taraz/Display</locationURI>
+		</link>
+		<link>
+			<name>Middlewares/Taraz/MiscLib</name>
+			<type>2</type>
+			<locationURI>PARENT-5-PROJECT_LOC/Middleware/Taraz/MiscLib</locationURI>
+		</link>
+		<link>
+			<name>Middlewares/Third_Party/lvgl</name>
+			<type>2</type>
+			<locationURI>PARENT-5-PROJECT_LOC/Middleware/Third_Party/lvgl</locationURI>
+		</link>
+		<link>
+			<name>BSP/Display/TS/pecontroller_ts.c</name>
+			<type>1</type>
+			<locationURI>PARENT-5-PROJECT_LOC/Drivers/BSP/PEController/TS/pecontroller_ts.c</locationURI>
+		</link>
+		<link>
+			<name>Middlewares/Third_Party/FreeRTOS/cmsis_os2.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.c</locationURI>
+		</link>
+		<link>
+			<name>Middlewares/Third_Party/FreeRTOS/croutine.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Middlewares/Third_Party/FreeRTOS/Source/croutine.c</locationURI>
+		</link>
+		<link>
+			<name>Middlewares/Third_Party/FreeRTOS/event_groups.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Middlewares/Third_Party/FreeRTOS/Source/event_groups.c</locationURI>
+		</link>
+		<link>
+			<name>Middlewares/Third_Party/FreeRTOS/heap_4.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Middlewares/Third_Party/FreeRTOS/Source/portable/MemMang/heap_4.c</locationURI>
+		</link>
+		<link>
+			<name>Middlewares/Third_Party/FreeRTOS/list.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Middlewares/Third_Party/FreeRTOS/Source/list.c</locationURI>
+		</link>
+		<link>
+			<name>Middlewares/Third_Party/FreeRTOS/port.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F/port.c</locationURI>
+		</link>
+		<link>
+			<name>Middlewares/Third_Party/FreeRTOS/queue.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Middlewares/Third_Party/FreeRTOS/Source/queue.c</locationURI>
+		</link>
+		<link>
+			<name>Middlewares/Third_Party/FreeRTOS/stream_buffer.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Middlewares/Third_Party/FreeRTOS/Source/stream_buffer.c</locationURI>
+		</link>
+		<link>
+			<name>Middlewares/Third_Party/FreeRTOS/tasks.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Middlewares/Third_Party/FreeRTOS/Source/tasks.c</locationURI>
+		</link>
+		<link>
+			<name>Middlewares/Third_Party/FreeRTOS/timers.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Middlewares/Third_Party/FreeRTOS/Source/timers.c</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>

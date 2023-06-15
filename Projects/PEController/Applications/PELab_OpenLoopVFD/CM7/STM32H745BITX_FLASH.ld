@@ -37,37 +37,49 @@
 ENTRY(Reset_Handler)
 
 /* Highest address of the user mode stack */
-_estack = ORIGIN(RAM) + LENGTH(RAM); /* end of "RAM" Ram type memory */
+_estack = ORIGIN(DTCM) + LENGTH(DTCM); /* end of "DTCM" Ram type memory */
 
-_Min_Heap_Size = 0x200 ; /* required amount of heap  */
-_Min_Stack_Size = 0x400 ; /* required amount of stack */
+_Min_Heap_Size = 0x200; /* required amount of heap  */
+_Min_Stack_Size = 0x400; /* required amount of stack */
 
 /* Memories definition */
 MEMORY
 {
-  EXTRAM (xrw)   : ORIGIN = 0x24000000, LENGTH =  256K    /* Memory is divided. Actual start is 0x24000000 and actual length is 512K */
-  FLASH  (rx)    : ORIGIN = 0x08000000, LENGTH = 1024K    /* Memory is divided. Actual start is 0x08000000 and actual length is 2048K */
-  RAM (xrw)  	 : 	ORIGIN = 0x20000000, LENGTH = 128K		/* This is the DTCM RAM */
-  RAM_D2 (xrw)   : ORIGIN = 0x30000000, LENGTH = 288K
-  RAM_D3 (xrw)   : ORIGIN = 0x38000000, LENGTH = 64K
-  ITCMRAM (xrw)  : ORIGIN = 0x00000000, LENGTH = 64K
+  FLASH  (rx)    : ORIGIN = 0x08000000, LENGTH = 64K 		/* Memory is divided. Actual start is 0x08000000 and actual length is 2048K */
+  DTCM (xrw)  	 : ORIGIN = 0x20000000, LENGTH = 128K		/* This is the DTCM RAM */
+  ITCM (xrw)  	 : ORIGIN = 0x00000000, LENGTH = 64K
 }
 
 /* Sections */
 SECTIONS
 {
+  /* used by the startup to initialize data */
+  _siisr_vector = LOADADDR(.isr_vector);
   /* The startup code into "FLASH" Rom type memory */
   .isr_vector :
   {
     . = ALIGN(4);
+    _sisr_vector = .;    /* create a global symbol at isr start */
     KEEP(*(.isr_vector)) /* Startup code */
     . = ALIGN(4);
+    _eisr_vector = .;    /* create a global symbol at isr end */
+  } >ITCM AT>FLASH
+  
+  /* The program code and other data goes into FLASH */
+  .text.Reset_Handler :
+  {
+    . = ALIGN(4);
+    *(.text.Reset_Handler)
+    . = ALIGN(4);
   } >FLASH
-
+  
+  /* used by the startup to initialize data */
+  _sitext = LOADADDR(.text);
   /* The program code and other data into "FLASH" Rom type memory */
   .text :
   {
     . = ALIGN(4);
+    _stext = .;        /* create a global symbol at code start */
     *(.text)           /* .text sections (code) */
     *(.text*)          /* .text* sections (code) */
     *(.glue_7)         /* glue arm to thumb code */
@@ -78,32 +90,44 @@ SECTIONS
     KEEP (*(.fini))
 
     . = ALIGN(4);
-    _etext = .;        /* define a global symbols at end of code */
-  } >FLASH
-
+    _etext = .;        /* create a global symbol at code end */
+  } >ITCM AT>FLASH
+  
+  /* used by the startup to initialize data */
+  _sirodata = LOADADDR(.rodata);
   /* Constant data into "FLASH" Rom type memory */
   .rodata :
   {
     . = ALIGN(4);
+    _srodata = .;
     *(.rodata)         /* .rodata sections (constants, strings, etc.) */
     *(.rodata*)        /* .rodata* sections (constants, strings, etc.) */
     . = ALIGN(4);
-  } >FLASH
+    _erodata = .;
+  } >ITCM AT>FLASH
 
+  /* used by the startup to initialize data */
+  _siextab = LOADADDR(.ARM.extab);
   .ARM.extab   : { 
     . = ALIGN(4);
+    _sextab = .;
     *(.ARM.extab* .gnu.linkonce.armextab.*)
     . = ALIGN(4);
-  } >FLASH
+    _eextab = .; 
+  } >ITCM AT>FLASH
   
+  /* used by the startup to initialize data */
+  _siexidx = LOADADDR(.ARM); 
   .ARM : {
     . = ALIGN(4);
     __exidx_start = .;
     *(.ARM.exidx*)
     __exidx_end = .;
     . = ALIGN(4);
-  } >FLASH
+  } >ITCM AT>FLASH
 
+  /* used by the startup to initialize data */
+  _sipreinit_array = LOADADDR(.preinit_array);
   .preinit_array :
   {
     . = ALIGN(4);
@@ -111,8 +135,10 @@ SECTIONS
     KEEP (*(.preinit_array*))
     PROVIDE_HIDDEN (__preinit_array_end = .);
     . = ALIGN(4);
-  } >FLASH
+  } >ITCM AT>FLASH
   
+  /* used by the startup to initialize data */
+  _siinit_array = LOADADDR(.init_array);
   .init_array :
   {
     . = ALIGN(4);
@@ -121,8 +147,10 @@ SECTIONS
     KEEP (*(.init_array*))
     PROVIDE_HIDDEN (__init_array_end = .);
     . = ALIGN(4);
-  } >FLASH
+  } >ITCM AT>FLASH
   
+  /* used by the startup to initialize data */
+  _sifini_array = LOADADDR(.fini_array);
   .fini_array :
   {
     . = ALIGN(4);
@@ -131,26 +159,27 @@ SECTIONS
     KEEP (*(.fini_array*))
     PROVIDE_HIDDEN (__fini_array_end = .);
     . = ALIGN(4);
-  } >FLASH
-
+  } >ITCM AT>FLASH
+  
   /* Used by the startup to initialize data */
   _sidata = LOADADDR(.data);
 
-  /* Initialized data sections into "RAM" Ram type memory */
+  /* Initialized data sections into "DTCM" Ram type memory */
   .data : 
   {
     . = ALIGN(4);
     _sdata = .;        /* create a global symbol at data start */
     *(.data)           /* .data sections */
     *(.data*)          /* .data* sections */
+    *(.tCritical)
     *(.RamFunc)        /* .RamFunc sections */
     *(.RamFunc*)       /* .RamFunc* sections */
 
     . = ALIGN(4);
     _edata = .;        /* define a global symbol at data end */
-  } >RAM AT> FLASH
+  } >DTCM AT> FLASH
 
-  /* Uninitialized data section into "RAM" Ram type memory */
+  /* Uninitialized data section into "DTCM" Ram type memory */
   . = ALIGN(4);
   .bss :
   {
@@ -164,9 +193,9 @@ SECTIONS
     . = ALIGN(4);
     _ebss = .;         /* define a global symbol at bss end */
     __bss_end__ = _ebss;
-  } >RAM
+  } >DTCM
 
-  /* User_heap_stack section, used to check that there is enough "RAM" Ram  type memory left */
+  /* User_heap_stack section, used to check that there is enough "DTCM" Ram  type memory left */
   ._user_heap_stack :
   {
     . = ALIGN(8);
@@ -175,7 +204,7 @@ SECTIONS
     . = . + _Min_Heap_Size;
     . = . + _Min_Stack_Size;
     . = ALIGN(8);
-  } >RAM
+  } >DTCM
 
   /* Remove information from the compiler libraries */
   /DISCARD/ :

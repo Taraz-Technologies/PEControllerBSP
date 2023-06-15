@@ -26,6 +26,7 @@
 #include "grid_tie_controller.h"
 #include "pecontroller_digital_out.h"
 #include "pecontroller_digital_in.h"
+#include "shared_memory.h"
 /********************************************************************************
  * Defines
  *******************************************************************************/
@@ -47,7 +48,7 @@
 static pwm_module_config_t inverterPWMModuleConfig =
 {
 		.alignment = CENTER_ALIGNED,
-		.periodInUsec = PWM_PERIOD_Us,
+		.f = PWM_FREQ_Hz,
 		.deadtime = {
 				.on = true,
 				.nanoSec = INVERTER_DEADTIME_ns,
@@ -59,12 +60,16 @@ static pwm_module_config_t inverterPWMModuleConfig =
 static pwm_module_config_t boostPWMConfig =
 {
 		.alignment = CENTER_ALIGNED,
-		.periodInUsec = PWM_PERIOD_Us
+		.f = PWM_FREQ_Hz,
 };
-static pwm_slave_opts_t PWMSync =
+static tim_in_trigger_config_t timerTriggerIn =
 {
-		.syncSrc = PWM_SYNC_SRC_TIM1,
-		.syncType = PWM_SYNC_RESET_AND_START
+		.src = TIM_TRG_SRC_TIM1,
+		.type = TIM_TRGI_TYPE_RESET_AND_START
+};
+static tim_out_trigger_config_t timerTriggerOut =
+{
+		.type = TIM_TRGO_OUT_UPDATE
 };
 /**
  * @brief Compensator for PI
@@ -102,7 +107,8 @@ void GridTieControl_Init(grid_tie_t* gridTie, PWMResetCallback pwmResetCallback)
 	inverterConfig->pwmConfig.lim.max = 1;
 	inverterConfig->pwmConfig.lim.minMaxDutyCycleBalancing = MIN_MAX_BALANCING_INVERTER;
 	inverterConfig->pwmConfig.dutyMode = INVERTER_DUTY_MODE;
-	inverterConfig->pwmConfig.slaveOpts = &PWMSync;
+	inverterConfig->pwmConfig.slaveOpts = &timerTriggerIn;
+	inverterConfig->pwmConfig.masterOpts = &timerTriggerOut;
 	inverterConfig->pwmConfig.module = &inverterPWMModuleConfig;
 	Inverter3Ph_Init(inverterConfig);
 
@@ -115,7 +121,7 @@ void GridTieControl_Init(grid_tie_t* gridTie, PWMResetCallback pwmResetCallback)
 	gridTie->pll.qLockMax = 20;
 	gridTie->pll.dLockMin = 255;
 	gridTie->pll.dLockMax = 375;
-	gridTie->pll.cycleCount = (int)((1 / PWM_PERIOD_s) * 2);
+	gridTie->pll.cycleCount = (int)(PWM_PERIOD_s * 2);
 	PLL_Init(&gridTie->pll);
 
 	// configure Grid Tie Parameters
@@ -146,7 +152,8 @@ void GridTieControl_Init(grid_tie_t* gridTie, PWMResetCallback pwmResetCallback)
 		boostConfig->pwmConfig.lim.min = 0;
 		boostConfig->pwmConfig.lim.max = BOOST_DUTYCYCLE_MAX;
 		boostConfig->pwmConfig.module = &boostPWMConfig;
-		boostConfig->pwmConfig.slaveOpts = &PWMSync;
+		boostConfig->pwmConfig.slaveOpts = &timerTriggerIn;
+		boostConfig->pwmConfig.masterOpts = &timerTriggerOut;
 		boostConfig->dutyUpdateFnc = BSP_PWM_ConfigChannel(boostConfig->pinNo, &boostConfig->pwmConfig);
 		boostConfig->dutyUpdateFnc(boostConfig->pinNo, 0.f, &boostConfig->pwmConfig);
 		BSP_Dout_SetAsPWMPin(boostConfig->pinNo);
@@ -155,12 +162,60 @@ void GridTieControl_Init(grid_tie_t* gridTie, PWMResetCallback pwmResetCallback)
 		if(gridTie->boostDiodePin[i])
 			BSP_Dout_SetAsIOPin(gridTie->boostDiodePin[i], GPIO_PIN_RESET);
 
-		BSP_PWMOut_Enable((1 << (boostConfig->pinNo - 1)) , true);			// --TODO-- TNPC leg for boost??
+		// Deactivate the boost at startup
+		BSP_PWMOut_Enable((1 << (boostConfig->pinNo - 1)) , false);			// --TODO-- TNPC leg for boost??
 	}
 	gridTie->VbstSet = BOOST_VSET;
 	/***************** Configure Boost *********************/
 	// Configure the interrupt for PWM Channel with highest priority
-	BSP_PWM_Config_Interrupt(inverterConfig->s1PinNos[0], true, pwmResetCallback, 0);
+	BSP_PWM_Config_Interrupt(inverterConfig->s1PinNos[0], true, pwmResetCallback, 1);
+}
+
+device_err_t GridTie_EnableBoost(grid_tie_t* gridTie, bool en)
+{
+	if (gridTie->isBoostEnabled == en)
+		return ERR_OK;
+	//if (gridTie->isInverterEnabled)
+	//return ERR_INVERTER_ACTIVE;
+	// refresh the PI Controller
+	boostPI.Integral = 0;
+	for (int i = 0; i < BOOST_COUNT; i++)
+		BSP_PWMOut_Enable((1 << (gridTie->boostConfig[i].pinNo - 1)) , en);
+	// correct flags
+	INTER_CORE_DATA.bools[SHARE_BOOST_STATE] = gridTie->isBoostEnabled = en;
+	return ERR_OK;
+}
+
+device_err_t GridTie_EnableInverter(grid_tie_t* gridTie, bool en)
+{
+	if (gridTie->isInverterEnabled == en)
+		return ERR_OK;
+
+	// refresh the PI Controllers
+	gridTie->iQComp.Integral = 0;
+	gridTie->iDComp.Integral = 0;
+	if (en == false)
+	{
+		// Disable inverters
+		Inverter3Ph_Activate(&gridTie->inverterConfig, en);
+		// set flags
+		INTER_CORE_DATA.bools[SHARE_INVERTER_STATE] = gridTie->isInverterEnabled = en;
+		return ERR_OK;
+	}
+	else
+	{
+		//if (gridTie->isBoostEnabled == false)
+		//return ERR_BOOST_DISABLED;
+		if (gridTie->isRelayOn == false)
+			return ERR_RELAY_OFF;
+		if (gridTie->pll.status != PLL_LOCKED)
+			return ERR_PLL_NOT_LOCKED;
+		// Enable inverters
+		Inverter3Ph_Activate(&gridTie->inverterConfig, en);
+		// set flags
+		INTER_CORE_DATA.bools[SHARE_INVERTER_STATE] = gridTie->isInverterEnabled = en;
+		return ERR_OK;
+	}
 }
 
 /**
@@ -176,9 +231,8 @@ static float GridTie_BoostControl(grid_tie_t* gridTie)
 /**
  * @brief Generate the output duty cycles for the grid tie inverter
  * @param gridTie Grid Tie structure to be used.
- * @param disable Used to reset the PI compensators in case the inverter is not enabled
  */
-static void GridTie_GenerateOutput(grid_tie_t* gridTie, bool disable)
+static void GridTie_GenerateOutput(grid_tie_t* gridTie)
 {
 	LIB_COOR_ALL_t* vCoor = &gridTie->vCoor;
 	LIB_COOR_ALL_t* iCoor = &gridTie->iCoor;
@@ -193,30 +247,60 @@ static void GridTie_GenerateOutput(grid_tie_t* gridTie, bool disable)
 
 	// Apply PI control to both DQ coordinates gridTie->dCompensator.dt
 	LIB_COOR_ALL_t coor;
+
+	// Get the required parameters
+	float fGrid = INTER_CORE_DATA.floats[SHARE_GRID_FREQ];
+	float lOut = INTER_CORE_DATA.floats[SHARE_LOUT];
+	// convert to peak current
+	gridTie->iRef = INTER_CORE_DATA.floats[SHARE_REQ_RMS_CURRENT] * 1.414;
+
 	coor.dq0.d = PI_Compensate(&gridTie->iDComp, gridTie->iRef - iCoor->dq0.d) + vCoor->dq0.d
-			- TWO_PI * GRID_FREQ * L_OUT * iCoor->dq0.q / PWM_FREQ_Hz;
+			- TWO_PI * fGrid * lOut * iCoor->dq0.q / PWM_FREQ_Hz;
 	coor.dq0.q = PI_Compensate(&gridTie->iQComp, 0             - iCoor->dq0.q) + vCoor->dq0.q
-			+ TWO_PI * GRID_FREQ * L_OUT * iCoor->dq0.d / PWM_FREQ_Hz;
+			+ TWO_PI * fGrid * lOut * iCoor->dq0.d / PWM_FREQ_Hz;
 
 	// Divide by VDC for normalization
 	coor.dq0.d /= gridTie->vdc;
 	coor.dq0.q /= gridTie->vdc;
 
-	// if disabled reset integral term
-	if (disable)
-	{
-		gridTie->iQComp.Integral = 0;
-		gridTie->iDComp.Integral = 0;
-	}
-
 	// get the values in alpha beta coordinates
 	Transform_alphaBeta0_dq0(&coor.alBe0, &coor.dq0, &iCoor->trigno, SRC_DQ0, PARK_SINE);
 	// Get SVPWM signal
-	 SVPWM_GenerateDutyCycles(&coor.alBe0, inverterDuties);
+	SVPWM_GenerateDutyCycles(&coor.alBe0, inverterDuties);
 	/******************** Compute Inverter Duty Cycles ******************/
 
 	// generate the duty cycle for the inverter
 	Inverter3Ph_UpdateDuty(&gridTie->inverterConfig, inverterDuties);
+}
+
+static void ControlRelays(grid_tie_t* gridTie)
+{
+	// Relay Control depending On Vboost
+	if (gridTie->isRelayOn)
+	{
+		// Turn off relay if goes beyond acceptable voltage
+		if (gridTie->vdc < RELAY_TURN_ON_VDC)
+		{
+			gridTie->isRelayOn = INTER_CORE_DATA.bools[SHARE_RELAY_STATUS] = false;
+			gridTie->tempIndex = 0;
+			for (int i = 0; i < GRID_RELAY_COUNT; i++)
+				BSP_Dout_SetAsIOPin(GRID_RELAY_IO + i, GPIO_PIN_RESET);
+		}
+	}
+	else
+	{
+		// wait till boost voltage goes up
+		if (gridTie->vdc < RELAY_TURN_OFF_VDC)			// --FIXME-- Change with Grid Voltage
+			gridTie->tempIndex = 0;
+		// wait for stabilization of boost
+		else if (++gridTie->tempIndex == (int)PWM_FREQ_Hz)
+		{
+			gridTie->isRelayOn = INTER_CORE_DATA.bools[SHARE_RELAY_STATUS] = true;
+			for (int i = 0; i < GRID_RELAY_COUNT; i++)
+				BSP_Dout_SetAsIOPin(GRID_RELAY_IO + i, GPIO_PIN_SET);
+			gridTie->tempIndex = 0;
+		}
+	}
 }
 
 /**
@@ -229,64 +313,37 @@ void GridTieControl_Loop(grid_tie_t* gridTie)
 	pll_lock_t* pll = &gridTie->pll;
 
 	// Compute and apply boost duty cycle
-	float boostDuty = GridTie_BoostControl(gridTie);
-	if (gridTie->VbstSet > 800.f)
-		boostDuty = 0;
-
-	for (int i = 0; i < BOOST_COUNT; i++)
-		gridTie->boostConfig[i].dutyUpdateFnc(gridTie->boostConfig[i].pinNo, boostDuty, &gridTie->boostConfig[i].pwmConfig);
-
-
-	// Relay Control depending On Vboost
-	if (gridTie->isVbstStable)
+	// Only compute and apply if the boost is already enabled
+	if (gridTie->isBoostEnabled)
 	{
-		// Turn off relay if goes beyond acceptable voltage
-		if (gridTie->vdc < RELAY_TURN_OFF_VBST)
-		{
-			gridTie->isVbstStable = false;
-			gridTie->tempIndex = 0;
-			for (int i = 0; i < GRID_RELAY_COUNT; i++)
-				BSP_Dout_SetAsIOPin(GRID_RELAY_IO + i, GPIO_PIN_RESET);
-		}
+		float boostDuty = GridTie_BoostControl(gridTie);
+		if (gridTie->vdc > 800.f)				// --FIXME-- Limit should be on Vdc
+			boostDuty = 0;
+
+		for (int i = 0; i < BOOST_COUNT; i++)
+			gridTie->boostConfig[i].dutyUpdateFnc(gridTie->boostConfig[i].pinNo, boostDuty, &gridTie->boostConfig[i].pwmConfig);
 	}
-	else
-	{
-		// wait till boost voltage goes up
-		if (gridTie->vdc < RELAY_TURN_ON_VBST)
-			gridTie->tempIndex = 0;
-		// wait for stabilization of boost
-		else if (++gridTie->tempIndex == (int)PWM_FREQ_Hz)
-		{
-			gridTie->isVbstStable = true;
-			for (int i = 0; i < GRID_RELAY_COUNT; i++)
-				BSP_Dout_SetAsIOPin(GRID_RELAY_IO + i, GPIO_PIN_SET);
-			gridTie->tempIndex = 0;
-		}
-	}
+
+	// Control relays for protection of the circuitry
+	ControlRelays(gridTie);
 
 	// Implement phase lock loop
 	Pll_LockGrid(pll);
+	INTER_CORE_DATA.bools[SHARE_PLL_STATUS] = gridTie->pll.status == PLL_LOCKED;
 
-	// Update status of grid tie depending upon dc-link and pll
-	if(gridTie->state == GRID_TIE_INACTIVE)
+	// Generate inverter PWM is enabled and not faulty
+	if (gridTie->isInverterEnabled)
 	{
-		if (gridTie->isVbstStable && pll->status == PLL_LOCKED)
+		// Update status of grid tie depending upon dc-link and PLL
+		if(gridTie->isRelayOn == false || gridTie->pll.status != PLL_LOCKED)
 		{
-			gridTie->state = GRID_TIE_ACTIVE;
-			Inverter3Ph_Activate(&gridTie->inverterConfig, true);
-		}
-	}
-	else
-	{
-		if (!gridTie->isVbstStable || pll->status != PLL_LOCKED)
-		{
-			gridTie->state = GRID_TIE_INACTIVE;
 			Inverter3Ph_Activate(&gridTie->inverterConfig, false);
+			gridTie->isInverterEnabled = INTER_CORE_DATA.bools[SHARE_INVERTER_STATE] = false;
 		}
+		else
+			// compute and generate the duty cycle for inverter
+			GridTie_GenerateOutput(gridTie);
 	}
-
-	// compute and generate the duty cycle for inverter
-	GridTie_GenerateOutput(gridTie, gridTie->state == GRID_TIE_INACTIVE);
 }
 
 #pragma GCC pop_options

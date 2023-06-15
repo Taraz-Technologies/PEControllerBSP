@@ -103,7 +103,7 @@ typedef struct
  * @param config Pointer to the configuration structure
  * @param pwmResetCallback Function callback issued after each PWM completion
  */
-void OpenLoopVfControl_Init(openloopvf_config_t* config, PWMResetCallback pwmResetCallback);
+extern void OpenLoopVfControl_Init(openloopvf_config_t* config, PWMResetCallback pwmResetCallback);
 /**
  * @brief This function computes new duty cycles for the inverter in each cycle
  * @param config Pointer to the inverter structure
@@ -111,7 +111,9 @@ void OpenLoopVfControl_Init(openloopvf_config_t* config, PWMResetCallback pwmRes
  * 	it reaches the @ref OUTPUT_FREQ value with constant @ref ACCELERATION. The currentModulationIndex
  * 	is acquired by nominalModulationIndex / nominalFreq
  */
-void OpenLoopVfControl_Loop(openloopvf_config_t* config);
+extern void OpenLoopVfControl_Loop(openloopvf_config_t* config);
+
+extern void OpenLoopVfControl_Activate(openloopvf_config_t* config, bool activate);
 /********************************************************************************
  * Code
  *******************************************************************************/

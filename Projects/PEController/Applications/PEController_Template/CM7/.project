@@ -35,34 +35,49 @@
 			<locationURI>PARENT-1-PROJECT_LOC/Common</locationURI>
 		</link>
 		<link>
+			<name>BSP/ADC/max11046_drivers.c</name>
+			<type>1</type>
+			<locationURI>PARENT-5-PROJECT_LOC/Drivers/BSP/PEController/ADC/max11046_drivers.c</locationURI>
+		</link>
+		<link>
+			<name>BSP/ADC/pecontroller_adc.c</name>
+			<type>1</type>
+			<locationURI>PARENT-5-PROJECT_LOC/Drivers/BSP/PEController/ADC/pecontroller_adc.c</locationURI>
+		</link>
+		<link>
+			<name>BSP/Components/shared_memory.c</name>
+			<type>1</type>
+			<locationURI>PARENT-5-PROJECT_LOC/Drivers/BSP/PEController/Common/shared_memory.c</locationURI>
+		</link>
+		<link>
 			<name>BSP/DigitalPins/pecontroller_digital_in.c</name>
 			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/Drivers/BSP/PEController/DigitalPins/Src/pecontroller_digital_in.c</locationURI>
+			<locationURI>PARENT-5-PROJECT_LOC/Drivers/BSP/PEController/DigitalPins/pecontroller_digital_in.c</locationURI>
 		</link>
 		<link>
 			<name>BSP/DigitalPins/pecontroller_digital_inout.c</name>
 			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/Drivers/BSP/PEController/DigitalPins/Src/pecontroller_digital_inout.c</locationURI>
+			<locationURI>PARENT-5-PROJECT_LOC/Drivers/BSP/PEController/DigitalPins/pecontroller_digital_inout.c</locationURI>
 		</link>
 		<link>
 			<name>BSP/DigitalPins/pecontroller_digital_out.c</name>
 			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/Drivers/BSP/PEController/DigitalPins/Src/pecontroller_digital_out.c</locationURI>
+			<locationURI>PARENT-5-PROJECT_LOC/Drivers/BSP/PEController/DigitalPins/pecontroller_digital_out.c</locationURI>
 		</link>
 		<link>
 			<name>BSP/DigitalPins/pecontroller_digital_pins.c</name>
 			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/Drivers/BSP/PEController/DigitalPins/Src/pecontroller_digital_pins.c</locationURI>
+			<locationURI>PARENT-5-PROJECT_LOC/Drivers/BSP/PEController/DigitalPins/pecontroller_digital_pins.c</locationURI>
 		</link>
 		<link>
 			<name>BSP/PWM/pecontroller_pwm.c</name>
 			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/Drivers/BSP/PEController/PWM/Src/pecontroller_pwm.c</locationURI>
+			<locationURI>PARENT-5-PROJECT_LOC/Drivers/BSP/PEController/PWM/pecontroller_pwm.c</locationURI>
 		</link>
 		<link>
 			<name>BSP/Timers/pecontroller_timers.c</name>
 			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/Drivers/BSP/PEController/Timers/Src/pecontroller_timers.c</locationURI>
+			<locationURI>PARENT-5-PROJECT_LOC/Drivers/BSP/PEController/Timers/pecontroller_timers.c</locationURI>
 		</link>
 		<link>
 			<name>Drivers/STM32H7xx_HAL_Driver/stm32h7xx_hal.c</name>
@@ -160,9 +175,14 @@
 			<locationURI>PARENT-1-PROJECT_LOC/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_tim_ex.c</locationURI>
 		</link>
 		<link>
-			<name>UserFiles/Src/control_library.c</name>
-			<type>1</type>
-			<locationURI>PARENT-5-PROJECT_LOC/Middleware/Taraz/ControlLib/Src/control_library.c</locationURI>
+			<name>Middlewares/Taraz/ControlLib</name>
+			<type>2</type>
+			<locationURI>PARENT-5-PROJECT_LOC/Middleware/Taraz/ControlLib</locationURI>
+		</link>
+		<link>
+			<name>Middlewares/Taraz/MiscLib</name>
+			<type>2</type>
+			<locationURI>PARENT-5-PROJECT_LOC/Middleware/Taraz/MiscLib</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>

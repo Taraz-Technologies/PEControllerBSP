@@ -20,6 +20,8 @@
  ********************************************************************************
  */
 
+#pragma GCC push_options
+#pragma GCC optimize ("-Ofast")
 /********************************************************************************
  * Includes
  *******************************************************************************/
@@ -68,5 +70,5 @@ void ComputeDuty_SPWM(float theta, float modulationIndex, float* duties)
 	}
 }
 
-
+#pragma GCC pop_options
 /* EOF */
