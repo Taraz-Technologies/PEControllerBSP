@@ -81,7 +81,7 @@ static const digital_pin_t* InitPin(uint32_t pinNo, GPIO_InitTypeDef* GPIO_InitS
 {
 	const digital_pin_t* pin = &doutPins[pinNo - 1];
 	GPIO_InitStruct->Pin = pin->pinMask;
-	GPIO_InitStruct->Pull = GPIO_NOPULL;
+	GPIO_InitStruct->Pull = GPIO_PULLDOWN;
 	GPIO_InitStruct->Speed = GPIO_SPEED_FREQ_VERY_HIGH;
 	HAL_GPIO_WritePin(pin->GPIO, pin->pinMask, state);
 	HAL_GPIO_Init(pin->GPIO, GPIO_InitStruct);

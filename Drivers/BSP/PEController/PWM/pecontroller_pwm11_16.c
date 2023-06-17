@@ -51,7 +51,7 @@ static TIM_OC_InitTypeDef sConfigOC =
 		.OCNPolarity = TIM_OCNPOLARITY_HIGH,
 		.OCFastMode = TIM_OCFAST_DISABLE,
 		.OCIdleState = TIM_OCIDLESTATE_RESET,
-		.OCNIdleState = TIM_OCNIDLESTATE_SET,
+		.OCNIdleState = TIM_OCIDLESTATE_RESET,  // --TODO-- Confirm if it should be set/reset
 };
 static float dutyDeadTime = 0;
 static bool isEdgeAligned;
