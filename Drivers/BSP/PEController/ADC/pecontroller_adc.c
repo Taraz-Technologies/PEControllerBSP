@@ -51,6 +51,7 @@
 #define DEFAULT_UNIT					(UNIT_V)
 
 #define STORAGE_WORD_LEN				((TOTAL_MEASUREMENT_COUNT * 3) + ((TOTAL_MEASUREMENT_COUNT / sizeof(uint32_t)) * sizeof(uint8_t)))
+#define GET_SAMPLE_COUNT(_fs, _f)		(((uint32_t)_fs) - ((uint32_t)_fs) % ((uint32_t)_f)) / 2
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
@@ -277,7 +278,7 @@ device_err_t BSP_ADC_UpdateConfig(adc_info_t* _info, float _fs, int _channelInde
 	_info->offsets[_channelIndex] = _offset;
 	_info->units[_channelIndex] = _unit;
 #if IS_ADC_STATS_CORE && ADC_BULK_STATS
-	tempStats[_channelIndex].sampleCount = _fs / _freq;
+	tempStats[_channelIndex].sampleCount = GET_SAMPLE_COUNT(_fs, _freq);
 #endif
 	return ERR_OK;
 }
@@ -305,7 +306,7 @@ void BSP_ADC_ComputeStatsInBulk(adc_processed_data_t* _processedAdcData, float _
 		fs = _fs;
 		for (int i = 0; i < TOTAL_MEASUREMENT_COUNT; i++)
 		{
-			tempStats[i].sampleCount = tempStats[i].samplesLeft = _fs / processedAdcData->info.freq[i];
+			tempStats[i].sampleCount = tempStats[i].samplesLeft = GET_SAMPLE_COUNT(_fs, processedAdcData->info.freq[i]);
 		}
 		init = true;
 	}
@@ -314,7 +315,7 @@ void BSP_ADC_ComputeStatsInBulk(adc_processed_data_t* _processedAdcData, float _
 		fs = _fs;
 		Stats_Reset(tempStats, NULL, 1000, 16);
 		for (int i = 0; i < TOTAL_MEASUREMENT_COUNT; i++)
-			tempStats[i].sampleCount = tempStats[i].samplesLeft = fs / processedAdcData->info.freq[i];
+			tempStats[i].sampleCount = tempStats[i].samplesLeft = GET_SAMPLE_COUNT(fs, processedAdcData->info.freq[i]);
 	}
 
 	ringBuffLocal.wrIndex = processedAdcData->recordIndex;
