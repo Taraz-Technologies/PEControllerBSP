@@ -59,6 +59,9 @@ volatile shared_data_t * const sharedData = (shared_data_t *)0x38000000;
  */
 void SharedMemory_Init(void)
 {
+#if !IS_STORAGE_CORE
+	sharedData->isStateStorageInitialized = false;
+#endif
 #if IS_CONTROL_CORE
 	InterprocessorComms_InitData();
 #endif

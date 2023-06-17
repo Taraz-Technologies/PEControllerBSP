@@ -51,7 +51,7 @@
 #define DEFAULT_UNIT					(UNIT_V)
 
 #define STORAGE_WORD_LEN				((TOTAL_MEASUREMENT_COUNT * 3) + ((TOTAL_MEASUREMENT_COUNT / sizeof(uint32_t)) * sizeof(uint8_t)))
-#define GET_SAMPLE_COUNT(_fs, _f)		(((uint32_t)_fs) - ((uint32_t)_fs) % ((uint32_t)_f)) / 2
+#define GET_SAMPLE_COUNT(_fs, _f)		((((uint32_t)_fs) - ((uint32_t)_fs) % ((uint32_t)_f)) / 2)
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
