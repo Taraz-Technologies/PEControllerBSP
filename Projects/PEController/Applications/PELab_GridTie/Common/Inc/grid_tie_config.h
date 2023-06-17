@@ -127,7 +127,7 @@ extern "C" {
 /**
  * @brief Defines the turn off condition for the relay
  */
-#define RELAY_TURN_OFF_VDC				(530.f)
+#define RELAY_TURN_OFF_VDC				(500.f)
 /**
  * @brief Dead time value in nano-seconds for the inverter
  */

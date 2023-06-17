@@ -73,7 +73,7 @@ extern "C" {
  */
 #define ENABLE_INTELLISENS		(1)
 
-#define MONITORING_FREQUENCY_Hz		(100000)
+#define MONITORING_FREQUENCY_Hz		(40000)
 #define CONTROL_FREQUENCY_Hz		(40000)
 /******** MEASUREMENT CONFIGURATION ***********/
 

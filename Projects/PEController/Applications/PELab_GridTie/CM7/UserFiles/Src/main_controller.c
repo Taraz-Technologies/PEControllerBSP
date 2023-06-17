@@ -88,7 +88,7 @@ static void ADC_Callback(adc_measures_t* result)
 			adcMode = ADC_MODE_MONITORING;
 		}
 	}
-	MainControl_Loop();
+	MainControl_Loop(result);
 }
 #endif
 /**
@@ -152,7 +152,7 @@ void MainControl_Loop(adc_measures_t* result)
 	gridTieConfig.vCoor.abc.a = result->Ch10;
 	gridTieConfig.vCoor.abc.b = result->Ch11;
 	gridTieConfig.vCoor.abc.c = result->Ch13;
-	gridTieConfig.vdc = (result->Ch9);
+	gridTieConfig.vdc = result->Ch9;
 	gridTieConfig.iCoor.abc.a = result->Ch1;
 	gridTieConfig.iCoor.abc.b = result->Ch2;
 	gridTieConfig.iCoor.abc.c = result->Ch3;

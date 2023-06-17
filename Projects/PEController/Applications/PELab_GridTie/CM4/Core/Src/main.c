@@ -73,7 +73,7 @@ osThreadId_t statsTaskHandle;
 const osThreadAttr_t statsTask_attributes = {
 		.name = "statsTask",
 		.stack_size = 1024 * 4,
-		.priority = (osPriority_t) osPriorityLow,
+		.priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for displayTask */
 osThreadId_t displayTaskHandle;

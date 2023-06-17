@@ -116,7 +116,7 @@ int main(void)
 	/*Release HSEM in order to notify the CPU2(CM4)*/
 	HAL_HSEM_Release(HSEM_ID_0,0);
 	/* wait until CPU2 wakes up from stop mode */
-	timeout = 0xFFFF;
+	timeout = 0xFFFFFFF;
 	while((__HAL_RCC_GET_FLAG(RCC_FLAG_D2CKRDY) == RESET) && (timeout-- > 0));
 	if ( timeout < 0 )
 	{

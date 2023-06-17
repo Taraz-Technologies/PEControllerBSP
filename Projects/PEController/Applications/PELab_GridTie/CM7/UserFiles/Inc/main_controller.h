@@ -55,7 +55,7 @@ void MainControl_Stop(void);
  * @brief Call this function to process the control loop.
  * If the new computation request is available new duty cycle values are computed and applied to all inverter legs
  */
-void MainControl_Loop(void);
+void MainControl_Loop(adc_measures_t* result);
 /*******************************************************************************
  * Variables
  ******************************************************************************/

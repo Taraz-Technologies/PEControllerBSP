@@ -120,7 +120,7 @@ void GridTieControl_Init(grid_tie_t* gridTie, PWMResetCallback pwmResetCallback)
 	gridTie->pll.expectedGridFreq = 50;
 	gridTie->pll.qLockMax = 20;
 	gridTie->pll.dLockMin = 255;
-	gridTie->pll.dLockMax = 375;
+	gridTie->pll.dLockMax = 390;
 	gridTie->pll.cycleCount = (int)(PWM_PERIOD_s * 2);
 	PLL_Init(&gridTie->pll);
 
@@ -133,12 +133,11 @@ void GridTieControl_Init(grid_tie_t* gridTie, PWMResetCallback pwmResetCallback)
 	gridTie->iDComp.dt = PWM_PERIOD_s;
 
 	// Set IOs as PWM
-	BSP_Dout_SetAsPWMPin(gridTie->inverterConfig.s1PinNos[0]);
-	BSP_Dout_SetAsPWMPin(gridTie->inverterConfig.s1PinNos[0] + 1);
-	BSP_Dout_SetAsPWMPin(gridTie->inverterConfig.s1PinNos[1]);
-	BSP_Dout_SetAsPWMPin(gridTie->inverterConfig.s1PinNos[1] + 1);
-	BSP_Dout_SetAsPWMPin(gridTie->inverterConfig.s1PinNos[2]);
-	BSP_Dout_SetAsPWMPin(gridTie->inverterConfig.s1PinNos[2] + 1);
+	for (int i = 0; i < BOOST_COUNT; i++)
+	{
+		BSP_Dout_SetAsPWMPin(gridTie->inverterConfig.s1PinNos[i]);
+		BSP_Dout_SetAsPWMPin(gridTie->inverterConfig.s1PinNos[i] + 1);
+	}
 	/***************** Configure Inverter *********************/
 
 	// Turn off Grid Relays
