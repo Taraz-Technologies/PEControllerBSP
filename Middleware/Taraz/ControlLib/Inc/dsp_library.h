@@ -86,6 +86,14 @@ typedef struct
 	int count;		/**< @brief No of samples per computation */
 	int index;		/**< @brief Initialize to zero. Used internally for detecting current data position */
 } mov_avg_t;
+
+typedef struct
+{
+	float avg;
+	float tempAvg;
+	int count;
+	int index;
+} avg_t;
 /**
  * @brief Defines the parameters used by a PI compensator
  */
@@ -137,7 +145,8 @@ extern void MovingAverage_Reset(mov_avg_t* filt);
  * @return float Result of the PI compensation of current cycle
  */
 extern float PI_Compensate(pi_compensator_t* pi, float err);
-
+extern bool Average_Compute(avg_t* filt, float val);
+extern void Average_Reset(avg_t* filt);
 /********************************************************************************
  * Code
  *******************************************************************************/

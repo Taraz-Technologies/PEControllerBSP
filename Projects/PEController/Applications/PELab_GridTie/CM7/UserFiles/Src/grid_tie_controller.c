@@ -27,6 +27,7 @@
 #include "pecontroller_digital_out.h"
 #include "pecontroller_digital_in.h"
 #include "shared_memory.h"
+#include "control_library.h"
 /********************************************************************************
  * Defines
  *******************************************************************************/
@@ -82,6 +83,8 @@ pi_compensator_t boostPI = {
 		.Integral = 0,
 		.max = BOOST_DUTYCYCLE_MAX,
 		.min = 0.f };
+
+avg_t iGenAvg = { .count = PWM_FREQ_Hz * 2, };
 /********************************************************************************
  * Global Variables
  *******************************************************************************/
@@ -168,6 +171,8 @@ void GridTieControl_Init(grid_tie_t* gridTie, PWMResetCallback pwmResetCallback)
 	/***************** Configure Boost *********************/
 	// Configure the interrupt for PWM Channel with highest priority
 	BSP_PWM_Config_Interrupt(inverterConfig->s1PinNos[0], true, pwmResetCallback, 1);
+
+	Average_Reset(&iGenAvg);
 }
 
 device_err_t GridTie_EnableBoost(grid_tie_t* gridTie, bool en)
@@ -190,6 +195,7 @@ device_err_t GridTie_EnableInverter(grid_tie_t* gridTie, bool en)
 	if (gridTie->isInverterEnabled == en)
 		return ERR_OK;
 
+	Average_Reset(&iGenAvg);
 	// refresh the PI Controllers
 	gridTie->iQComp.Integral = 0;
 	gridTie->iDComp.Integral = 0;
@@ -243,7 +249,8 @@ static void GridTie_GenerateOutput(grid_tie_t* gridTie)
 
 	// Transform the current measurements to DQ coordinates
 	Transform_abc_dq0(&iCoor->abc, &iCoor->dq0, &iCoor->trigno, SRC_ABC, PARK_SINE);
-
+	if(Average_Compute(&iGenAvg, iCoor->dq0.d))
+		INTER_CORE_DATA.floats[SHARE_CURR_RMS_CURRENT] = iGenAvg.avg / 1.414f;
 	// Apply PI control to both DQ coordinates gridTie->dCompensator.dt
 	LIB_COOR_ALL_t coor;
 
@@ -251,7 +258,7 @@ static void GridTie_GenerateOutput(grid_tie_t* gridTie)
 	float fGrid = INTER_CORE_DATA.floats[SHARE_GRID_FREQ];
 	float lOut = INTER_CORE_DATA.floats[SHARE_LOUT];
 	// convert to peak current
-	gridTie->iRef = INTER_CORE_DATA.floats[SHARE_REQ_RMS_CURRENT] * 1.414;
+	gridTie->iRef = INTER_CORE_DATA.floats[SHARE_REQ_RMS_CURRENT] * 1.414f;
 
 	coor.dq0.d = PI_Compensate(&gridTie->iDComp, gridTie->iRef - iCoor->dq0.d) + vCoor->dq0.d
 			- TWO_PI * fGrid * lOut * iCoor->dq0.q / PWM_FREQ_Hz;
@@ -338,6 +345,7 @@ void GridTieControl_Loop(grid_tie_t* gridTie)
 		{
 			Inverter3Ph_Activate(&gridTie->inverterConfig, false);
 			gridTie->isInverterEnabled = INTER_CORE_DATA.bools[SHARE_INVERTER_STATE] = false;
+			Average_Reset(&iGenAvg);
 		}
 		else
 			// compute and generate the duty cycle for inverter

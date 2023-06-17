@@ -137,6 +137,23 @@ void MovingAverage_Reset(mov_avg_t* filt)
 	filt->stable = false;
 }
 
+bool Average_Compute(avg_t* filt, float val)
+{
+	filt->tempAvg += val;
+	if (--filt->index <= 0)
+	{
+		filt->avg = filt->tempAvg / filt->count;
+		filt->index = filt->count;
+		filt->tempAvg = 0;
+		return true;
+	}
+	return false;
+}
+
+void Average_Reset(avg_t* filt)
+{
+	filt->index = filt->tempAvg = 0;
+}
 
 #pragma GCC pop_options
 /* EOF */
