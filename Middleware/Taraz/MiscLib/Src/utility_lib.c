@@ -251,6 +251,24 @@ bool atou_custom(const char *txt, uint32_t *result)
 	return true;
 }
 
+static bool ceil_custom(char* firstNumLoc, char* lastNumLoc)
+{
+	if (*firstNumLoc != '9')			// --TODO-- include for '9' later also
+	{
+		do
+		{
+			if (*lastNumLoc == '9')
+				*lastNumLoc = '0';
+			else if (*lastNumLoc < '9' && *lastNumLoc >= '0')
+			{
+				*lastNumLoc = *lastNumLoc + 1;
+				break;
+			}
+		} while (lastNumLoc-- != firstNumLoc);
+	}
+	return false;
+}
+
 /**
  * @brief This function converts the floating point number to character string
  * @param f Single precision floating point number to be converted
@@ -272,6 +290,8 @@ int ftoa_custom(float f, char* txt, int maxDigits, int precision)
 		*txt++ = '-';
 		f *= -1;
 	}
+
+	char* firstNumLoc = txt;
 
 	val = (int)f;
 	int digits = 0;
@@ -315,6 +335,13 @@ int ftoa_custom(float f, char* txt, int maxDigits, int precision)
 			{
 				frac *= 10;
 				*txt++ = ((int)frac) % 10 + '0';
+			}
+
+			frac *= 10;
+			if (((int)frac) % 10  >= 5)
+			{
+				if (ceil_custom(firstNumLoc, txt-1))
+					txt++;
 			}
 		}
 	}

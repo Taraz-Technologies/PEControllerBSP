@@ -207,9 +207,9 @@ void ConfigScreen_LoadMeasurement(int _measurementIndex)
 	lv_obj_set_style_text_align(lv_dropdown_get_list(measureObjs.ddUnit), LV_TEXT_ALIGN_RIGHT, 0);
 
 	char txt[12];
-	(void)ftoa_custom(ADC_INFO.sensitivity[measurementIndex], txt, 7, 3);
+	(void)ftoa_custom(ADC_INFO.sensitivity[measurementIndex], txt, 7, 4);
 	screenObjs.focusItem = measureObjs.sensitivity = lv_create_textfield_display(screenObjs.paramGrid, &lblStyle, &lvStyleStore.defaultTextArea, "Sensitivity", txt, TextArea_Clicked, NULL, 2);
-	(void)ftoa_custom(ADC_INFO.offsets[measurementIndex], txt, 7, 3);
+	(void)ftoa_custom(ADC_INFO.offsets[measurementIndex], txt, 7, 4);
 	measureObjs.offset = lv_create_textfield_display(screenObjs.paramGrid, &lblStyle, &lvStyleStore.defaultTextArea, "Offset", txt, TextArea_Clicked, NULL, 3);
 	(void)ftoa_custom(ADC_INFO.freq[measurementIndex], txt, 7, 1);
 	measureObjs.freq = lv_create_textfield_display(screenObjs.paramGrid, &lblStyle, &lvStyleStore.defaultTextArea, "Signal Frequency", txt, TextArea_Clicked, NULL, 4);
