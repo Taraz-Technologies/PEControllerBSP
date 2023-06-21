@@ -149,9 +149,9 @@ void MainControl_Stop(void)
 void MainControl_Loop(adc_measures_t* result)
 {
 	/* add the required measurements and current reference point */
-	gridTieConfig.vCoor.abc.a = result->Ch10;
-	gridTieConfig.vCoor.abc.b = result->Ch11;
-	gridTieConfig.vCoor.abc.c = result->Ch13;
+	gridTieConfig.vCoor.abc.a = result->Ch13;
+	gridTieConfig.vCoor.abc.b = result->Ch14;
+	gridTieConfig.vCoor.abc.c = result->Ch15;
 	gridTieConfig.vdc = result->Ch9;
 	gridTieConfig.iCoor.abc.a = result->Ch1;
 	gridTieConfig.iCoor.abc.b = result->Ch2;
