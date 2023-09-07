@@ -146,7 +146,6 @@ static pll_states_t IsPLLSynched(pll_lock_t* pll)
 
 /**
  * @brief Lock the grid voltages using PLL
- *
  * @param pll Pointer to the data structure
  * @return pll_states_t PLL_LOCKED if grid phase successfully locked
  */
