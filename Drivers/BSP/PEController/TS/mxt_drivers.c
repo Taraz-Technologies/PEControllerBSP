@@ -47,6 +47,7 @@
 static uint8_t objectTable[OBJECT_COUNT][MXT_OBJECT_SIZE];
 static uint8_t msgBuffer[MSG_COUNT][MXT_T5_MSG_LEN];
 static uint16_t xPress, yPress;
+uint8_t counter = 0;
 /********************************************************************************
  * Global Variables
  *******************************************************************************/
@@ -199,6 +200,7 @@ static void mxt_proc_t100_messages(mxt_data_t *data, uint8_t *message)
 						data->finger_down[id - 2] = true;
 						xPress = x;
 						yPress = y;
+						counter++;
 					}
 				if ((touch_event == MXT_T100_EVENT_MOVE ||
 						touch_event == MXT_T100_EVENT_NONE) &&
@@ -227,9 +229,9 @@ static void mxt_proc_t100_messages(mxt_data_t *data, uint8_t *message)
 				//					input_report_abs(input_dev, ABS_MT_ORIENTATION, vector);
 				//				mxt_input_sync(data);
 			}
-		} else {
+		} else if (touch_event == 5){
 			/* Touch no longer in detect, so close out slot */
-			if (data->touch_num == 0 &&
+			/*if (data->touch_num == 0 &&
 					data->wakeup_gesture_mode &&
 					data->is_wakeup_by_gesture) {
 				//				dev_info(dev, "wakeup finger release, restore t7 and t8!\n");
@@ -238,10 +240,13 @@ static void mxt_proc_t100_messages(mxt_data_t *data, uint8_t *message)
 			}
 			//			mxt_input_sync(data);
 			//			input_mt_report_slot_state(input_dev, MT_TOOL_FINGER, 0);
+			 *
+			 */
 			data->finger_down[id - 2] = false;
 		}
 	}
-}
+	}
+
 
 
 #endif
@@ -373,8 +378,8 @@ static void mxt_read_messages_t44(mxt_data_t *data)
 	}
 }
 
-volatile uint8_t touchTH;
-static void SetResolution(mxt_data_t *data, uint16_t x, uint16_t y)
+//volatile uint8_t touchTH;
+/*static void SetResolution(mxt_data_t *data, uint16_t x, uint16_t y)
 {
 	if (mxt_get_object(data, MXT_TOUCH_MULTI_T100) != NULL) {
 
@@ -406,6 +411,7 @@ static void SetResolution(mxt_data_t *data, uint16_t x, uint16_t y)
 	mxt_read_object(data, MXT_TOUCH_MULTI_T100, MXT_MULTITOUCH_TCHTHR, &touchTH);
 	mxt_write_object(data, MXT_TOUCH_MULTI_T100, MXT_MULTITOUCH_TCHTHR, 0x10);
 }
+*/
 // gets the object table
 static uint16_t mxt_get_object_table(mxt_data_t *data)
 {
@@ -626,10 +632,176 @@ static uint16_t mxt_initialize(mxt_data_t *data, uint16_t ts_SizeX, uint16_t ts_
 			return error;
 	}
 
-	SetResolution(data, ts_SizeX, ts_SizeY);
-
 	// set touch threshold
-	mxt_write_object(data, MXT_TOUCH_MULTI_T100, MXT_MULTITOUCH_TCHTHR, 50);
+		uint8_t init_val =0;
+		//Put non-zero value to calibrate
+		mxt_write_object(data, MXT_GEN_COMMAND_T6, MXT_COMMAND_CALIBRATE, 11);
+		//Time interval between successive idle burst cycles.  Typical: 32ms
+		mxt_write_object(data, MXT_GEN_POWER_T7, MXT_POWER_IDLEACQINT, 32);
+		//Time interval between successive active burst cycles.  Typical: 16ms
+		mxt_write_object(data, MXT_GEN_POWER_T7, MXT_POWER_ACTVACQINT, 16);
+		//Timeout period; the device remains active for this period after the first touch. Typical: 50 (10 sec)
+		mxt_write_object(data, MXT_GEN_POWER_T7, MXT_POWER_ACTV2IDLETO, 50);
+		//start in active mode, suppress overflow msgs, 4 MSBs, pipeline both modes
+		mxt_write_object(data, MXT_GEN_POWER_T7, MXT_POWER_CFG, 0b11000011);
+		//The ACTV2IDLETO is reset on subsequent touches and counts from the last touch
+		mxt_read_object(data, MXT_GEN_POWER_T7, MXT_POWER_CFG2, &init_val);
+		init_val = init_val & (0b11111110);
+		mxt_write_object(data, MXT_GEN_POWER_T7, MXT_POWER_CFG2, init_val);
+		///////////
+		//Scanning time. default: 0 (2us)
+		mxt_write_object(data, MXT_GEN_ACQUIRE_T8, MXT_ACQUIRE_CHRGTIME, 0);
+		//Typical: 20
+		mxt_write_object(data, MXT_GEN_ACQUIRE_T8, MXT_ACQUIRE_TCHDRIFT, 20);
+		//Default:
+		mxt_write_object(data, MXT_GEN_ACQUIRE_T8, MXT_ACQUIRE_DRIFTST, 10);
+		//Recalibrate if an object remains in contact with CTP for certain time (0 = dont calibrate)
+		mxt_write_object(data, MXT_GEN_ACQUIRE_T8, MXT_ACQUIRE_TCHAUTOCAL, 50);
+		//dont Sync acquisition cycles with external clock
+		mxt_read_object(data, MXT_GEN_ACQUIRE_T8, MXT_ACQUIRE_SYNC, &init_val);
+		init_val = init_val & (0b11111010);
+		mxt_write_object(data, MXT_GEN_ACQUIRE_T8, MXT_ACQUIRE_SYNC, init_val);
+		//Should be less than DRIFTST and 0 if only mutual capacitace is used
+		mxt_write_object(data, MXT_GEN_ACQUIRE_T8, MXT_ACQUIRE_ATCHCALST, 0);
+		//Typical: 0
+		mxt_write_object(data, MXT_GEN_ACQUIRE_T8, MXT_ACQUIRE_ATCHCALSTHR, 0);
+		//Typical: 50
+		mxt_write_object(data, MXT_GEN_ACQUIRE_T8, MXT_ACQUIRE_ATCHFRCCALTHR, 50);
+		//Typical: 25
+		mxt_write_object(data, MXT_GEN_ACQUIRE_T8, MXT_ACQUIRE_ATCHFRCCALRATIO, 25);
+		//#################################################################################
+		mxt_read_object(data, MXT_SPT_AUXTOUCHCONFIG_T104, MXT_AUXTCHCFG_CTRL, &init_val);
+		init_val = init_val | (0b00000001);
+		mxt_write_object(data,MXT_SPT_AUXTOUCHCONFIG_T104, MXT_AUXTCHCFG_CTRL, init_val);
+		//#################################################################################
+		//Enable/disable mutual cap, self cap, selfprox with bits 0 1 & 3 respectively
+		mxt_read_object(data, MXT_GEN_ACQUIRE_T8, MXT_ACQUIRE_MEASALLOW, &init_val);
+		init_val = ((init_val | 0b00000011) & 0b11110111);
+		mxt_write_object(data, MXT_GEN_ACQUIRE_T8, MXT_ACQUIRE_MEASALLOW, &init_val);
+		//Enable/disable mutual cap, self cap, selfprox in idle mode with bits 0 1 & 3 respectively
+		mxt_read_object(data, MXT_GEN_ACQUIRE_T8, MXT_ACQUIRE_MEASIDLEDEF, &init_val);
+		init_val = ((init_val | 0b00000001) & 0b11110101);
+		mxt_write_object(data, MXT_GEN_ACQUIRE_T8, MXT_ACQUIRE_MEASIDLEDEF, &init_val);
+		//Enable/disable mutual cap, self cap in active mode with bits 0 & 1 respectively (Enable only one)
+		mxt_read_object(data, MXT_GEN_ACQUIRE_T8, MXT_ACQUIRE_MEASACTVDEF, &init_val);
+		init_val = ((init_val | 0b00000001) & 0b11111101);
+		mxt_write_object(data, MXT_GEN_ACQUIRE_T8, MXT_ACQUIRE_MEASACTVDEF, init_val);
+		//#############################################################################
+		//1 is recommended by microchip
+		mxt_write_object(data, MXT_GEN_ACQUIRE_T8, MXT_ACQUIRE_REFMODE, 1);
+		//
+		mxt_read_object(data, MXT_GEN_ACQUIRE_T8, MXT_ACQUIRE_CFG, &init_val);
+		init_val = init_val & (0b01111001);
+		mxt_write_object(data, MXT_GEN_ACQUIRE_T8, MXT_ACQUIRE_CFG, init_val);
+		////////
+		//Disable the T15 Key array object
+		mxt_read_object(data, MXT_TOUCH_KEYARRAY_T15, MXT_KEYARRAY_CTRL, &init_val);
+		init_val = init_val & (0b00110011);
+		mxt_write_object(data, MXT_TOUCH_KEYARRAY_T15, MXT_KEYARRAY_CTRL, init_val);
+		//###########################################################################
+		mxt_read_object(data, MXT_SPT_COMMSCONFIG_T18, MXT_COMMS_CTRL, &init_val);
+		init_val = (init_val & (0b00110011)) |
+		mxt_write_object(data, MXT_SPT_COMMSCONFIG_T18, MXT_COMMS_CTRL, init_val);
+		mxt_write_object(data, MXT_SPT_COMMSCONFIG_T18, MXT_COMMS_CMD, 0);
+		//###########################################################################
+		//X & Y resolution of the CTP
+		mxt_write_object(data,  MXT_TOUCH_MULTI_T100, MXT_MULTITOUCH_XRANGE_MSB, (ts_SizeX >> 8) & 0xff);
+		mxt_write_object(data,  MXT_TOUCH_MULTI_T100, MXT_MULTITOUCH_XRANGE_LSB, (uint8_t)(ts_SizeX & 0xff));
+		mxt_write_object(data,  MXT_TOUCH_MULTI_T100, MXT_MULTITOUCH_YRANGE_MSB, (ts_SizeY >> 8) & 0xff);
+		mxt_write_object(data,  MXT_TOUCH_MULTI_T100, MXT_MULTITOUCH_YRANGE_LSB, (uint8_t)(ts_SizeY & 0xff));
+		//Orientation of the LCD & T100 message generation
+		mxt_read_object(data, MXT_TOUCH_MULTI_T100, MXT_MULTITOUCH_CFG1, &init_val);
+		init_val = (init_val & ~(0xE0)) | (0x80);
+		mxt_write_object(data, MXT_TOUCH_MULTI_T100, MXT_MULTITOUCH_CFG1, init_val);
+		mxt_read_object(data, MXT_TOUCH_MULTI_T100, MXT_MULTITOUCH_CTRL, &init_val);
+		init_val = init_val | (0b01111111);
+		mxt_write_object(data, MXT_TOUCH_MULTI_T100, MXT_MULTITOUCH_CTRL, init_val);
+		init_val = init_val & (0b01111111);
+		mxt_write_object(data, MXT_TOUCH_MULTI_T100, MXT_MULTITOUCH_CTRL, init_val);
+		//CTP is vertically flipped & message will be generated on events only
+		mxt_read_object(data, MXT_TOUCH_MULTI_T100, MXT_MULTITOUCH_SCRAUX, &init_val);
+		init_val = init_val | (0b01001110);
+		mxt_write_object(data, MXT_TOUCH_MULTI_T100, MXT_MULTITOUCH_SCRAUX, init_val);
+		//Maximum number of touches to detect
+		mxt_read_object(data, MXT_TOUCH_MULTI_T100, MXT_MULTITOUCH_NUMTCH, &init_val);
+		init_val = init_val | (0b00000001);//(0b1110101);
+		mxt_write_object(data, MXT_TOUCH_MULTI_T100, MXT_MULTITOUCH_NUMTCH, init_val);
+		init_val = init_val & (0b00000001);//(0b1110101);
+		mxt_write_object(data, MXT_TOUCH_MULTI_T100, MXT_MULTITOUCH_NUMTCH, init_val);
+		// set touch threshold
+		mxt_write_object(data, MXT_TOUCH_MULTI_T100, MXT_MULTITOUCH_TCHTHR, 25);
+		mxt_write_object(data, MXT_TOUCH_MULTI_T100, MXT_MULTITOUCH_DXGAIN, 10);
+		mxt_read_object(data, MXT_TOUCH_MULTI_T100, MXT_MULTITOUCH_TCHDIDOWN, &init_val);
+		init_val =   (init_val  & (0b1100010)) | 0b00000010;
+		mxt_write_object(data, MXT_TOUCH_MULTI_T100, MXT_MULTITOUCH_TCHDIDOWN, init_val);
+		 //
+		mxt_read_object(data, MXT_TOUCH_MULTI_T100, MXT_MULTITOUCH_TCHDIUP, &init_val);
+		init_val = (init_val  & (0b1100010)) | 0b00000010;
+		mxt_write_object(data, MXT_TOUCH_MULTI_T100, MXT_MULTITOUCH_TCHDIUP, init_val);
+		//
+		mxt_read_object(data, MXT_TOUCH_MULTI_T100, MXT_MULTITOUCH_NEXTTCHDI, &init_val);
+		init_val = (init_val  & (0b1100010)) | 0b00000010;
+		mxt_write_object(data, MXT_TOUCH_MULTI_T100, MXT_MULTITOUCH_NEXTTCHDI, init_val);
+		//################################################################################
+	/*
+		mxt_read_object(data, MXT_PROCG_NOISESUPPRESSION_T72, MXT_NOISESUP_CTRL, &init_val);
+		init_val = (init_val | (0b00000001)) & 0b00000001;
+		mxt_write_object(data,MXT_PROCG_NOISESUPPRESSION_T72, MXT_NOISESUP_CTRL, init_val);
+
+		mxt_read_object(data, MXT_PROCG_NOISESUPPRESSION_T72, MXT_NOISESUP_CFG1, &init_val);
+		init_val = (init_val | (0b00000001)) & 0b11111101;
+		mxt_write_object(data,MXT_PROCG_NOISESUPPRESSION_T72, MXT_NOISESUP_CFG1, init_val);
+
+		mxt_read_object(data, MXT_PROCG_NOISESUPPRESSION_T72, MXT_NOISESUP_CFG2, &init_val);
+		init_val = (init_val) & 0b11111101;
+		mxt_write_object(data,MXT_PROCG_NOISESUPPRESSION_T72, MXT_NOISESUP_CFG2, init_val);
+		mxt_write_object(data,MXT_PROCG_NOISESUPPRESSION_T72, MXT_NOISESUP_HOPCNT, 255);
+		mxt_write_object(data,MXT_PROCG_NOISESUPPRESSION_T72, MXT_NOISESUP_HOPCNTPER, 1);
+
+		mxt_write_object(data,MXT_PROCG_NOISESUPPRESSION_T72, MXT_NOISESUP_NLGAINDUALX, 15);
+		mxt_write_object(data,MXT_PROCG_NOISESUPPRESSION_T72, MXT_NOISESUP_MINNLTHR, 20);//thr/2
+		mxt_write_object(data,MXT_PROCG_NOISESUPPRESSION_T72, MXT_NOISESUP_MINNLTHR, 20);//thr/2
+		mxt_write_object(data,MXT_PROCG_NOISESUPPRESSION_T72, MXT_NOISESUP_NLTHRMARGIN, 20);//same as MINNLTHR
+		mxt_write_object(data,MXT_PROCG_NOISESUPPRESSION_T72, MXT_NOISESUP_MINTHRADJ, 19);
+		//Tuning//mxt_write_object(data,MXT_PROCG_NOISESUPPRESSION_T72, MXT_NOISESUP_NLTHRLIMIT, 19);
+		mxt_write_object(data,MXT_PROCG_NOISESUPPRESSION_T72, MXT_NOISESUP_NLGAINSINGX, 15);
+		mxt_write_object(data,MXT_PROCG_NOISESUPPRESSION_T72, MXT_NOISESUP_CFG3, 216);
+		mxt_write_object(data,MXT_PROCG_NOISESUPPRESSION_T72, MXT_NOISESUP_BGSCAN, 11);
+		mxt_write_object(data,MXT_PROCG_NOISESUPPRESSION_T72, MXT_NOISESUP_BGSCAN, 9);
+		mxt_write_object(data,MXT_PROCG_NOISESUPPRESSION_T72, MXT_NOISESUP_NOISCNT, 3);
+		mxt_read_object(data, MXT_PROCG_NOISESUPPRESSION_T72, MXT_NOISESUP_VNOICTRL, &init_val);
+		init_val = (init_val) | 0b00001001;
+		mxt_write_object(data,MXT_PROCG_NOISESUPPRESSION_T72, MXT_NOISESUP_VNOICTRL, init_val);
+		mxt_write_object(data,MXT_PROCG_NOISESUPPRESSION_T72, MXT_NOISESUP_VNOICNT, 3);
+
+
+		mxt_read_object(data, MXT_PROCG_NOISESUPSELFCAP_T108, MXT_SELF_CAP_MAXCHARGER_CTRL, &init_val);
+		init_val = init_val | (0b00000001);
+		mxt_write_object(data, MXT_PROCG_NOISESUPSELFCAP_T108,MXT_SELF_CAP_MAXCHARGER_CTRL , init_val);
+
+		mxt_read_object(data, MXT_PROCG_NOISESUPSELFCAP_T108, MXT_SELF_CAP_MAXCHARGER_CALCFG1, &init_val);
+		init_val = init_val | (0b00000001);
+		mxt_write_object(data, MXT_PROCG_NOISESUPSELFCAP_T108, MXT_SELF_CAP_MAXCHARGER_CALCFG1, init_val);
+
+		mxt_read_object(data, MXT_PROCG_NOISESUPSELFCAP_T108, MXT_SELF_CAP_MAXCHARGER_CFG3, &init_val);
+		init_val = init_val | (0b01000000);
+		mxt_write_object(data, MXT_PROCG_NOISESUPSELFCAP_T108, MXT_SELF_CAP_MAXCHARGER_CFG3, init_val);
+
+		mxt_write_object(data, MXT_PROCG_NOISESUPSELFCAP_T108, MXT_SELF_CAP_MAXCHARGER_IIRCOEFF, 0);
+		mxt_write_object(data, MXT_PROCG_NOISESUPSELFCAP_T108, MXT_SELF_CAP_MAXCHARGER_MINNLTDDIFF, 6);
+		mxt_write_object(data, MXT_PROCG_NOISESUPSELFCAP_T108, MXT_SELF_CAP_MAXCHARGER_MINNLTDHOP, 3);
+		mxt_write_object(data, MXT_PROCG_NOISESUPSELFCAP_T108, MXT_SELF_CAP_MAXCHARGER_HOPST, 0);
+		mxt_write_object(data, MXT_PROCG_NOISESUPSELFCAP_T108, MXT_SELF_CAP_MAXCHARGER_STABCTRL, 0);
+
+		mxt_write_object(data, MXT_PROCG_NOISESUPSELFCAP_T108, MXT_SELF_CAP_MAXCHARGER_NOISCTRL, 0);
+		mxt_write_object(data, MXT_PROCG_NOISESUPSELFCAP_T108, MXT_SELF_CAP_MAXCHARGER_NOISCNT, 3);
+		mxt_write_object(data, MXT_PROCG_NOISESUPSELFCAP_T108, MXT_SELF_CAP_MAXCHARGER_VNOICTRL, 15);
+		mxt_write_object(data, MXT_PROCG_NOISESUPSELFCAP_T108, MXT_SELF_CAP_MAXCHARGER_VNOICNT, 3);
+	*/
+		mxt_read_object(data, MXT_PROCI_RETRANSMISSIONCOMPENSATION_T80, MXT_RETRANS_CTRL, &init_val);
+		init_val = (init_val | (0b00000001)) & (0b11000001);
+		mxt_write_object(data, MXT_PROCI_RETRANSMISSIONCOMPENSATION_T80, MXT_RETRANS_CTRL, init_val);
+
 
 	//	while(1)
 	//		mxt_read_messages_t44(data);
