@@ -58,7 +58,7 @@
  * 				<b>Pairs are classified as :</b>
  * 				-# CH1 = Reference channel available at pin pwmNo
  * 				-# CH2 = Inverted Channel from reference available at pin pwmNo + 1 if pwmNo is odd else pwmNo - 1
- * @param en <c>true</c> if needs activation, else false
+ * @param en <c>true</c> if needs activation, else <c>false</c>
  */
 void BSP_PWM_ActivateInvertedPair(uint32_t pwmNo, bool en)
 {
@@ -68,7 +68,7 @@ void BSP_PWM_ActivateInvertedPair(uint32_t pwmNo, bool en)
 		BSP_PWMOut_Enable(((1U) << (pwmNo - 1)), en);
 }
 /**
- * @brief Configures an PWM pair as inverted pair
+ * @brief Configures a PWM pair as inverted pair
  * @param pwmNo Channel no of reference channel is the PWM pair (Valid Values 1-16). <br>
  * 				<b>Pairs are classified as :</b>
  * 				-# CH1 = Reference channel available at pin pwmNo
