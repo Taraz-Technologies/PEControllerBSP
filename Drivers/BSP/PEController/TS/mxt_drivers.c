@@ -47,7 +47,6 @@
 static uint8_t objectTable[OBJECT_COUNT][MXT_OBJECT_SIZE];
 static uint8_t msgBuffer[MSG_COUNT][MXT_T5_MSG_LEN];
 static uint16_t xPress, yPress;
-uint8_t counter = 0;
 /********************************************************************************
  * Global Variables
  *******************************************************************************/
@@ -200,7 +199,6 @@ static void mxt_proc_t100_messages(mxt_data_t *data, uint8_t *message)
 						data->finger_down[id - 2] = true;
 						xPress = x;
 						yPress = y;
-						counter++;
 					}
 				if ((touch_event == MXT_T100_EVENT_MOVE ||
 						touch_event == MXT_T100_EVENT_NONE) &&

@@ -54,6 +54,9 @@ dkms.conf
 **/Debug/
 **/Release/
 **/Docs/
+**/.settings/
+
+
 **LICENSE.txt
 **Licence.txt
 *.prefs
