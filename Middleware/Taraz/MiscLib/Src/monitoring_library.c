@@ -100,16 +100,74 @@ TCritical uint32_t Stats_Compute_SingleSample(float* data, temp_stats_data_t* te
 	return result;
 }
 
+// after completion some samples will be discarded
+uint32_t Stats_Compute_MultiSample_SingleChannel_16offset(float* data, temp_stats_data_t* tempStats, stats_data_t* stats, int sampleCount)
+{
+	// Stop after a result is obtained to avoid algorithm complexity and increase performance.
+	int loopCount = 0;
+	bool newResult = false;
+
+	// Assign loop count according to the available data length
+	if (sampleCount >= tempStats->samplesLeft)
+	{
+		loopCount = tempStats->samplesLeft - 1;
+		newResult = true;
+	}
+	else
+	{
+		loopCount = sampleCount;
+		tempStats->samplesLeft -= loopCount;
+	}
+
+	// First loop for copying data
+	while (loopCount-- >= 0)
+	{
+		// Compute the temporary values
+		tempStats->rms += ((*data) * (*data));
+		tempStats->avg += (*data);
+		if (tempStats->max < *data)
+			tempStats->max = *data;
+		if (tempStats->min > *data)
+			tempStats->min = *data;
+		data += 16;
+	}
+	if (newResult)
+	{
+		// get new values
+		tempStats->samplesLeft = tempStats->sampleCount;
+		stats->rms = sqrtf(tempStats->rms / tempStats->sampleCount);
+		stats->avg = tempStats->avg / tempStats->sampleCount;
+		stats->max = tempStats->max;
+		stats->min = tempStats->min;
+		stats->pkTopk = stats->max - stats->min;
+
+		// reset temporary statistics
+		tempStats->rms = 0;
+		tempStats->avg = 0;
+		tempStats->max = -4294967296;
+		tempStats->min = 4294967296;
+		return 1;
+	}
+
+	return 0;
+}
+
 TCritical uint32_t Stats_Compute_MultiSample_16ch(float* data, temp_stats_data_t* tempStats, stats_data_t* stats, int sampleCount)
 {
 	uint32_t result = 0;
-	while (sampleCount--)
-	{
-		uint32_t resultTemp = Stats_Compute_SingleSample(data, tempStats, stats, 16);
-		data += 16;
-		if (resultTemp)
-			result = resultTemp;
-	}
+
+	for (int i = 0; i < 16; i++)
+		result |= (Stats_Compute_MultiSample_SingleChannel_16offset(data + i, tempStats + i, stats + i, sampleCount) << i);
+
+
+//	while (sampleCount--)
+//	{
+//		uint32_t resultTemp = Stats_Compute_SingleSample(data, tempStats, stats, 16);
+//		data += 16;
+//		if (resultTemp)
+//			result = resultTemp;
+//	}
+
 	return result;
 }
 

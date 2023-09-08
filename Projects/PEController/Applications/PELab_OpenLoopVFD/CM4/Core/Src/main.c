@@ -73,14 +73,14 @@ osThreadId_t statsTaskHandle;
 const osThreadAttr_t statsTask_attributes = {
 		.name = "statsTask",
 		.stack_size = 1024 * 4,
-		.priority = (osPriority_t) osPriorityLow,
+		.priority = (osPriority_t) osPriorityRealtime7,
 };
 /* Definitions for displayTask */
 osThreadId_t displayTaskHandle;
 const osThreadAttr_t displayTask_attributes = {
 		.name = "displayTask",
 		.stack_size = 512 * 4,
-		.priority = (osPriority_t) osPriorityHigh,
+		.priority = (osPriority_t) osPriorityAboveNormal7,
 };
 /* Definitions for touchTask */
 osThreadId_t touchTaskHandle;
@@ -421,6 +421,7 @@ void StartStorageTask(void *argument)
 }
 
 /* USER CODE BEGIN Header_StartStatsTask */
+volatile uint32_t statsTicks;
 /**
  * @brief Function implementing the statsTask thread.
  * @param argument: Not used
@@ -433,13 +434,16 @@ void StartStatsTask(void *argument)
 	/* Infinite loop */
 	for(;;)
 	{
+		volatile uint32_t ticks = SysTick->VAL;
 		BSP_ADC_ComputeStatsInBulk((adc_processed_data_t*)&PROCESSED_ADC_DATA, (float)ADC_INFO.fs);
+		statsTicks = (ticks - SysTick->VAL) / 24;
 		osDelay(1);
 	}
 	/* USER CODE END StartStatsTask */
 }
 
 /* USER CODE BEGIN Header_StartDisplayTask */
+volatile uint32_t displayTicks;
 /**
  * @brief Function implementing the displayTask thread.
  * @param argument: Not used
@@ -453,18 +457,23 @@ void StartDisplayTask(void *argument)
 	int i = 0;
 	for(;;)
 	{
+		volatile uint32_t ticks = SysTick->VAL;
 		if (++i > 10)
 		{
 			ScreenManager_Refresh();
 			i = 0;
 		}
 		lv_timer_handler();
+		ticks = (ticks - SysTick->VAL) / 24;
+		if (ticks > 100)
+			displayTicks = ticks;
 		osDelay(1);
 	}
 	/* USER CODE END StartDisplayTask */
 }
 
 /* USER CODE BEGIN Header_StartTouchTask */
+volatile uint32_t touchTicks;
 /**
  * @brief Function implementing the touchTask thread.
  * @param argument: Not used
@@ -479,7 +488,9 @@ void StartTouchTask(void *argument)
 	/* Infinite loop */
 	for(;;)
 	{
+		volatile uint32_t ticks = lv_tick_get();//SysTick->VAL;
 		BSP_TS_Poll();
+		touchTicks = lv_tick_elaps(ticks);//(ticks - SysTick->VAL) / 24;
 		osDelay(10);
 	}
 	/* USER CODE END StartTouchTask */
