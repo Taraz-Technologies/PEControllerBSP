@@ -26,6 +26,18 @@
 extern "C" {
 #endif
 
+/** @addtogroup BSP
+ * @{
+ */
+
+/** @defgroup intelliSENS intelliSENS
+ * @brief This module contains the procedure to connect with the intelliSENS drivers for
+ * sending data to the PC for monitoring purposes.
+ * @details In the main file call the @ref intelliSENS_Init() function.
+ * The function @ref intelliSENS_GetLicenseNumberString() gets the license information
+ * for the PEController.
+ * @{
+ */
 /********************************************************************************
  * Includes
  *******************************************************************************/
@@ -49,6 +61,9 @@ extern "C" {
 /********************************************************************************
  * Global Function Prototypes
  *******************************************************************************/
+/** @defgroup intelliSENS_Exported_Functions Functions
+  * @{
+  */
 /**
  * @brief Initialize the intelliSENS library
  * @note <b>The following resources are used by the intelliSENS library. Make sure that they are not used in the main program.
@@ -72,7 +87,15 @@ extern const char* intelliSENS_GetLicenseNumberString(void);
  * Code
  *******************************************************************************/
 
-
+/**
+ * @}
+ */
+/**
+ * @}
+ */
+/**
+ * @}
+ */
 #ifdef __cplusplus
 }
 #endif
