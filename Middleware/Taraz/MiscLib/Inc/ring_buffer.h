@@ -26,6 +26,15 @@
 extern "C" {
 #endif
 
+/** @defgroup Misc_Library Miscellaneous
+ * @brief Contains the miscellaneous libraries.
+ * @{
+ */
+
+/** @defgroup RingBuffer_Library Ring Buffer
+ * @brief Contains helper functions and variables for ring buffer usage.
+ * @{
+ */
 /********************************************************************************
  * Includes
  *******************************************************************************/
@@ -73,77 +82,80 @@ typedef struct
  * Code
  *******************************************************************************/
 /**
- * @brief Process ring buffer read index after read is done
- * @param buff Pointer to the relevant @ref ring_buffer_t
+ * @brief Update the @ref ring_buffer_t.rdIndex after single successful read.
+ * @param buff Pointer to the relevant @ref ring_buffer_t.
  */
 static void RingBuffer_Read(ring_buffer_t* buff)
 {
 	buff->rdIndex = (buff->rdIndex + 1) & buff->modulo;
 }
 /**
- * @brief Process ring buffer write index after write is done
- * @param buff Pointer to the relevant @ref ring_buffer_t
+ * @brief Update the @ref ring_buffer_t.wrIndex after single successful write.
+ * @param buff Pointer to the relevant @ref ring_buffer_t.
  */
 static void RingBuffer_Write(ring_buffer_t* buff)
 {
 	buff->wrIndex = (buff->wrIndex + 1) & buff->modulo;
 }
 /**
- * @brief Process ring buffer read index after read is done
- * @param buff Pointer to the relevant @ref ring_buffer_t
- * @param count No of reads done
+ * @brief Update the @ref ring_buffer_t.rdIndex after multiple successful reads.
+ * @param buff Pointer to the relevant @ref ring_buffer_t.
+ * @param count No of reads done.
  */
 static void RingBuffer_Read_Count(ring_buffer_t* buff, int count)
 {
 	buff->rdIndex = (buff->rdIndex + count) & buff->modulo;
 }
 /**
- * @brief Process ring buffer write index after write is done
- * @param buff Pointer to the relevant @ref ring_buffer_t
- * @param count No of reads done
+ * @brief Update the @ref ring_buffer_t.wrIndex after multiple successful writes.
+ * @param buff Pointer to the relevant @ref ring_buffer_t.
+ * @param count No of writes done.
  */
 static void RingBuffer_Write_Count(ring_buffer_t* buff, int count)
 {
 	buff->wrIndex = (buff->wrIndex + count) & buff->modulo;
 }
 /**
- * @brief Checks if the ring buffer is empty
- * @returns bool <c>true</c> if empty else <c>false</c>
+ * @brief Checks if the ring buffer is empty.
+ * @param buff Pointer to the relevant @ref ring_buffer_t.
+ * @returns bool <c>true</c> if empty else <c>false</c>.
  */
 static bool RingBuffer_IsEmpty(ring_buffer_t* buff)
 {
 	return buff->rdIndex == buff->wrIndex;
 }
 /**
- * @brief Checks if the ring buffer is full
- * @returns bool <c>true</c> if full else <c>false</c>
+ * @brief Checks if the ring buffer is full.
+ * @param buff Pointer to the relevant @ref ring_buffer_t.
+ * @returns bool <c>true</c> if full else <c>false</c>.
  */
 static bool RingBuffer_IsFull(ring_buffer_t* buff)
 {
 	return buff->rdIndex == ((buff->wrIndex + 1) & buff->modulo);
 }
 /*!
- * @brief Get the next write location in the ring buffer
- * @param buff Pointer to the relevant @ref ring_buffer_t
- * @retval int- Next write location
+ * @brief Get the next write location in the ring buffer.
+ * @param buff Pointer to the relevant @ref ring_buffer_t.
+ * @retval int- Next write location index in relevant buffer.
  */
 static int RingBuffer_NextWriteLoc(ring_buffer_t* buff)
 {
 	return ((buff->wrIndex + 1) & buff->modulo);
 }
 /*!
- * @brief Get the next read location in the ring buffer
- * @param buff Pointer to the relevant @ref ring_buffer_t
- * @retval int- next read location
+ * @brief Get the next read location in the ring buffer.
+ * @param buff Pointer to the relevant @ref ring_buffer_t.
+ * @retval int- next read location index in relevant buffer.
  */
 static int RingBuffer_NextReadLoc(ring_buffer_t* buff)
 {
 	return ((buff->rdIndex + 1) & buff->modulo);
 }
 /*!
- * @brief Get the next index for given index
- * @param buff Pointer to the relevant @ref ring_buffer_t
- * @retval int- next index
+ * @brief Get the next index for given index in the ring buffer.
+ * @param buff Pointer to the relevant @ref ring_buffer_t.
+ * @param index Initial index.
+ * @retval int- next index in relevant buffer.
  */
 static int RingBuffer_NextLoc(ring_buffer_t* buff, int index)
 {
@@ -151,20 +163,28 @@ static int RingBuffer_NextLoc(ring_buffer_t* buff, int index)
 }
 
 /**
- * @brief Reset the indexes for the ring buffer
- * @param buff Pointer to the relevant @ref ring_buffer_t
+ * @brief Reset the indexes for the ring buffer.
+ * @param buff Pointer to the relevant @ref ring_buffer_t.
  */
 static void RingBuffer_Reset(ring_buffer_t* buff)
 {
 	buff->rdIndex = 0;
 	buff->wrIndex = 0;
 }
-
+/**
+ * @brief Get the number of entries left till the end of the data buffer, if we consider it as a linear buffer.
+ * @param buff Pointer to the relevant @ref ring_buffer_t.
+ * @return Number of entries left till end of linearized buffer.
+ */
 static int RingBuffer_GetCountTillSize(ring_buffer_t* buff)
 {
 	return (buff->modulo + 1 - buff->rdIndex);
 }
-
+/**
+ * @brief Get the number of available slots/entries in the @ref ring_buffer_t.
+ * @param buff Pointer to the relevant @ref ring_buffer_t.
+ * @return Number of available slots/entries in the ring_buffer_t.
+ */
 static int RingBuffer_GetPendingReadCount(ring_buffer_t* buff)
 {
 	if (buff->rdIndex > buff->wrIndex)
@@ -172,7 +192,11 @@ static int RingBuffer_GetPendingReadCount(ring_buffer_t* buff)
 	else
 		return buff->wrIndex - buff->rdIndex;
 }
-
+/**
+ * @brief Get the number of available slots/entries in the @ref ring_buffer_t without looping back to the start of the buffer.
+ * @param buff Pointer to the relevant @ref ring_buffer_t.
+ * @return Number of available slots/entries in the ring_buffer_t in linear access mode.
+ */
 static int RingBuffer_GetPendingReadCountsTillEnd(ring_buffer_t* buff)
 {
 	if (buff->rdIndex > buff->wrIndex)
@@ -181,8 +205,6 @@ static int RingBuffer_GetPendingReadCountsTillEnd(ring_buffer_t* buff)
 		return buff->wrIndex - buff->rdIndex;
 }
 
-
-
 #pragma GCC diagnostic pop
 /**
  * @}
@@ -190,6 +212,11 @@ static int RingBuffer_GetPendingReadCountsTillEnd(ring_buffer_t* buff)
 #ifdef __cplusplus
 }
 #endif
-
+/**
+ * @}
+ */
+/**
+ * @}
+ */
 #endif 
 /* EOF */

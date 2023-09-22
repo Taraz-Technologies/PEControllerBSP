@@ -25,7 +25,14 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+/** @addtogroup Misc_Library
+ * @{
+ */
 
+/** @defgroup Utility_Lib Utility Library
+ * @brief The library contains helper functions for generic usage.
+ * @{
+ */
 /********************************************************************************
  * Includes
  *******************************************************************************/
@@ -52,6 +59,9 @@ extern "C" {
 /********************************************************************************
  * Global Function Prototypes
  *******************************************************************************/
+/** @defgroup UTILITYLIB_Exported_Functions Functions
+ * @{
+ */
 /**
  * @brief Concatenates two strings
  * @param dest Destination string containing the first part where the src part will be appended
@@ -61,6 +71,36 @@ extern "C" {
  * @return Length of the resulting string
  */
 extern int strcat_custom(char* dest, const char* src, int destLen, bool insertSpace);
+/**
+ * @brief This function converts the floating point number to character string
+ * @param f Single precision floating point number to be converted
+ * @param txt Pointer to the string
+ * @param maxDigits Max number of digits to be displayed
+ * @param precision Precision of reading to be displayed to avoid showing negligible numbers
+ * @return Number of characters in the string
+ */
+extern int ftoa_custom(float f, char* txt, int maxDigits, int precision);
+/**
+ * @brief Custom implementation to convert string to single precision number if possible.
+ * @param txt Pointer to the text field.
+ * @param val Pointer to the single precision value to be updated
+ * @return <c>true</c> if successful else <c>false</c>
+ */
+extern bool atof_custom(const char* txt, float* f);
+/**
+ * @brief Custom implementation to convert boolean value to string.
+ * @param b Boolean value.
+ * @param txt Pointer to the text field to be filled.
+ * @return Number of characters in the string.
+ */
+extern int btoa_custom(bool b, char* txt);
+/**
+ * @brief Custom implementation to convert string to boolean if possible.
+ * @param txt Pointer to the text field.
+ * @param val Pointer to the boolean value to be updated
+ * @return <c>true</c> if successful else <c>false</c>
+ */
+extern bool atob_custom(const char* txt, bool* val);
 /**
  * @brief This function converts the integer number to character string
  * @param val Value of the integer
@@ -76,38 +116,14 @@ extern int itoa_custom(int32_t val, char* txt);
  */
 extern int utoa_custom(uint32_t val, char* txt);
 /**
- * @brief This function converts the floating point number to character string
- * @param f Single precision floating point number to be converted
- * @param txt Pointer to the string
- * @param maxDigits Max number of digits to be displayed
- * @param precision Precision of reading to be displayed to avoid showing negligible numbers
- * @return Number of characters in the string
- */
-extern int ftoa_custom(float f, char* txt, int maxDigits, int precision);
-extern bool atof_custom(const char* txt, float* f);
-/**
- * @brief Converts a boolean value to string literal.
- * @param b Boolean value.
- * @param txt Pointer to the text field to be filled.
- * @return Number of characters in the string.
- */
-extern int btoa_custom(bool b, char* txt);
-/**
- * @brief Converts a string literal to boolean if possible
- * @param txt Pointer to the text field.
- * @param val Pointer to the boolean value to be updated
- * @return <c>true</c> if sucessfull else <c>false</c>
- */
-extern bool atob_custom(const char* txt, bool* val);
-/**
- * @brief Custom implementation to convert string to integer.
+ * @brief Custom implementation to convert string to integer if possible.
  * @param txt Text representation
  * @param result Result of the conversion
  * @return <c>true</c> if successful else <c>false</c>
  */
 extern bool atoi_custom(const char *txt, int32_t *result);
 /**
- * @brief Custom implementation to convert string to unsigned integer.
+ * @brief Custom implementation to convert string to unsigned integer if possible.
  * @param txt Text representation
  * @param result Result of the conversion
  * @return <c>true</c> if successful else <c>false</c>
@@ -117,10 +133,17 @@ extern bool atou_custom(const char *txt, uint32_t *result);
  * Code
  *******************************************************************************/
 
-
+/**
+ * @}
+ */
 #ifdef __cplusplus
 }
 #endif
-
+/**
+ * @}
+ */
+/**
+ * @}
+ */
 #endif 
 /* EOF */

@@ -25,7 +25,9 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+/** @addtogroup Misc_Library
+ * @{
+ */
 
 /** @defgroup Monitoring_Library Monitoring Library
  * @brief Contains the declaration required for monitoring procedures
@@ -66,6 +68,10 @@ typedef enum
 /** @defgroup MonitoringLib_Exported_Strutures Structures
  * @{
  */
+/**
+ * @brief Contains the temporary variables for statistical analysis.
+ * @note Don't directly overwrite any variables in this structure. Reset using @ref Stats_Reset().
+ */
 typedef struct
 {
 	float rms;				/**< @brief RMS measurement */
@@ -87,8 +93,6 @@ typedef struct
 	float min;				/**< @brief Minimum measurement */
 	float pkTopk;			/**< @brief Peak to peak measurement */
 } stats_data_t;
-
-
 /**
  * @}
  */
@@ -103,14 +107,39 @@ typedef struct
  * @{
  */
 /**
- * @brief Insert new data for computation of statistics. If samples are enough statistics will be computed.
- * @param data Pointer to the first element of the new data array
- * @param stats Pointer to the first element of the statistics array
- * @param count Number of consecutive statistics computations
+ * @brief Insert new data for multiple channel statistics from a single buffer with samples in ping-pong fashion.
+ * @param data Pointer to the first element of the new data array.
+ * @param tempStats Pointer to the first element of the temporary statistics array.
+ * @param stats Pointer to the first element of the statistics array.
+ * @param chCount Number of consecutive channels for the statistical computations.
+ * @return Returns non-zero if new results are available else 0.
  */
 extern uint32_t Stats_Compute_SingleSample(float* data, temp_stats_data_t* tempStats, stats_data_t* stats, int chCount);
+/**
+ * @brief Insert new data for single channel statistics. The channel data is available after every 15 samples in the data buffer.
+ * @param data Pointer to the first element of the new data array.
+ * @param tempStats Pointer to the first element of the temporary statistics array.
+ * @param stats Pointer to the first element of the statistics array.
+ * @param sampleCount Number of samples for the channel.
+ * @return Returns 1 if new results are available else zero.
+ */
+extern uint32_t Stats_Compute_MultiSample_SingleChannel_16offset(float* data, temp_stats_data_t* tempStats, stats_data_t* stats, int sampleCount);
+/**
+ * @brief Insert new data for 16-channel statistics from a single buffer with samples in ping-pong fashion.
+ * @param data Pointer to the first element of the new data array.
+ * @param tempStats Pointer to the first element of the temporary statistics array.
+ * @param stats Pointer to the first element of the statistics array.
+ * @param sampleCount Number of samples for the channel.
+ * @return Returns zero if new results are not available else relevant bit is turned for each channel with new result is 1.
+ */
 extern uint32_t Stats_Compute_MultiSample_16ch(float* data, temp_stats_data_t* tempStats, stats_data_t* stats, int sampleCount);
-extern TCritical void Stats_Reset(temp_stats_data_t* tempStats, stats_data_t* stats, int sampleCount, int chCount);
+/**
+ * @brief Reset the statistics data
+ * @param tempStats Pointer to the first element of the temporary statistics array.
+ * @param stats Pointer to the first element of the statistics array.
+ * @param chCount Number of consecutive channels for the statistical computations.
+ */
+extern void Stats_Reset(temp_stats_data_t* tempStats, stats_data_t* stats, int chCount);
 /********************************************************************************
  * Code
  *******************************************************************************/
@@ -124,6 +153,9 @@ extern TCritical void Stats_Reset(temp_stats_data_t* tempStats, stats_data_t* st
 #ifdef __cplusplus
 }
 #endif
+/**
+ * @}
+ */
 /**
  * @}
  */

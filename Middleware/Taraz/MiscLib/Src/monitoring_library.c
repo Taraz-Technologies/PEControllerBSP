@@ -54,12 +54,13 @@
  *******************************************************************************/
 #pragma GCC push_options
 #pragma GCC optimize ("-Ofast")
-
 /**
- * @brief Insert new data for computation of statistics. If samples are enough statistics will be computed.
- * @param data Pointer to the first element of the new data array
- * @param stats Pointer to the first element of the statistics array
- * @param count Number of consecutive statistics computations
+ * @brief Insert new data for multiple channel statistics from a single buffer with samples in ping-pong fashion.
+ * @param data Pointer to the first element of the new data array.
+ * @param tempStats Pointer to the first element of the temporary statistics array.
+ * @param stats Pointer to the first element of the statistics array.
+ * @param chCount Number of consecutive channels for the statistical computations.
+ * @return Returns non-zero if new results are available else 0.
  */
 TCritical uint32_t Stats_Compute_SingleSample(float* data, temp_stats_data_t* tempStats, stats_data_t* stats, int chCount)
 {
@@ -99,8 +100,14 @@ TCritical uint32_t Stats_Compute_SingleSample(float* data, temp_stats_data_t* te
 	}
 	return result;
 }
-
-// after completion some samples will be discarded
+/**
+ * @brief Insert new data for single channel statistics. The channel data is available after every 15 samples in the data buffer.
+ * @param data Pointer to the first element of the new data array.
+ * @param tempStats Pointer to the first element of the temporary statistics array.
+ * @param stats Pointer to the first element of the statistics array.
+ * @param sampleCount Number of samples for the channel.
+ * @return Returns 1 if new results are available else zero.
+ */
 uint32_t Stats_Compute_MultiSample_SingleChannel_16offset(float* data, temp_stats_data_t* tempStats, stats_data_t* stats, int sampleCount)
 {
 	// Stop after a result is obtained to avoid algorithm complexity and increase performance.
@@ -151,7 +158,14 @@ uint32_t Stats_Compute_MultiSample_SingleChannel_16offset(float* data, temp_stat
 
 	return 0;
 }
-
+/**
+ * @brief Insert new data for 16-channel statistics from a single buffer with samples in ping-pong fashion.
+ * @param data Pointer to the first element of the new data array.
+ * @param tempStats Pointer to the first element of the temporary statistics array.
+ * @param stats Pointer to the first element of the statistics array.
+ * @param sampleCount Number of samples for the channel.
+ * @return Returns zero if new results are not available else relevant bit is turned for each channel with new result is 1.
+ */
 TCritical uint32_t Stats_Compute_MultiSample_16ch(float* data, temp_stats_data_t* tempStats, stats_data_t* stats, int sampleCount)
 {
 	uint32_t result = 0;
@@ -159,26 +173,22 @@ TCritical uint32_t Stats_Compute_MultiSample_16ch(float* data, temp_stats_data_t
 	for (int i = 0; i < 16; i++)
 		result |= (Stats_Compute_MultiSample_SingleChannel_16offset(data + i, tempStats + i, stats + i, sampleCount) << i);
 
-
-//	while (sampleCount--)
-//	{
-//		uint32_t resultTemp = Stats_Compute_SingleSample(data, tempStats, stats, 16);
-//		data += 16;
-//		if (resultTemp)
-//			result = resultTemp;
-//	}
-
 	return result;
 }
-
-TCritical void Stats_Reset(temp_stats_data_t* tempStats, stats_data_t* stats, int sampleCount, int chCount)
+/**
+ * @brief Reset the statistics data
+ * @param tempStats Pointer to the first element of the temporary statistics array.
+ * @param stats Pointer to the first element of the statistics array.
+ * @param chCount Number of consecutive channels for the statistical computations.
+ */
+TCritical void Stats_Reset(temp_stats_data_t* tempStats, stats_data_t* stats, int chCount)
 {
 	while (chCount--)
 	{
 		tempStats->rms = tempStats->avg = 0;
 		tempStats->max = -4294967296;
 		tempStats->min = 4294967296;
-		tempStats->samplesLeft = tempStats->sampleCount = sampleCount;
+		tempStats->samplesLeft = tempStats->sampleCount;
 		tempStats++;
 
 		if (stats != NULL)
