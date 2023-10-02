@@ -37,7 +37,7 @@ extern "C" {
  * 									to compute the value for the compensation.
  * 	-# <b>Moving Average Filter:</b> @ref mov_avg_t defines the filter unit. Use @ref MovingAverage_Compute()
  * 									to compute the moving average and @ref MovingAverage_Reset() to reset the filter.
- * 	-# <b>Moving Average Filter:</b> @ref avg_t defines the filter unit. Use @ref Average_Compute()
+ * 	-# <b>Average Filter:</b> @ref avg_t defines the filter unit. Use @ref Average_Compute()
  * 									to compute the average and @ref Average_Reset() to reset the filter.
  * @{
  */

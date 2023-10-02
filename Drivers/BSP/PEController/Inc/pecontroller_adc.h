@@ -191,7 +191,7 @@ extern timer_trigger_src_t BSP_ADC_SetInputOutputTrigger(tim_in_trigger_config_t
  * @param _freq Desired frequency
  * @param _sensitivity Desired sensitivity
  * @param _offset Desired offset
- * @param unit Desired unit
+ * @param _unit Desired unit
  * @return <c>ERR_OK</c> if setting successful else @ref device_err_t.
  */
 extern device_err_t BSP_ADC_UpdateConfig(adc_info_t* _info, float _fs, int _channelIndex, float _freq, float _sensitivity, float _offset, data_units_t _unit);

@@ -74,6 +74,36 @@ uint8_t String_FindnCharsIndices(const char *txt, char item, uint8_t* indices, u
 	// if not found return null pointer
 	return index;
 }
+static void ReverseString(char* txt, int len)
+{
+	int start = 0;
+	int end = len - 1;
+	while (start < end)
+	{
+		char temp = txt[start];
+		txt[start] = txt[end];
+		txt[end] = temp;
+		start++;
+		end--;
+	}
+}
+static bool ceil_custom(char* firstNumLoc, char* lastNumLoc)
+{
+	if (*firstNumLoc != '9')			// --TODO-- include for '9' later also
+	{
+		do
+		{
+			if (*lastNumLoc == '9')
+				*lastNumLoc = '0';
+			else if (*lastNumLoc < '9' && *lastNumLoc >= '0')
+			{
+				*lastNumLoc = *lastNumLoc + 1;
+				break;
+			}
+		} while (lastNumLoc-- != firstNumLoc);
+	}
+	return false;
+}
 /**
  * @brief Concatenates two strings
  * @param dest Destination string containing the first part where the src part will be appended
@@ -95,180 +125,6 @@ int strcat_custom(char* dest, const char* src, int destLen, bool insertSpace)
 	}
 	return destLen;
 }
-
-static void ReverseString(char* txt, int len)
-{
-	int start = 0;
-	int end = len - 1;
-	while (start < end)
-	{
-		char temp = txt[start];
-		txt[start] = txt[end];
-		txt[end] = temp;
-		start++;
-		end--;
-	}
-}
-
-/**
- * @brief This function converts the integer number to character string
- * @param val Value of the integer
- * @param txt Pointer to the string
- * @return Number of characters in the string.
- */
-int itoa_custom(int32_t val, char* txt)
-{
-	bool isNegative = false;
-	int i = 0;
-
-	if (val == 0)
-	{
-		txt[i++] = '0';
-		txt[i] = 0;
-		return 1;
-	}
-
-	if (val < 0)
-	{
-		isNegative = true;
-		val = -val;
-	}
-
-	while (val != 0)
-	{
-		int digit = val % 10;
-		txt[i++] = digit + '0';
-		val = val / 10;
-	}
-
-	if (isNegative)
-		txt[i++] = '-';
-
-	txt[i] = 0;
-
-	ReverseString(txt, i);
-
-	return i;
-}
-
-/**
- * @brief This function converts the unsigned integer number to character string
- * @param val Value of the unsigned integer
- * @param txt Pointer to the string
- * @return Number of characters in the string.
- */
-int utoa_custom(uint32_t val, char* txt)
-{
-	int i = 0;
-
-	if (val == 0)
-	{
-		txt[i++] = '0';
-		txt[i] = 0;
-		return 1;
-	}
-
-	while (val != 0)
-	{
-		int digit = val % 10;
-		txt[i++] = digit + '0';
-		val = val / 10;
-	}
-
-	txt[i] = 0;
-
-	ReverseString(txt, i);
-
-	return i;
-}
-
-/**
- * @brief Custom implementation to convert string to integer.
- * @param txt Text representation
- * @param result Result of the conversion
- * @return <c>true</c> if successful else <c>false</c>
- */
-bool atoi_custom(const char *txt, int32_t *result)
-{
-	if (txt == NULL)
-		return false;
-
-	int32_t num = 0;
-	bool isNegative = false;
-	int i = 0;
-
-	// Check for optional sign
-	if (txt[i] == '-' || txt[i] == '+') {
-		isNegative = (txt[i] == '-');
-		i++;
-	}
-
-	// Convert remaining digits
-	for (; txt[i] != '\0'; i++) {
-		if (txt[i] >= '0' && txt[i] <= '9')
-			num = num * 10 + (txt[i] - '0');
-		else
-			// Invalid character encountered
-			return false;
-	}
-
-	// Apply sign
-	if (isNegative)
-		num = -num;
-
-	*result = num;
-	return true;
-}
-
-/**
- * @brief Custom implementation to convert string to unsigned integer.
- * @param txt Text representation
- * @param result Result of the conversion
- * @return <c>true</c> if successful else <c>false</c>
- */
-bool atou_custom(const char *txt, uint32_t *result)
-{
-	if (txt == NULL)
-		return false;
-
-	uint32_t num = 0;
-	int i = 0;
-
-	// Check for optional sign
-	if (txt[i] == '+')
-		i++;
-
-	// Convert remaining digits
-	for (; txt[i] != '\0'; i++) {
-		if (txt[i] >= '0' && txt[i] <= '9')
-			num = num * 10 + (txt[i] - '0');
-		else
-			// Invalid character encountered
-			return false;
-	}
-
-	*result = num;
-	return true;
-}
-
-static bool ceil_custom(char* firstNumLoc, char* lastNumLoc)
-{
-	if (*firstNumLoc != '9')			// --TODO-- include for '9' later also
-	{
-		do
-		{
-			if (*lastNumLoc == '9')
-				*lastNumLoc = '0';
-			else if (*lastNumLoc < '9' && *lastNumLoc >= '0')
-			{
-				*lastNumLoc = *lastNumLoc + 1;
-				break;
-			}
-		} while (lastNumLoc-- != firstNumLoc);
-	}
-	return false;
-}
-
 /**
  * @brief This function converts the floating point number to character string
  * @param f Single precision floating point number to be converted
@@ -349,7 +205,12 @@ int ftoa_custom(float f, char* txt, int maxDigits, int precision)
 
 	return txt - txt0;
 }
-
+/**
+ * @brief Custom implementation to convert string to single precision number if possible.
+ * @param txt Pointer to the text field.
+ * @param val Pointer to the single precision value to be updated
+ * @return <c>true</c> if successful else <c>false</c>
+ */
 bool atof_custom(const char* txt, float* val)
 {
 	// if nothing found
@@ -410,9 +271,8 @@ bool atof_custom(const char* txt, float* val)
 		*val *= (-1.0f);
 	return true;
 }
-
 /**
- * @brief Converts a boolean value to string literal.
+ * @brief Custom implementation to convert boolean value to string.
  * @param b Boolean value.
  * @param txt Pointer to the text field to be filled.
  * @return Number of characters in the string.
@@ -431,12 +291,11 @@ int btoa_custom(bool b, char* txt)
 	*txt = 0;
 	return txt - txt0;
 }
-
 /**
- * @brief Converts a string literal to boolean if possible
+ * @brief Custom implementation to convert string to boolean if possible.
  * @param txt Pointer to the text field.
  * @param val Pointer to the boolean value to be updated
- * @return <c>true</c> if sucessfull else <c>false</c>
+ * @return <c>true</c> if successful else <c>false</c>
  */
 bool atob_custom(const char* txt, bool* val)
 {
@@ -486,4 +345,144 @@ bool atob_custom(const char* txt, bool* val)
 	}
 	return false;
 }
+/**
+ * @brief This function converts the integer number to character string
+ * @param val Value of the integer
+ * @param txt Pointer to the string
+ * @return Number of characters in the string.
+ */
+int itoa_custom(int32_t val, char* txt)
+{
+	bool isNegative = false;
+	int i = 0;
+
+	if (val == 0)
+	{
+		txt[i++] = '0';
+		txt[i] = 0;
+		return 1;
+	}
+
+	if (val < 0)
+	{
+		isNegative = true;
+		val = -val;
+	}
+
+	while (val != 0)
+	{
+		int digit = val % 10;
+		txt[i++] = digit + '0';
+		val = val / 10;
+	}
+
+	if (isNegative)
+		txt[i++] = '-';
+
+	txt[i] = 0;
+
+	ReverseString(txt, i);
+
+	return i;
+}
+/**
+ * @brief This function converts the unsigned integer number to character string
+ * @param val Value of the unsigned integer
+ * @param txt Pointer to the string
+ * @return Number of characters in the string.
+ */
+int utoa_custom(uint32_t val, char* txt)
+{
+	int i = 0;
+
+	if (val == 0)
+	{
+		txt[i++] = '0';
+		txt[i] = 0;
+		return 1;
+	}
+
+	while (val != 0)
+	{
+		int digit = val % 10;
+		txt[i++] = digit + '0';
+		val = val / 10;
+	}
+
+	txt[i] = 0;
+
+	ReverseString(txt, i);
+
+	return i;
+}
+/**
+ * @brief Custom implementation to convert string to integer if possible.
+ * @param txt Text representation
+ * @param result Result of the conversion
+ * @return <c>true</c> if successful else <c>false</c>
+ */
+bool atoi_custom(const char *txt, int32_t *result)
+{
+	if (txt == NULL)
+		return false;
+
+	int32_t num = 0;
+	bool isNegative = false;
+	int i = 0;
+
+	// Check for optional sign
+	if (txt[i] == '-' || txt[i] == '+') {
+		isNegative = (txt[i] == '-');
+		i++;
+	}
+
+	// Convert remaining digits
+	for (; txt[i] != '\0'; i++) {
+		if (txt[i] >= '0' && txt[i] <= '9')
+			num = num * 10 + (txt[i] - '0');
+		else
+			// Invalid character encountered
+			return false;
+	}
+
+	// Apply sign
+	if (isNegative)
+		num = -num;
+
+	*result = num;
+	return true;
+}
+/**
+ * @brief Custom implementation to convert string to unsigned integer if possible.
+ * @param txt Text representation
+ * @param result Result of the conversion
+ * @return <c>true</c> if successful else <c>false</c>
+ */
+bool atou_custom(const char *txt, uint32_t *result)
+{
+	if (txt == NULL)
+		return false;
+
+	uint32_t num = 0;
+	int i = 0;
+
+	// Check for optional sign
+	if (txt[i] == '+')
+		i++;
+
+	// Convert remaining digits
+	for (; txt[i] != '\0'; i++) {
+		if (txt[i] >= '0' && txt[i] <= '9')
+			num = num * 10 + (txt[i] - '0');
+		else
+			// Invalid character encountered
+			return false;
+	}
+
+	*result = num;
+	return true;
+}
+
+
+
 /* EOF */

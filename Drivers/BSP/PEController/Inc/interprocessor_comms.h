@@ -28,7 +28,8 @@ extern "C" {
  * @{
  */
 
-/** @addtogroup Interprocessor
+/** @defgroup Interprocessor Interprocessor Communication
+ * @brief Controls the communication between the communication and controls processors.
  * @{
  */
 /*******************************************************************************
@@ -144,11 +145,31 @@ typedef struct
  * @{
  */
 #if IS_COMMS_CORE
+/**
+ * @brief Update the value of an interprocessor parameter from a string value.
+ * @param _paramInfo Relevant parameter information
+ * @param value Text value used for updating the parameter
+ * @return device_err_t If successful <c>ERR_OK</c> else some other error.
+ */
 extern device_err_t Interprocessor_UpdateFromString(data_param_info_t* _paramInfo, const char* value);
+/**
+ * @brief Get the value of an interprocessor parameter in string format.
+ * @param _paramInfo Relevant parameter information.
+ * @param value text value to be updated.
+ * @param addUnit If <c>true</c> append the unit of the parameter at the end of the string result.
+ * @return device_err_t If successful <c>ERR_OK</c> else some other error.
+ */
 extern device_err_t Interprocessor_GetStringValue(data_param_info_t* _paramInfo, char* value, bool addUnit);
 #endif
 #if IS_CONTROL_CORE
+/**
+ * @brief Process the pending request for interprocessor communications.
+ * @note Call this function frequently to make sure that interprocessor communications work flawlessly.
+ */
 extern void InterprocessorComms_ProcessPendingRequests(void);
+/**
+ * @brief Initialize the buffers and storage for the interprocessor communications.
+ */
 extern void InterprocessorComms_InitData(void);
 #endif
 #if IS_STORAGE_CORE
@@ -172,7 +193,6 @@ extern void BSP_InterProcessorMsgs_ConfigStorage(state_storage_client_t* _config
 /**
  * @}
  */
-
 /**
  * @}
  */

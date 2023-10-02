@@ -103,7 +103,7 @@ typedef struct
 /********************************************************************************
  * Global Function Prototypes
  *******************************************************************************/
-/** @defgroup MAX11046_Exported_Functions Functions
+/** @defgroup MonitoringLib_Exported_Functions Functions
  * @{
  */
 /**

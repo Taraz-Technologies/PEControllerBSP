@@ -2440,7 +2440,14 @@ INCLUDE_FILE_PATTERNS  =
 # recursively expanded use the := operator instead of the = operator.
 # This tag requires that the tag ENABLE_PREPROCESSING is set to YES.
 
-PREDEFINED             =
+PREDEFINED             = IS_ADC_STATS_CORE \
+                         ADC_BULK_STATS \
+                         IS_STORAGE_CORE \
+                         IS_COMMS_CORE \
+                         IS_ADC_CORE \
+                         IS_LOCAL_STORAGE_FASTER \
+                         IS_CONTROL_CORE \
+                         MAX11046_ENABLE
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then this
 # tag can be used to specify a list of macro names that should be expanded. The

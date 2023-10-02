@@ -69,7 +69,6 @@ extern "C" {
  * @param *duties Pointer to the array where duty cycles need to be updated.
  */
 extern void ComputeDuty_SPWM(float theta, float modulationIndex, float* duties);
-
 /********************************************************************************
  * Code
  *******************************************************************************/

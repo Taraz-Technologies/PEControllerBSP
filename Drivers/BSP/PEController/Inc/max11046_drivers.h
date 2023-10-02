@@ -35,12 +35,13 @@ extern "C" {
  */
 
 /** @defgroup MAX11046 Max11046
- * @brief Contains the declaration and procedures for MAX11046 ADC
+ * @brief Contains the declaration and procedures for MAX11046 ADC.
  * @details List of functions
- * 	-# <b>@ref BSP_MAX11046_Init() :</b> Initializes the MAX11046 drivers
- * 	-# <b>@ref BSP_MAX11046_DeInit() :</b> De-initialize the MAX11046 drivers
- * 	-# <b>@ref BSP_MAX11046_Run() :</b> Performs the conversion
- * 	-# <b>@ref BSP_MAX11046_Stop() :</b> Stops the ADC data collection module, only effective for ADC_MODE_CONT
+ * 	-# <b>@ref BSP_MAX11046_Init() :</b> Initializes the MAX11046 drivers.
+ * 	-# <b>@ref BSP_MAX11046_DeInit() :</b> De-initialize the MAX11046 drivers.
+ * 	-# <b>@ref BSP_MAX11046_Run() :</b> Performs the conversion.
+ * 	-# <b>@ref BSP_MAX11046_Stop() :</b> Stops the ADC data collection module, only effective for ADC_MODE_CONT.
+ * 	-# <b>@ref BSP_MAX11046_SetInputOutputTrigger() :</b> Sets the input and output trigger functions for the ADC.
  * @{
  */
 /********************************************************************************
@@ -56,32 +57,15 @@ extern "C" {
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
-/** @defgroup MAX11046_Exported_Typedefs Type Definitions
- * @{
- */
 
-/**
- * @}
- */
 /********************************************************************************
  * Structures
  *******************************************************************************/
-/** @defgroup MAX11046_Exported_Structures Structures
- * @{
- */
-/**
- * @}
- */
+
 /********************************************************************************
  * Exported Variables
  *******************************************************************************/
-/** @defgroup MAX11046_Exported_Variables Variables
- * @{
- */
 
-/**
- * @}
- */
 /********************************************************************************
  * Global Function Prototypes
  *******************************************************************************/

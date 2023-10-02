@@ -53,11 +53,13 @@ extern "C" {
   * @{
   */
 /**
- * @brief Number of measurement logs to be kept - ring buffer should be 2 ^ n
+ * @brief Number of measurement logs to be kept
+ * @note Ring buffer should be 2 ^ n
  */
 #define MEASURE_SAVE_COUNT				(256)
 /**
- * @brief Number of raw measurement logs to be kept for communication systems - ring buffer should be 2 ^ n
+ * @brief Number of raw measurement logs to be kept for communication systems
+ * @note Ring buffer should be 2 ^ n
  */
 #define RAW_MEASURE_SAVE_COUNT			(256)
 /**
@@ -104,21 +106,23 @@ typedef struct
 	float fs;											/**< @brief Current sampling rate of the ADC */
 } adc_info_t;
 /**
- * @brief Non-converted (Raw) ADC values structure
+ * @brief Contains the stored raw/unconverted ADC results.
  */
 typedef struct
 {
-	volatile int recordIndex;
-	uint16_t dataRecord[RAW_MEASURE_SAVE_COUNT * TOTAL_MEASUREMENT_COUNT] __attribute__ ((aligned (8)));
+	volatile int recordIndex;							/**< @brief Record index for the raw ADC results in the @ref dataRecord buffer.
+	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 @note The index increases the location in the buffer with an increment of 16.
+	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	e.g. if recordIndex is 1, start index in the @ref dataRecord will be 1*16 = 16. */
+	uint16_t dataRecord[RAW_MEASURE_SAVE_COUNT * TOTAL_MEASUREMENT_COUNT] __attribute__ ((aligned (8)));	/**< @brief Buffer containing the raw ADC data. */
 } adc_raw_data_t;
 /**
- * @brief Converted ADC values structure
+ * @brief Contains the stored converted ADC results for all channels and there relevant statisitics.
  */
 typedef struct
 {
-	volatile int recordIndex;
-	adc_measures_t dataRecord[MEASURE_SAVE_COUNT];
-	adc_info_t info;
+	volatile int recordIndex;							/**< @brief Record index for the processed ADC results in the @ref dataRecord buffer. */
+	adc_measures_t dataRecord[MEASURE_SAVE_COUNT];		/**< @brief Buffer containing the processed ADC data. */
+	adc_info_t info;									/**< @brief ADC Information. */
 } adc_processed_data_t;
 /**
  * @}
@@ -126,38 +130,21 @@ typedef struct
 /********************************************************************************
  * Structures
  *******************************************************************************/
-/** @defgroup ADCConfig_Exported_Structures Structures
-  * @{
-  */
 
-/**
- * @}
- */
 /********************************************************************************
  * Exported Variables
  *******************************************************************************/
-/** @defgroup ADCConfig_Exported_Variables Variables
-  * @{
-  */
 
-/**
- * @}
- */
 /********************************************************************************
  * Global Function Prototypes
  *******************************************************************************/
-/** @defgroup ADCConfig_Exported_Functions Functions
-  * @{
-  */
+
 /********************************************************************************
  * Code
  *******************************************************************************/
 
 
 
-/**
- * @}
- */
 #ifdef __cplusplus
 }
 #endif

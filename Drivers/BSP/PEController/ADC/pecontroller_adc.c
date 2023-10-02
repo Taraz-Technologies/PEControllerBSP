@@ -302,7 +302,7 @@ void BSP_ADC_ComputeStatsInBulk(adc_processed_data_t* _processedAdcData, float _
 	{
 		if (processedAdcData == NULL)
 			processedAdcData = _processedAdcData;
-		Stats_Reset(tempStats, (stats_data_t*)processedAdcData->info.stats, 1000, TOTAL_MEASUREMENT_COUNT);
+		Stats_Reset(tempStats, (stats_data_t*)processedAdcData->info.stats, TOTAL_MEASUREMENT_COUNT);
 		fs = _fs;
 		for (int i = 0; i < TOTAL_MEASUREMENT_COUNT; i++)
 		{
@@ -313,7 +313,7 @@ void BSP_ADC_ComputeStatsInBulk(adc_processed_data_t* _processedAdcData, float _
 	if (_fs != fs)
 	{
 		fs = _fs;
-		Stats_Reset(tempStats, NULL, 1000, 16);
+		Stats_Reset(tempStats, NULL, 16);
 		for (int i = 0; i < TOTAL_MEASUREMENT_COUNT; i++)
 			tempStats[i].sampleCount = tempStats[i].samplesLeft = GET_SAMPLE_COUNT(fs, processedAdcData->info.freq[i]);
 	}

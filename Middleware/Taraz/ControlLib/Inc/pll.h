@@ -19,8 +19,8 @@
  ********************************************************************************
  */
 
-#ifndef INC_PLL_H_
-#define INC_PLL_H_
+#ifndef PLL_H_
+#define PLL_H_
 
 #ifdef __cplusplus
 extern "C" {
