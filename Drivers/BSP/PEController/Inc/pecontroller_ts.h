@@ -49,6 +49,9 @@ extern "C" {
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
+/** @defgroup BSPTS_Exported_Typedefs Typedefs
+  * @{
+  */
 /**
  *  @brief TS_StatusTypeDef
  *  Define BSP_TS_xxx() functions possible return value,
@@ -61,20 +64,28 @@ typedef enum
   TS_TIMEOUT           = 0x02, /*!< Touch Timeout */
   TS_DEVICE_NOT_FOUND  = 0x03  /*!< Touchscreen device not found */
 } TS_StatusTypeDef;
-
+/**
+  * @}
+  */
 /********************************************************************************
  * Structures
  *******************************************************************************/
+/** @defgroup BSPTS_Exported_Structures Structures
+  * @{
+  */
 /**
-*  @brief TS_StateTypeDef
-*  Define TS State structure
-*/
+ *  @brief TS_StateTypeDef
+ *  Define TS State structure
+ */
 typedef struct
 {
-  bool  touchDetected;                	/*!< Contains touch detections state   */
+  bool  touchDetected;                	/*!< Contains touch detections state */
   uint16_t touchX;      				 /*!< Contains horizontal touch location state */
   uint16_t touchY;      				/*!< Contains vertical touch location state */
 } TS_StateTypeDef;
+/**
+  * @}
+  */
 /********************************************************************************
  * Exported Variables
  *******************************************************************************/
@@ -82,6 +93,9 @@ typedef struct
 /********************************************************************************
  * Global Function Prototypes
  *******************************************************************************/
+/** @defgroup BSPTS_Exported_Functions Functions
+  * @{
+  */
 /**
  * @brief Initialize the touch screen controller
  * @param ts_SizeX Horizontal Size of the touch screen
@@ -102,7 +116,9 @@ extern void BSP_TS_Poll(void);
  * Code
  *******************************************************************************/
 
-
+/**
+ * @}
+ */
 #endif
 #ifdef __cplusplus
 }

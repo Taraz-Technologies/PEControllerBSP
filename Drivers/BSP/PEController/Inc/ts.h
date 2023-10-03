@@ -57,14 +57,6 @@
 /** @addtogroup TS
   * @{
   */
-
-/** @defgroup TS_Exported_Types
-  * @{
-  */
-
-/** @defgroup TS_Driver_structure  Touch Sensor Driver structure
-  * @{
-  */
 typedef struct
 {
   void       (*Init)(uint16_t);
@@ -88,14 +80,6 @@ typedef struct
   void (*Reset)(void);
   void (*Delay)(uint32_t delay);
 } TS_BSPTypeDef;
-
-/**
-  * @}
-  */
-
-/**
-  * @}
-  */
 
 /**
   * @}

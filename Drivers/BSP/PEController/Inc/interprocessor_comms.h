@@ -73,14 +73,14 @@ typedef enum
 	MSG_GET_FLOAT,    /**< Message to get single precision parameter value */
 } interprocessor_msg_type_t;
 /**
- * @brief
+ * @brief Defines types of bits management
  */
 typedef enum
 {
-	BITS_SET,     /**< BITS_SET */
-	BITS_CLR,     /**< BITS_CLR */
-	BITS_TOGGLE,  /**< BITS_TOGGLE */
-	BITS_SET_COUNT/**< BITS_SET_COUNT */
+	BITS_SET,     /**< Select to set bits */
+	BITS_CLR,     /**< Select to clear bits */
+	BITS_TOGGLE,  /**< Select to toggle bits */
+	BITS_SET_COUNT/**< Not a type. Use this to get the total number of legal types */
 } bits_set_types_t;
 /**
  * @}

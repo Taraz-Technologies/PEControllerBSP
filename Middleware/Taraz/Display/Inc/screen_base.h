@@ -25,7 +25,17 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+/** @addtogroup BSP
+ * @{
+ */
 
+/** @addtogroup Display
+ * @{
+ */
+
+/** @addtogroup DisplayScreens
+ * @{
+ */
 /********************************************************************************
  * Includes
  *******************************************************************************/
@@ -53,6 +63,9 @@ extern "C" {
 /********************************************************************************
  * Global Function Prototypes
  *******************************************************************************/
+/** @defgroup PEDISPLAYSCREEN_Exported_Functions Functions
+  * @{
+  */
 /**
  * @brief Display a message on screen
  * @param _titleTxt Title of the message
@@ -63,10 +76,20 @@ extern void DisplayMessage(const char* _titleTxt, const char* _msgTxt);
  * Code
  *******************************************************************************/
 
-
+/**
+ * @}
+ */
 #ifdef __cplusplus
 }
 #endif
-
+/**
+ * @}
+ */
+/**
+ * @}
+ */
+/**
+ * @}
+ */
 #endif 
 /* EOF */

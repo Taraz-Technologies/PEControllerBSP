@@ -74,10 +74,10 @@ extern "C" {
  */
 /**
  * @brief Initializes the MAX11046 drivers
- * @param _type ADC_MODE_SINGLE or ADC_MODE_CONT for single or continuous conversions respectively
- * @param _contConfig adc_cont_config_t contains the continuous transfer configuration
- * @param _rawAdcData Pointer to the raw ADC data container
- * @param _processedAdcData Pointer to the processed ADC data container
+ * @param type ADC_MODE_SINGLE or ADC_MODE_CONT for single or continuous conversions respectively
+ * @param contConfig adc_cont_config_t contains the continuous transfer configuration
+ * @param rawAdcData Pointer to the raw ADC data container
+ * @param processedAdcData Pointer to the processed ADC data container
  */
 extern void BSP_MAX11046_Init(adc_acq_mode_t type, adc_cont_config_t* contConfig, volatile adc_raw_data_t* rawAdcData, volatile adc_processed_data_t* processedAdcData);
 /**

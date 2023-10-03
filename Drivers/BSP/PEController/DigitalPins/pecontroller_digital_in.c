@@ -121,7 +121,6 @@ void BSP_Din_SetPortGPIO(void)
 }
 /**
  * @brief Get the value of the  Complete Input Port
- *
  * @return uint32_t Current Port Input Value
  */
 uint32_t BSP_Din_GetPortValue(void)
@@ -136,7 +135,6 @@ uint32_t BSP_Din_GetPortValue(void)
 	val |= (uint32_t)HAL_GPIO_ReadPin(dinPins[0].GPIO, dinPins[0].pinMask);
 	return val;
 }
-
 /**
  * @brief Get the value of the input pins
  * @param pinNo Pin no from (1-16)

@@ -25,7 +25,12 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+/** @addtogroup BSP
+ * @{
+ */
+/** @addtogroup General
+ * @{
+ */
 /********************************************************************************
  * Includes
  *******************************************************************************/
@@ -37,6 +42,9 @@ extern "C" {
 /********************************************************************************
  * Defines
  *******************************************************************************/
+/** @defgroup PECONTROLLERBSP_Exported_Macros Macros
+  * @{
+  */
 #define maxCS1_Pin GPIO_PIN_2
 #define maxCS1_GPIO_Port GPIOE
 #define maxCS2_Pin GPIO_PIN_3
@@ -101,27 +109,64 @@ extern "C" {
 #define MAX11046_CLK_Us	240					// --todo-- configure 240 seperately
 
 /*********** Device Constants **************/
+/**
+ * @brief Total number of measurment channels
+ */
 #define TOTAL_MEASUREMENT_COUNT			(16)
 /*********** Device Constants **************/
 
 #define TCritical						__attribute__((section (".tCritical")))
 
 // Inputs
+/**
+ * @brief Select the core for control systems.
+ */
 #define IS_CONTROL_CORE							(defined(CORE_CM7))
+/**
+ * @brief Select the core for communication systems.
+ */
 #define IS_COMMS_CORE							(defined(CORE_CM4))
+/**
+ * @brief Select the core for storage operations.
+ */
 #define IS_STORAGE_CORE							(defined(CORE_CM4))
+/**
+ * @brief Select the core analog to digital conversion.
+ */
 #define IS_ADC_STATS_CORE						(defined(CORE_CM4))
+/**
+ * @brief Compute the statistics of the ADC in bulk.
+ */
 #define ADC_BULK_STATS							(1)
+/**
+ * @brief Checks if the ADC conversion is on CM7.
+ */
 #define IS_ADC_CM7								(1)
+/**
+ * @brief Enable the MAX11046 drivers.
+ */
 #define MAX11046_ENABLE							(1)
+/**
+ * @brief If ADC data collection through DMA is more efficient than manual collection set to 1.
+ */
 #define IS_DMA_ADC_DATA_COLLECTION_SUPERIOR		(0) 				// Running from DMA takes more time in both cases.
+/**
+ * @brief If local RAM storage is faster than distant RAM set to 1.
+ */
 #define IS_LOCAL_STORAGE_FASTER					(defined(CORE_CM7)) // Local storage is only faster for the CM4 core.
-
-// Computations
+/**
+ * @brief Checks if the ADC conversion is on CM4.
+ */
 #define IS_ADC_CM4						(!IS_ADC_CM7)
+/**
+ * @brief Checks if the ADC conversion is on current core.
+ */
 #define IS_ADC_CORE						((IS_ADC_CM7 && defined(CORE_CM7)) || (IS_ADC_CM4 && defined(CORE_CM4)))
 
 /************** Debugging *****************/
+/**
+ * @brief Disable profiling  to improve efficiency of the code.
+ */
 #define ENABLE_PROFILING				(1)
 #if ENABLE_PROFILING
 #define PROFILE_GPIO_PORT				(GPIOB)
@@ -133,6 +178,9 @@ extern "C" {
 #define SET_Pin(GPIO, PinMask)			GPIO->BSRR = PinMask;
 #define CLR_Pin(GPIO, PinMask)			GPIO->BSRR = (PinMask << 16U);
 /************** HELPERS *******************/
+/**
+  * @}
+  */
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
@@ -148,6 +196,9 @@ extern "C" {
 /********************************************************************************
  * Global Function Prototypes
  *******************************************************************************/
+/** @defgroup PECONTROLLERBSP_Exported_Functions Functions
+  * @{
+  */
 /**
   * @brief  This function is executed in case of error occurrence.
   * @retval None
@@ -156,6 +207,15 @@ extern void Error_Handler(void);
 /********************************************************************************
  * Code
  *******************************************************************************/
+/**
+ * @brief Configure the GPIO struct with default values
+ * @param GPIO_InitStruct struct
+ * @param pin Specifies the GPIO pins to be configured. This parameter can be any value of @ref GPIO_pins_define.
+ * @param mode Specifies the operating mode for the selected pins. This parameter can be a value of @ref GPIO_mode_define.
+ * @param alternate Peripheral to be connected to the selected pins. This parameter can be a value of @ref GPIO_Alternate_function_selection.
+ * @note PULL = GPIO_NOPULL
+ * Speed = GPIO_SPEED_FREQ_HIGH
+ */
 static inline void BSP_GPIOStruct_DefaultConfig(GPIO_InitTypeDef* GPIO_InitStruct, uint32_t pin, uint32_t mode, uint32_t alternate)
 {
 	GPIO_InitStruct->Pin = pin;
@@ -164,7 +224,14 @@ static inline void BSP_GPIOStruct_DefaultConfig(GPIO_InitTypeDef* GPIO_InitStruc
 	GPIO_InitStruct->Speed = GPIO_SPEED_FREQ_HIGH;
 	GPIO_InitStruct->Alternate = alternate;
 }
-
+/**
+ * @brief Configure the GPIO struct as IO
+ * @param GPIO_InitStruct struct
+ * @param pin Specifies the GPIO pins to be configured. This parameter can be any value of @ref GPIO_pins_define.
+ * @param mode Specifies the operating mode for the selected pins. This parameter can be a value of @ref GPIO_mode_define.
+ * @param speed Specifies the speed for the selected pins. This parameter can be a value of @ref GPIO_speed_define.
+ * @note PULL = GPIO_NOPULL
+ */
 static inline void BSP_GPIOStruct_IOConfig(GPIO_InitTypeDef* GPIO_InitStruct, uint32_t pin, uint32_t mode, uint32_t speed)
 {
 	GPIO_InitStruct->Pin = pin;
@@ -172,10 +239,17 @@ static inline void BSP_GPIOStruct_IOConfig(GPIO_InitTypeDef* GPIO_InitStruct, ui
 	GPIO_InitStruct->Pull = GPIO_NOPULL;
 	GPIO_InitStruct->Speed = speed;
 }
-
+/**
+  * @}
+  */
 #ifdef __cplusplus
 }
 #endif
-
+/**
+  * @}
+  */
+/**
+  * @}
+  */
 #endif 
 /* EOF */

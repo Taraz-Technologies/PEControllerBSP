@@ -57,6 +57,9 @@ extern "C" {
 /********************************************************************************
  * Exported Variables
  *******************************************************************************/
+/** @defgroup CLUTDATA_Exported_Typedefs Type Definitions
+  * @{
+  */
 /**
  * @brief Array containing the look-up table data for the CLUT module of PEController.
  */
@@ -65,6 +68,9 @@ extern const unsigned clut_data[256];
  * @brief Color mapping array to map the colors to 256 available colors
  */
 extern const unsigned char color_map[65536];
+/**
+ * @}
+ */
 /********************************************************************************
  * Global Function Prototypes
  *******************************************************************************/

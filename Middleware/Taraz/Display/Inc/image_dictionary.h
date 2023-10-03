@@ -26,6 +26,18 @@
 extern "C" {
 #endif
 
+/** @addtogroup BSP
+ * @{
+ */
+
+/** @addtogroup Display
+ * @{
+ */
+
+/** @defgroup Images Images
+ * @brief Contains the declaration and procedures for available images.
+ * @{
+ */
 /********************************************************************************
  * Includes
  *******************************************************************************/
@@ -37,13 +49,22 @@ extern "C" {
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
+/** @defgroup IMGS_Exported_Structures Structures
+ * @{
+ */
+/**
+ * @brief Contains the relevant information for an image
+ */
 typedef struct
 {
-	uint16_t width;
-	uint16_t height;
-	uint32_t pixelFormat;
-	const uint8_t* data;
+	uint16_t width;	 		/**< @brief Image width */
+	uint16_t height;	 	/**< @brief Image height */
+	uint32_t pixelFormat;	/**< @brief Image pixel format @ref LTDC_Pixelformat */
+	const uint8_t* data;	/**< @brief Image pixel color data in specified format */
 } image_info_t;
+/**
+ * @}
+ */
 /********************************************************************************
  * Structures
  *******************************************************************************/
@@ -51,10 +72,28 @@ typedef struct
 /********************************************************************************
  * Exported Variables
  *******************************************************************************/
+/** @defgroup IMGS_Exported_Variables Variables
+ * @{
+ */
+/**
+ * @brief Taraz logo information
+ */
 extern image_info_t taraz_logo_info;
+/**
+ * @brief intelliSENS QR Code information
+ */
 extern image_info_t intelliSENS_QR_info;
+/**
+ * @brief intelliSENS logo information
+ */
 extern image_info_t intelliSENS_logo_info;
+/**
+ * @brief BSP documentation QR Code information
+ */
 extern image_info_t bsp_docs_QR_info;
+/**
+ * @}
+ */
 /********************************************************************************
  * Global Function Prototypes
  *******************************************************************************/
@@ -67,6 +106,14 @@ extern image_info_t bsp_docs_QR_info;
 #ifdef __cplusplus
 }
 #endif
-
+/**
+ * @}
+ */
+/**
+ * @}
+ */
+/**
+ * @}
+ */
 #endif 
 /* EOF */

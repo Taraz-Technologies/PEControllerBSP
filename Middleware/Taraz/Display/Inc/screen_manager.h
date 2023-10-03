@@ -25,7 +25,17 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+/** @addtogroup BSP
+ * @{
+ */
 
+/** @addtogroup Display
+ * @{
+ */
+
+/** @addtogroup DisplayScreens
+ * @{
+ */
 /********************************************************************************
  * Includes
  *******************************************************************************/
@@ -51,6 +61,9 @@ typedef void (*DisplayLayer)(ltdc_layer_info_t* layerInfo, int layerIdx);
 /********************************************************************************
  * Global Function Prototypes
  *******************************************************************************/
+/** @defgroup PEDISPLAYSCREEN_Exported_Functions Functions
+ * @{
+ */
 /**
  * @brief Initialize the screen manager
  * @note This function is automatically called by the BSP. No need to call this function externally
@@ -67,9 +80,21 @@ void ScreenManager_Refresh(void);
  *******************************************************************************/
 
 
+/**
+ * @}
+ */
 #ifdef __cplusplus
 }
 #endif
 
+/**
+ * @}
+ */
+/**
+ * @}
+ */
+/**
+ * @}
+ */
 #endif 
 /* EOF */

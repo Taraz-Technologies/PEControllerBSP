@@ -51,10 +51,25 @@ extern "C" {
 /** @defgroup SHAREDMEM_Exported_Macros Macros
  * @{
  */
+/**
+ * @brief Shortcut for accessing raw ADC data.
+ */
 #define RAW_ADC_DATA				(sharedData->rawAdcData)
+/**
+ * @brief Shortcut for converted/processed raw ADC data.
+ */
 #define PROCESSED_ADC_DATA			(sharedData->processedAdcData)
+/**
+ * @brief Shortcut for accessing ADC related information.
+ */
 #define ADC_INFO					(PROCESSED_ADC_DATA.info)
+/**
+ * @brief Shortcut for accessing messages between CM4 and CM7 core.
+ */
 #define CORE_MSGS					(sharedData->interProcessorMsgs)
+/**
+ * @brief Shortcut for accessing data shared between CM4 and CM7 core.
+ */
 #define INTER_CORE_DATA				(sharedData->interProcessorMsgs.dataBuffs)
 /**
  * @}
@@ -62,13 +77,7 @@ extern "C" {
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
-/** @defgroup SHAREDMEM_Exported_Typedefs Type Definitions
- * @{
- */
 
-/**
- * @}
- */
 /********************************************************************************
  * Structures
  *******************************************************************************/
@@ -80,10 +89,10 @@ extern "C" {
  */
 typedef struct
 {
-	volatile bool isStateStorageInitialized;
-	adc_raw_data_t rawAdcData;
-	adc_processed_data_t processedAdcData;
-	interprocessor_msg_data_t interProcessorMsgs;
+	volatile bool isStateStorageInitialized;		/**< Flag indicating if the state storage module has restored states. */
+	adc_raw_data_t rawAdcData;						/**< Raw ADC data */
+	adc_processed_data_t processedAdcData;			/**< Converted ADC data */
+	interprocessor_msg_data_t interProcessorMsgs;	/**< Structure handling the parameters and commjunications between CM4 and CM7 core. */
 } shared_data_t;
 /**
  * @}

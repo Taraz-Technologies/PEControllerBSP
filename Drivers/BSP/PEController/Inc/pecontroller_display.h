@@ -39,9 +39,6 @@ extern "C" {
  * @brief Contains the declaration and procedures for the display driver
  * @details List of functions
  * 	-# <b>@ref BSP_Display_Init()</b> Initializes the display module
- * 	-# <b>@ref BSP_Display_DeInit()</b> De-initializes the display module
- * 	-# <b>@ref BSP_Display_ShowFirstLayer()</b> Displays the first layer after applying configuration
- * 	-# <b>@ref BSP_Display_ShowLogo()</b> Display the selected LOGO. Use the user_config.h file to select appropriate LOGO
  * @{
  */
 /********************************************************************************
@@ -52,6 +49,9 @@ extern "C" {
 /********************************************************************************
  * Defines
  *******************************************************************************/
+/** @defgroup PEDISPLAY_Exported_Typedefs Typedefs
+  * @{
+  */
 /**
  * @brief Pixel width of the Display
  */
@@ -72,12 +72,21 @@ extern "C" {
  * @brief Set the display buffer size to 1/10th the size of the screen
  */
 #define LVGL_BUFF_SIZE				((DISPLAY_WIDTH_RAM * DISPLAY_HEIGHT_RAM * 10) / 100)
-
+/**
+ * @brief LTDC layer used by LVGL
+ */
 #define LVGL_LAYER					(0)
-
+/**
+ * @brief LTDC layer used by direct display
+ */
 #define DIRECT_LAYER				(1)
-
+/**
+ * @brief Display format used by the lvgl layer in LTDC
+ */
 #define RAM_PIXEL_FORMAT			(LTDC_PIXEL_FORMAT_L8)
+/**
+  * @}
+  */
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
@@ -89,7 +98,16 @@ extern "C" {
 /********************************************************************************
  * Exported Variables
  *******************************************************************************/
+/** @defgroup PEDISPLAY_Exported_Variables Variables
+  * @{
+  */
+/**
+ * @brief Frame buffer used for storage of a display frma in RAM.
+ */
 extern uint8_t frame_buff[DISPLAY_HEIGHT_RAM][DISPLAY_WIDTH_RAM];
+/**
+ * @}
+ */
 /********************************************************************************
  * Global Function Prototypes
  *******************************************************************************/

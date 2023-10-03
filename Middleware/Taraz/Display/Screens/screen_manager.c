@@ -112,7 +112,7 @@ static void Measurements_Init(adc_info_t* _adcInfo)
 /**
  * @brief Initialize the screen manager
  * @note This function is automatically called by the BSP. No need to call this function externally
- * @param __dispLayer This function will be called to change the layer information
+ * @param _dispLayer This function will be called to change the layer information
  * @param _adcInfo This pointer points to the ADC information structure
  */
 void ScreenManager_Init(DisplayLayer _dispLayer ,adc_info_t* _adcInfo)

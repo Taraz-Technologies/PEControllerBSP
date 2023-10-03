@@ -25,7 +25,16 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+/** @addtogroup BSP
+ * @{
+ */
+/** @addtogroup Display
+ * @{
+ */
+/** @defgroup DisplayScreens Screens
+ * @brief Contains the declaration and procedures for the display screens
+ * @{
+ */
 /********************************************************************************
  * Includes
  *******************************************************************************/
@@ -42,6 +51,9 @@ extern "C" {
 /********************************************************************************
  * Structures
  *******************************************************************************/
+/** @defgroup PEDISPLAYSCREEN_Exported_Structures Structures
+  * @{
+  */
 /**
  * @brief Contains the information of the application required by the display unit.
  */
@@ -56,9 +68,15 @@ typedef struct
 	image_info_t* img;								/**< @brief Image displayed in the application screen.
 															Set to NULL if no image to display.*/
 } appinfo_display_t;
+/**
+  * @}
+  */
 /********************************************************************************
  * Exported Variables
  *******************************************************************************/
+/** @defgroup PEDISPLAYSCREEN_Exported_Variables Variables
+  * @{
+  */
 /**
  * @brief This information will be displayed in the application information screen
  * @note The information is application dependent and can be edited in @ref screen_appinfo_data.c.
@@ -69,6 +87,9 @@ extern appinfo_display_t appInfoDisplay;
  * @brief Assigns the image to be displayed on the splash screen
  */
 extern image_info_t* splashImg;
+/**
+  * @}
+  */
 /********************************************************************************
  * Global Function Prototypes
  *******************************************************************************/
@@ -82,5 +103,14 @@ extern image_info_t* splashImg;
 }
 #endif
 
+/**
+  * @}
+  */
+/**
+  * @}
+  */
+/**
+  * @}
+  */
 #endif 
 /* EOF */
