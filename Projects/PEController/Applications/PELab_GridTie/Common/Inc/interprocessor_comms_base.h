@@ -1,6 +1,6 @@
 /**
  ********************************************************************************
- * @file 		pecontroller_digital_in.h
+ * @file 		interprocessor_comms_base.h
  * @author 		Waqas Ehsan Butt
  * @date 		September 25, 2021
  *
@@ -41,12 +41,30 @@ extern "C" {
 /*******************************************************************************
  * Defines
  ******************************************************************************/
+/** @defgroup InterprocessorComms_Exported_Macros Macros
+ * @{
+ */
+/**
+ * @brief No of simultaneous inter-processor messages supported.
+ */
 #define INTERPROCESSOR_MSGS_SIZE					(64)
+/**
+ * @brief No of simultaneous inter-processor commands supported.
+ */
 #define INTERPROCESSOR_CMD_BUFF_SIZE				(1024)
+/**
+ * @brief No of simultaneous inter-processor responses supported.
+ */
 #define INTERPROCESSOR_RESPONSE_BUFF_SIZE			(1024)
+/**
+ * @}
+ */
 /*******************************************************************************
  * Typedefs
  ******************************************************************************/
+/** @defgroup InterprocessorComms_Exported_Typedefs Type Definitions
+ * @{
+ */
 typedef enum
 {
 	// Controls
@@ -55,37 +73,37 @@ typedef enum
 	// Monitors
 	SHARE_RELAY_STATUS,
 	SHARE_PLL_STATUS,
-	SHARE_BOOL_COUNT,
+	SHARE_BOOL_COUNT,   /**< Not a type. Use this to get the total number of legal types */
 } shared_bools_t;
 typedef enum
 {
 	SHARE_SAMPLE_U8,
-	SHARE_U8_COUNT,
+	SHARE_U8_COUNT,   /**< Not a type. Use this to get the total number of legal types */
 } shared_u8_t;
 typedef enum
 {
 	SHARE_SAMPLE_U16,
-	SHARE_U16_COUNT,
+	SHARE_U16_COUNT,   /**< Not a type. Use this to get the total number of legal types */
 } shared_u16_t;
 typedef enum
 {
 	SHARE_SAMPLE_U32,
-	SHARE_U32_COUNT,
+	SHARE_U32_COUNT,   /**< Not a type. Use this to get the total number of legal types */
 } shared_u32_t;
 typedef enum
 {
 	SHARE_SAMPLE_S8,
-	SHARE_S8_COUNT,
+	SHARE_S8_COUNT,   /**< Not a type. Use this to get the total number of legal types */
 } shared_s8_t;
 typedef enum
 {
 	SHARE_SAMPLE_S16,
-	SHARE_S16_COUNT,
+	SHARE_S16_COUNT,   /**< Not a type. Use this to get the total number of legal types */
 } shared_s16_t;
 typedef enum
 {
 	SHARE_SAMPLE_S32,
-	SHARE_S32_COUNT,
+	SHARE_S32_COUNT,   /**< Not a type. Use this to get the total number of legal types */
 } shared_s32_t;
 typedef enum
 {
@@ -96,13 +114,19 @@ typedef enum
 	SHARE_LOUT,
 	// Monitors
 	SHARE_CURR_RMS_CURRENT,
-	SHARE_FLOAT_COUNT,
+	SHARE_FLOAT_COUNT,   /**< Not a type. Use this to get the total number of legal types */
 } shared_float_t;
 typedef enum
 {
 	SHARE_SAMPLE_BIT_ACCESS,
-	SHARE_BIT_ACCESS_COUNT,
+	SHARE_BIT_ACCESS_COUNT,   /**< Not a type. Use this to get the total number of legal types */
 } shared_bit_access_t;
+/**
+ * @}
+ */
+/*******************************************************************************
+ * Structures
+ ******************************************************************************/
 #if IS_CONTROL_CORE
 typedef struct
 {
@@ -111,10 +135,6 @@ typedef struct
 	volatile bool isPending;
 } state_update_request;
 #endif
-/*******************************************************************************
- * Structures
- ******************************************************************************/
-
  /*******************************************************************************
  * Exported Variables
  ******************************************************************************/
@@ -125,24 +145,15 @@ extern state_update_request inverterStateUpdateRequest;
 /*******************************************************************************
  * Global Function Prototypes
  ******************************************************************************/
-/** @defgroup DIN_Exported_Functions Functions
-  * @{
-  */
 
 /*******************************************************************************
  * Code
  ******************************************************************************/
 
-/**
- * @}
- */
 #ifdef __cplusplus
 }
 #endif
 
-/**
- * @}
- */
 
 /**
  * @}

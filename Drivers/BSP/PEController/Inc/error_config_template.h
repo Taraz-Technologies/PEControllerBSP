@@ -55,7 +55,7 @@ typedef enum
 	ERR_INVALID_TEXT, /**< Text is invalid */
 	ERR_ILLEGAL,      /**< Value is illegal */
 	ERR_OUT_OF_RANGE, /**< Value is out of defined range */
-	ERR_NOT_AVAILABLE,/**< Parmaeter not available */
+	ERR_NOT_AVAILABLE,/**< Parameter not available */
 	ERR_COUNT,        /**< Not an error. Use this to get the total number of legal error types. */
 } device_err_t;
 /**

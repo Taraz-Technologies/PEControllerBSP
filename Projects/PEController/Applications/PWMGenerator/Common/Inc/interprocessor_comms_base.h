@@ -1,6 +1,6 @@
 /**
  ********************************************************************************
- * @file 		pecontroller_digital_in.h
+ * @file 		interprocessor_comms_base.h
  * @author 		Waqas Ehsan Butt
  * @date 		September 25, 2021
  *
@@ -68,47 +68,47 @@ extern "C" {
 typedef enum
 {
 	SHARE_CONTROL_STATE,/**< SHARE_CONTROL_STATE */
-	SHARE_BOOL_COUNT,   /**< SHARE_BOOL_COUNT */
+	SHARE_BOOL_COUNT,   /**< Not a type. Use this to get the total number of legal types */
 } shared_bools_t;
 typedef enum
 {
 	SHARE_SAMPLE_U8,
-	SHARE_U8_COUNT,
+	SHARE_U8_COUNT,   /**< Not a type. Use this to get the total number of legal types */
 } shared_u8_t;
 typedef enum
 {
 	SHARE_SAMPLE_U16,
-	SHARE_U16_COUNT,
+	SHARE_U16_COUNT,   /**< Not a type. Use this to get the total number of legal types */
 } shared_u16_t;
 typedef enum
 {
 	SHARE_SAMPLE_U32,
-	SHARE_U32_COUNT,
+	SHARE_U32_COUNT,   /**< Not a type. Use this to get the total number of legal types */
 } shared_u32_t;
 typedef enum
 {
 	SHARE_SAMPLE_S8,
-	SHARE_S8_COUNT,
+	SHARE_S8_COUNT,   /**< Not a type. Use this to get the total number of legal types */
 } shared_s8_t;
 typedef enum
 {
 	SHARE_SAMPLE_S16,
-	SHARE_S16_COUNT,
+	SHARE_S16_COUNT,   /**< Not a type. Use this to get the total number of legal types */
 } shared_s16_t;
 typedef enum
 {
 	SHARE_SAMPLE_S32,
-	SHARE_S32_COUNT,
+	SHARE_S32_COUNT,   /**< Not a type. Use this to get the total number of legal types */
 } shared_s32_t;
 typedef enum
 {
 	SHARE_PWM_PHASE_SHIFT,
-	SHARE_FLOAT_COUNT,
+	SHARE_FLOAT_COUNT,   /**< Not a type. Use this to get the total number of legal types */
 } shared_float_t;
 typedef enum
 {
 	SHARE_SAMPLE_BIT_ACCESS,
-	SHARE_BIT_ACCESS_COUNT,
+	SHARE_BIT_ACCESS_COUNT,   /**< Not a type. Use this to get the total number of legal types */
 } shared_bit_access_t;
 /**
  * @}

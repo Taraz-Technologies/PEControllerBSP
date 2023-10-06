@@ -73,7 +73,7 @@ extern "C" {
  */
 #define MONITOR_COL_COUNT					(3)
 
-// Use only if forcing layout, otherwise these will be auto-computed.
+// Use only if forcing layout <Not recommended>, otherwise these will be auto-computed.
 #if 0
 /**
  * @brief Number of rows in controls view

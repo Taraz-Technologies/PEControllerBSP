@@ -65,61 +65,52 @@ extern "C" {
 /** @defgroup InterprocessorComms_Exported_Typedefs Type Definitions
  * @{
  */
+/**
+ * @brief Defines the shared boolean variables between cores
+ */
 typedef enum
 {
-	SHARE_INV1_STATE,
-	SHARE_INV2_STATE,
+	SHARE_SAMPLE_BOOL,	/**< Defines Sample boolean shared variable */
 	SHARE_BOOL_COUNT,   /**< Not a type. Use this to get the total number of legal types */
 } shared_bools_t;
 typedef enum
 {
-	SHARE_SAMPLE_U8,
+	SHARE_SAMPLE_U8,  /**< Defines Sample uint8_t shared variable */
 	SHARE_U8_COUNT,   /**< Not a type. Use this to get the total number of legal types */
 } shared_u8_t;
 typedef enum
 {
-	SHARE_SAMPLE_U16,
+	SHARE_SAMPLE_U16,  /**< Defines Sample uint16_t shared variable */
 	SHARE_U16_COUNT,   /**< Not a type. Use this to get the total number of legal types */
 } shared_u16_t;
 typedef enum
 {
-	SHARE_SAMPLE_U32,
+	SHARE_SAMPLE_U32,  /**< Defines Sample uint32_t shared variable */
 	SHARE_U32_COUNT,   /**< Not a type. Use this to get the total number of legal types */
 } shared_u32_t;
 typedef enum
 {
-	SHARE_SAMPLE_S8,
+	SHARE_SAMPLE_S8,  /**< Defines Sample int8_t shared variable */
 	SHARE_S8_COUNT,   /**< Not a type. Use this to get the total number of legal types */
 } shared_s8_t;
 typedef enum
 {
-	SHARE_SAMPLE_S16,
+	SHARE_SAMPLE_S16,  /**< Defines Sample int16_t shared variable */
 	SHARE_S16_COUNT,   /**< Not a type. Use this to get the total number of legal types */
 } shared_s16_t;
 typedef enum
 {
-	SHARE_SAMPLE_S32,
+	SHARE_SAMPLE_S32,  /**< Defines Sample int32_t shared variable */
 	SHARE_S32_COUNT,   /**< Not a type. Use this to get the total number of legal types */
 } shared_s32_t;
 typedef enum
 {
-	// Controls
-	SHARE_INV1_REQ_FREQ,
-	SHARE_INV1_NOM_FREQ,
-	SHARE_INV1_NOM_m,
-	SHARE_INV2_REQ_FREQ,
-	SHARE_INV2_NOM_FREQ,
-	SHARE_INV2_NOM_m,
-	// Monitoring
-	SHARE_INV1_FREQ,
-	SHARE_INV1_m,
-	SHARE_INV2_FREQ,
-	SHARE_INV2_m,
+	SHARE_SAMPLE_FLOAT,  /**< Defines Sample single precision shared variable */
 	SHARE_FLOAT_COUNT,   /**< Not a type. Use this to get the total number of legal types */
 } shared_float_t;
 typedef enum
 {
-	SHARE_SAMPLE_BIT_ACCESS,
+	SHARE_SAMPLE_BIT_ACCESS,  /**< Defines Sample bit accessible shared variable */
 	SHARE_BIT_ACCESS_COUNT,   /**< Not a type. Use this to get the total number of legal types */
 } shared_bit_access_t;
 /**
@@ -128,21 +119,11 @@ typedef enum
 /*******************************************************************************
  * Structures
  ******************************************************************************/
-#if IS_CONTROL_CORE
-typedef struct
-{
-	bool state;
-	volatile device_err_t err;
-	volatile bool isPending;
-} state_update_request;
-#endif
+
  /*******************************************************************************
  * Exported Variables
  ******************************************************************************/
-#if IS_CONTROL_CORE
-extern state_update_request inv1StateUpdateRequest;
-extern state_update_request inv2StateUpdateRequest;
-#endif
+
 /*******************************************************************************
  * Global Function Prototypes
  ******************************************************************************/
@@ -151,6 +132,7 @@ extern state_update_request inv2StateUpdateRequest;
  * Code
  ******************************************************************************/
 
+
 #ifdef __cplusplus
 }
 #endif
@@ -158,7 +140,6 @@ extern state_update_request inv2StateUpdateRequest;
 /**
  * @}
  */
-
 /**
  * @}
  */

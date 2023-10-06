@@ -28,7 +28,8 @@ extern "C" {
  * @{
  */
 
-/** @addtogroup Error_Config Error Config
+/** @addtogroup Error_Config Error Configuration
+ * @brief Defines the errors and its related information
  * @{
  */
 /*******************************************************************************
@@ -42,32 +43,59 @@ extern "C" {
 /*******************************************************************************
  * Typedefs
  ******************************************************************************/
+/** @defgroup ERRORCONFIG_Exported_TypeDefs Type Definitions
+* @{
+*/
+/**
+ * @brief Defines the types of errors
+ */
 typedef enum
 {
-	ERR_OK,
-	ERR_INVALID_TEXT,
-	ERR_ILLEGAL,
-	ERR_OUT_OF_RANGE,
-	ERR_NOT_AVAILABLE,
-	ERR_COUNT,
+	ERR_OK,           /**< No Error */
+	ERR_INVALID_TEXT, /**< Text is invalid */
+	ERR_ILLEGAL,      /**< Value is illegal */
+	ERR_OUT_OF_RANGE, /**< Value is out of defined range */
+	ERR_NOT_AVAILABLE,/**< Parameter not available */
+	ERR_COUNT,        /**< Not an error. Use this to get the total number of legal error types. */
 } device_err_t;
+/**
+ * @}
+ */
 /*******************************************************************************
  * Structures
  ******************************************************************************/
+/** @defgroup ERRORCONFIG_Exported_Strucutres Structures
+* @{
+*/
+/**
+ * @brief Describes the errors defined in @ref device_err_t.
+ */
 typedef struct
 {
-	const char* caption;
-	const char* desc;
-	const char* code;
+	const char* caption;	/**< Error caption */
+	const char* desc;		/**< Error description */
+	const char* code;		/**< Error code */
 } device_err_info_t;
+/**
+ * @}
+ */
  /*******************************************************************************
  * Exported Variables
  ******************************************************************************/
+ /** @defgroup ERRORCONFIG_Exported_Variables Variables
+ * @{
+ */
+/**
+ * @brief Details of the errors described in @ref device_err_info_t. Keep the order of descriptions same as definitions.
+ */
 extern device_err_info_t errInfo[ERR_COUNT];
+/**
+ * @}
+ */
 /*******************************************************************************
  * Global Function Prototypes
  ******************************************************************************/
-/** @defgroup DIN_Exported_Functions Functions
+/** @defgroup ERRORCONFIG_Exported_Functions Functions
   * @{
   */
 
@@ -85,11 +113,6 @@ extern device_err_info_t errInfo[ERR_COUNT];
 /**
  * @}
  */
-
-/**
- * @}
- */
-
 /**
  * @}
  */

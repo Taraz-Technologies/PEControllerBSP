@@ -25,7 +25,18 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+/** @addtogroup BSP
+ * @{
+ */
 
+/** @addtogroup Display
+ * @{
+ */
+
+/** @defgroup AppScreensCustomization Application Screen Handling
+ * @brief Use these macros and functions to customize the appearance of the main screen for every application independently.
+ * @{
+ */
 /********************************************************************************
  * Includes
  *******************************************************************************/
@@ -37,25 +48,32 @@ extern "C" {
 /********************************************************************************
  * Defines
  *******************************************************************************/
+/** @defgroup PEDISPLAYSCREEN_Exported_Macros Macros
+ * @{
+ */
 /**
- * @brief Number of configurations used for displaying the control parameters
+ * @brief Number of control parameters/configurations to be displayed on main screen
+ * @note Combined with @ref CONTROL_COL_COUNT, this calculates the rows required by the control area and
+ * thus computes the required sizes for each controllable parameter
  */
 #define CONTROL_CONFS_COUNT					(8)
 /**
- * @brief Number of configurations used for displaying the monitoring parameters
+ * @brief Number of monitored parameters/configurations to be displayed on main screen
+ * @note Combined with @ref MONITOR_COL_COUNT, this calculates the rows required by the monitoring area and
+ * thus computes the required sizes for each monitor-able parameter
  */
 #define MONITOR_CONFS_COUNT					(4)
 
 /**
- * @brief Number of columns in controls view
+ * @brief Number of columns in controls area
  */
 #define CONTROL_COL_COUNT					(4)
 /**
- * @brief Number of columns in monitoring view
+ * @brief Number of columns in monitoring area
  */
 #define MONITOR_COL_COUNT					(4)
 
-// Use only if forcing layout, otherwise these will be auto-computed.
+// Use only if forcing layout <Not recommended>, otherwise these will be auto-computed.
 #if 0
 /**
  * @brief Number of rows in controls view
@@ -95,6 +113,9 @@ extern "C" {
  * @brief Font used by the displayed monitoring parameters
  */
 #define MONITOR_VALUE_FONT					(lv_font_montserrat_18)
+/**
+ * @}
+ */
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
@@ -110,6 +131,9 @@ extern "C" {
 /********************************************************************************
  * Global Function Prototypes
  *******************************************************************************/
+/** @defgroup PEDISPLAYSCREEN_Exported_Functions Functions
+ * @{
+ */
 /**
  * @brief Creates the application dependent area of the main screen.
  * @param parent Parent lv_obj_t of the device.
@@ -130,10 +154,21 @@ extern screen_type_t AppControlGrid_TouchDetect(void);
  * Code
  *******************************************************************************/
 
-
+/**
+ * @}
+ */
 #ifdef __cplusplus
 }
 #endif
 
+/**
+ * @}
+ */
+/**
+ * @}
+ */
+/**
+ * @}
+ */
 #endif 
 /* EOF */

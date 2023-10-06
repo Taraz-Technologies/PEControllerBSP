@@ -27,6 +27,13 @@
 extern "C" {
 #endif
 
+/** @addtogroup BSP
+ * @{
+ */
+/** @defgroup user_config User Configuration
+ * @brief Defines the user configurations for a specific application
+ * @{
+ */
 /********************************************************************************
  * Includes
  *******************************************************************************/
@@ -69,11 +76,18 @@ extern "C" {
 /******** MEASUREMENT CONFIGURATION ***********/
 /**
  * @brief Enable intelliSENS support for PEController
- * @note Make sure that the binary intelliSENS.elf is also loaded in run configuration and correct linker file is selected
+ * @note There is a separate license for enabling each device with intelliSENS.
+ * If not already enabled contact support for a new license.
+ * Otherwise if intelliSENS based monitoring is not required you can set this to 0 which will improve the LCD performance.
  */
 #define ENABLE_INTELLISENS		(1)
-
+/**
+ * @brief Use this frequency when no control loop is enabled to get high bandwidth measurements. Max value is 100K.
+ */
 #define MONITORING_FREQUENCY_Hz		(100000)
+/**
+ * @brief Use this frequency when control loop is enabled to get low bandwidth measurements. Max value is 100K and is dependent upon the control performance.
+ */
 #define CONTROL_FREQUENCY_Hz		(25000)
 /******** MEASUREMENT CONFIGURATION ***********/
 
@@ -81,6 +95,11 @@ extern "C" {
 }
 #endif
 
-
+ /**
+ * @}
+ */
+ /**
+ * @}
+ */
 #endif
 /* EOF */

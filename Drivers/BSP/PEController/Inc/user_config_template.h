@@ -76,7 +76,7 @@ extern "C" {
 /******** MEASUREMENT CONFIGURATION ***********/
 /**
  * @brief Enable intelliSENS support for PEController
- * @note There is a seperate license for enabling each device with intelliSENS.
+ * @note There is a separate license for enabling each device with intelliSENS.
  * If not already enabled contact support for a new license.
  * Otherwise if intelliSENS based monitoring is not required you can set this to 0 which will improve the LCD performance.
  */
