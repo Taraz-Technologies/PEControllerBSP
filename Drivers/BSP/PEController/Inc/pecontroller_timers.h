@@ -40,7 +40,8 @@ extern "C" {
  * -# <b>TIM2 (Fiber Rx For Slave Operation):</b> This timer can be configured to trigger a reset on all
  * PWM channels on a rising or falling edge at the Fiber Rx connector.
  * -# <b>TIM3 (Fiber Tx For Master Operation):</b> This timer can be configured to trigger a reset on a slave PEController
- *  by connecting it to the Fiber Rx pin of the slave controller. <br><br>
+ *  by connecting it to the Fiber Rx pin of the slave controller.
+ * -# <b>Other timers:</b> These timers can act as master/slave timers to other timers/events. <br><br>
  *
  *
  * The following list describes the operating mechanics for the relevant timers.
@@ -54,6 +55,8 @@ extern "C" {
  * generates a PWM at fiber Tx pin. The width of the PWM can also be selected via this function.
  * This can be used to synchronize with other PEControllers by connected to the Fiber-Rx (TIM2) pin and
  * configuring them as slaves. @ref BSP_TIM3_FiberTxStart() starts the TIM3 with optional synching of HRTIM.
+ * -# <b>Other timers: </b> Use @ref BSP_Timer_SetInputTrigger() and @ref BSP_Timer_SetOutputTrigger() to set the trigger
+ * characteristics of other timers.
  * @{
  */
 /********************************************************************************
@@ -229,7 +232,7 @@ extern PWMResetCallback hrtimCallbacks[6];
 /**
  * @brief Gets the clock frequency of the specific timer in MHz.
  * @param TimerIdx Index of the timer submodule.
- * @return Clock frequency in MHz.
+ * @return Clock frequency in Hz.
  */
 extern uint32_t BSP_HRTIM_GetTimerFreq(uint32_t TimerIdx);
 /**
@@ -241,6 +244,7 @@ extern uint32_t BSP_HRTIM_GetTimerFreq(uint32_t TimerIdx);
  * -# PreloadEnable = true
  * -# ResetTrigger = false
  * -# ResetUpdate = true
+ *
  * @param f Defines the freuency in Hz.
  * @param TimerIdx Index of the timer submodule.
  * @return Timer configuration.
@@ -251,6 +255,7 @@ extern HRTIM_TimerCfgTypeDef BSP_HRTIM_GetDefaultTimerConfig(timer_frequency_t f
  * @details <b>Default Configuration</b>:
  * -# CompareValue = 3
  * -# AutoDelayedMode = HRTIM_AUTODELAYEDMODE_REGULAR
+ *
  * @return The compare configuration.
  */
 extern HRTIM_CompareCfgTypeDef BSP_HRTIM_GetDefaultCompareConfig(void);
@@ -260,6 +265,7 @@ extern HRTIM_CompareCfgTypeDef BSP_HRTIM_GetDefaultCompareConfig(void);
  * -# Prescaler = HRTIM_TIMDEADTIME_PRESCALERRATIO_DIV16
  * -# RisingSign = HRTIM_TIMDEADTIME_RISINGSIGN_POSITIVE
  * -# FallingSign = HRTIM_TIMDEADTIME_FALLINGSIGN_POSITIVE
+ *
  * @return The dead time configuration.
  */
 extern HRTIM_DeadTimeCfgTypeDef BSP_HRTIM_GetDefaultDeadtimeConfig(void);
@@ -270,6 +276,7 @@ extern HRTIM_DeadTimeCfgTypeDef BSP_HRTIM_GetDefaultDeadtimeConfig(void);
  * -# IdleLevel = HRTIM_OUTPUTIDLELEVEL_INACTIVE
  * -# SetSource = HRTIM_OUTPUTSET_TIMCMP1
  * -# ResetSource = HRTIM_OUTPUTRESET_TIMCMP2
+ *
  * @return The output configuration.
  */
 extern HRTIM_OutputCfgTypeDef BSP_HRTIM_GetDefaultOutputConfig(void);
@@ -285,36 +292,9 @@ extern IRQn_Type BSP_HRTIM_GetIRQn(uint32_t TimerIdx);
  * -# TIM1_TRG0
  * -# TIM2_TRG0
  * -# TIM3_TRG0
+ *
  */
 void BSP_HRTIM_Init(void);
-/**
- * @brief Configures the Fiber/Sync Tx pin to generate a PWM of required frequency.
- * @details The output period is controlled by the periodInUsecs while the onTime is controlled via triggerDelayInUsecs.
- * The output trigger is generated after triggerDelayInUsecs in each PWM period.
- * @param periodInUsecs Time period of the wave in micro-seconds.
- * @param inTrigger Configuration of the input trigger of the Timer to trigger this timer using any other timer. Pass NULL to make independent timer.
- * @param outTrigger Configuration for the output trigger of the Timer, which can be used to trigger other timers.
- */
-extern void BSP_TIM3_ConfigFiberTx(tim_in_trigger_config_t* inTrigger, tim_out_trigger_config_t* outTrigger, float _fs);
-/**
- * @brief Configures the Fiber/Sync Rx pin to receive the synchronization event via TIM2 module.
- * @details The output trigger event for the TIM2 module will be obtained based on the settings of slaveType
- * and slaveEdge on Rx Pin of the Fiber/Sync connectors.
- * @param periodInUsecs Specify the Rx period in microseconds if required. If no-retriggering it should set be to 0, to set period to max value.
- * @param slaveType Type of triggering on the slave.
- * @param slaveEdge Edge on which needs to be triggered on the slave.
- * @param outTrigger Configuration for the output trigger of the Timer, which can be used to trigger other timers.
- */
-extern void BSP_TIM2_ConfigFiberRx(tim_trg_in_type_t slaveType, tim_slave_edge_t slaveEdge, tim_out_trigger_config_t* outTrigger, float _fs);
-/**
- * @brief Configures the master timer for HRTIM1 module.
- * @details The master timer is used as a support timer, which may be used for synchronizing different HRTIM submodules.
- * This timer can only operate as a master and can only be enabled or reset based upon the TIM1 module.
- * Use the @ref BSP_MasterHRTIM_SetShiftValue() and BSP_MasterHRTIM_SetShiftPercent()
- * functions to configure the trigger delays for other timer modules.
- * @param opts Contains the configuration options for the Master HRTIM.
- */
-extern void BSP_MasterHRTIM_Config(hrtim_opts_t* opts);
 /**
  * @brief Configures the compare value for the HRTIM compare unit.
  * This value can be used to reset the HRTIM submodules at required instances.
@@ -332,6 +312,30 @@ extern void BSP_MasterHRTIM_SetShiftValue(hrtim_comp_t comp, uint32_t value);
  * @param percent Phase shift in percentage.
  */
 extern void BSP_MasterHRTIM_SetShiftPercent(hrtim_opts_t* opts, hrtim_comp_t comp, float percent);
+/**
+ * @brief Configures the Fiber/Sync Rx pin to receive the synchronization event via TIM2 module.
+ * @param slaveType Control what to do when signal received on the RX pin
+ * @param slaveEdge Select the rising or falling edge for the RX pin as trigger
+ * @param outTrigger Output trigger configuration for the timer. Used to synchronize another timer to the RX signal
+ * @param _fs Required frequency at Fiber/Sync RX Pin
+ */
+extern void BSP_TIM2_ConfigFiberRx(tim_trg_in_type_t slaveType, tim_slave_edge_t slaveEdge, tim_out_trigger_config_t* outTrigger, float _fs);
+/**
+ * @brief Configures the Fiber/Sync Tx pin to generate a PWM of required frequency.
+ * @param inTrigger Input trigger configuration for the timer. Used to synchronize the TX signal to another trigger/Source
+ * @param outTrigger Output trigger configuration for the timer. Used to synchronize another timer to the TX signal
+ * @param _fs Required frequency at Fiber/Sync TX Pin
+ */
+extern void BSP_TIM3_ConfigFiberTx(tim_in_trigger_config_t* inTrigger, tim_out_trigger_config_t* outTrigger, float _fs);
+/**
+ * @brief Configures the master timer for HRTIM1 module.
+ * @details The master timer is used as a support timer, which may be used for synchronizing different HRTIM submodules.
+ * This timer can only operate as a master and can only be enabled or reset based upon the TIM1 module.
+ * Use the @ref BSP_MasterHRTIM_SetShiftValue() and BSP_MasterHRTIM_SetShiftPercent()
+ * functions to configure the trigger delays for other timer modules.
+ * @param opts Contains the configuration options for the Master HRTIM.
+ */
+extern void BSP_MasterHRTIM_Config(hrtim_opts_t* opts);
 /**
  * @brief Start the generation of PWM for the TIM3 modules (Fiber/Sync Tx)
  * @param startHrtimMaster Master HRTIM and TIM3 can also be enabled at the same time via software.
@@ -352,6 +356,15 @@ extern void BSP_HRTIM_Config_Interrupt(bool enable, PWMResetCallback callback, i
 /**
  * @brief Set the input trigger of a timer to make it a slave of any of the @ref timer_trigger_src_t.
  * @note Each timer can only be trigger by only a subset of the available options. Invalid selection will throw an error.
+ * The following are the trigger options for all available timers.
+ * -# <b>TIM1: </b> TIM15, TIM2, TIM3, TIM4
+ * -# <b>TIM2: </b> TIM1, TIM8, TIM3, TIM4, External Pin
+ * -# <b>TIM3: </b> TIM1, TIM2, TIM15, TIM4
+ * -# <b>TIM4: </b> TIM1, TIM2, TIM3, TIM8
+ * -# <b>TIM5: </b> TIM1, TIM8, TIM3, TIM4
+ * -# <b>TIM8: </b> TIM1, TIM2, TIM4, TIM5
+ * -# <b>TIM12: </b> TIM4, TIM5
+ *
  * @param _htim Handle of the timer to be configured. (Make sure to initialize this parameter before this function).
  * @param _config Required configuration. If this value is set to NULL the timer will be configured as independent timer.
  */
