@@ -39,33 +39,11 @@
 /* Includes ------------------------------------------------------------------*/
 #include "mXT336T.h"
 
-/** @addtogroup BSP
-  * @{
-  */
-
-/** @addtogroup Component
-  * @{
-  */
-
-/** @defgroup MXT336T
-  * @{
-  */
-
 /* Private typedef -----------------------------------------------------------*/
 
-/** @defgroup MXT336T_Private_Defines MXT336T Private Defines
-  * @{
-  */
 #define MXT336T_MAX_INSTANCE  1
-/**
-  * @}
-  */
 
 /* Private macro -------------------------------------------------------------*/
-
-/** @defgroup MXT336T_Private_Variables MXT336T Private Variables
-  * @{
-  */
 
 /* Touch screen driver structure initialization */
 TS_DrvTypeDef mXT336T_ts_drv =
@@ -90,13 +68,6 @@ uint8_t mXT336T[MXT336T_MAX_INSTANCE] = {0};
 /* Global mXT336T handle */
 static mXT336T_handle_TypeDef mXT336T_handle = { MXT336T_I2C_NOT_INITIALIZED, 0, 0};
 
-/**
-  * @}
-  */
-
-/** @defgroup mXT336T_Private_Function_Prototypes mXT336T Private Function Prototypes
-  * @{
-  */
 static uint8_t mXT336T_GetInstance(uint16_t DeviceAddr);
 /* Private functions prototypes-----------------------------------------------*/
 #if (TS_AUTO_CALIBRATION_SUPPORTED == 1)
@@ -114,14 +85,6 @@ static uint32_t mXT336T_TS_Calibration(uint16_t DeviceAddr);
   * @retval Status MXT336T_STATUS_OK or MXT336T_STATUS_NOT_OK.
   */
 static uint32_t mXT336T_TS_Configure(uint16_t DeviceAddr);
-
-/**
-  * @}
-  */
-
-/** @defgroup mXT336T_Private_Functions mXT336T Private Functions
-  * @{
-  */
 
 /**
   * @brief  Initialize the mXT336T communication bus
@@ -498,21 +461,5 @@ static uint8_t mXT336T_GetInstance(uint16_t DeviceAddr)
 
   return 0xFF;
 }
-
-/**
-  * @}
-  */
-
-/**
-  * @}
-  */
-
-/**
-  * @}
-  */
-
-/**
-  * @}
-  */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

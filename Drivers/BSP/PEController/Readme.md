@@ -6,6 +6,9 @@ Defines the Board Support Driver Package for PEController.
 # Control Packages 
 @ref Control_Library  
 Contains the declaration and procedures for different control theories.
+# Miscellaneous Packages 
+@ref Misc_Library  
+Contains the declaration and procedures for different miscellaneous packages.
 # Application Examples
 @ref ApplicationExamples  
 Contains different example projects to display the capability of PEController to produce PWM signals for different control topologies.

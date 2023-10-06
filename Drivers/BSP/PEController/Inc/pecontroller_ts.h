@@ -25,7 +25,19 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+/** @addtogroup BSP
+  * @{
+  */
 
+/** @defgroup Components Helper Components
+  * @brief Contains the declarations for the helper components.
+  * @{
+  */
+
+/** @defgroup TS TouchScreen
+  * @brief Contains the declarations for the touch screen drivers.
+  * @{
+  */
 /********************************************************************************
  * Includes
  *******************************************************************************/
@@ -35,8 +47,7 @@ extern "C" {
 /********************************************************************************
  * Defines
  *******************************************************************************/
-/** @brief With FT6206 : maximum 2 touches detected simultaneously
-  */
+//brief With FT6206 : maximum 2 touches detected simultaneously
 #define TS_MAX_NB_TOUCH                 ((uint32_t) MXT336T_MAX_DETECTABLE_TOUCH)
 
 #define TS_NO_IRQ_PENDING               ((uint8_t) 0)
@@ -123,5 +134,14 @@ extern void BSP_TS_Poll(void);
 #ifdef __cplusplus
 }
 #endif
+/**
+  * @}
+  */
+/**
+  * @}
+  */
+/**
+  * @}
+  */
 
 /* EOF */

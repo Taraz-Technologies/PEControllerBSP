@@ -309,6 +309,7 @@ static void InitStatesFromStorage(uint32_t* data, bool isDataValid)
 		dest->floats[SHARE_PWM_PHASE_SHIFT] = 90;
 	}
 }
+
 static uint32_t RefreshStates(uint32_t* data, uint32_t* indexPtr)
 {
 	uint32_t len = 0;

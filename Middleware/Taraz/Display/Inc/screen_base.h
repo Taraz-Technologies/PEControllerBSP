@@ -72,6 +72,19 @@ extern "C" {
  * @param _msgTxt Content of the message
  */
 extern void DisplayMessage(const char* _titleTxt, const char* _msgTxt);
+/**
+ * @brief Load the relevant fields and configurations for the desired measurement channel
+ * @note Make sure to call this function before switching to the configuration screen
+ * @param _measurementIndex Channel index for which the measurement configuration is required. Starts from index 0
+ */
+extern void ConfigScreen_LoadMeasurement(int _measurementIndex);
+/**
+ * @brief Load the relevant fields and configurations for the desired parameter
+ * @note Make sure to call this function before switching to the configuration screen
+ * @param _paramInfo Pointer to the desired parameter to be configured.
+ * @param val Current value of the parameter
+ */
+extern void ConfigScreen_LoadParam(data_param_info_t* _paramInfo, char* val);
 /********************************************************************************
  * Code
  *******************************************************************************/

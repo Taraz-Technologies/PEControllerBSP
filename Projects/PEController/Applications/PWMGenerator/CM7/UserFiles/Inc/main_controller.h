@@ -33,11 +33,12 @@
  * -# <b>PWM 3-6 (LEG 2, 3)</b>: Presents the scheme to create a H-Bridge where switches 3,6
  * get same waveform while switches 4,5 get the inverted PWM. Moreover the phase
  * shift is added between 3 and 1 which can be controlled via the value of
- * compare 1 and compare 2 units of master HRTIM.
+ * compare 1 and compare 2 units of master HRTIM. In this example the phase shift is updated every @ref MainControl_Loop().
  * -# <b>PWM 7-8 (LEG 4)</b>: Presents the scheme to synchronize a HRTIM submodule to
  * the Fiber Tx signal and generating the Fiber Tx signal to synchronize slave PEControllers.
  * -# <b>PWM 9-16 (LEG 5, 8)</b>: Presents 2 H-Bridges with 8 switches showing the mechanism to synchronize
- * with Fiber Rx signal as slave and also synchronizing TIM1 and HRTIM submodules.<br><br>
+ * with Fiber Rx signal as slave and also synchronizing TIM1 and HRTIM submodules.
+ * The phase shift can be controlled from the display screen. Value should be between 0-180 degrees<br><br>
  *
  *
  * \image html "PWM Generation Description.png"

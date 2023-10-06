@@ -41,16 +41,34 @@ extern "C" {
 /*******************************************************************************
  * Defines
  ******************************************************************************/
+/** @defgroup InterprocessorComms_Exported_Macros Macros
+ * @{
+ */
+/**
+ * @brief No of simultaneous inter-processor messages supported.
+ */
 #define INTERPROCESSOR_MSGS_SIZE					(64)
+/**
+ * @brief No of simultaneous inter-processor commands supported.
+ */
 #define INTERPROCESSOR_CMD_BUFF_SIZE				(1024)
+/**
+ * @brief No of simultaneous inter-processor responses supported.
+ */
 #define INTERPROCESSOR_RESPONSE_BUFF_SIZE			(1024)
+/**
+ * @}
+ */
 /*******************************************************************************
  * Typedefs
  ******************************************************************************/
+/** @defgroup InterprocessorComms_Exported_Typedefs Type Definitions
+ * @{
+ */
 typedef enum
 {
-	SHARE_CONTROL_STATE,
-	SHARE_BOOL_COUNT,
+	SHARE_CONTROL_STATE,/**< SHARE_CONTROL_STATE */
+	SHARE_BOOL_COUNT,   /**< SHARE_BOOL_COUNT */
 } shared_bools_t;
 typedef enum
 {
@@ -92,6 +110,9 @@ typedef enum
 	SHARE_SAMPLE_BIT_ACCESS,
 	SHARE_BIT_ACCESS_COUNT,
 } shared_bit_access_t;
+/**
+ * @}
+ */
 /*******************************************************************************
  * Structures
  ******************************************************************************/
@@ -103,17 +124,12 @@ typedef enum
 /*******************************************************************************
  * Global Function Prototypes
  ******************************************************************************/
-/** @defgroup DIN_Exported_Functions Functions
-  * @{
-  */
 
 /*******************************************************************************
  * Code
  ******************************************************************************/
 
-/**
- * @}
- */
+
 #ifdef __cplusplus
 }
 #endif
@@ -121,11 +137,6 @@ typedef enum
 /**
  * @}
  */
-
-/**
- * @}
- */
-
 /**
  * @}
  */

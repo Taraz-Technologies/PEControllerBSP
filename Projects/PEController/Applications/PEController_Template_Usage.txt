@@ -89,7 +89,24 @@ To list the control variables, you can utilize the <b>controlConfs</b> array, an
  /**
  * @}
  */
- 
+
+/** @defgroup InterprocessorCommUsage Interprocessor Communication
+ * @brief Controls the communication between the CM4 and CM7 processors.
+ * @details 
+ * The CM4-CM7 communication provided is divided into two portions
+ * -# <b>Data Buffers:</b> These are defined in @ref interprocessor_data_buffs_t and are shared between both cores.
+ * Both cores can access these shared registers because they are in a shared accessible space.
+ * Users can store parameters meant to be shared between both cores, such as current power or current,
+ * in these data buffers
+ * -# <b>Messaging from CM4 to CM7:</b> This is controlled using @ref interprocessor_msg_t.
+ * These messages are used to update settings and parameter values in the CM7 core.
+ * These values cannot be directly updated in the registers because they are critical for the
+ * control system and cannot be changed without a specific control sequence from the CM7 core.
+ * @{
+ */ 
+ /**
+ * @}
+ */
  
  
 /** @defgroup NewProject New Project Creation

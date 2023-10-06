@@ -57,6 +57,9 @@
 /** @addtogroup TS
   * @{
   */
+  /** @defgroup BSPTS_Exported_Structures Structures
+  * @{
+  */
 typedef struct
 {
   void       (*Init)(uint16_t);
@@ -80,7 +83,9 @@ typedef struct
   void (*Reset)(void);
   void (*Delay)(uint32_t delay);
 } TS_BSPTypeDef;
-
+/**
+  * @}
+  */
 /**
   * @}
   */

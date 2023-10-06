@@ -49,7 +49,18 @@ extern "C" {
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
+/** @defgroup PEDISPLAYSCREEN_Exported_Typedefs Typedefs
+ * @{
+ */
+/**
+ * @brief Call the LTDC module to display relevant layer
+ * @param layerInfo Layer information
+ * @param layerIdx Layer ID
+ */
 typedef void (*DisplayLayer)(ltdc_layer_info_t* layerInfo, int layerIdx);
+/**
+ * @}
+ */
 /********************************************************************************
  * Structures
  *******************************************************************************/

@@ -4,7 +4,7 @@
  * @author 		Waqas Ehsan Butt
  * @date 		May 23, 2023
  *
- * @brief    
+ * @brief   
  ********************************************************************************
  * @attention
  *
@@ -53,27 +53,26 @@ extern "C" {
  */
 /**
  * @brief Number of control parameters/configurations to be displayed on main screen
- * @note Combined with @ref CONTROL_COL_COUNT, this calculates the rows required by the control area and
+ * @note Combined with @ref CONTROL_COL_COUNT, this calculates the rows required by the control area and 
  * thus computes the required sizes for each controllable parameter
  */
-#define CONTROL_CONFS_COUNT					(9)
+#define CONTROL_CONFS_COUNT					(1)
 /**
  * @brief Number of monitored parameters/configurations to be displayed on main screen
- * @note Combined with @ref MONITOR_COL_COUNT, this calculates the rows required by the monitoring area and
+ * @note Combined with @ref MONITOR_COL_COUNT, this calculates the rows required by the monitoring area and 
  * thus computes the required sizes for each monitor-able parameter
  */
-#define MONITOR_CONFS_COUNT					(3)
-
+#define MONITOR_CONFS_COUNT					(0)
 /**
  * @brief Number of columns in controls area
  */
-#define CONTROL_COL_COUNT					(3)
+#define CONTROL_COL_COUNT					(1)
 /**
  * @brief Number of columns in monitoring area
  */
-#define MONITOR_COL_COUNT					(3)
+#define MONITOR_COL_COUNT					(1)
 
-// Use only if forcing layout, otherwise these will be auto-computed.
+// Use only if forcing row layout <Not recommended>, otherwise these will be auto-computed.
 #if 0
 /**
  * @brief Number of rows in controls view
@@ -99,7 +98,7 @@ extern "C" {
 /**
  * @brief Ratio of application specific area on the main screen
  */
-#define APP_AREA_RATIO						(4)
+#define APP_AREA_RATIO						(3)
 
 /**
  * @brief Font used by the displayed measurement value
@@ -108,7 +107,7 @@ extern "C" {
 /**
  * @brief Font used by the displayed control parameters
  */
-#define CONTROL_VALUE_FONT					(lv_font_montserrat_18)
+#define CONTROL_VALUE_FONT					(lv_font_montserrat_40)
 /**
  * @brief Font used by the displayed monitoring parameters
  */
@@ -131,9 +130,9 @@ extern "C" {
 /********************************************************************************
  * Global Function Prototypes
  *******************************************************************************/
-/** @defgroup PEDISPLAYSCREEN_Exported_Functions Functions
- * @{
- */
+ /** @defgroup PEDISPLAYSCREEN_Exported_Functions Functions
+  * @{
+  */
 /**
  * @brief Creates the application dependent area of the main screen.
  * @param parent Parent lv_obj_t of the device.

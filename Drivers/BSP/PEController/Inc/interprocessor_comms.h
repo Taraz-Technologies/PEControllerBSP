@@ -30,6 +30,18 @@ extern "C" {
 
 /** @defgroup Interprocessor Interprocessor Communication
  * @brief Controls the communication between the communication and controls processors.
+ * @details The BSP has the following structure
+ * -The CM4 core is responsible for the external communication such as Fiber, SPI, Ethernet, USB.
+ * -The CM7 core is responsible for ADC acquistion and control implementation.
+ * The CM4-CM7 communication provided is divided into two portions
+ * -# <b>Data Buffers:</b> These are defined in @ref interprocessor_data_buffs_t and are shared between both cores.
+ * Both cores can access these shared registers because they are in a shared accessible space.
+ * Users can store parameters meant to be shared between both cores, such as current power or current,
+ * in these data buffers
+ * -# <b>Messaging from CM4 to CM7:</b> This is controlled using @ref interprocessor_msg_t.
+ * These messages are used to update settings and parameter values in the CM7 core.
+ * These values cannot be directly updated in the registers because they are critical for the
+ * control system and cannot be changed without a specific control sequence from the CM7 core.
  * @{
  */
 /*******************************************************************************

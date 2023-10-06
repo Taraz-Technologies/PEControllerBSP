@@ -203,6 +203,8 @@ void MainControl_Stop(void)
  */
 void MainControl_Loop(void)
 {
+	// The register SHARE_PWM_PHASE_SHIFT can be controlled from the screen.
+	// The phase shift should be between 0 and 180 degrees
 	BSP_MasterHRTIM_SetShiftPercent(&opts, HRTIM_COMP2, INTER_CORE_DATA.floats[SHARE_PWM_PHASE_SHIFT] / 360.f);
 }
 

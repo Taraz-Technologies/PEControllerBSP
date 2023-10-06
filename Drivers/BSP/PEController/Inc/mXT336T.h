@@ -59,9 +59,6 @@ extern "C" {
 
 /* Macros --------------------------------------------------------------------*/
 
-/** @typedef mXT336T_handle_TypeDef
- *  mXT336T Handle definition.
- */
 typedef struct
 {
   uint8_t i2cInitialized;
@@ -73,30 +70,6 @@ typedef struct
   uint8_t currActiveTouchIdx;
 
 } mXT336T_handle_TypeDef;
-
-  /** @addtogroup BSP
-   * @{
-   */
-
-  /** @addtogroup Component
-   * @{
-   */
-
-  /** @defgroup MXT336T
-   * @{
-   */
-
-  /* Exported types ------------------------------------------------------------*/
-
-  /** @defgroup MXT336T_Exported_Types
-   * @{
-   */
-
-  /* Exported constants --------------------------------------------------------*/
-
-  /** @defgroup MXT336T_Exported_Constants
-   * @{
-   */
 
   /* Maximum border values of the touchscreen pad */
 #define  MXT336T_MAX_WIDTH              ((uint16_t)800)     /* Touchscreen pad max width   */
@@ -112,10 +85,6 @@ typedef struct
 
   /* Max detectable simultaneous touches */
 #define MXT336T_MAX_DETECTABLE_TOUCH     10
-
-  /**
-   * @brief : Definitions for MXT336T I2C register addresses on 8 bit
-   **/
 
   /* Current mode register of the MXT336T (R/W) */
 #define MXT336T_DEV_MODE_REG             0x00
@@ -280,26 +249,9 @@ typedef struct
   /* Current operating mode the MXT336T system is in (R) */
 #define MXT336T_STATE_REG                0xBC
 
-  /**
-   * @}
-   */
-
   /* Exported macro ------------------------------------------------------------*/
 
-  /** @defgroup mXT336T_Exported_Macros
-   * @{
-   */
-
   /* Exported functions --------------------------------------------------------*/
-
-  /** @defgroup mXT336T_Exported_Functions
-   * @{
-   */
-
-  /**
-   * @brief mXT336T Control functions
-   */
-
 
 /**
  * @brief  Initialize the mXT336T communication bus
@@ -421,51 +373,19 @@ void mXT336T_TS_GetTouchInfo(uint16_t   DeviceAddr,
 
 /* Imported TS IO functions --------------------------------------------------------*/
 
-/** @defgroup mXT336T_Imported_Functions
- * @{
- */
-
 /* TouchScreen (TS) external IO functions */
 //extern void     TS_IO_Delay(uint32_t Delay);
 
-  /**
-   * @}
-   */
 
   /* Imported global variables --------------------------------------------------------*/
-
-  /** @defgroup mXT336T_Imported_Globals
-   * @{
-   */
-
 
 /* Touch screen driver structure */
 extern TS_DrvTypeDef mXT336T_ts_drv;
 extern TS_BSPTypeDef ts_bsp_drv;
-
-  /**
-   * @}
-   */
 
 #ifdef __cplusplus
 }
 #endif
 #endif /* __MXT336T_H */
 
-
-/**
- * @}
- */
-
-/**
- * @}
- */
-
-/**
- * @}
- */
-
-/**
- * @}
- */
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

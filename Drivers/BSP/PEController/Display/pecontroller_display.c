@@ -36,6 +36,9 @@
 /********************************************************************************
  * Defines
  *******************************************************************************/
+/**
+ * @brief Because the LCD is installed in reverse direction, 180 degrees rotation is required
+ */
 #define LV_ROTATION			(LV_DISP_ROT_180)
 /********************************************************************************
  * Typedefs
@@ -51,6 +54,9 @@
 /** Handle for the LTDC module
  */
 static LTDC_HandleTypeDef hltdc;
+/**
+ * @brief This layer info can be assigned to any layer when the relevant LTDC layer is needed to be kept empty
+ */
 static ltdc_layer_info_t nullLayerInfo =
 {
 		.data = (const uint8_t*)frame_buff,
@@ -88,12 +94,6 @@ static void ReadTouchPad(struct _lv_indev_drv_t * indev, lv_indev_data_t * data)
 	}
 }
 
-/**
- * @brief
- * @param disp
- * @param area
- * @param color_p
- */
 static void FlushLVGLScreen(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t * color_p)
 {
 	int32_t x, y;

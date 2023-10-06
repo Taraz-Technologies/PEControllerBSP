@@ -155,6 +155,11 @@ static void StaticForm_Create(lv_obj_t * parent)
 	lv_obj_set_width(cancelBtn, btnWidth);
 }
 
+/**
+ * @brief Load the relevant fields and configurations for the desired measurement channel
+ * @note Make sure to call this function before switching to the configuration screen
+ * @param _measurementIndex Channel index for which the measurement configuration is required. Starts from index 0
+ */
 void ConfigScreen_LoadMeasurement(int _measurementIndex)
 {
 	if (screenObjs.itemContainer == NULL)
@@ -217,6 +222,12 @@ void ConfigScreen_LoadMeasurement(int _measurementIndex)
 	lv_keyboard_set_textarea(screenObjs.keyboard, screenObjs.focusItem);
 }
 
+/**
+ * @brief Load the relevant fields and configurations for the desired parameter
+ * @note Make sure to call this function before switching to the configuration screen
+ * @param _paramInfo Pointer to the desired parameter to be configured.
+ * @param val Current value of the parameter
+ */
 void ConfigScreen_LoadParam(data_param_info_t* _paramInfo, char* val)
 {
 	if (screenObjs.itemContainer == NULL)
