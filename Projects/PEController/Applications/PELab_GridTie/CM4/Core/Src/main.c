@@ -73,7 +73,7 @@ osThreadId_t statsTaskHandle;
 const osThreadAttr_t statsTask_attributes = {
 		.name = "statsTask",
 		.stack_size = 1024 * 4,
-		.priority = (osPriority_t) osPriorityHigh1,
+		.priority = (osPriority_t) osPriorityHigh7,
 };
 /* Definitions for displayTask */
 osThreadId_t displayTaskHandle;
@@ -87,7 +87,7 @@ osThreadId_t touchTaskHandle;
 const osThreadAttr_t touchTask_attributes = {
 		.name = "touchTask",
 		.stack_size = 256 * 4,
-		.priority = (osPriority_t) osPriorityLow,
+		.priority = (osPriority_t) osPriorityHigh5,
 };
 /* USER CODE BEGIN PV */
 volatile bool isDispInitialized = false;
@@ -453,13 +453,13 @@ void StartDisplayTask(void *argument)
 	int i = 0;
 	for(;;)
 	{
-		if (++i > 10)
+		if (++i > 4)
 		{
 			ScreenManager_Refresh();
 			i = 0;
 		}
 		lv_timer_handler();
-		osDelay(1);
+		osDelay(5);
 	}
 	/* USER CODE END StartDisplayTask */
 }
@@ -480,7 +480,7 @@ void StartTouchTask(void *argument)
 	for(;;)
 	{
 		BSP_TS_Poll();
-		osDelay(10);
+		osDelay(20);
 	}
 	/* USER CODE END StartTouchTask */
 }

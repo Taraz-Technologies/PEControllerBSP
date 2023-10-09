@@ -84,7 +84,7 @@ extern "C" {
 /**
  * @brief Use this frequency when no control loop is enabled to get high bandwidth measurements. Max value is 100K.
  */
-#define MONITORING_FREQUENCY_Hz		(40000)
+#define MONITORING_FREQUENCY_Hz		(100000)
 /**
  * @brief Use this frequency when control loop is enabled to get low bandwidth measurements. Max value is 100K and is dependent upon the control performance.
  */
