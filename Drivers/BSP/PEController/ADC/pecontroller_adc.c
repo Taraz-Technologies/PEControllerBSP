@@ -258,7 +258,7 @@ timer_trigger_src_t BSP_ADC_SetInputOutputTrigger(tim_in_trigger_config_t* _slav
  * @param _freq Desired frequency
  * @param _sensitivity Desired sensitivity
  * @param _offset Desired offset
- * @param unit Desired unit
+ * @param _unit Desired unit
  * @return <c>ERR_OK</c> if setting successful else @ref device_err_t.
  */
 device_err_t BSP_ADC_UpdateConfig(adc_info_t* _info, float _fs, int _channelIndex, float _freq, float _sensitivity, float _offset, data_units_t _unit)
@@ -420,10 +420,9 @@ static uint32_t RefreshStates(uint32_t* data, uint32_t* indexPtr)
 	*indexPtr = 0;
 	return len;
 }
-
 /**
  * @brief Configures the storage client information.
- * @note Before calling this function set the @ref _config->arg parameter to system @ref processedAdcData structure.
+ * @note Before calling this function set the _config->arg parameter to system processedAdcData structure.
  * @param _config Pointer to the relevant configuration to be filled.
  */
 void BSP_ADC_ConfigStorage(state_storage_client_t* _config)

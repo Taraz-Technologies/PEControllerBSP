@@ -201,7 +201,6 @@ extern "C" {
   */
 /**
   * @brief  This function is executed in case of error occurrence.
-  * @retval None
   */
 extern void Error_Handler(void);
 /********************************************************************************
@@ -210,9 +209,9 @@ extern void Error_Handler(void);
 /**
  * @brief Configure the GPIO struct with default values
  * @param GPIO_InitStruct struct
- * @param pin Specifies the GPIO pins to be configured. This parameter can be any value of @ref GPIO_pins_define.
- * @param mode Specifies the operating mode for the selected pins. This parameter can be a value of @ref GPIO_mode_define.
- * @param alternate Peripheral to be connected to the selected pins. This parameter can be a value of @ref GPIO_Alternate_function_selection.
+ * @param pin Specifies the GPIO pins to be configured. This parameter can be any value of GPIO_pins_define.
+ * @param mode Specifies the operating mode for the selected pins. This parameter can be a value of GPIO_mode_define.
+ * @param alternate Peripheral to be connected to the selected pins. This parameter can be a value of GPIO_Alternate_function_selection.
  * @note PULL = GPIO_NOPULL
  * Speed = GPIO_SPEED_FREQ_HIGH
  */
@@ -227,9 +226,9 @@ static inline void BSP_GPIOStruct_DefaultConfig(GPIO_InitTypeDef* GPIO_InitStruc
 /**
  * @brief Configure the GPIO struct as IO
  * @param GPIO_InitStruct struct
- * @param pin Specifies the GPIO pins to be configured. This parameter can be any value of @ref GPIO_pins_define.
- * @param mode Specifies the operating mode for the selected pins. This parameter can be a value of @ref GPIO_mode_define.
- * @param speed Specifies the speed for the selected pins. This parameter can be a value of @ref GPIO_speed_define.
+ * @param pin Specifies the GPIO pins to be configured. This parameter can be any value of GPIO_pins_define.
+ * @param mode Specifies the operating mode for the selected pins. This parameter can be a value of GPIO_mode_define.
+ * @param speed Specifies the speed for the selected pins. This parameter can be a value of GPIO_speed_define.
  * @note PULL = GPIO_NOPULL
  */
 static inline void BSP_GPIOStruct_IOConfig(GPIO_InitTypeDef* GPIO_InitStruct, uint32_t pin, uint32_t mode, uint32_t speed)

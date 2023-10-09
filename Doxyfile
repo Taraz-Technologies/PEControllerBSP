@@ -949,6 +949,8 @@ INPUT                  = Drivers/BSP \
                          Projects/PEController/Applications/PELab_OpenLoopVFD/CM7/UserFiles \
                          Projects/PEController/Applications/PELab_GridTie/CM7/UserFiles \
                          Projects/PEController/Applications/PWMGenerator/CM7/UserFiles \
+                         Projects/PEController/Applications/PELab_OpenLoopVFD/Common/Inc/open_loop_vf_config.h \
+                         Projects/PEController/Applications/PELab_GridTie/Common/Inc/grid_tie_config.h
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses

@@ -62,6 +62,13 @@ lv_coord_t* singleRowCol;
 /********************************************************************************
  * Code
  *******************************************************************************/
+/**
+ * @brief Make RGB color in selected format
+ * @param r Red color
+ * @param g Green color
+ * @param b Blue color
+ * @return RGB color
+ */
 lv_color_t MakeColor(uint8_t r, uint8_t g, uint8_t b)
 {
 	//LV_COLOR_MAKE
@@ -71,7 +78,18 @@ lv_color_t MakeColor(uint8_t r, uint8_t g, uint8_t b)
 	bgColor.ch.blue = (b >> 3) & 0x1f;
 	return bgColor;
 }
-
+/**
+ * @brief Create general text entry field with label and value
+ * @param parent Parent lv_obj_t
+ * @param nameLblStyle Label style for the name. NULL if default style
+ * @param fieldStyle Label style for the field value. NULL if default style
+ * @param fieldName Text representing field name
+ * @param fieldValue Text representing field value
+ * @param event_cb Click event handler. Set to NULL if no click event needed
+ * @param eventData Click event custom user data pointer
+ * @param row Row no in parent grid
+ * @return Generated value text field
+ */
 lv_obj_t* lv_create_textfield_display(lv_obj_t* parent, lv_style_t* nameLblStyle, lv_style_t* fieldStyle, const char* fieldName, const char* fieldValue, lv_event_cb_t event_cb, void * eventData, uint8_t row)
 {
 	lv_obj_t* lblName = lv_label_create_general(parent, nameLblStyle, fieldName, NULL, NULL);
@@ -82,7 +100,15 @@ lv_obj_t* lv_create_textfield_display(lv_obj_t* parent, lv_style_t* nameLblStyle
 
 	return taField;
 }
-
+/**
+ * @brief Create general entry field with label and a given field
+ * @param parent Parent lv_obj_t
+ * @param nameLblStyle Label style for the name. NULL if default style
+ * @param fieldName Text representing field name
+ * @param field Field value object
+ * @param row Row no in parent grid
+ * @return Generated value field
+ */
 lv_obj_t* lv_create_field(lv_obj_t* parent, lv_style_t* nameLblStyle, const char* fieldName, lv_obj_t* field, uint8_t row)
 {
 	lv_obj_t* lblName = lv_label_create_general(parent, nameLblStyle, fieldName, NULL, NULL);
@@ -92,7 +118,16 @@ lv_obj_t* lv_create_field(lv_obj_t* parent, lv_style_t* nameLblStyle, const char
 
 	return field;
 }
-
+/**
+ * @brief Create general button
+ * @param parent Parent lv_obj_t
+ * @param btnStyle Button style. NULL if default style
+ * @param lblStyle Style for Label included in button. NULL if default style
+ * @param txt Label text
+ * @param event_cb Click event handler. Set to NULL if no click event needed
+ * @param eventData Click event custom user data pointer
+ * @return Generated button object
+ */
 lv_obj_t* lv_btn_create_general(lv_obj_t* parent, lv_style_t* btnStyle, lv_style_t* lblStyle, const char* txt, lv_event_cb_t event_cb, void * eventData)
 {
 	lv_obj_t* btn = lv_btn_create(parent);
@@ -106,7 +141,15 @@ lv_obj_t* lv_btn_create_general(lv_obj_t* parent, lv_style_t* btnStyle, lv_style
 	lv_obj_center(lbl);
 	return btn;
 }
-
+/**
+ * @brief Create general label
+ * @param parent Parent lv_obj_t
+ * @param style Label style. NULL if default style
+ * @param txt Label text
+ * @param event_cb Click event handler. Set to NULL if no click event needed
+ * @param eventData Click event custom user data pointer
+ * @return Generated label object
+ */
 lv_obj_t* lv_label_create_general(lv_obj_t* parent, lv_style_t* style, const char* txt, lv_event_cb_t event_cb, void * eventData)
 {
 	lv_obj_t* lbl = lv_label_create(parent);
@@ -120,7 +163,15 @@ lv_obj_t* lv_label_create_general(lv_obj_t* parent, lv_style_t* style, const cha
 		lv_obj_add_flag(lbl, LV_OBJ_FLAG_CLICKABLE);
 	return lbl;
 }
-
+/**
+ * @brief Create general textarea
+ * @param parent Parent lv_obj_t
+ * @param style Textarea style. NULL if default style
+ * @param txt Label text
+ * @param event_cb Click event handler. Set to NULL if no click event needed
+ * @param eventData Click event custom user data pointer
+ * @return Generated Textarea object
+ */
 lv_obj_t* lv_textarea_create_general(lv_obj_t* parent, lv_style_t* style, const char* txt, lv_event_cb_t event_cb, void * eventData)
 {
 	lv_obj_t* ta = lv_textarea_create(parent);
@@ -134,7 +185,17 @@ lv_obj_t* lv_textarea_create_general(lv_obj_t* parent, lv_style_t* style, const 
 	lv_obj_set_align(lv_textarea_get_label(ta), LV_ALIGN_RIGHT_MID);
 	return ta;
 }
-
+/**
+ * @brief Create general grid
+ * @param parent Parent lv_obj_t
+ * @param cols Column information
+ * @param rows Row information
+ * @param style Grid style. NULL if default style
+ * @param bgColor Background color. NULL if default color
+ * @param event_cb Click event handler. Set to NULL if no click event needed
+ * @param eventData Click event custom user data pointer
+ * @return Generated grid object
+ */
 lv_obj_t* lv_grid_create_general(lv_obj_t* parent, lv_coord_t* cols, lv_coord_t* rows, lv_style_t* style, lv_color_t* bgColor, lv_event_cb_t event_cb, void * eventData)
 {
 	lv_obj_t* grid = lv_obj_create(parent);
@@ -148,7 +209,16 @@ lv_obj_t* lv_grid_create_general(lv_obj_t* parent, lv_coord_t* cols, lv_coord_t*
 		lv_obj_add_event_cb(grid, event_cb, LV_EVENT_CLICKED, eventData);
 	return grid;
 }
-
+/**
+ * @brief Create general container
+ * @param parent Parent lv_obj_t
+ * @param style Container style. NULL if default style
+ * @param row Row no in parent grid
+ * @param col Column no in parent grid
+ * @param event_cb Click event handler. Set to NULL if no click event needed
+ * @param eventData Click event custom user data pointer
+ * @return Container object
+ */
 lv_obj_t* lv_container_create_general(lv_obj_t* parent, lv_style_t* style, int row, int col, lv_event_cb_t event_cb, void * eventData)
 {
 	lv_obj_t* container = lv_obj_create(parent);
@@ -160,10 +230,8 @@ lv_obj_t* lv_container_create_general(lv_obj_t* parent, lv_style_t* style, int r
 		lv_obj_set_grid_cell(container, LV_GRID_ALIGN_STRETCH, col, 1, LV_GRID_ALIGN_STRETCH, row, 1);
 	return container;
 }
-
-
 /**
- * Initializes the grid style according to the given basic properties
+ * @brief Initializes the grid style according to the given basic properties
  * @param style Style to be initialized
  * @param pad Padding in pixels
  * @param margin Margin in rows for childs in pixels
@@ -182,7 +250,13 @@ void BSP_Screen_InitGridStyle(lv_style_t* style, lv_coord_t pad, lv_coord_t marg
 	if (bgColor != NULL)
 		lv_style_set_bg_color(style, *bgColor);
 }
-
+/**
+ * @brief Initializes the label style
+ * @param style Style to be initialized
+ * @param font Text font. NULL if default font
+ * @param align Text alignment
+ * @param txtColor Text color. NULL if default color
+ */
 void BSP_Screen_InitLabelStyle(lv_style_t* style, const lv_font_t * font, lv_text_align_t align, lv_color_t* txtColor)
 {
 	lv_style_init(style);
@@ -193,7 +267,13 @@ void BSP_Screen_InitLabelStyle(lv_style_t* style, const lv_font_t * font, lv_tex
 	if (txtColor != NULL)
 		lv_style_set_text_color(style, *txtColor);
 }
-
+/**
+ * @brief Initializes the button style
+ * @param style Style to be initialized
+ * @param border Button border width
+ * @param radius Button radius width
+ * @param bgColor Background color given in lv_color_t
+ */
 void BSP_Screen_InitBtnStyle(lv_style_t* style, lv_coord_t border, lv_coord_t radius, lv_color_t* bgColor)
 {
 	lv_style_init(style);
@@ -221,7 +301,9 @@ void BSP_Screen_InitTextAreaStyle(lv_style_t* style, const lv_font_t * font, lv_
 	if (txtColor != NULL)
 		lv_style_set_text_color(style, *txtColor);
 }
-
+/**
+ * @brief Initializes base screen styles
+ */
 void BSP_Screen_Styles_Init(void)
 {
 	// initialize colors

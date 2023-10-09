@@ -111,12 +111,11 @@ void OpenLoopVfControl_Init(openloopvf_config_t* config, PWMResetCallback pwmRes
 
 	Inverter3Ph_Activate(inverterConfig, false);
 }
-
 /**
  * @brief This function computes new duty cycles for the inverter in each cycle
  * @param config Pointer to the inverter structure
  * @details Here the frequency starts from the @ref INITIAL_FREQ and keeps increasing till
- * 	it reaches the @ref OUTPUT_FREQ value with constant @ref ACCELERATION. The currentModulationIndex
+ * 	it reaches the required frequency value with constant @ref ACCELERATION. The currentModulationIndex
  * 	is acquired by nominalModulationIndex / nominalFreq
  */
 void OpenLoopVfControl_Loop(openloopvf_config_t* config)
@@ -147,7 +146,11 @@ void OpenLoopVfControl_Loop(openloopvf_config_t* config)
 	// generate and apply SPWM according to the theta and modulation index
 	Inverter3Ph_UpdateSPWM(&config->inverterConfig, config->wt, config->currentModulationIndex);
 }
-
+/**
+ * @brief Activate/Deactivate the inverter
+ * @param config Pointer to the inverter structure
+ * @param activate en <c>true</c> if needs to be enabled else <c>false</c>
+ */
 void OpenLoopVfControl_Activate(openloopvf_config_t* config, bool activate)
 {
 	if (activate)

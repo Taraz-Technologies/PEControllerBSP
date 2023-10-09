@@ -233,7 +233,7 @@ extern void StateStorage_Init(state_storage_config_t* _config);
  * @details Poll this function periodically to refresh the stored states for all parameters. If the index in the
  * sector is 0 or the packet cannot fit within the remaining space in the sector, the \"isFirstSectorPacket\" flag
  * is set. This flag ensures that all parameters are completely flushed to the beginning of the sector.
- * To obtain the necessary data, each client is prompted to refresh their states using the @ref RefreshStates() function.
+ * To obtain the necessary data, each client is prompted to refresh their states using the @ref state_storage_client_t.RefreshStates() function.
  * It is the responsibility of the client to provide the refreshed data, if necessary, and return the size of
  * the updated data. Finally, the partial data will be flushed to the storage flash.
  */

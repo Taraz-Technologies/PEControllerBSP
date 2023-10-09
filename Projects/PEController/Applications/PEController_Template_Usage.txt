@@ -91,7 +91,6 @@ To list the control variables, you can utilize the <b>controlConfs</b> array, an
  */
 
 /** @defgroup InterprocessorCommUsage Interprocessor Communication
- * @brief Controls the communication between the CM4 and CM7 processors.
  * @details 
  * The CM4-CM7 communication provided is divided into two portions
  * -# <b>Data Buffers:</b> These are defined in @ref interprocessor_data_buffs_t and are shared between both cores.

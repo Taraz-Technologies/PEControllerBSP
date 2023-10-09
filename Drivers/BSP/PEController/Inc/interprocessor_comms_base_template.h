@@ -1,6 +1,6 @@
 /**
  ********************************************************************************
- * @file 		interprocessor_comms_base.h
+ * @file 		interprocessor_comms_base_template.h
  * @author 		Waqas Ehsan Butt
  * @date 		September 25, 2021
  *
@@ -73,41 +73,65 @@ typedef enum
 	SHARE_SAMPLE_BOOL,	/**< Defines Sample boolean shared variable */
 	SHARE_BOOL_COUNT,   /**< Not a type. Use this to get the total number of legal types */
 } shared_bools_t;
+/**
+ * @brief Defines the shared uint8_t variables between cores
+ */
 typedef enum
 {
 	SHARE_SAMPLE_U8,  /**< Defines Sample uint8_t shared variable */
 	SHARE_U8_COUNT,   /**< Not a type. Use this to get the total number of legal types */
 } shared_u8_t;
+/**
+ * @brief Defines the shared uint16_t variables between cores
+ */
 typedef enum
 {
 	SHARE_SAMPLE_U16,  /**< Defines Sample uint16_t shared variable */
 	SHARE_U16_COUNT,   /**< Not a type. Use this to get the total number of legal types */
 } shared_u16_t;
+/**
+ * @brief Defines the shared uint32_t variables between cores
+ */
 typedef enum
 {
 	SHARE_SAMPLE_U32,  /**< Defines Sample uint32_t shared variable */
 	SHARE_U32_COUNT,   /**< Not a type. Use this to get the total number of legal types */
 } shared_u32_t;
+/**
+ * @brief Defines the shared int8_t variables between cores
+ */
 typedef enum
 {
 	SHARE_SAMPLE_S8,  /**< Defines Sample int8_t shared variable */
 	SHARE_S8_COUNT,   /**< Not a type. Use this to get the total number of legal types */
 } shared_s8_t;
+/**
+ * @brief Defines the shared int16_t variables between cores
+ */
 typedef enum
 {
 	SHARE_SAMPLE_S16,  /**< Defines Sample int16_t shared variable */
 	SHARE_S16_COUNT,   /**< Not a type. Use this to get the total number of legal types */
 } shared_s16_t;
+/**
+ * @brief Defines the shared int32_t variables between cores
+ */
 typedef enum
 {
 	SHARE_SAMPLE_S32,  /**< Defines Sample int32_t shared variable */
 	SHARE_S32_COUNT,   /**< Not a type. Use this to get the total number of legal types */
 } shared_s32_t;
+/**
+ * @brief Defines the shared single precision variables between cores
+ */
 typedef enum
 {
 	SHARE_SAMPLE_FLOAT,  /**< Defines Sample single precision shared variable */
 	SHARE_FLOAT_COUNT,   /**< Not a type. Use this to get the total number of legal types */
 } shared_float_t;
+/**
+ * @brief Defines the shared bit accessible variables between cores
+ */
 typedef enum
 {
 	SHARE_SAMPLE_BIT_ACCESS,  /**< Defines Sample bit accessible shared variable */

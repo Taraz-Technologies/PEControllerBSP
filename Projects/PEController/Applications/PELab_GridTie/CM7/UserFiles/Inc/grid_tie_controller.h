@@ -40,7 +40,6 @@ extern "C" {
  * Make sure to provide the DC Link before connecting to the grid to avoid failure due to in-rush current.
  * Initializes the algorithm using @ref GridTieControl_Init().
  * Once initialized constantly polls using @ref GridTieControl_Loop().
- * The structure @ref adcVals contains all measurements obtained by the cortex-M4 processor
  * @{
  */
 /********************************************************************************
@@ -56,13 +55,7 @@ extern "C" {
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
-/** @defgroup GRIDTIE_Exported_Typedefs Type Definitions
-  * @{
-  */
 
-/**
- * @}
- */
 /********************************************************************************
  * Structures
  *******************************************************************************/
@@ -114,7 +107,19 @@ extern void GridTieControl_Init(grid_tie_t* gridTie, PWMResetCallback pwmResetCa
  * @param gridTie Pointer to the grid tie structure
  */
 extern void GridTieControl_Loop(grid_tie_t* gridTie);
+/**
+ * @brief Enable/Disable the boost converter for the grid tie controller
+ * @param gridTie Pointer to the grid tie structure
+ * @param en <c>true</c> if needs to be enabled else <c>false</c>
+ * @return <c>ERR_OK</c> if command successfully run else some other error
+ */
 extern device_err_t GridTie_EnableBoost(grid_tie_t* gridTie, bool en);
+/**
+ * @brief Enable/Disable the inverter for the grid tie controller
+ * @param gridTie Pointer to the grid tie structure
+ * @param en <c>true</c> if needs to be enabled else <c>false</c>
+ * @return <c>ERR_OK</c> if command successfully run else some other error
+ */
 extern device_err_t GridTie_EnableInverter(grid_tie_t* gridTie, bool en);
 /********************************************************************************
  * Code

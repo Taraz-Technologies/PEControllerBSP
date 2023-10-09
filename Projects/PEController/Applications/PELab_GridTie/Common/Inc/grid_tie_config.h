@@ -41,10 +41,19 @@ extern "C" {
  * Defines
  *******************************************************************************/
 /** @defgroup GRIDTIE_Exported_Macros Configurations
+ * @details Use the configurations to control the PWM for the VFDs.
+ * Some control for the VFDs are provided on the external touch screen.
+ * While the limits and default values may be controlled from here.
+ * Make sure to set these values to proper limits to avoid generation of invalid output.
+ * @note <b>This application is only supported for the 6-Phase configuration currently.</b>
   * @{
   */
+#if PECONTROLLER_CONFIG != PLB_6PH && PECONTROLLER_CONFIG != PEC_CUSTOM
+#error("This example is only supported for 6-Phase Inverter")
+#endif
 /**
- * @brief PWM Time Period in micro-seconds
+ * @brief PWM frequency in Hz.
+ * @note Minimum value is 5000
  */
 #define PWM_FREQ_Hz						(40000)
 /**
@@ -57,10 +66,13 @@ extern "C" {
 #define L_OUT							(.0025f)
 /**
  * @brief Number of Boost Switches to control
+ * @note Using multiple legs as boost converter reduces the load for each
+ * leg making it possible to achieve higher output power.
  */
 #define BOOST_COUNT						(3)
 /**
  * @brief Set point voltage for boost converter
+ * @note This should be kept as high as possible to avoid clamping at the top of the output current wave
  */
 #define BOOST_VSET						(720)
 /**
@@ -89,6 +101,7 @@ extern "C" {
 #define KI_I							(1000)
 /**
  * @brief Maximum duty cycle limit for the boost controller
+ * @note This value should be low if working on high input/PV voltage
  */
 #define BOOST_DUTYCYCLE_MAX				(.95f)
 
@@ -140,18 +153,53 @@ extern "C" {
  * @brief Inverter dead time subtraction mode selection. Can be selected from @ref duty_mode_t
  */
 #define INVERTER_DUTY_MODE				OUTPUT_DUTY_MINUS_DEADTIME_AT_PWMH
-
+/**
+ * @brief The frequency of the grid 1st time the application is run. Current value can be updated from screen
+ */
 #define DEFAULT_GRID_FREQ				(50)
+/**
+ * @brief The output inductance of the inverter 1st time the application is run. Current value can be updated from screen
+ */
 #define DEFAULT_LOUT					(.001f)
+/**
+ * @brief The phase voltage of the inverter 1st time the application is run. Current value can be updated from screen
+ */
 #define DEFAULT_GRID_VOLTAGE			(220.f)
+/**
+ * @brief The output current of the inverter 1st time the application is run. Current value can be updated from screen
+ */
 #define DEFAULT_CURRENT_INJ				(3.f)
+/**
+ * @brief The maximum allowed value of the grid frequency
+ */
 #define MAX_GRID_FREQ					(65)
+/**
+ * @brief The minimum allowed value of the grid frequency
+ */
 #define MIN_GRID_FREQ					(45)
+/**
+ * @brief The maximum allowed value of the output inductance
+ */
 #define MAX_LOUT						(.01f)
+/**
+ * @brief The minimum allowed value of the output inductance
+ */
 #define MIN_LOUT						(.0005f)
+/**
+ * @brief The maximum allowed value of grid phase voltage
+ */
 #define MAX_GRID_VOLTAGE				(250.f)
+/**
+ * @brief The minimum allowed value of grid phase voltage
+ */
 #define MIN_GRID_VOLTAGE				(40.f)
+/**
+ * @brief The maximum allowed value of output current to be injected
+ */
 #define MAX_CURRENT_INJ					(20.f)
+/**
+ * @brief The minimum allowed value of output current to be injected
+ */
 #define MIN_CURRENT_INJ					(.1f)
 /**
  * @}

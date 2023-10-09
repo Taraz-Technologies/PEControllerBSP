@@ -1,6 +1,6 @@
 /**
  ********************************************************************************
- * @file 		data_config.h
+ * @file 		data_config_template.h
  * @author 		Waqas Ehsan Butt
  * @date 		September 25, 2021
  *
@@ -164,7 +164,7 @@ extern const char* unitTxts[UNIT_COUNT];
 #pragma GCC diagnostic ignored "-Wunused-function"
 /**
  * @brief Default function to get the data parameters in textual format, according to the parameter info
- * @note This function is used whenever the @ref data_param_info_t.Getter_InText function is not defined and @ref GetDataParameter_InText() is called.
+ * @note This function is used whenever the data_param_info_t.Getter_InText function is not defined and @ref GetDataParameter_InText() is called.
  * @param _paramInfo Structure defining the parameter.
  * @param value Pointer to the location to be updated with the value
  * @param addUnit <c>true</c> if unit needs to be added with the text else false.

@@ -110,9 +110,9 @@ typedef struct
  */
 typedef struct
 {
-	volatile int recordIndex;							/**< @brief Record index for the raw ADC results in the @ref dataRecord buffer.
+	volatile int recordIndex;							/**< @brief Record index for the raw ADC results in the dataRecord buffer.
 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 @note The index increases the location in the buffer with an increment of 16.
-	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	e.g. if recordIndex is 1, start index in the @ref dataRecord will be 1*16 = 16. */
+	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	e.g. if recordIndex is 1, start index in the dataRecord will be 1*16 = 16. */
 	uint16_t dataRecord[RAW_MEASURE_SAVE_COUNT * TOTAL_MEASUREMENT_COUNT] __attribute__ ((aligned (8)));	/**< @brief Buffer containing the raw ADC data. */
 } adc_raw_data_t;
 /**
@@ -120,7 +120,7 @@ typedef struct
  */
 typedef struct
 {
-	volatile int recordIndex;							/**< @brief Record index for the processed ADC results in the @ref dataRecord buffer. */
+	volatile int recordIndex;							/**< @brief Record index for the processed ADC results in the dataRecord buffer. */
 	adc_measures_t dataRecord[MEASURE_SAVE_COUNT];		/**< @brief Buffer containing the processed ADC data. */
 	adc_info_t info;									/**< @brief ADC Information. */
 } adc_processed_data_t;

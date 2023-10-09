@@ -68,12 +68,12 @@ void BSP_PWM_ActivateInvertedPair(uint32_t pwmNo, bool en)
 		BSP_PWMOut_Enable(((1U) << (pwmNo - 1)), en);
 }
 /**
- * @brief Configures a PWM pair as inverted pair
+ * @brief Configures an PWM pair as inverted pair
  * @param pwmNo Channel no of reference channel is the PWM pair (Valid Values 1-16). <br>
  * 				<b>Pairs are classified as :</b>
  * 				-# CH1 = Reference channel available at pin pwmNo
  * 				-# CH2 = Inverted Channel from reference available at pin pwmNo + 1 if pwmNo is odd else pwmNo - 1
- * @param *config Pointer to a  pwm_config_t structure that contains the configuration
+ * @param config Pointer to a  pwm_config_t structure that contains the configuration
  * 				   parameters for the PWM pair
  * @return DutyCycleUpdateFnc Returns the function pointer of the type DutyCycleUpdateFnc which needs to be called
  * 						  whenever the duty cycles of the pair need to be updated
@@ -284,6 +284,7 @@ void BSP_PWM_Stop(uint32_t pwmMask, bool masterHRTIM)
  * -# deadtime.on = false
  * -# deadtime.nanoSec = 1000
  * -# f = 25000Hz
+ *
  * @param moduleConfig module configuration to be updated
  */
 void BSP_PWM_GetDafaultModuleConfig(pwm_module_config_t* moduleConfig)

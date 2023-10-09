@@ -66,10 +66,10 @@ extern "C" {
   */
 /**
  * @brief Initialize the intelliSENS library
- * @note <b>The following resources are used by the intelliSENS library. Make sure that they are not used in the main program.
+ * @note The following resources are used by the intelliSENS library. Make sure that they are not used in the main program.
  * -# DMA2_Stream0
  * -# LPTIM2
- * -# MDMA_Channel0 (Only in-case of CM4 core) </b>
+ * -# MDMA_Channel0 (Only in-case of CM4 core)
  * @param _mults Pointer to the multipliers for the ADC.
  * @param _offsets Pointer to the offsets for the ADC.
  * @param _dataCenter Pointer to the data center array. The array should have 2^n members.

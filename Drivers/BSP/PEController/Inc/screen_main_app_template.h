@@ -1,6 +1,6 @@
 /**
  ********************************************************************************
- * @file 		screen_main_app.h
+ * @file 		screen_main_app_template.h
  * @author 		Waqas Ehsan Butt
  * @date 		May 23, 2023
  *

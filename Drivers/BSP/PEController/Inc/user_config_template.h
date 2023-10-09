@@ -1,6 +1,6 @@
 /**
  ********************************************************************************
- * @file 		user_config.h
+ * @file 		user_config_template.h
  * @author 		Waqas Ehsan Butt
  * @date 		Nov 26, 2021
  * @copyright 	Taraz Technologies Pvt. Ltd.
@@ -48,7 +48,7 @@ extern "C" {
 #define PLB_6PH					(3)
 #define PLB_3PH					(4)
 /**
- * @brief Defines the Configuration for the PEController. Select @ref PEC_CUSTOM for independent PEControllers
+ * @brief Defines the Configuration for the PEController. Select PEC_CUSTOM for independent PEControllers
  */
 #define PECONTROLLER_CONFIG		(PLB_6PH)
 

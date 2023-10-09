@@ -1,6 +1,6 @@
 /**
  ********************************************************************************
- * @file 		error_config.h
+ * @file 		error_config_template.h
  * @author 		Waqas Ehsan Butt
  * @date 		September 25, 2021
  *

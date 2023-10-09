@@ -116,7 +116,7 @@ typedef struct
  * 				<b>Pairs are classified as :</b>
  * 				-# CH1 = Reference channel available at pin pwmNo
  * 				-# CH2 = Inverted Channel from reference available at pin pwmNo + 1 if pwmNo is odd else pwmNo - 1
- * @param *config Pointer to a  pwm_config_t structure that contains the configuration
+ * @param config Pointer to a  pwm_config_t structure that contains the configuration
  * 				   parameters for the PWM pair
  * @return DutyCycleUpdateFnc Returns the function pointer of the type DutyCycleUpdateFnc which needs to be called
  * 						  whenever the duty cycles of the pair need to be updated
@@ -199,7 +199,8 @@ extern void BSP_PWM_Stop(uint32_t pwmMask, bool masterHRTIM);
  * -# alignment = CENTER_ALIGNED
  * -# deadtime.on = false
  * -# deadtime.nanoSec = 1000
- * -# periodInUsec = 40
+ * -# f = 25000Hz
+ *
  * @param moduleConfig module configuration to be updated
  */
 extern void BSP_PWM_GetDafaultModuleConfig(pwm_module_config_t* moduleConfig);

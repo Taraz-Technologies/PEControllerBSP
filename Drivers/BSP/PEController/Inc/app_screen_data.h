@@ -79,7 +79,7 @@ typedef struct
   */
 /**
  * @brief This information will be displayed in the application information screen
- * @note The information is application dependent and can be edited in @ref screen_appinfo_data.c.
+ * @note The information is application dependent and can be edited in <b>screen_appinfo_data.c</b>.
  * The file is located in \"CM4/BSP/Display\" folder in the relevant project
  */
 extern appinfo_display_t appInfoDisplay;

@@ -57,6 +57,9 @@ extern "C" {
 /** @defgroup PEDISPLAYSTYLES_Exported_Structures Structures
   * @{
   */
+/**
+ * @brief Contains the available color definitions for the display
+ */
 typedef struct
 {
 	lv_color_t background;
@@ -75,6 +78,9 @@ typedef struct
 	lv_color_t on;
 	lv_color_t off;
 } lv_color_store_t;
+/**
+ * @brief Contains the available style definitions for the display
+ */
 typedef struct
 {
 	lv_style_t defaultGrid;
@@ -228,7 +234,7 @@ extern void BSP_Screen_InitBtnStyle(lv_style_t* style, lv_coord_t border, lv_coo
  * @param col Column no in parent grid
  * @param event_cb Click event handler. Set to NULL if no click event needed
  * @param eventData Click event custom user data pointer
- * @return
+ * @return Container object
  */
 extern lv_obj_t* lv_container_create_general(lv_obj_t* parent, lv_style_t* style, int row, int col, lv_event_cb_t event_cb, void * eventData);
 /********************************************************************************

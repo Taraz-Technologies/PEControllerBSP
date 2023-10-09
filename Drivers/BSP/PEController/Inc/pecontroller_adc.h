@@ -137,10 +137,10 @@ extern ring_buffer_t adcLocalIndexRingBuff;
 #if IS_ADC_CORE
 /**
  * @brief Set default parameters for the ADC
- * @param processedAdcData Pointer to the processed ADC data container
- * @param rawAdcData Pointer to the raw ADC data container
+ * @param _processedAdcData Pointer to the processed ADC data container
+ * @param _rawAdcData Pointer to the raw ADC data container
  */
-extern void BSP_ADC_SetDefaultParams(adc_processed_data_t* processedAdcData, adc_raw_data_t* rawAdcData);
+extern void BSP_ADC_SetDefaultParams(adc_processed_data_t* _processedAdcData, adc_raw_data_t* _rawAdcData);
 /**
  * @brief Updates the data parameters and data sharing items.
  * @note Should be called frequently to avoid data missing.
@@ -207,7 +207,7 @@ extern void BSP_ADC_ComputeStatsInBulk(adc_processed_data_t* _processedAdcData, 
 #if IS_STORAGE_CORE
 /**
  * @brief Configures the storage client information.
- * @note Before calling this function set the @ref _config->arg parameter to system @ref processedAdcData structure.
+ * @note Before calling this function set the _config->arg parameter to system processedAdcData structure.
  * @param _config Pointer to the relevant configuration to be filled.
  */
 extern void BSP_ADC_ConfigStorage(state_storage_client_t* _config);
