@@ -50,12 +50,18 @@
  */
 appinfo_display_t appInfoDisplay =
 {
-		.appInfo = "This application serves as a template to demonstrate the usage of PEControllerBSP. "
-				"It can be used as a starting point to enhance functionality by incorporating various control and communication schemes.",
+		.appInfo =
+				"This example controls a three phase inverter module as well as a boost converter for PELab (PLB-6PH). "
+				"The boost converter starts regulation to provide a stabilized DC-Link voltage. "
+				"Once stabilized, the relay connects the grid. "
+				"The control implements a PLL algorithm to detect the phase of the grid voltages. "
+				"After estimating the exact phase angle the inverter is enabled and starts injecting power in the grid. "
+				"Set measurement sensitivity before connecting to the input or output. "
+				"Make sure to provide the DC Link before connecting to the grid to avoid failure due to in-rush current.",
 
 		.connectionInfo = NULL,
 
-		.documentationLink = "www.taraztechnologies.com/Downloads/Software/PEControllerBSP/index.html",
+		.documentationLink = "https://www.taraztechnologies.com/help/pecontroller-three-phase-grid-tie-inverter/",
 
 		.img = NULL,
 };

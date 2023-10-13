@@ -50,8 +50,11 @@
  */
 appinfo_display_t appInfoDisplay =
 {
-		.appInfo = "This application serves as a template to demonstrate the usage of PEControllerBSP. "
-				"It can be used as a starting point to enhance functionality by incorporating various control and communication schemes.",
+		.appInfo = "PWM 1-2 (LEG 1) displays synchronization of the PWM generation with HRTIM_Master COMP1. "
+				"PWM 3-6 (LEG 2,3) displays an H-Bridge switching scheme. "
+				"PWM1 and PWM3 have a controllable phase shift update-able through the display. Value should be between 0-120 degrees. "
+				"PWM 7-8 (LEG 4) synchronizes HRTIM submodule to the Fiber Tx and generates the Fiber Tx signal to synchronize slave controllers. "
+				"PWM 9-16 (LEG 5-8) presents 2 H-Bridges with 8 switches synchronizing with Fiber Rx signal, and also synchronizing TIM1 and HRTIM.",
 
 		.connectionInfo = NULL,
 

@@ -50,8 +50,10 @@
  */
 appinfo_display_t appInfoDisplay =
 {
-		.appInfo = "This application serves as a template to demonstrate the usage of PEControllerBSP. "
-				"It can be used as a starting point to enhance functionality by incorporating various control and communication schemes.",
+		.appInfo = "This example controls one/multiple three phase inverter modules using the PWM signals of the PEController."
+				" The three phase signal starts from the INITIAL_FREQ and gradually increases dependent upon the value of ACCELERATION to reach the OUTPUT_FREQ. "
+				"A constant V/f is maintained through out this process using the ratio NOMINAL_FREQ / NOMINAL_MODULATION_INDEX. "
+				"These configurations are available in the file open_loop_vf_config.h",
 
 		.connectionInfo = NULL,
 
