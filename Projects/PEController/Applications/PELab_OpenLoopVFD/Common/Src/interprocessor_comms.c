@@ -167,6 +167,13 @@ device_err_t Interprocessor_UpdateValue(data_param_info_t* _paramInfo, data_unio
 	default:  return ERR_ILLEGAL;
 	}
 }
+/**
+ * @brief Get the value of an interprocessor parameter in string format.
+ * @param _paramInfo Relevant parameter information.
+ * @param value text value to be updated.
+ * @param addUnit If <c>true</c> append the unit of the parameter at the end of the string result.
+ * @return device_err_t If successful <c>ERR_OK</c> else some other error.
+ */
 device_err_t Interprocessor_GetStringValue(data_param_info_t* _paramInfo, char* value, bool addUnit)
 {
 	data_union_t dataVal;
@@ -197,6 +204,12 @@ device_err_t Interprocessor_GetStringValue(data_param_info_t* _paramInfo, char* 
 		strcat_custom(value, unitTxts[_paramInfo->unit], len, false);
 	return ERR_OK;
 }
+/**
+ * @brief Update the value of an interprocessor parameter from a string value.
+ * @param _paramInfo Relevant parameter information
+ * @param value Text value used for updating the parameter
+ * @return device_err_t If successful <c>ERR_OK</c> else some other error.
+ */
 device_err_t Interprocessor_UpdateFromString(data_param_info_t* _paramInfo, const char* value)
 {
 	if (!IsParameterValid(_paramInfo))
@@ -264,20 +277,23 @@ device_err_t Default_SetDataParameter_FromText(data_param_info_t* _paramInfo, co
 	return Interprocessor_UpdateFromString(_paramInfo, value);
 }
 /**
- * @brief  Default function to get the data parameters according to the parameter info
- * @param _paramInfo Structure defining the parameter.
- * @param value Pointer to the location to be updated with the value
- * @return <c>ERR_OK</c> if no error else appropriate error thrown
+ * @brief Default function to get the value of a parameter in string format.
+ * @note This function is used whenever the @ref data_param_info_t.Getter function is not defined and @ref GetDataParameter() is called.
+ * @param _paramInfo Information regarding the data parameter.
+ * @param value text representation of the value acquired.
+ * @param addUnit If <c>true</c> append the unit of the parameter at the end of the string result.
+ * @return device_err_t If successful <c>ERR_OK</c> else some other error.
  */
 device_err_t Default_GetDataParameter(data_param_info_t* _paramInfo, data_union_t* value)
 {
 	return Interprocessor_GetValue(_paramInfo, value);
 }
 /**
- * @brief  Default function to set the data parameters according to the parameter info
- * @param _paramInfo Structure defining the parameter.
- * @param value Value to be set
- * @return <c>ERR_OK</c> if no error else appropriate error thrown
+ * @brief Default function to set the value of a parameter from string format.
+ * @note This function is used whenever the @ref data_param_info_t.Setter function is not defined and @ref SetDataParameter() is called.
+ * @param _paramInfo Information regarding the data parameter.
+ * @param value text representation of the parameter value.
+ * @return device_err_t If successful <c>ERR_OK</c> else some other error.
  */
 device_err_t Default_SetDataParameter(data_param_info_t* _paramInfo, data_union_t value)
 {
@@ -476,7 +492,10 @@ static device_err_t ToggleBits(uint8_t index, uint8_t value)
 		INTER_CORE_DATA.bitAccess[index] ^= value;
 	return ERR_OK;
 }
-
+/**
+ * @brief Process the pending request for interprocessor communications.
+ * @note Call this function frequently to make sure that interprocessor communications work flawlessly.
+ */
 void InterprocessorComms_ProcessPendingRequests(void)
 {
 	if (RingBuffer_IsEmpty((ring_buffer_t*)&CORE_MSGS.msgsRingBuff))
@@ -513,7 +532,9 @@ void InterprocessorComms_ProcessPendingRequests(void)
 	RingBuffer_Read((ring_buffer_t*)&CORE_MSGS.msgsRingBuff);
 
 }
-
+/**
+ * @brief Initialize the buffers and storage for the interprocessor communications.
+ */
 void InterprocessorComms_InitData(void)
 {
 	CORE_MSGS.msgsRingBuff.modulo = INTERPROCESSOR_MSGS_SIZE - 1;
