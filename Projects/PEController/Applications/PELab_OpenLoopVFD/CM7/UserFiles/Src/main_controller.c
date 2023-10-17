@@ -72,7 +72,11 @@ static void ADC_Callback(adc_measures_t* result)
 		inv2StateUpdateRequest.isPending = false;
 	}
 	// Switch between Monitoring and control mode
-	if (openLoopVfConfig1.inverterConfig.state == INVERTER_ACTIVE || openLoopVfConfig2.inverterConfig.state == INVERTER_ACTIVE)
+	if (openLoopVfConfig1.inverterConfig.state == INVERTER_ACTIVE
+#if VFD_COUNT == 2
+			|| openLoopVfConfig2.inverterConfig.state == INVERTER_ACTIVE
+#endif
+			)
 	{
 		if (adcMode == ADC_MODE_MONITORING)
 		{

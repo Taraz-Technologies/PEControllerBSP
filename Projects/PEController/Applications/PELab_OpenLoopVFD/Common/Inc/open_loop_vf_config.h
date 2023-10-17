@@ -83,7 +83,7 @@ extern "C" {
  * @brief No of switches per leg.
  * @note This figure depends on the topology. e.g. TNPC requires four switches per leg
  */
-#define VFD_COUNT						(PECONTROLLER_CONFIG == PLB_6PH || PECONTROLLER_CONFIG == PEC_CUSTOM ? 2 : 1)
+#define VFD_COUNT						(PECONTROLLER_CONFIG == PLB_6PH || PECONTROLLER_CONFIG == PEC_CUSTOM || PECONTROLLER_CONFIG == PLB_MMC ? 2 : 1)
 /**
  * @brief 1st pin of 1st VFD
  */
