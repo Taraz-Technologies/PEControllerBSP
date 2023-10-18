@@ -126,14 +126,15 @@ static void StaticForm_Create(lv_obj_t * parent)
 	if (!init)
 	{
 		BSP_Screen_InitLabelStyle(&btnLblStyle, &lv_font_montserrat_26, LV_TEXT_ALIGN_CENTER, &lvColorStore.darkFont);
-		BSP_Screen_InitLabelStyle(&lblStyleName, &lv_font_montserrat_30, LV_TEXT_ALIGN_CENTER, &lvColorStore.mediumFont);
-		BSP_Screen_InitGridStyle(&nameContainerStyle, 0, 0, 0, 10, &lvColorStore.btnBg2);
+		BSP_Screen_InitLabelStyle(&lblStyleName, &lv_font_montserrat_30, LV_TEXT_ALIGN_CENTER, &lvColorStore.white);
+		BSP_Screen_InitGridStyle(&nameContainerStyle, 0, 0, 0, 10, &lvColorStore.darkTaraz);
 		init = true;
 	}
 
 	// name and container for configuration data
-	lv_obj_t * nameContainer = lv_container_create_general(parent, &nameContainerStyle, 0, 0, NULL, NULL);
-	lv_obj_set_grid_cell(nameContainer, LV_GRID_ALIGN_STRETCH, 0, 2, LV_GRID_ALIGN_STRETCH, 0, 1);
+	lv_obj_t* nameContainerArea = lv_grid_create_general(parent, singleRowCol, singleRowCol, &lvStyleStore.mediumMarginGrid, NULL, NULL, NULL);
+	lv_obj_set_grid_cell(nameContainerArea, LV_GRID_ALIGN_STRETCH, 0, 2, LV_GRID_ALIGN_STRETCH, 0, 1);
+	lv_obj_t * nameContainer = lv_container_create_general(nameContainerArea, &nameContainerStyle, 0, 0, NULL, NULL);
 	screenObjs.paramName = lv_label_create_general(nameContainer, &lblStyleName, "", NULL, NULL);
 	lv_obj_align(screenObjs.paramName, LV_ALIGN_CENTER, 0, 0);
 
@@ -337,7 +338,7 @@ void ConfigScreen_Init(screens_t* _screen)
 
 	// create basic grid
 	static lv_coord_t colsScreen[] = {LV_GRID_FR(1), 350, LV_GRID_TEMPLATE_LAST};
-	static lv_coord_t rowsScreen[] = {45, LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
+	static lv_coord_t rowsScreen[] = {60, LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
 	lv_obj_t* screenGrid = lv_grid_create_general(screen, colsScreen, rowsScreen, &lvStyleStore.defaultGrid, NULL, NULL, NULL);
 	lv_obj_set_size(screenGrid, DISPLAY_WIDTH_RAM, DISPLAY_HEIGHT_RAM);
 

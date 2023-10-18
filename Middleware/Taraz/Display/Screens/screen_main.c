@@ -138,7 +138,7 @@ static void MeasurementCell_Create(lv_obj_t * parent, int index)
 	disp->lastUnit = UNIT_V;
 
 	// Set main grid element
-	static lv_coord_t rows[] = {LV_GRID_FR(10), LV_GRID_FR(3), LV_GRID_TEMPLATE_LAST};
+	static lv_coord_t rows[] = {LV_GRID_FR(10), LV_GRID_FR(4), LV_GRID_TEMPLATE_LAST};
 	lv_obj_t * grid = lv_grid_create_general(parent, singleRowCol, rows, &cellGridStyle, NULL, event_handler, MEASURE_TAG(index));
 	disp->gridMeasure = grid;
 	lv_obj_set_grid_cell(grid, LV_GRID_ALIGN_STRETCH, col, 1, LV_GRID_ALIGN_STRETCH, row, 1);
@@ -174,55 +174,38 @@ static void MeasurementGrid_Create(lv_obj_t* parent)
 	static lv_coord_t cols[] = {LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
 	static lv_coord_t rows[] = {LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
 	lv_obj_t* grid = lv_grid_create_general(parent, cols, rows, &lvStyleStore.mediumMarginGrid, NULL, NULL, NULL);
-	lv_obj_set_grid_cell(grid, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
+	lv_obj_set_grid_cell(grid, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 1, 1);
 	// create all cells
 	for (int i = 0; i < 16; i++)
 		MeasurementCell_Create(grid, i);
 }
 
-static void FileMenu_Create(lv_obj_t* parent, int row)
+static void Header_Create(lv_obj_t* parent)
 {
-/*
-	static lv_style_t stripGridStyle;
-	static lv_style_t lblStyle;
-	static lv_style_t btnStyle;
+	static const char* title = "Grid Tie Converter";
+	static lv_style_t titleContainerStyle;
+	static lv_style_t lblStyleName;
 	static bool init = false;
 	// initialize styles once
 	if (!init)
 	{
-		BSP_Screen_InitGridStyle(&stripGridStyle, 1, 2, 2, 5, &lvColorStore.background);
-		BSP_Screen_InitBtnStyle(&btnStyle, 0, 4, &lvColorStore.btnBg2);
-		// Initialize the basic grid cell label styles
-		BSP_Screen_InitLabelStyle(&lblStyle, &lv_font_montserrat_22, LV_TEXT_ALIGN_CENTER, &lvColorStore.darkFont);
+		BSP_Screen_InitGridStyle(&titleContainerStyle, 5, 5, 0, 10, &lvColorStore.darkTaraz);
+		BSP_Screen_InitLabelStyle(&lblStyleName, &lv_font_montserrat_30, LV_TEXT_ALIGN_CENTER, &lvColorStore.white);
 		init = true;
 	}
 
-	// Set main grid element
-	static lv_coord_t cols[] = {LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
-	lv_obj_t * grid = lv_grid_create_general(parent, cols, singleRowCol, &stripGridStyle, NULL, NULL, NULL);
-	lv_obj_set_grid_cell(grid, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, row, 1);
+	lv_obj_t* titleCellArea = lv_grid_create_general(parent, singleRowCol, singleRowCol, &lvStyleStore.mediumMarginGrid, NULL, NULL, NULL);
+	lv_obj_set_grid_cell(titleCellArea, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
+	lv_obj_t * titleCell = lv_container_create_general(titleCellArea, &titleContainerStyle, 0, 0, event_handler, TAG_ATTACH(TAG_APPINFO));
+	lv_obj_t * titleCellInner = lv_label_create_general(titleCell, &lblStyleName, title, NULL, NULL);
+	lv_obj_align(titleCellInner, LV_ALIGN_CENTER, 0, 0);
 
-
-	lv_obj_t* infoBtn = lv_btn_create_general(grid, &btnStyle, &lblStyle, "Info", event_handler, TAG_ATTACH(TAG_APPINFO));
-	lv_obj_set_grid_cell(infoBtn, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
-
-	lv_obj_t* docsBtn = lv_btn_create_general(grid, &btnStyle, &lblStyle, "Help", event_handler, TAG_ATTACH(TAG_HELP));
-	lv_obj_set_grid_cell(docsBtn, LV_GRID_ALIGN_STRETCH, 1, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
-
-	lv_obj_t* intBtn = lv_btn_create_general(grid, &btnStyle, &lblStyle, "", event_handler, TAG_ATTACH(TAG_intelliSENS));
-	lv_obj_set_grid_cell(intBtn, LV_GRID_ALIGN_STRETCH, 2, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
-*/
+	lv_container_create_general(parent, &lvStyleStore.defaultGrid, 0, 1, event_handler, TAG_ATTACH(TAG_intelliSENS));
 }
 
 static void ControlGrid_Create(lv_obj_t* parent)
 {
-	// create control grid
-	static lv_coord_t rows[] = {60, LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
-	lv_obj_t* grid = lv_grid_create_general(parent, singleRowCol, rows, &lvStyleStore.defaultGrid, NULL, NULL, NULL);
-	lv_obj_set_grid_cell(grid, LV_GRID_ALIGN_STRETCH, 1, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
-
-	FileMenu_Create(grid, 0);
-	AppControlGrid_Create(grid, 1, 0);
+	AppControlGrid_Create(parent, 1, 1);
 }
 
 static void Load(void)
@@ -274,7 +257,6 @@ static screen_type_t Refresh(void)
 				float* stats = ((float*)&dispMeasures.adcInfo->stats[i]);
 				char txt[10];
 				ftoa_custom(stats[(uint8_t)type], txt, 4, 1);
-				//strcat_custom(txt, unitTxts[(uint8_t)dispMeasures.adcInfo->units[i]], len, false);
 				lv_label_set_text(chDisplay[i].lblValue, txt);
 
 				if (chDisplay[i].lastType == dispMeasures.chMeasures[i].type && chDisplay[i].lastUnit == dispMeasures.adcInfo->units[i])
@@ -298,11 +280,11 @@ void MainScreen_Init(screens_t* _screen)
 {
 	static ltdc_layer_info_t directLayer =
 	{
-			.xAlign = ALIGN_LEFT_X,
+			.xAlign = ALIGN_RIGHT_X,
 			.yAlign = ALIGN_UP_Y,
 			.posY = 12
 	};
-	directLayer.posX = (MEASUREMENT_AREA_RATIO * DISPLAY_WIDTH_RAM) / (MEASUREMENT_AREA_RATIO + APP_AREA_RATIO) + 10;//(((APP_AREA_RATIO * DISPLAY_WIDTH_RAM) / (MEASUREMENT_AREA_RATIO + APP_AREA_RATIO)) / 6) - (intelliSENS_icon_info.width / 2);
+	directLayer.posX = 10;//(MEASUREMENT_AREA_RATIO * DISPLAY_WIDTH_RAM) / (MEASUREMENT_AREA_RATIO + APP_AREA_RATIO) + 10;
 	directLayer.PixelFormat = intelliSENS_logo_info.pixelFormat;
 	directLayer.width = intelliSENS_logo_info.width;
 	directLayer.height = intelliSENS_logo_info.height;
@@ -313,10 +295,12 @@ void MainScreen_Init(screens_t* _screen)
 	screen = lv_obj_create(NULL);
 
 	// create basic grid
+	static lv_coord_t rowsScreen[] = {60, LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
 	static lv_coord_t colsScreen[] = {LV_GRID_FR(MEASUREMENT_AREA_RATIO), LV_GRID_FR(APP_AREA_RATIO), LV_GRID_TEMPLATE_LAST};
-	lv_obj_t* screenGrid = lv_grid_create_general(screen, colsScreen, singleRowCol, &lvStyleStore.defaultGrid, NULL, NULL, NULL);
+	lv_obj_t* screenGrid = lv_grid_create_general(screen, colsScreen, rowsScreen, &lvStyleStore.defaultGrid, NULL, NULL, NULL);
 	lv_obj_set_size(screenGrid, DISPLAY_WIDTH_RAM, DISPLAY_HEIGHT_RAM);
 
+	Header_Create(screenGrid);
 	MeasurementGrid_Create(screenGrid);
 	ControlGrid_Create(screenGrid);
 
