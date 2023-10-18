@@ -88,6 +88,10 @@ extern image_info_t intelliSENS_QR_info;
  */
 extern image_info_t intelliSENS_logo_info;
 /**
+ * @brief intelliSENS icon information
+ */
+extern image_info_t intelliSENS_icon_info;
+/**
  * @brief BSP documentation QR Code information
  */
 extern image_info_t bsp_docs_QR_info;

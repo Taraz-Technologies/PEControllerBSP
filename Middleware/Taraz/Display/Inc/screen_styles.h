@@ -75,6 +75,8 @@ typedef struct
 	lv_color_t lightTaraz;
 	lv_color_t mediumTaraz;
 	lv_color_t darkTaraz;
+	lv_color_t current;
+	lv_color_t voltage;
 	lv_color_t on;
 	lv_color_t off;
 } lv_color_store_t;

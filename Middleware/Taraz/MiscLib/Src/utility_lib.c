@@ -74,6 +74,21 @@ uint8_t String_FindnCharsIndices(const char *txt, char item, uint8_t* indices, u
 	// if not found return null pointer
 	return index;
 }
+/**
+ * @brief Copy the source string to destination
+ * @param dest Copy destination
+ * @param src Source string
+ */
+void CopyString(char *dest, const char *src)
+{
+	while (*src != '\0')
+	{
+		*dest = *src;
+		src++;
+		dest++;
+	}
+	*dest = '\0'; // Adding null-terminator at the end
+}
 static void ReverseString(char* txt, int len)
 {
 	int start = 0;
@@ -104,6 +119,7 @@ static bool ceil_custom(char* firstNumLoc, char* lastNumLoc)
 	}
 	return false;
 }
+
 /**
  * @brief Concatenates two strings
  * @param dest Destination string containing the first part where the src part will be appended

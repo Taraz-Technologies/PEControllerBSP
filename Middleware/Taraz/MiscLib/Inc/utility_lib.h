@@ -63,6 +63,12 @@ extern "C" {
  * @{
  */
 /**
+ * @brief Copy the source string to destination
+ * @param dest Copy destination
+ * @param src Source string
+ */
+extern void CopyString(char *dest, const char *src);
+/**
  * @brief Concatenates two strings
  * @param dest Destination string containing the first part where the src part will be appended
  * @param src String to be appened in destination

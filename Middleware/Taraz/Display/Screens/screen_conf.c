@@ -109,7 +109,7 @@ static void Numpad_Create(lv_obj_t * parent)
 			"+/-", "0", "." , LV_SYMBOL_RIGHT,
 			NULL};
 	screenObjs.keyboard = lv_keyboard_create(parent);
-	lv_obj_set_grid_cell(screenObjs.keyboard, LV_GRID_ALIGN_STRETCH, 1, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
+	lv_obj_set_grid_cell(screenObjs.keyboard, LV_GRID_ALIGN_STRETCH, 1, 1, LV_GRID_ALIGN_STRETCH, 1, 1);
 	//lv_keyboard_set_mode(screenObjs.keyboard, LV_KEYBOARD_MODE_NUMBER);
 	lv_btnmatrix_set_map(screenObjs.keyboard, map);
 	lv_obj_set_style_bg_color(screenObjs.keyboard, lvColorStore.background, 0);
@@ -131,21 +131,23 @@ static void StaticForm_Create(lv_obj_t * parent)
 		init = true;
 	}
 
-	static lv_coord_t rows[] = {60, LV_GRID_FR(1), 80, LV_GRID_TEMPLATE_LAST};
-	lv_obj_t* grid = lv_grid_create_general(parent, singleRowCol, rows, &lvStyleStore.thinMarginGrid, NULL, NULL, NULL);
-	lv_obj_set_grid_cell(grid, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
-
 	// name and container for configuration data
-	lv_obj_t * nameContainer = lv_container_create_general(grid, &nameContainerStyle, 0, 0, NULL, NULL);
+	lv_obj_t * nameContainer = lv_container_create_general(parent, &nameContainerStyle, 0, 0, NULL, NULL);
+	lv_obj_set_grid_cell(nameContainer, LV_GRID_ALIGN_STRETCH, 0, 2, LV_GRID_ALIGN_STRETCH, 0, 1);
 	screenObjs.paramName = lv_label_create_general(nameContainer, &lblStyleName, "", NULL, NULL);
 	lv_obj_align(screenObjs.paramName, LV_ALIGN_CENTER, 0, 0);
+
+	static lv_coord_t rows[] = {LV_GRID_FR(1), 80, LV_GRID_TEMPLATE_LAST};
+	lv_obj_t* grid = lv_grid_create_general(parent, singleRowCol, rows, &lvStyleStore.thinMarginGrid, NULL, NULL, NULL);
+	lv_obj_set_grid_cell(grid, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 1, 1);
+
 	screenObjs.itemContainer = lv_grid_create_general(grid, singleRowCol, singleRowCol, &lvStyleStore.defaultGrid, NULL, NULL, NULL);
-	lv_obj_set_grid_cell(screenObjs.itemContainer, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 1, 1);
+	lv_obj_set_grid_cell(screenObjs.itemContainer, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
 
 	// buttons
 	static lv_coord_t cols[] = {LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
 	lv_obj_t* gridBtns = lv_grid_create_general(grid, cols, singleRowCol, &lvStyleStore.thickMarginGrid, NULL, NULL, NULL);
-	lv_obj_set_grid_cell(gridBtns, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 2, 1);
+	lv_obj_set_grid_cell(gridBtns, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 1, 1);
 
 	lv_obj_t* okBtn = lv_btn_create_general(gridBtns, &lvStyleStore.btn2, &btnLblStyle, "Save", Close_Clicked, TAG_ATTACH(TAG_OK));
 	lv_obj_set_grid_cell(okBtn, LV_GRID_ALIGN_CENTER, 0, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
@@ -335,7 +337,8 @@ void ConfigScreen_Init(screens_t* _screen)
 
 	// create basic grid
 	static lv_coord_t colsScreen[] = {LV_GRID_FR(1), 350, LV_GRID_TEMPLATE_LAST};
-	lv_obj_t* screenGrid = lv_grid_create_general(screen, colsScreen, singleRowCol, &lvStyleStore.defaultGrid, NULL, NULL, NULL);
+	static lv_coord_t rowsScreen[] = {45, LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
+	lv_obj_t* screenGrid = lv_grid_create_general(screen, colsScreen, rowsScreen, &lvStyleStore.defaultGrid, NULL, NULL, NULL);
 	lv_obj_set_size(screenGrid, DISPLAY_WIDTH_RAM, DISPLAY_HEIGHT_RAM);
 
 	Numpad_Create(screenGrid);

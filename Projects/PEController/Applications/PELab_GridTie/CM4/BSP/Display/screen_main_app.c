@@ -80,10 +80,10 @@ static data_param_info_t controlConfs[CONTROL_CONFS_COUNT] =
 {
 		{ .name = "iReq (RMS)", .index = SHARE_REQ_RMS_CURRENT, .type = DTYPE_FLOAT, .arg = 1, .unit = UNIT_A },
 		{ .name = "Grid Freq.", .index = SHARE_GRID_FREQ, .type = DTYPE_FLOAT, .arg = 1, .unit = UNIT_Hz },
-		{ .name = "Grid Voltage", .index = SHARE_GRID_VOLTAGE, .type = DTYPE_FLOAT, .arg = 1, .unit = UNIT_V },
+		{ .name = "Grid Voltage (P-N)", .index = SHARE_GRID_VOLTAGE, .type = DTYPE_FLOAT, .arg = 1, .unit = UNIT_V },
 		{ .name = "Output Inductance", .index = SHARE_LOUT, .type = DTYPE_FLOAT, .arg = 4, .unit = UNIT_NONE },
-		{ .name = "Boost Control", .index = SHARE_BOOST_STATE, .type = DTYPE_BOOL},
-		{ .name = "Inverter Control", .index = SHARE_INVERTER_STATE, .type = DTYPE_BOOL},
+		{ .name = "Enable Boost", .index = SHARE_BOOST_STATE, .type = DTYPE_BOOL},
+		{ .name = "Enable Inverter", .index = SHARE_INVERTER_STATE, .type = DTYPE_BOOL},
 };
 #endif
 #if MONITOR_CONFS_COUNT > 0
@@ -178,9 +178,10 @@ static lv_obj_t* Control_Cell_Create(lv_obj_t* parent, int index, data_param_inf
 	// initialize styles once
 	if (!init)
 	{
-		BSP_Screen_InitGridStyle(&paramGridStyle, 0, 0, 2, 10, &lvColorStore.btnBg2);
-		BSP_Screen_InitLabelStyle(&paramNameStyle, &lv_font_montserrat_14, LV_TEXT_ALIGN_CENTER, &lvColorStore.mediumFont);
-		BSP_Screen_InitLabelStyle(&paramValueStyle, &CONTROL_VALUE_FONT, LV_TEXT_ALIGN_CENTER, &lvColorStore.darkFont);
+		BSP_Screen_InitGridStyle(&paramGridStyle, 0, 0, 2, 10, &lvColorStore.darkTaraz);
+		lv_style_set_border_color(&paramGridStyle, lvColorStore.lightTaraz);
+		BSP_Screen_InitLabelStyle(&paramNameStyle, &lv_font_montserrat_14, LV_TEXT_ALIGN_CENTER, &lvColorStore.white);
+		BSP_Screen_InitLabelStyle(&paramValueStyle, &CONTROL_VALUE_FONT, LV_TEXT_ALIGN_CENTER, &lvColorStore.white);
 		init = true;
 	}
 
@@ -254,8 +255,8 @@ static lv_obj_t* Monitor_Cell_Create(lv_obj_t* parent, int index, data_param_inf
 	{
 		BSP_Screen_InitGridStyle(&paramGridStyle, 0, 0, 2, 10, &lvColorStore.background);
 		lv_style_set_border_color(&paramGridStyle, lvColorStore.gray);
-		BSP_Screen_InitLabelStyle(&paramNameStyle, &lv_font_montserrat_14, LV_TEXT_ALIGN_CENTER, &lvColorStore.mediumFont);
-		BSP_Screen_InitLabelStyle(&paramValueStyle, &MONITOR_VALUE_FONT, LV_TEXT_ALIGN_CENTER, &lvColorStore.darkFont);
+		BSP_Screen_InitLabelStyle(&paramNameStyle, &lv_font_montserrat_14, LV_TEXT_ALIGN_CENTER, &lvColorStore.white);
+		BSP_Screen_InitLabelStyle(&paramValueStyle, &MONITOR_VALUE_FONT, LV_TEXT_ALIGN_CENTER, &lvColorStore.white);
 		init = true;
 	}
 

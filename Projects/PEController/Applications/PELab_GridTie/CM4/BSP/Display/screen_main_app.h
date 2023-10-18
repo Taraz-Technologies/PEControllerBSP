@@ -104,7 +104,7 @@ extern "C" {
 /**
  * @brief Font used by the displayed measurement value
  */
-#define MEASUREMENT_VALUE_FONT				(lv_font_montserrat_22)
+#define MEASUREMENT_VALUE_FONT				(lv_font_montserrat_26)
 /**
  * @brief Font used by the displayed control parameters
  */

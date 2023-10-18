@@ -307,19 +307,21 @@ void BSP_Screen_InitTextAreaStyle(lv_style_t* style, const lv_font_t * font, lv_
 void BSP_Screen_Styles_Init(void)
 {
 	// initialize colors
-	lvColorStore.background = MakeColor(230, 230, 230);
+	lvColorStore.background = MakeColor(10, 40, 60);
 	lvColorStore.black = MakeColor(0, 0, 0);
 	lvColorStore.gray = MakeColor(127, 127, 127);
 	lvColorStore.white = MakeColor(255, 255, 255);
 	lvColorStore.darkFont = MakeColor(0, 0, 0);
 	lvColorStore.mediumFont = MakeColor(127, 127, 127);
 	lvColorStore.lightFont = MakeColor(255, 255, 255);
-	lvColorStore.darkTaraz = MakeColor(0, 75, 75);
+	lvColorStore.darkTaraz = MakeColor(0, 100, 100);
 	lvColorStore.mediumTaraz = MakeColor(0, 155, 155);
 	lvColorStore.lightTaraz = MakeColor(0, 200, 200);
 	lvColorStore.btnBg1 = MakeColor(0, 180, 180);
 	lvColorStore.btnBg2 = MakeColor(180, 180, 180);
 	lvColorStore.btnBg3 = MakeColor(210, 210, 210);
+	lvColorStore.current = MakeColor(250, 90, 0);
+	lvColorStore.voltage = MakeColor(0, 70, 160);
 	lvColorStore.on = MakeColor(11, 161, 51);
 	lvColorStore.off = MakeColor(207, 52, 43);
 	static lv_coord_t singleCoord[] = {LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
