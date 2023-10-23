@@ -30,7 +30,7 @@
 /********************************************************************************
  * Defines
  *******************************************************************************/
-#define FIELD_ROW_HEIGHT				(55)
+#define FIELD_ROW_HEIGHT				(45)
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
@@ -113,6 +113,7 @@ static void Numpad_Create(lv_obj_t * parent)
 	//lv_keyboard_set_mode(screenObjs.keyboard, LV_KEYBOARD_MODE_NUMBER);
 	lv_btnmatrix_set_map(screenObjs.keyboard, map);
 	lv_obj_set_style_bg_color(screenObjs.keyboard, lvColorStore.background, 0);
+	lv_obj_set_style_text_color(screenObjs.keyboard, lvColorStore.darkTaraz, 0);
 }
 
 static void StaticForm_Create(lv_obj_t * parent)
@@ -170,11 +171,15 @@ void ConfigScreen_LoadMeasurement(int _measurementIndex)
 	measurementIndex = _measurementIndex;
 	confType = CONF_MEASURE;
 	static lv_style_t lblStyle;
+	static lv_style_t taStyle;
+	static lv_style_t gridStyle;
 	static bool init = false;
 	// initialize styles once
 	if (!init)
 	{
-		BSP_Screen_InitLabelStyle(&lblStyle, NULL, LV_TEXT_ALIGN_CENTER, &lvColorStore.darkFont);
+		BSP_Screen_InitLabelStyle(&lblStyle, NULL, LV_TEXT_ALIGN_CENTER, &lvColorStore.white);
+		BSP_Screen_InitTextAreaStyle(&taStyle, NULL, &lvColorStore.white);
+		BSP_Screen_InitGridStyle(&gridStyle, 12, 12, 0, 0, &lvColorStore.background);
 		init = true;
 	}
 
@@ -187,8 +192,8 @@ void ConfigScreen_LoadMeasurement(int _measurementIndex)
 	static lv_coord_t rows[] = {FIELD_ROW_HEIGHT, FIELD_ROW_HEIGHT, FIELD_ROW_HEIGHT,
 			FIELD_ROW_HEIGHT, FIELD_ROW_HEIGHT, FIELD_ROW_HEIGHT,
 			LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
-	static lv_coord_t cols[] = {LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
-	screenObjs.paramGrid = lv_grid_create_general(screenObjs.itemContainer, cols, rows, &lvStyleStore.thinMarginGrid, NULL, NULL, NULL);
+	static lv_coord_t cols[] = {LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
+	screenObjs.paramGrid = lv_grid_create_general(screenObjs.itemContainer, cols, rows, &gridStyle, NULL, NULL, NULL);
 	lv_obj_set_grid_cell(screenObjs.paramGrid, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
 
 	if(screenObjs.paramName != NULL)
@@ -203,6 +208,7 @@ void ConfigScreen_LoadMeasurement(int _measurementIndex)
 	lv_obj_clear_flag(measureObjs.ddMeasure, LV_OBJ_FLAG_CLICK_FOCUSABLE);
 	lv_create_field(screenObjs.paramGrid, &lblStyle, "Type", measureObjs.ddMeasure, 0);
 	lv_obj_set_style_text_align(lv_dropdown_get_list(measureObjs.ddMeasure), LV_TEXT_ALIGN_RIGHT, 0);
+	lv_obj_add_style(measureObjs.ddMeasure, &taStyle, 0);
 
 	// drop down for unit selection
 	measureObjs.ddUnit = lv_dropdown_create(screenObjs.paramGrid);
@@ -213,14 +219,27 @@ void ConfigScreen_LoadMeasurement(int _measurementIndex)
 	lv_obj_clear_flag(measureObjs.ddUnit, LV_OBJ_FLAG_CLICK_FOCUSABLE);
 	lv_create_field(screenObjs.paramGrid, &lblStyle, "Units", measureObjs.ddUnit, 1);
 	lv_obj_set_style_text_align(lv_dropdown_get_list(measureObjs.ddUnit), LV_TEXT_ALIGN_RIGHT, 0);
+	lv_obj_add_style(measureObjs.ddUnit, &taStyle, 0);
 
 	char txt[12];
 	(void)ftoa_custom(ADC_INFO.sensitivity[measurementIndex], txt, 7, 4);
-	screenObjs.focusItem = measureObjs.sensitivity = lv_create_textfield_display(screenObjs.paramGrid, &lblStyle, &lvStyleStore.defaultTextArea, "Sensitivity", txt, TextArea_Clicked, NULL, 2);
+	lv_ta_field_data_t field =
+		{
+			.isTextArea = true,
+			.nameTxt = "Sensitivity",
+			.valueTxt = txt,
+			.colWidths = { LV_GRID_FR(1), 120 }
+		};
+	lv_default_text_field(screenObjs.paramGrid, &field, 2, 0, TextArea_Clicked, NULL);
+	screenObjs.focusItem = measureObjs.sensitivity = field.valueField;//lv_create_textfield_display(screenObjs.paramGrid, &lblStyle, &taStyle, "Sensitivity", txt, TextArea_Clicked, NULL, 2);
 	(void)ftoa_custom(ADC_INFO.offsets[measurementIndex], txt, 7, 4);
-	measureObjs.offset = lv_create_textfield_display(screenObjs.paramGrid, &lblStyle, &lvStyleStore.defaultTextArea, "Offset", txt, TextArea_Clicked, NULL, 3);
+	field.nameTxt = "Offset";
+	lv_default_text_field(screenObjs.paramGrid, &field, 3, 0, TextArea_Clicked, NULL);
+	measureObjs.offset = field.valueField;// = lv_create_textfield_display(screenObjs.paramGrid, &lblStyle, &taStyle, "Offset", txt, TextArea_Clicked, NULL, 3);
 	(void)ftoa_custom(ADC_INFO.freq[measurementIndex], txt, 7, 1);
-	measureObjs.freq = lv_create_textfield_display(screenObjs.paramGrid, &lblStyle, &lvStyleStore.defaultTextArea, "Signal Frequency", txt, TextArea_Clicked, NULL, 4);
+	field.nameTxt = "Fundamental Frequency";
+	lv_default_text_field(screenObjs.paramGrid, &field, 4, 0, TextArea_Clicked, NULL);
+	measureObjs.freq = field.valueField;// = lv_create_textfield_display(screenObjs.paramGrid, &lblStyle, &taStyle, "Fundamental\nFrequency", txt, TextArea_Clicked, NULL, 4);
 
 	lv_keyboard_set_textarea(screenObjs.keyboard, screenObjs.focusItem);
 }

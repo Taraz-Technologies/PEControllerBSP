@@ -78,6 +78,52 @@ lv_color_t MakeColor(uint8_t r, uint8_t g, uint8_t b)
 	bgColor.ch.blue = (b >> 3) & 0x1f;
 	return bgColor;
 }
+void lv_default_text_field(lv_obj_t* parent, lv_ta_field_data_t* field, int row, int col, lv_event_cb_t event_cb, void * eventData)
+{
+	static lv_style_t outerGridStyle;
+	static lv_style_t nameContainerStyle, valueContainerStyle;
+	static lv_style_t nameLblStyle, valueLblStyle;
+	static lv_style_t taStyle;
+	static bool init = false;
+	// initialize styles once
+	if (!init)
+	{
+		BSP_Screen_InitGridStyle(&outerGridStyle, 2, 2, 0, 5, &lvColorStore.lightTaraz);
+		BSP_Screen_InitGridStyle(&valueContainerStyle, 0, 0, 0, 0, &lvColorStore.background);
+		BSP_Screen_InitGridStyle(&nameContainerStyle, 0, 0, 0, 0, &lvColorStore.lightTaraz);
+		// Initialize the basic grid cell label styles
+		BSP_Screen_InitLabelStyle(&valueLblStyle, &lv_font_montserrat_22, LV_TEXT_ALIGN_LEFT, &lvColorStore.white);
+		BSP_Screen_InitLabelStyle(&nameLblStyle, &lv_font_montserrat_20, LV_TEXT_ALIGN_CENTER, &lvColorStore.black);
+		BSP_Screen_InitTextAreaStyle(&taStyle, NULL, &lvColorStore.white);
+		init = true;
+	}
+
+	// Set main grid element
+	static lv_coord_t cols[3] = { 0, 0, LV_GRID_TEMPLATE_LAST};
+	cols[0] = field->colWidths[0];
+	cols[1] = field->colWidths[1];
+	lv_obj_t * grid = lv_grid_create_general(parent, cols, singleRowCol, &outerGridStyle, NULL, event_cb, eventData);
+
+	// set the name portion
+	lv_obj_t* containerName = lv_container_create_general(grid, &nameContainerStyle, 0, 0, event_cb, eventData);
+	field->nameField = lv_label_create_general(containerName, &nameLblStyle, field->nameTxt, NULL, NULL);
+	lv_obj_align(field->nameField, LV_ALIGN_RIGHT_MID, 0, 0);
+
+	//lv_obj_t * containerValue = lv_grid_create_general(grid, singleRowCol, singleRowCol, &valueContainerStyle, NULL, event_cb, eventData);
+	//lv_obj_set_grid_cell(containerValue, LV_GRID_ALIGN_STRETCH, 1, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
+	lv_obj_t * containerValue = lv_container_create_general(grid, &valueContainerStyle, 0, 1, event_cb, eventData);
+
+	if (field->isTextArea)
+	{
+		field->valueField = lv_textarea_create_general(containerValue, &taStyle, field->valueTxt, NULL, NULL);
+		lv_obj_set_align(lv_textarea_get_label(field->valueField), LV_ALIGN_LEFT_MID);
+		lv_obj_set_grid_cell(field->valueField, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
+	}
+	else
+		field->valueField = lv_label_create_general(containerValue, &valueLblStyle, field->valueTxt, NULL, NULL);
+	lv_obj_align(field->valueField, LV_ALIGN_LEFT_MID, 10, 0);
+}
+
 /**
  * @brief Create general text entry field with label and value
  * @param parent Parent lv_obj_t
@@ -94,8 +140,9 @@ lv_obj_t* lv_create_textfield_display(lv_obj_t* parent, lv_style_t* nameLblStyle
 {
 	lv_obj_t* lblName = lv_label_create_general(parent, nameLblStyle, fieldName, NULL, NULL);
 	lv_obj_set_grid_cell(lblName, LV_GRID_ALIGN_START, 0, 1, LV_GRID_ALIGN_CENTER, row, 1);
+	lv_obj_set_style_text_align(lblName, LV_TEXT_ALIGN_LEFT, 0);
 
-	lv_obj_t* taField = lv_textarea_create_general(parent, nameLblStyle, fieldValue, event_cb, eventData);
+	lv_obj_t* taField = lv_textarea_create_general(parent, fieldStyle, fieldValue, event_cb, eventData);
 	lv_obj_set_grid_cell(taField, LV_GRID_ALIGN_STRETCH, 1, 1, LV_GRID_ALIGN_STRETCH, row, 1);
 
 	return taField;
@@ -202,7 +249,7 @@ lv_obj_t* lv_grid_create_general(lv_obj_t* parent, lv_coord_t* cols, lv_coord_t*
 	lv_obj_set_grid_dsc_array(grid, cols, rows);
 	lv_obj_set_layout(grid, LV_LAYOUT_GRID);
 	//if (bgColor != NULL)
-		//lv_style_set_bg_color(style, *bgColor);
+	//lv_style_set_bg_color(style, *bgColor);
 	if (style != NULL)
 		lv_obj_add_style(grid, style, 0);
 	if (event_cb != NULL)
@@ -295,11 +342,25 @@ void BSP_Screen_InitBtnStyle(lv_style_t* style, lv_coord_t border, lv_coord_t ra
 void BSP_Screen_InitTextAreaStyle(lv_style_t* style, const lv_font_t * font, lv_color_t* txtColor)
 {
 	lv_style_init(style);
-	lv_style_set_pad_all(style, 100);
+	lv_style_set_pad_all(style, 5);
 	if (font != NULL)
 		lv_style_set_text_font(style, font);
 	if (txtColor != NULL)
 		lv_style_set_text_color(style, *txtColor);
+	lv_style_set_bg_color(style, lvColorStore.background);
+	lv_style_set_border_width(style, 0);
+}
+
+void BSP_Screen_InitDropDownStyle(lv_style_t* style, const lv_font_t * font, lv_color_t* txtColor)
+{
+	lv_style_init(style);
+	lv_style_set_pad_all(style, 5);
+	if (font != NULL)
+		lv_style_set_text_font(style, font);
+	if (txtColor != NULL)
+		lv_style_set_text_color(style, *txtColor);
+	lv_style_set_bg_color(style, lvColorStore.darkTaraz);
+	lv_style_set_border_width(style, 0);
 }
 /**
  * @brief Initializes base screen styles

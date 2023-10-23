@@ -94,6 +94,15 @@ typedef struct
 	lv_style_t btn2;
 	lv_style_t btn3;
 } lv_style_store;
+typedef struct
+{
+	bool isTextArea;
+	lv_obj_t* nameField;
+	lv_obj_t* valueField;
+	const char* nameTxt;
+	const char* valueTxt;
+	lv_coord_t colWidths[2];
+} lv_ta_field_data_t;
 /**
  * @}
  */
@@ -150,6 +159,7 @@ extern void BSP_Screen_InitLabelStyle(lv_style_t* style, const lv_font_t * font,
  * @return RGB color
  */
 extern lv_color_t MakeColor(uint8_t r, uint8_t g, uint8_t b);
+extern void lv_default_text_field(lv_obj_t* parent, lv_ta_field_data_t* field, int row, int col, lv_event_cb_t event_cb, void * eventData);
 /**
  * @brief Create general grid
  * @param parent Parent lv_obj_t

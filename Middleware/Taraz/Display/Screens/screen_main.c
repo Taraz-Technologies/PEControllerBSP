@@ -153,7 +153,7 @@ static void MeasurementCell_Create(lv_obj_t * parent, int index)
 	disp->lblValue = lv_label_create_general(containerValue, &chValueLblStyle, txtVal, NULL, NULL);
 	disp->lblReading = lv_label_create_general(containerValue, &chReadingTypeLblStyle, txtRead, NULL, NULL);
 	lv_obj_align(disp->lblValue, LV_ALIGN_CENTER, 0, -8);
-	lv_obj_align(disp->lblReading, LV_ALIGN_BOTTOM_MID, 0, -10);
+	lv_obj_align(disp->lblReading, LV_ALIGN_BOTTOM_MID, 0, -6);
 
 	// set the name portion
 	lv_obj_t* containerName = lv_container_create_general(grid, &chNameContainerStyle, 1, 0, event_handler, MEASURE_TAG(index));
@@ -180,25 +180,87 @@ static void MeasurementGrid_Create(lv_obj_t* parent)
 		MeasurementCell_Create(grid, i);
 }
 
+static void Title_Create(lv_obj_t * parent)
+{
+	static lv_style_t padGridStyle;
+	/*
+	static lv_style_t outerGridStyle;
+	static lv_style_t titleNoContainerStyle, titleContainerStyle;
+	static lv_style_t titleNoLblStyle, titleLblStyle;
+	*/
+	static bool init = false;
+	// initialize styles once
+	if (!init)
+	{
+		//
+		BSP_Screen_InitGridStyle(&padGridStyle, 5, 5, 0, 0, &lvColorStore.background);
+		//lv_style_set_pad_row(&padGridStyle, 10);
+		lv_style_set_pad_bottom(&padGridStyle, 10);
+		/*
+		BSP_Screen_InitGridStyle(&outerGridStyle, 2, 2, 0, 5, &lvColorStore.lightTaraz);
+		BSP_Screen_InitGridStyle(&titleContainerStyle, 0, 0, 0, 0, &lvColorStore.background);
+		BSP_Screen_InitGridStyle(&titleNoContainerStyle, 0, 0, 0, 0, &lvColorStore.lightTaraz);
+		// Initialize the basic grid cell label styles
+		BSP_Screen_InitLabelStyle(&titleLblStyle, &lv_font_montserrat_22, LV_TEXT_ALIGN_LEFT, &lvColorStore.white);
+		BSP_Screen_InitLabelStyle(&titleNoLblStyle, &lv_font_montserrat_20, LV_TEXT_ALIGN_CENTER, &lvColorStore.black);
+		*/
+		init = true;
+	}
+
+	lv_obj_t* titleCellArea = lv_grid_create_general(parent, singleRowCol, singleRowCol, &padGridStyle, NULL, NULL, NULL);
+	lv_obj_set_grid_cell(titleCellArea, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
+	/*
+	// Set main grid element
+	static lv_coord_t cols[] = {80, LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
+	lv_obj_t * grid = lv_grid_create_general(titleCellArea, cols, singleRowCol, &outerGridStyle, NULL, event_handler, TAG_ATTACH(TAG_APPINFO));
+	lv_obj_set_grid_cell(grid, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
+
+	// set the name portion
+	lv_obj_t* containerName = lv_container_create_general(grid, &titleNoContainerStyle, 0, 0, event_handler, TAG_ATTACH(TAG_APPINFO));
+	lv_obj_t* lblName = lv_label_create_general(containerName, &titleNoLblStyle, "AN02", NULL, NULL);
+	lv_obj_align(lblName, LV_ALIGN_CENTER, 0, 0);
+
+	lv_obj_t * containerValue = lv_container_create_general(grid, &titleContainerStyle, 0, 1, event_handler, TAG_ATTACH(TAG_APPINFO));
+	lv_obj_t* lblValue = lv_label_create_general(containerValue, &titleLblStyle, "Three-Phase Grid-Tie Inverter", NULL, NULL);
+	lv_obj_align(lblValue, LV_ALIGN_LEFT_MID, 10, 0);
+	*/
+	lv_ta_field_data_t field =
+	{
+		.isTextArea = false,
+		.nameTxt = "AN02",
+		.valueTxt = "Three-Phase Grid-Tie Inverter",
+		.colWidths = { 70, LV_GRID_FR(1) }
+	};
+	lv_default_text_field(titleCellArea, &field, 0, 0, event_handler, TAG_ATTACH(TAG_APPINFO));
+}
+
 static void Header_Create(lv_obj_t* parent)
 {
-	static const char* title = "Grid Tie Converter";
 	static lv_style_t titleContainerStyle;
 	static lv_style_t lblStyleName;
 	static bool init = false;
 	// initialize styles once
 	if (!init)
 	{
-		BSP_Screen_InitGridStyle(&titleContainerStyle, 5, 5, 0, 10, &lvColorStore.darkTaraz);
-		BSP_Screen_InitLabelStyle(&lblStyleName, &lv_font_montserrat_30, LV_TEXT_ALIGN_CENTER, &lvColorStore.white);
+		BSP_Screen_InitGridStyle(&titleContainerStyle, 5, 5, 0, 0, &lvColorStore.background);
+		BSP_Screen_InitLabelStyle(&lblStyleName, &lv_font_montserrat_24, LV_TEXT_ALIGN_LEFT, &lvColorStore.white);
+		lv_style_set_text_align(&lblStyleName, LV_TEXT_ALIGN_LEFT);
 		init = true;
 	}
 
-	lv_obj_t* titleCellArea = lv_grid_create_general(parent, singleRowCol, singleRowCol, &lvStyleStore.mediumMarginGrid, NULL, NULL, NULL);
+	/*
+	static lv_coord_t colsScreen[] = {60, LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
+	lv_obj_t* titleCellArea = lv_grid_create_general(parent, colsScreen, singleRowCol, &lvStyleStore.mediumMarginGrid, NULL, event_handler, TAG_ATTACH(TAG_APPINFO));
+	// number
+
+	// title
 	lv_obj_set_grid_cell(titleCellArea, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
 	lv_obj_t * titleCell = lv_container_create_general(titleCellArea, &titleContainerStyle, 0, 0, event_handler, TAG_ATTACH(TAG_APPINFO));
-	lv_obj_t * titleCellInner = lv_label_create_general(titleCell, &lblStyleName, title, NULL, NULL);
-	lv_obj_align(titleCellInner, LV_ALIGN_CENTER, 0, 0);
+	lv_obj_t * titleCellInner = lv_label_create_general(titleCell, &lblStyleName, title, event_handler, TAG_ATTACH(TAG_APPINFO));
+	lv_obj_set_grid_cell(titleCellInner, LV_GRID_ALIGN_START, 0, 1, LV_GRID_ALIGN_START, 0, 1);
+	lv_obj_align(titleCellInner, LV_ALIGN_TOP_LEFT, 0, 5);
+	*/
+	Title_Create(parent);
 
 	lv_container_create_general(parent, &lvStyleStore.defaultGrid, 0, 1, event_handler, TAG_ATTACH(TAG_intelliSENS));
 }

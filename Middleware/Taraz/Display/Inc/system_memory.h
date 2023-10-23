@@ -1,11 +1,10 @@
 /**
  ********************************************************************************
- * @file    	screen_splash.c
+ * @file 		system_memory.h
  * @author 		Waqas Ehsan Butt
- * @date    	May 15, 2023
+ * @date 		Oct 18, 2023
  *
- * @brief   
- ********************************************************************************
+ * @brief    
  ********************************************************************************
  * @attention
  *
@@ -20,15 +19,43 @@
  ********************************************************************************
  */
 
+#ifndef SYSTEM_MEMORY_H_
+#define SYSTEM_MEMORY_H_
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /********************************************************************************
  * Includes
  *******************************************************************************/
-#include "screen_base.h"
-#include "app_screen_data.h"
+#include "general_header.h"
 /********************************************************************************
  * Defines
  *******************************************************************************/
-#define SPLASH_TIME_ms			(1000)
+#define TARAZ_LOGO_WIDTH				(265)
+#define TARAZ_LOGO_HEIGHT				(108)
+#define TARAZ_LOGO_FORMAT				(LTDC_PIXEL_FORMAT_ARGB8888)
+#define TARAZ_LOGO_SIZE					(4*TARAZ_LOGO_WIDTH*TARAZ_LOGO_HEIGHT)
+
+#define BSP_QR_WIDTH					(230)
+#define BSP_QR_HEIGHT					(230)
+#define BSP_QR_FORMAT					(LTDC_PIXEL_FORMAT_ARGB1555)
+#define BSP_QR_SIZE						(2*BSP_QR_WIDTH*BSP_QR_HEIGHT)
+
+#define intelliSENS_QR_WIDTH			(230)
+#define intelliSENS_QR_HEIGHT			(230)
+#define intelliSENS_QR_FORMAT			(LTDC_PIXEL_FORMAT_ARGB1555)
+#define intelliSENS_QR_SIZE				(2*intelliSENS_QR_WIDTH*intelliSENS_QR_HEIGHT) 
+
+#define intelliSENS_LOGO_WIDTH			(328)
+#define intelliSENS_LOGO_HEIGHT			(32)
+#define intelliSENS_LOGO_FORMAT			(LTDC_PIXEL_FORMAT_ARGB8888)
+#define intelliSENS_LOGO_SIZE			(4*intelliSENS_LOGO_WIDTH*intelliSENS_LOGO_HEIGHT)
+
+
+#define SYSTEM_IMAGES_SIZE				(TARAZ_LOGO_SIZE + BSP_QR_SIZE)
+#define intelliSENS_IMAGES_SIZE			(intelliSENS_QR_SIZE + intelliSENS_LOGO_SIZE)
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
@@ -38,62 +65,21 @@
  *******************************************************************************/
 
 /********************************************************************************
- * Static Variables
+ * Exported Variables
  *******************************************************************************/
 
 /********************************************************************************
- * Global Variables
+ * Global Function Prototypes
  *******************************************************************************/
 
-/********************************************************************************
- * Function Prototypes
- *******************************************************************************/
-uint32_t tickStart = 0;
 /********************************************************************************
  * Code
  *******************************************************************************/
-static void Load(void)
-{
-	tickStart = HAL_GetTick();
-}
 
-/**
- * @brief Refresh the splash screen
- * @return Type of screen if needs to switch to another screen
- */
-static screen_type_t Refresh(void)
-{
-	if((HAL_GetTick() - tickStart) < SPLASH_TIME_ms)
-		return SCREEN_NONE;
-	return SCREEN_MAIN;
-}
 
-/**
- * @brief Initialize screen
- * @param _screen Pointer to fill the screen information
- */
-void SplashScreen_Init(screens_t* _screen)
-{
-	_screen->Refresh = Refresh;
-	_screen->Load = Load;
-	_screen->Unload = NULL;
-	if (splashImg == NULL)
-		_screen->directLayer = NULL;
-	else
-	{
-		static ltdc_layer_info_t directLayer =
-		{
-				.xAlign = ALIGN_CENTER_X,
-				.yAlign = ALIGN_CENTER_Y,
-				.posX = DISPLAY_WIDTH / 2,
-				.posY = DISPLAY_HEIGHT / 2
-		};
-		directLayer.PixelFormat = splashImg->pixelFormat;
-		directLayer.width = splashImg->width;
-		directLayer.height = splashImg->height;
-		directLayer.data = splashImg->data;
-		_screen->directLayer = &directLayer;
-	}
-	_screen->lvglLayer = NULL;
+#ifdef __cplusplus
 }
+#endif
+
+#endif 
 /* EOF */

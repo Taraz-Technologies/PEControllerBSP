@@ -81,7 +81,7 @@ static data_param_info_t controlConfs[CONTROL_CONFS_COUNT] =
 		{ .name = "iReq (RMS)", .index = SHARE_REQ_RMS_CURRENT, .type = DTYPE_FLOAT, .arg = 1, .unit = UNIT_A },
 		{ .name = "Grid Freq.", .index = SHARE_GRID_FREQ, .type = DTYPE_FLOAT, .arg = 1, .unit = UNIT_Hz },
 		{ .name = "Grid Voltage (P-N)", .index = SHARE_GRID_VOLTAGE, .type = DTYPE_FLOAT, .arg = 1, .unit = UNIT_V },
-		{ .name = "Output Inductance", .index = SHARE_LOUT, .type = DTYPE_FLOAT, .arg = 4, .unit = UNIT_NONE },
+		{ .name = "Filter Inductance (mH)", .index = SHARE_LOUT, .type = DTYPE_FLOAT, .arg = 4, .unit = UNIT_NONE },
 		{ .name = "Enable Boost", .index = SHARE_BOOST_STATE, .type = DTYPE_BOOL},
 		{ .name = "Enable Inverter", .index = SHARE_INVERTER_STATE, .type = DTYPE_BOOL},
 };
@@ -90,7 +90,7 @@ static data_param_info_t controlConfs[CONTROL_CONFS_COUNT] =
 static data_param_info_t monitorConfs[MONITOR_CONFS_COUNT] =
 {
 		{ .name = "iGen (RMS)", .index = SHARE_CURR_RMS_CURRENT, .type = DTYPE_FLOAT, .arg = 1, .unit = UNIT_A },
-		{ .name = "Relay Status", .index = SHARE_RELAY_STATUS, .type = DTYPE_BOOL },
+		{ .name = "Precharge Relay Status", .index = SHARE_RELAY_STATUS, .type = DTYPE_BOOL },
 		{ .name = "PLL Status", .index = SHARE_PLL_STATUS, .type = DTYPE_BOOL },
 };
 #endif
