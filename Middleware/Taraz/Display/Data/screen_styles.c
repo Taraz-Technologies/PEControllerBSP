@@ -99,19 +99,20 @@ void lv_default_text_field(lv_obj_t* parent, lv_ta_field_data_t* field, int row,
 	}
 
 	// Set main grid element
-	static lv_coord_t cols[3] = { 0, 0, LV_GRID_TEMPLATE_LAST};
+	static lv_coord_t cols[3] = { 200, 100, LV_GRID_TEMPLATE_LAST};
 	cols[0] = field->colWidths[0];
 	cols[1] = field->colWidths[1];
 	lv_obj_t * grid = lv_grid_create_general(parent, cols, singleRowCol, &outerGridStyle, NULL, event_cb, eventData);
+	lv_obj_set_grid_cell(grid, LV_GRID_ALIGN_STRETCH, col, 1, LV_GRID_ALIGN_STRETCH, row, 1);
 
 	// set the name portion
 	lv_obj_t* containerName = lv_container_create_general(grid, &nameContainerStyle, 0, 0, event_cb, eventData);
 	field->nameField = lv_label_create_general(containerName, &nameLblStyle, field->nameTxt, NULL, NULL);
 	lv_obj_align(field->nameField, LV_ALIGN_RIGHT_MID, 0, 0);
 
-	//lv_obj_t * containerValue = lv_grid_create_general(grid, singleRowCol, singleRowCol, &valueContainerStyle, NULL, event_cb, eventData);
-	//lv_obj_set_grid_cell(containerValue, LV_GRID_ALIGN_STRETCH, 1, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
-	lv_obj_t * containerValue = lv_container_create_general(grid, &valueContainerStyle, 0, 1, event_cb, eventData);
+	lv_obj_t * containerValue = lv_grid_create_general(grid, singleRowCol, singleRowCol, &valueContainerStyle, NULL, event_cb, eventData);
+	lv_obj_set_grid_cell(containerValue, LV_GRID_ALIGN_STRETCH, 1, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
+	//lv_obj_t * containerValue = lv_container_create_general(grid, &valueContainerStyle, 0, 1, event_cb, eventData);
 
 	if (field->isTextArea)
 	{
@@ -120,7 +121,10 @@ void lv_default_text_field(lv_obj_t* parent, lv_ta_field_data_t* field, int row,
 		lv_obj_set_grid_cell(field->valueField, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
 	}
 	else
+	{
 		field->valueField = lv_label_create_general(containerValue, &valueLblStyle, field->valueTxt, NULL, NULL);
+		lv_obj_set_grid_cell(field->valueField, LV_GRID_ALIGN_START, 0, 1, LV_GRID_ALIGN_CENTER, 0, 1);
+	}
 	lv_obj_align(field->valueField, LV_ALIGN_LEFT_MID, 10, 0);
 }
 

@@ -221,15 +221,16 @@ void ConfigScreen_LoadMeasurement(int _measurementIndex)
 	lv_obj_set_style_text_align(lv_dropdown_get_list(measureObjs.ddUnit), LV_TEXT_ALIGN_RIGHT, 0);
 	lv_obj_add_style(measureObjs.ddUnit, &taStyle, 0);
 
-	char txt[12];
-	(void)ftoa_custom(ADC_INFO.sensitivity[measurementIndex], txt, 7, 4);
 	lv_ta_field_data_t field =
-		{
-			.isTextArea = true,
-			.nameTxt = "Sensitivity",
-			.valueTxt = txt,
+	{
+			.isTextArea = false,
 			.colWidths = { LV_GRID_FR(1), 120 }
-		};
+	};
+	char txt[12];
+	field.isTextArea = true;
+	field.valueTxt = txt;
+	(void)ftoa_custom(ADC_INFO.sensitivity[measurementIndex], txt, 7, 4);
+	field.nameTxt = "Sensitivity";
 	lv_default_text_field(screenObjs.paramGrid, &field, 2, 0, TextArea_Clicked, NULL);
 	screenObjs.focusItem = measureObjs.sensitivity = field.valueField;//lv_create_textfield_display(screenObjs.paramGrid, &lblStyle, &taStyle, "Sensitivity", txt, TextArea_Clicked, NULL, 2);
 	(void)ftoa_custom(ADC_INFO.offsets[measurementIndex], txt, 7, 4);
