@@ -94,6 +94,16 @@ static void Close_Clicked(lv_event_t * e)
 		return;
 	tag = GET_TAG(e);
 }
+
+static void Keypad_Clicked(lv_event_t * e)
+{
+	if (!isActive)
+		return;
+	lv_obj_t * obj = lv_event_get_target(e);
+	lv_keyboard_t * keyboard = (lv_keyboard_t *)obj;
+	tag = lv_btnmatrix_get_selected_btn(obj) ? TAG_CANCEL : TAG_OK;
+}
+
 static void Type_Toggle(lv_event_t* e)
 {
 	if (!isActive)
@@ -127,29 +137,43 @@ static void TextArea_Clicked(lv_event_t * e)
 
 static void Numpad_Create(lv_obj_t * parent)
 {
-	static const char* map[] = {"7", "8", "9" , LV_SYMBOL_HOME ,"\n",
-			"4", "5", "6" , LV_SYMBOL_BACKSPACE ,"\n",
-			"1", "2", "3" , LV_SYMBOL_LEFT ,"\n",
-			"+/-", "0", "." , LV_SYMBOL_RIGHT,
+	static const char* map[] = {"7", "8", "9" , LV_SYMBOL_BACKSPACE ,"\n",
+			"4", "5", "6" , LV_SYMBOL_LEFT ,"\n",
+			"1", "2", "3" , LV_SYMBOL_RIGHT ,"\n",
+			"+/-", "0", "." , "",
 			NULL};
 	screenObjs.keyboard = lv_keyboard_create(parent);
 	lv_obj_set_grid_cell(screenObjs.keyboard, LV_GRID_ALIGN_STRETCH, 1, 1, LV_GRID_ALIGN_STRETCH, 1, 1);
+	lv_obj_set_style_text_font(screenObjs.keyboard, &lv_font_montserrat_26, 0);
 	//lv_keyboard_set_mode(screenObjs.keyboard, LV_KEYBOARD_MODE_NUMBER);
 	lv_btnmatrix_set_map(screenObjs.keyboard, map);
+	lv_btnmatrix_set_btn_width(screenObjs.keyboard, 13, 2);
 	lv_obj_set_style_bg_color(screenObjs.keyboard, lvColorStore.background, 0);
 	lv_obj_set_style_text_color(screenObjs.keyboard, lvColorStore.darkTaraz, 0);
-	//lv_obj_set_style_bg_color(screenObjs.keyboard, lvColorStore.gray, LV_BTN_PART_MAIN);
+	lv_obj_set_style_bg_color(screenObjs.keyboard, lvColorStore.darkTaraz, LV_PART_ITEMS);
+	lv_obj_set_style_text_color(screenObjs.keyboard, lvColorStore.white, LV_PART_ITEMS);
+	lv_obj_set_style_border_color(screenObjs.keyboard, lvColorStore.lightTaraz, LV_PART_ITEMS);
+	lv_obj_set_style_border_width(screenObjs.keyboard, 2, LV_PART_ITEMS);
 }
 
 static void OkClose_Create(lv_obj_t * parent, int row, int col)
 {
 	static const char* map[] = {LV_SYMBOL_OK, LV_SYMBOL_CLOSE,
 								NULL};
+	static lv_style_t btnStyle;
+
 	lv_obj_t* kb = lv_keyboard_create(parent);
 	lv_obj_set_grid_cell(kb, LV_GRID_ALIGN_STRETCH, col, 1, LV_GRID_ALIGN_STRETCH, row, 1);
 	lv_btnmatrix_set_map(kb, map);
 	lv_obj_set_style_bg_color(kb, lvColorStore.background, 0);
 	lv_obj_set_style_text_color(kb, lvColorStore.lightTaraz, 0);
+	lv_obj_set_style_bg_color(kb, lvColorStore.darkTaraz, LV_PART_ITEMS);
+	lv_obj_set_style_text_color(kb, lvColorStore.white, LV_PART_ITEMS);
+	lv_obj_set_style_border_color(kb, lvColorStore.lightTaraz, LV_PART_ITEMS);
+	lv_obj_set_style_border_width(kb, 2, LV_PART_ITEMS);
+	lv_obj_set_style_text_font(kb, &lv_font_montserrat_30, 0);
+	//lv_keyboard_def_event_cb()
+	lv_obj_add_event_cb(kb, Keypad_Clicked, LV_EVENT_CLICKED, NULL);
 }
 
 static void StaticForm_Create(lv_obj_t * parent)
@@ -164,7 +188,8 @@ static void StaticForm_Create(lv_obj_t * parent)
 	{
 		BSP_Screen_InitLabelStyle(&btnLblStyle, &lv_font_montserrat_26, LV_TEXT_ALIGN_CENTER, &lvColorStore.darkFont);
 		BSP_Screen_InitLabelStyle(&lblStyleName, &lv_font_montserrat_30, LV_TEXT_ALIGN_CENTER, &lvColorStore.white);
-		BSP_Screen_InitGridStyle(&nameContainerStyle, 0, 0, 0, 0, &lvColorStore.mediumTaraz);
+		BSP_Screen_InitGridStyle(&nameContainerStyle, 0, 0, 2, 10, &lvColorStore.background);
+		lv_style_set_border_color(&nameContainerStyle, lvColorStore.gray);
 		init = true;
 	}
 

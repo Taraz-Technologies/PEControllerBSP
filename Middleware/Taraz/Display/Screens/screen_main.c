@@ -191,6 +191,7 @@ static void Title_Create(lv_obj_t * parent)
 		BSP_Screen_InitGridStyle(&padGridStyle, 5, 5, 0, 0, &lvColorStore.background);
 		//lv_style_set_pad_row(&padGridStyle, 10);
 		lv_style_set_pad_bottom(&padGridStyle, 10);
+		lv_style_set_pad_top(&padGridStyle, 10);
 		init = true;
 	}
 
@@ -200,8 +201,10 @@ static void Title_Create(lv_obj_t * parent)
 	{
 		.isTextArea = false,
 		.colorFieldName = true,
-		.nameTxt = "AN02",
-		.valueTxt = "Three-Phase Grid-Tie Inverter",
+		.nameTxt = "AN01",
+		.valueTxt = "Open-Loop V/f Control",
+		//.nameTxt = "AN02",
+		//.valueTxt = "Three-Phase Grid-Tie Inverter",
 		.colWidths = { 70, LV_GRID_FR(1) }
 	};
 	lv_default_text_field(titleCellArea, &field, 0, 0, event_handler, TAG_ATTACH(TAG_APPINFO));

@@ -403,12 +403,12 @@ void BSP_Screen_InitDropDownStyle(lv_style_t* style, const lv_font_t * font, lv_
 void BSP_Screen_Styles_Init(void)
 {
 	// initialize colors
-	lvColorStore.background = MakeColor(10, 40, 60);
+	lvColorStore.background = MakeColor(10, 20, 60);
 	lvColorStore.black = MakeColor(0, 0, 0);
 	lvColorStore.gray = MakeColor(127, 127, 127);
 	lvColorStore.white = MakeColor(255, 255, 255);
 	lvColorStore.darkFont = MakeColor(0, 0, 0);
-	lvColorStore.mediumFont = MakeColor(127, 127, 127);
+	lvColorStore.mediumFont = MakeColor(0, 20, 40);
 	lvColorStore.lightFont = MakeColor(255, 255, 255);
 	lvColorStore.darkTaraz = MakeColor(0, 100, 100);
 	lvColorStore.mediumTaraz = MakeColor(0, 155, 155);
