@@ -28,7 +28,7 @@
  * Defines
  *******************************************************************************/
 #define FIELD_FG_COLOR				(lvColorStore.lightTaraz)
-#define FIELD_BG_COLOR				(lvColorStore.lightTaraz)
+#define FIELD_BG_COLOR				(lvColorStore.background)
 #define FIELD_FG_FONT_COLOR			(lvColorStore.black)
 #define FIELD_BG_FONT_COLOR			(lvColorStore.white)
 /********************************************************************************
@@ -91,7 +91,7 @@ void lv_default_text_field(lv_obj_t* parent, lv_ta_field_data_t* field, int row,
 	// initialize styles once
 	if (!init)
 	{
-		BSP_Screen_InitGridStyle(&outerGridStyle, 2, 2, 0, 5, &lvColorStore.lightTaraz);
+		BSP_Screen_InitGridStyle(&outerGridStyle, 2, 2, 0, 5, &FIELD_FG_COLOR);
 		BSP_Screen_InitGridStyle(&innerContainerStyle, 0, 0, 0, 0, NULL);
 		// Initialize the basic grid cell label styles
 		BSP_Screen_InitLabelStyle(&valueLblStyle, &lv_font_montserrat_22, LV_TEXT_ALIGN_LEFT, NULL);
@@ -99,8 +99,8 @@ void lv_default_text_field(lv_obj_t* parent, lv_ta_field_data_t* field, int row,
 		BSP_Screen_InitLabelStyle(&nameLblStyle, &lv_font_montserrat_20, LV_TEXT_ALIGN_CENTER, NULL);
 		lv_style_set_pad_all(&nameLblStyle, 5);
 		BSP_Screen_InitTextAreaStyle(&taStyle, NULL, NULL);
-		lv_style_init(&taCursorStyle);
-		lv_style_set_border_color(&taCursorStyle, lvColorStore.black);
+		//lv_style_init(&taCursorStyle);
+		//lv_style_set_border_color(&taCursorStyle, lvColorStore.black);
 		init = true;
 	}
 
@@ -137,26 +137,26 @@ void lv_default_text_field(lv_obj_t* parent, lv_ta_field_data_t* field, int row,
 	// set the colors for inverter and non-inverted models
 	if (field->colorFieldName)
 	{
-		lv_obj_set_style_bg_color(containerName, lvColorStore.lightTaraz, 0);
-		lv_obj_set_style_bg_color(containerValue, lvColorStore.background, 0);
-		lv_obj_set_style_text_color(field->valueField, lvColorStore.white, 0);
-		lv_obj_set_style_text_color(field->nameField, lvColorStore.black, 0);
+		lv_obj_set_style_bg_color(containerName, FIELD_FG_COLOR, 0);
+		lv_obj_set_style_bg_color(containerValue, FIELD_BG_COLOR, 0);
+		lv_obj_set_style_text_color(field->valueField, FIELD_BG_FONT_COLOR, 0);
+		lv_obj_set_style_text_color(field->nameField, FIELD_FG_FONT_COLOR, 0);
 		if (field->isTextArea)
 		{
-			lv_obj_set_style_bg_color(field->valueField, lvColorStore.background, 0);
-			lv_obj_set_style_border_color(field->valueField, lvColorStore.white, LV_PART_CURSOR | LV_STATE_FOCUSED);
+			lv_obj_set_style_bg_color(field->valueField, FIELD_BG_COLOR, 0);
+			lv_obj_set_style_border_color(field->valueField, FIELD_BG_FONT_COLOR, LV_PART_CURSOR | LV_STATE_FOCUSED);
 		}
 	}
 	else
 	{
-		lv_obj_set_style_bg_color(containerName, lvColorStore.background, 0);
-		lv_obj_set_style_bg_color(containerValue, lvColorStore.lightTaraz, 0);
-		lv_obj_set_style_text_color(field->valueField, lvColorStore.black, 0);
-		lv_obj_set_style_text_color(field->nameField, lvColorStore.white, 0);
+		lv_obj_set_style_bg_color(containerName, FIELD_BG_COLOR, 0);
+		lv_obj_set_style_bg_color(containerValue, FIELD_FG_COLOR, 0);
+		lv_obj_set_style_text_color(field->valueField, FIELD_FG_FONT_COLOR, 0);
+		lv_obj_set_style_text_color(field->nameField, FIELD_BG_FONT_COLOR, 0);
 		if (field->isTextArea)
 		{
-			lv_obj_set_style_bg_color(field->valueField, lvColorStore.lightTaraz, 0);
-			lv_obj_set_style_border_color(field->valueField, lvColorStore.black, LV_PART_CURSOR | LV_STATE_FOCUSED);
+			lv_obj_set_style_bg_color(field->valueField, FIELD_FG_COLOR, 0);
+			lv_obj_set_style_border_color(field->valueField, FIELD_FG_FONT_COLOR, LV_PART_CURSOR | LV_STATE_FOCUSED);
 		}
 	}
 	//lv_obj_align(field->valueField, LV_ALIGN_TOP_LEFT, 20, 0);
