@@ -127,7 +127,7 @@ static void TextArea_Clicked(lv_event_t * e)
 
 static void Numpad_Create(lv_obj_t * parent)
 {
-	static const char* map[] = {"7", "8", "9" , LV_SYMBOL_KEYBOARD ,"\n",
+	static const char* map[] = {"7", "8", "9" , LV_SYMBOL_HOME ,"\n",
 			"4", "5", "6" , LV_SYMBOL_BACKSPACE ,"\n",
 			"1", "2", "3" , LV_SYMBOL_LEFT ,"\n",
 			"+/-", "0", "." , LV_SYMBOL_RIGHT,
@@ -139,6 +139,17 @@ static void Numpad_Create(lv_obj_t * parent)
 	lv_obj_set_style_bg_color(screenObjs.keyboard, lvColorStore.background, 0);
 	lv_obj_set_style_text_color(screenObjs.keyboard, lvColorStore.darkTaraz, 0);
 	//lv_obj_set_style_bg_color(screenObjs.keyboard, lvColorStore.gray, LV_BTN_PART_MAIN);
+}
+
+static void OkClose_Create(lv_obj_t * parent, int row, int col)
+{
+	static const char* map[] = {LV_SYMBOL_OK, LV_SYMBOL_CLOSE,
+								NULL};
+	lv_obj_t* kb = lv_keyboard_create(parent);
+	lv_obj_set_grid_cell(kb, LV_GRID_ALIGN_STRETCH, col, 1, LV_GRID_ALIGN_STRETCH, row, 1);
+	lv_btnmatrix_set_map(kb, map);
+	lv_obj_set_style_bg_color(kb, lvColorStore.background, 0);
+	lv_obj_set_style_text_color(kb, lvColorStore.lightTaraz, 0);
 }
 
 static void StaticForm_Create(lv_obj_t * parent)
@@ -171,10 +182,13 @@ static void StaticForm_Create(lv_obj_t * parent)
 	screenObjs.itemContainer = lv_grid_create_general(grid, singleRowCol, singleRowCol, &lvStyleStore.defaultGrid, NULL, NULL, NULL);
 	lv_obj_set_grid_cell(screenObjs.itemContainer, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
 
+	OkClose_Create(grid, 1, 0);
+	/*
 	// buttons
 	static lv_coord_t cols[] = {LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
 	lv_obj_t* gridBtns = lv_grid_create_general(grid, cols, singleRowCol, &lvStyleStore.thickMarginGrid, NULL, NULL, NULL);
 	lv_obj_set_grid_cell(gridBtns, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 1, 1);
+	/*
 
 	lv_obj_t* okBtn = lv_btn_create_general(gridBtns, &lvStyleStore.btn2, &btnLblStyle, "Save", Close_Clicked, TAG_ATTACH(TAG_OK));
 	lv_obj_set_grid_cell(okBtn, LV_GRID_ALIGN_CENTER, 0, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
@@ -182,6 +196,7 @@ static void StaticForm_Create(lv_obj_t * parent)
 	lv_obj_t* cancelBtn = lv_btn_create_general(gridBtns, &lvStyleStore.btn2, &btnLblStyle, "Cancel", Close_Clicked, TAG_ATTACH(TAG_CANCEL));
 	lv_obj_set_grid_cell(cancelBtn, LV_GRID_ALIGN_CENTER, 1, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
 	lv_obj_set_width(cancelBtn, btnWidth);
+	*/
 }
 
 /**

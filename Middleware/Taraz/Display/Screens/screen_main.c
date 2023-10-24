@@ -183,11 +183,6 @@ static void MeasurementGrid_Create(lv_obj_t* parent)
 static void Title_Create(lv_obj_t * parent)
 {
 	static lv_style_t padGridStyle;
-	/*
-	static lv_style_t outerGridStyle;
-	static lv_style_t titleNoContainerStyle, titleContainerStyle;
-	static lv_style_t titleNoLblStyle, titleLblStyle;
-	*/
 	static bool init = false;
 	// initialize styles once
 	if (!init)
@@ -227,18 +222,6 @@ static void Header_Create(lv_obj_t* parent)
 		init = true;
 	}
 
-	/*
-	static lv_coord_t colsScreen[] = {60, LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
-	lv_obj_t* titleCellArea = lv_grid_create_general(parent, colsScreen, singleRowCol, &lvStyleStore.mediumMarginGrid, NULL, event_handler, TAG_ATTACH(TAG_APPINFO));
-	// number
-
-	// title
-	lv_obj_set_grid_cell(titleCellArea, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
-	lv_obj_t * titleCell = lv_container_create_general(titleCellArea, &titleContainerStyle, 0, 0, event_handler, TAG_ATTACH(TAG_APPINFO));
-	lv_obj_t * titleCellInner = lv_label_create_general(titleCell, &lblStyleName, title, event_handler, TAG_ATTACH(TAG_APPINFO));
-	lv_obj_set_grid_cell(titleCellInner, LV_GRID_ALIGN_START, 0, 1, LV_GRID_ALIGN_START, 0, 1);
-	lv_obj_align(titleCellInner, LV_ALIGN_TOP_LEFT, 0, 5);
-	*/
 	Title_Create(parent);
 
 	lv_container_create_general(parent, &lvStyleStore.defaultGrid, 0, 1, event_handler, TAG_ATTACH(TAG_intelliSENS));
