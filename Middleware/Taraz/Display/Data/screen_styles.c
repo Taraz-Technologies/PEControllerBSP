@@ -83,7 +83,7 @@ void lv_default_text_field(lv_obj_t* parent, lv_ta_field_data_t* field, int row,
 	static lv_style_t outerGridStyle;
 	static lv_style_t nameContainerStyle, valueContainerStyle;
 	static lv_style_t nameLblStyle, valueLblStyle;
-	static lv_style_t taStyle;
+	static lv_style_t taStyle, taCursorStyle;
 	static bool init = false;
 	// initialize styles once
 	if (!init)
@@ -93,8 +93,12 @@ void lv_default_text_field(lv_obj_t* parent, lv_ta_field_data_t* field, int row,
 		BSP_Screen_InitGridStyle(&nameContainerStyle, 0, 0, 0, 0, &lvColorStore.lightTaraz);
 		// Initialize the basic grid cell label styles
 		BSP_Screen_InitLabelStyle(&valueLblStyle, &lv_font_montserrat_22, LV_TEXT_ALIGN_LEFT, &lvColorStore.white);
+		lv_style_set_pad_all(&valueLblStyle, 5);
 		BSP_Screen_InitLabelStyle(&nameLblStyle, &lv_font_montserrat_20, LV_TEXT_ALIGN_CENTER, &lvColorStore.black);
+		lv_style_set_pad_all(&valueLblStyle, 5);
 		BSP_Screen_InitTextAreaStyle(&taStyle, NULL, &lvColorStore.white);
+		lv_style_init(&taCursorStyle);
+		lv_style_set_border_color(&taCursorStyle, lvColorStore.white);
 		init = true;
 	}
 
@@ -117,7 +121,8 @@ void lv_default_text_field(lv_obj_t* parent, lv_ta_field_data_t* field, int row,
 	if (field->isTextArea)
 	{
 		field->valueField = lv_textarea_create_general(containerValue, &taStyle, field->valueTxt, NULL, NULL);
-		lv_obj_set_align(lv_textarea_get_label(field->valueField), LV_ALIGN_LEFT_MID);
+		lv_obj_add_style(field->valueField, &taCursorStyle, LV_PART_CURSOR | LV_STATE_FOCUSED);
+		lv_obj_set_align(lv_textarea_get_label(field->valueField), LV_ALIGN_TOP_LEFT);
 		lv_obj_set_grid_cell(field->valueField, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
 	}
 	else
@@ -125,7 +130,7 @@ void lv_default_text_field(lv_obj_t* parent, lv_ta_field_data_t* field, int row,
 		field->valueField = lv_label_create_general(containerValue, &valueLblStyle, field->valueTxt, NULL, NULL);
 		lv_obj_set_grid_cell(field->valueField, LV_GRID_ALIGN_START, 0, 1, LV_GRID_ALIGN_CENTER, 0, 1);
 	}
-	lv_obj_align(field->valueField, LV_ALIGN_LEFT_MID, 10, 0);
+	lv_obj_align(field->valueField, LV_ALIGN_TOP_LEFT, 20, 0);
 }
 
 /**
@@ -230,10 +235,10 @@ lv_obj_t* lv_textarea_create_general(lv_obj_t* parent, lv_style_t* style, const 
 		lv_obj_add_style(ta, style, 0);
 	if (event_cb != NULL)
 		lv_obj_add_event_cb(ta, event_cb, LV_EVENT_CLICKED, eventData);
-	lv_textarea_set_align(ta, LV_TEXT_ALIGN_RIGHT);
+	//lv_textarea_set_align(ta, LV_TEXT_ALIGN_RIGHT);
 	lv_textarea_set_text(ta, txt);
 	lv_textarea_set_one_line(ta, true);
-	lv_obj_set_align(lv_textarea_get_label(ta), LV_ALIGN_RIGHT_MID);
+	//lv_obj_set_align(lv_textarea_get_label(ta), LV_ALIGN_RIGHT_MID);
 	return ta;
 }
 /**
