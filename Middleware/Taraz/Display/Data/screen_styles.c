@@ -86,7 +86,7 @@ void lv_default_text_field(lv_obj_t* parent, lv_ta_field_data_t* field, int row,
 	static lv_style_t outerGridStyle;
 	static lv_style_t innerContainerStyle;
 	static lv_style_t nameLblStyle, valueLblStyle;
-	static lv_style_t taStyle, taCursorStyle;
+	static lv_style_t taStyle;
 	static bool init = false;
 	// initialize styles once
 	if (!init)
@@ -94,13 +94,11 @@ void lv_default_text_field(lv_obj_t* parent, lv_ta_field_data_t* field, int row,
 		BSP_Screen_InitGridStyle(&outerGridStyle, 2, 2, 0, 5, &FIELD_FG_COLOR);
 		BSP_Screen_InitGridStyle(&innerContainerStyle, 0, 0, 0, 0, NULL);
 		// Initialize the basic grid cell label styles
-		BSP_Screen_InitLabelStyle(&valueLblStyle, &lv_font_montserrat_22, LV_TEXT_ALIGN_LEFT, NULL);
-		lv_style_set_pad_all(&valueLblStyle, 5);
-		BSP_Screen_InitLabelStyle(&nameLblStyle, &lv_font_montserrat_20, LV_TEXT_ALIGN_CENTER, NULL);
+		BSP_Screen_InitLabelStyle(&nameLblStyle, &lv_font_montserrat_20, LV_TEXT_ALIGN_LEFT, NULL);
+		BSP_Screen_InitLabelStyle(&valueLblStyle, &lv_font_montserrat_22, LV_TEXT_ALIGN_CENTER, NULL);
 		lv_style_set_pad_all(&nameLblStyle, 5);
+		lv_style_set_pad_all(&valueLblStyle, 5);
 		BSP_Screen_InitTextAreaStyle(&taStyle, NULL, NULL);
-		//lv_style_init(&taCursorStyle);
-		//lv_style_set_border_color(&taCursorStyle, lvColorStore.black);
 		init = true;
 	}
 
@@ -123,9 +121,8 @@ void lv_default_text_field(lv_obj_t* parent, lv_ta_field_data_t* field, int row,
 	if (field->isTextArea)
 	{
 		field->valueField = lv_textarea_create_general(containerValue, &taStyle, field->valueTxt, event_cb, eventData);
-		//lv_obj_add_style(field->valueField, &taCursorStyle, LV_PART_CURSOR | LV_STATE_FOCUSED);
-		lv_obj_set_align(lv_textarea_get_label(field->valueField), LV_ALIGN_CENTER);
-		lv_obj_set_style_text_align(lv_textarea_get_label(field->valueField), LV_ALIGN_CENTER, 0);
+		// use this to align the text in the textarea
+		lv_textarea_set_align(field->valueField, LV_TEXT_ALIGN_CENTER);
 		lv_obj_set_grid_cell(field->valueField, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
 	}
 	else
