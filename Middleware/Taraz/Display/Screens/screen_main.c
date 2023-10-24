@@ -196,42 +196,21 @@ static void Title_Create(lv_obj_t * parent)
 		BSP_Screen_InitGridStyle(&padGridStyle, 5, 5, 0, 0, &lvColorStore.background);
 		//lv_style_set_pad_row(&padGridStyle, 10);
 		lv_style_set_pad_bottom(&padGridStyle, 10);
-		/*
-		BSP_Screen_InitGridStyle(&outerGridStyle, 2, 2, 0, 5, &lvColorStore.lightTaraz);
-		BSP_Screen_InitGridStyle(&titleContainerStyle, 0, 0, 0, 0, &lvColorStore.background);
-		BSP_Screen_InitGridStyle(&titleNoContainerStyle, 0, 0, 0, 0, &lvColorStore.lightTaraz);
-		// Initialize the basic grid cell label styles
-		BSP_Screen_InitLabelStyle(&titleLblStyle, &lv_font_montserrat_22, LV_TEXT_ALIGN_LEFT, &lvColorStore.white);
-		BSP_Screen_InitLabelStyle(&titleNoLblStyle, &lv_font_montserrat_20, LV_TEXT_ALIGN_CENTER, &lvColorStore.black);
-		*/
 		init = true;
 	}
 
 	lv_obj_t* titleCellArea = lv_grid_create_general(parent, singleRowCol, singleRowCol, &padGridStyle, NULL, NULL, NULL);
 	lv_obj_set_grid_cell(titleCellArea, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
-	/*
-	// Set main grid element
-	static lv_coord_t cols[] = {80, LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
-	lv_obj_t * grid = lv_grid_create_general(titleCellArea, cols, singleRowCol, &outerGridStyle, NULL, event_handler, TAG_ATTACH(TAG_APPINFO));
-	lv_obj_set_grid_cell(grid, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
-
-	// set the name portion
-	lv_obj_t* containerName = lv_container_create_general(grid, &titleNoContainerStyle, 0, 0, event_handler, TAG_ATTACH(TAG_APPINFO));
-	lv_obj_t* lblName = lv_label_create_general(containerName, &titleNoLblStyle, "AN02", NULL, NULL);
-	lv_obj_align(lblName, LV_ALIGN_CENTER, 0, 0);
-
-	lv_obj_t * containerValue = lv_container_create_general(grid, &titleContainerStyle, 0, 1, event_handler, TAG_ATTACH(TAG_APPINFO));
-	lv_obj_t* lblValue = lv_label_create_general(containerValue, &titleLblStyle, "Three-Phase Grid-Tie Inverter", NULL, NULL);
-	lv_obj_align(lblValue, LV_ALIGN_LEFT_MID, 10, 0);
-	*/
 	lv_ta_field_data_t field =
 	{
 		.isTextArea = false,
+		.colorFieldName = true,
 		.nameTxt = "AN02",
 		.valueTxt = "Three-Phase Grid-Tie Inverter",
 		.colWidths = { 70, LV_GRID_FR(1) }
 	};
 	lv_default_text_field(titleCellArea, &field, 0, 0, event_handler, TAG_ATTACH(TAG_APPINFO));
+
 }
 
 static void Header_Create(lv_obj_t* parent)

@@ -97,6 +97,7 @@ typedef struct
 typedef struct
 {
 	bool isTextArea;
+	bool colorFieldName;
 	lv_obj_t* nameField;
 	lv_obj_t* valueField;
 	const char* nameTxt;

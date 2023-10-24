@@ -27,7 +27,10 @@
 /********************************************************************************
  * Defines
  *******************************************************************************/
-
+#define FIELD_FG_COLOR				(lvColorStore.lightTaraz)
+#define FIELD_BG_COLOR				(lvColorStore.lightTaraz)
+#define FIELD_FG_FONT_COLOR			(lvColorStore.black)
+#define FIELD_BG_FONT_COLOR			(lvColorStore.white)
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
@@ -81,7 +84,7 @@ lv_color_t MakeColor(uint8_t r, uint8_t g, uint8_t b)
 void lv_default_text_field(lv_obj_t* parent, lv_ta_field_data_t* field, int row, int col, lv_event_cb_t event_cb, void * eventData)
 {
 	static lv_style_t outerGridStyle;
-	static lv_style_t nameContainerStyle, valueContainerStyle;
+	static lv_style_t innerContainerStyle;
 	static lv_style_t nameLblStyle, valueLblStyle;
 	static lv_style_t taStyle, taCursorStyle;
 	static bool init = false;
@@ -89,16 +92,15 @@ void lv_default_text_field(lv_obj_t* parent, lv_ta_field_data_t* field, int row,
 	if (!init)
 	{
 		BSP_Screen_InitGridStyle(&outerGridStyle, 2, 2, 0, 5, &lvColorStore.lightTaraz);
-		BSP_Screen_InitGridStyle(&valueContainerStyle, 0, 0, 0, 0, &lvColorStore.background);
-		BSP_Screen_InitGridStyle(&nameContainerStyle, 0, 0, 0, 0, &lvColorStore.lightTaraz);
+		BSP_Screen_InitGridStyle(&innerContainerStyle, 0, 0, 0, 0, NULL);
 		// Initialize the basic grid cell label styles
-		BSP_Screen_InitLabelStyle(&valueLblStyle, &lv_font_montserrat_22, LV_TEXT_ALIGN_LEFT, &lvColorStore.white);
+		BSP_Screen_InitLabelStyle(&valueLblStyle, &lv_font_montserrat_22, LV_TEXT_ALIGN_LEFT, NULL);
 		lv_style_set_pad_all(&valueLblStyle, 5);
-		BSP_Screen_InitLabelStyle(&nameLblStyle, &lv_font_montserrat_20, LV_TEXT_ALIGN_CENTER, &lvColorStore.black);
-		lv_style_set_pad_all(&valueLblStyle, 5);
-		BSP_Screen_InitTextAreaStyle(&taStyle, NULL, &lvColorStore.white);
+		BSP_Screen_InitLabelStyle(&nameLblStyle, &lv_font_montserrat_20, LV_TEXT_ALIGN_CENTER, NULL);
+		lv_style_set_pad_all(&nameLblStyle, 5);
+		BSP_Screen_InitTextAreaStyle(&taStyle, NULL, NULL);
 		lv_style_init(&taCursorStyle);
-		lv_style_set_border_color(&taCursorStyle, lvColorStore.white);
+		lv_style_set_border_color(&taCursorStyle, lvColorStore.black);
 		init = true;
 	}
 
@@ -110,27 +112,54 @@ void lv_default_text_field(lv_obj_t* parent, lv_ta_field_data_t* field, int row,
 	lv_obj_set_grid_cell(grid, LV_GRID_ALIGN_STRETCH, col, 1, LV_GRID_ALIGN_STRETCH, row, 1);
 
 	// set the name portion
-	lv_obj_t* containerName = lv_container_create_general(grid, &nameContainerStyle, 0, 0, event_cb, eventData);
+	lv_obj_t* containerName = lv_container_create_general(grid, &innerContainerStyle, 0, 0, event_cb, eventData);
 	field->nameField = lv_label_create_general(containerName, &nameLblStyle, field->nameTxt, NULL, NULL);
-	lv_obj_align(field->nameField, LV_ALIGN_RIGHT_MID, 0, 0);
+	lv_obj_align(field->nameField, LV_ALIGN_LEFT_MID, 0, 0);
 
-	lv_obj_t * containerValue = lv_grid_create_general(grid, singleRowCol, singleRowCol, &valueContainerStyle, NULL, event_cb, eventData);
+	lv_obj_t * containerValue = lv_grid_create_general(grid, singleRowCol, singleRowCol, &innerContainerStyle, NULL, event_cb, eventData);
 	lv_obj_set_grid_cell(containerValue, LV_GRID_ALIGN_STRETCH, 1, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
 	//lv_obj_t * containerValue = lv_container_create_general(grid, &valueContainerStyle, 0, 1, event_cb, eventData);
 
 	if (field->isTextArea)
 	{
 		field->valueField = lv_textarea_create_general(containerValue, &taStyle, field->valueTxt, event_cb, eventData);
-		lv_obj_add_style(field->valueField, &taCursorStyle, LV_PART_CURSOR | LV_STATE_FOCUSED);
-		lv_obj_set_align(lv_textarea_get_label(field->valueField), LV_ALIGN_LEFT_MID);
+		//lv_obj_add_style(field->valueField, &taCursorStyle, LV_PART_CURSOR | LV_STATE_FOCUSED);
+		lv_obj_set_align(lv_textarea_get_label(field->valueField), LV_ALIGN_CENTER);
+		lv_obj_set_style_text_align(lv_textarea_get_label(field->valueField), LV_ALIGN_CENTER, 0);
 		lv_obj_set_grid_cell(field->valueField, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
 	}
 	else
 	{
-		field->valueField = lv_label_create_general(containerValue, &valueLblStyle, field->valueTxt, NULL, NULL);
-		lv_obj_set_grid_cell(field->valueField, LV_GRID_ALIGN_START, 0, 1, LV_GRID_ALIGN_CENTER, 0, 1);
+		field->valueField = lv_label_create_general(containerValue, &valueLblStyle, field->valueTxt, event_cb, NULL);
+		lv_obj_set_grid_cell(field->valueField, LV_GRID_ALIGN_CENTER, 0, 1, LV_GRID_ALIGN_CENTER, 0, 1);
 	}
-	lv_obj_align(field->valueField, LV_ALIGN_TOP_LEFT, 20, 0);
+
+	// set the colors for inverter and non-inverted models
+	if (field->colorFieldName)
+	{
+		lv_obj_set_style_bg_color(containerName, lvColorStore.lightTaraz, 0);
+		lv_obj_set_style_bg_color(containerValue, lvColorStore.background, 0);
+		lv_obj_set_style_text_color(field->valueField, lvColorStore.white, 0);
+		lv_obj_set_style_text_color(field->nameField, lvColorStore.black, 0);
+		if (field->isTextArea)
+		{
+			lv_obj_set_style_bg_color(field->valueField, lvColorStore.background, 0);
+			lv_obj_set_style_border_color(field->valueField, lvColorStore.white, LV_PART_CURSOR | LV_STATE_FOCUSED);
+		}
+	}
+	else
+	{
+		lv_obj_set_style_bg_color(containerName, lvColorStore.background, 0);
+		lv_obj_set_style_bg_color(containerValue, lvColorStore.lightTaraz, 0);
+		lv_obj_set_style_text_color(field->valueField, lvColorStore.black, 0);
+		lv_obj_set_style_text_color(field->nameField, lvColorStore.white, 0);
+		if (field->isTextArea)
+		{
+			lv_obj_set_style_bg_color(field->valueField, lvColorStore.lightTaraz, 0);
+			lv_obj_set_style_border_color(field->valueField, lvColorStore.black, LV_PART_CURSOR | LV_STATE_FOCUSED);
+		}
+	}
+	//lv_obj_align(field->valueField, LV_ALIGN_TOP_LEFT, 20, 0);
 }
 
 /**
@@ -356,7 +385,7 @@ void BSP_Screen_InitTextAreaStyle(lv_style_t* style, const lv_font_t * font, lv_
 		lv_style_set_text_font(style, font);
 	if (txtColor != NULL)
 		lv_style_set_text_color(style, *txtColor);
-	lv_style_set_bg_color(style, lvColorStore.background);
+	//lv_style_set_bg_color(style, lvColorStore.lightTaraz);
 	lv_style_set_border_width(style, 0);
 }
 
