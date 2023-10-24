@@ -55,6 +55,8 @@ typedef struct
 {
 	lv_obj_t* ddMeasure;
 	lv_obj_t* ddUnit;
+	lv_obj_t* type;
+	lv_obj_t* unit;
 	lv_obj_t* sensitivity;
 	lv_obj_t* offset;
 	lv_obj_t* freq;
@@ -75,6 +77,7 @@ static int measurementIndex = 0;
 static data_param_info_t* paramInfo = NULL;
 static measure_objs_t measureObjs = {0};
 static var_objs_t varObjs = {0};
+static int unitIndex, typeIndex;
 /********************************************************************************
  * Global Variables
  *******************************************************************************/
@@ -91,6 +94,28 @@ static void Close_Clicked(lv_event_t * e)
 	if (!isActive)
 		return;
 	tag = GET_TAG(e);
+}
+static void Type_Toggle(lv_event_t* e)
+{
+	if (!isActive)
+		return;
+	if (measureObjs.type != NULL)
+	{
+		if(++typeIndex >= MEASURE_COUNT)
+			typeIndex = 0;
+		lv_label_set_text(measureObjs.type, measureTxts[typeIndex]);
+	}
+}
+static void Unit_Toggle(lv_event_t* e)
+{
+	if (!isActive)
+		return;
+	if (measureObjs.unit != NULL)
+	{
+		if(++unitIndex >= UNIT_COUNT)
+			unitIndex = 0;
+		lv_label_set_text(measureObjs.unit, unitTxts[unitIndex]);
+	}
 }
 
 static void TextArea_Clicked(lv_event_t * e)
@@ -198,7 +223,7 @@ void ConfigScreen_LoadMeasurement(int _measurementIndex)
 
 	if(screenObjs.paramName != NULL)
 		lv_label_set_text(screenObjs.paramName, dispMeasures.chNames[measurementIndex]);
-/*
+	/*
 	// drop down selection for desired measurement type
 	measureObjs.ddMeasure = lv_dropdown_create(screenObjs.paramGrid);
 	lv_dropdown_set_options_static(measureObjs.ddMeasure, measureTxts[0]);
@@ -220,19 +245,21 @@ void ConfigScreen_LoadMeasurement(int _measurementIndex)
 	lv_create_field(screenObjs.paramGrid, &lblStyle, "Units", measureObjs.ddUnit, 1);
 	lv_obj_set_style_text_align(lv_dropdown_get_list(measureObjs.ddUnit), LV_TEXT_ALIGN_RIGHT, 0);
 	lv_obj_add_style(measureObjs.ddUnit, &taStyle, 0);
-*/
+	 */
 	lv_ta_field_data_t field =
 	{
 			.isTextArea = false,
-			.colWidths = { LV_GRID_FR(1), 120 }
+			.colWidths = { LV_GRID_FR(1), 150 }
 	};
 	//measureObjs.ddUnit = lv_dropdown_create(screenObjs.paramGrid);
 	field.nameTxt = "Type";
 	field.valueTxt = measureTxts[(uint8_t)dispMeasures.chMeasures[measurementIndex].type];
-	lv_default_text_field(screenObjs.paramGrid, &field, 0, 0, NULL, NULL);
+	lv_default_text_field(screenObjs.paramGrid, &field, 0, 0, Type_Toggle, NULL);
+	measureObjs.type = field.valueField;
 	field.nameTxt = "Units";
 	field.valueTxt = unitTxts[(uint8_t)dispMeasures.adcInfo->units[measurementIndex]];
-	lv_default_text_field(screenObjs.paramGrid, &field, 1, 0, NULL, NULL);
+	lv_default_text_field(screenObjs.paramGrid, &field, 1, 0, Unit_Toggle, NULL);
+	measureObjs.unit = field.valueField;
 	char txt[12];
 	field.isTextArea = true;
 	field.valueTxt = txt;
@@ -316,10 +343,8 @@ static device_err_t UpdateMeasurementSettings(void)
 			atof_custom(lv_textarea_get_text(measureObjs.offset), &offset);
 	if (isValid == false)
 		return ERR_INVALID_TEXT;
-	device_err_t err = BSP_ADC_UpdateConfig(dispMeasures.adcInfo, dispMeasures.adcInfo->fs,
-			measurementIndex, freq, sensitivity, offset,
-			(data_units_t)lv_dropdown_get_selected(measureObjs.ddUnit));
-	dispMeasures.chMeasures[measurementIndex].type = (measure_type_t)lv_dropdown_get_selected(measureObjs.ddMeasure);
+	device_err_t err = BSP_ADC_UpdateConfig(dispMeasures.adcInfo, dispMeasures.adcInfo->fs, measurementIndex, freq, sensitivity, offset, (data_units_t)unitIndex);
+	dispMeasures.chMeasures[measurementIndex].type = (measure_type_t)typeIndex;
 	return err;
 }
 

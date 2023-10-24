@@ -120,9 +120,9 @@ void lv_default_text_field(lv_obj_t* parent, lv_ta_field_data_t* field, int row,
 
 	if (field->isTextArea)
 	{
-		field->valueField = lv_textarea_create_general(containerValue, &taStyle, field->valueTxt, NULL, NULL);
+		field->valueField = lv_textarea_create_general(containerValue, &taStyle, field->valueTxt, event_cb, eventData);
 		lv_obj_add_style(field->valueField, &taCursorStyle, LV_PART_CURSOR | LV_STATE_FOCUSED);
-		lv_obj_set_align(lv_textarea_get_label(field->valueField), LV_ALIGN_TOP_LEFT);
+		lv_obj_set_align(lv_textarea_get_label(field->valueField), LV_ALIGN_LEFT_MID);
 		lv_obj_set_grid_cell(field->valueField, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
 	}
 	else
