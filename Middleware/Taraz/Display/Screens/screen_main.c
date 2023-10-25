@@ -28,6 +28,7 @@
 #include "utility_lib.h"
 #include "interprocessor_comms.h"
 #include "screen_main_app.h"
+#include "app_screen_data.h"
 /********************************************************************************
  * Defines
  *******************************************************************************/
@@ -201,10 +202,8 @@ static void Title_Create(lv_obj_t * parent)
 	{
 		.isTextArea = false,
 		.colorFieldName = true,
-		.nameTxt = "AN01",
-		.valueTxt = "Open-Loop V/f Control",
-		//.nameTxt = "AN02",
-		//.valueTxt = "Three-Phase Grid-Tie Inverter",
+		.nameTxt = appInfoDisplay.appNo,
+		.valueTxt = appInfoDisplay.appTitle,//{LV_SYMBOL_HOME, NULL},
 		.colWidths = { 70, LV_GRID_FR(1) }
 	};
 	lv_default_text_field(titleCellArea, &field, 0, 0, event_handler, TAG_ATTACH(TAG_APPINFO));

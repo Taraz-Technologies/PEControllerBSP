@@ -61,9 +61,13 @@ appinfo_display_t appInfoDisplay =
 
 		.connectionInfo = NULL,
 
-		.documentationLink = "https://www.taraztechnologies.com/help/pecontroller-three-phase-grid-tie-inverter/",
+		.documentationLink = "www.taraztechnologies.com/help/pecontroller-three-phase-grid-tie-inverter/",
 
 		.img = NULL,
+
+		.appNo = "AN02",
+
+		.appTitle = "Three-Phase Grid-Tie Inverter"
 };
 /**
  * @brief Assigns the image to be displayed on the splash screen

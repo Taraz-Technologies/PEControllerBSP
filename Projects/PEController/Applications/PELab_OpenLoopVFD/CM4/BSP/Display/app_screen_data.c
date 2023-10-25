@@ -59,7 +59,11 @@ appinfo_display_t appInfoDisplay =
 
 		.documentationLink = "www.taraztechnologies.com/Downloads/Software/PEControllerBSP/index.html",
 
-		.img = NULL,
+		.img = &bsp_docs_QR_info,
+
+		.appNo = "AN01",
+
+		.appTitle = "Open-Loop V/f Control"
 };
 /**
  * @brief Assigns the image to be displayed on the splash screen

@@ -67,6 +67,8 @@ typedef struct
 															Set to NULL if no need to display this parameter.*/
 	image_info_t* img;								/**< @brief Image displayed in the application screen.
 															Set to NULL if no image to display.*/
+	const char* appNo;								/**< @brief Text representing the application number text. */
+	const char* appTitle;							/**< @brief Text representing the application title. */
 } appinfo_display_t;
 /**
   * @}

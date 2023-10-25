@@ -126,7 +126,7 @@ void lv_default_text_field(lv_obj_t* parent, lv_ta_field_data_t* field, int row,
 	}
 	else
 	{
-		field->valueField = lv_label_create_general(containerValue, &valueLblStyle, field->valueTxt, event_cb, NULL);
+		field->valueField = lv_label_create_general(containerValue, &valueLblStyle, field->valueTxt, event_cb, eventData);
 		lv_obj_set_grid_cell(field->valueField, LV_GRID_ALIGN_CENTER, 0, 1, LV_GRID_ALIGN_CENTER, 0, 1);
 	}
 
