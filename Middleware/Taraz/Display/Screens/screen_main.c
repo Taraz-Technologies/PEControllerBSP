@@ -190,7 +190,7 @@ static void Title_Create(lv_obj_t * parent)
 		//
 		BSP_Screen_InitGridStyle(&padGridStyle, 5, 5, 0, 0, &lvColorStore.background);
 		//lv_style_set_pad_row(&padGridStyle, 10);
-		lv_style_set_pad_bottom(&padGridStyle, 10);
+		lv_style_set_pad_bottom(&padGridStyle, 5);
 		lv_style_set_pad_top(&padGridStyle, 10);
 		init = true;
 	}
@@ -208,6 +208,7 @@ static void Title_Create(lv_obj_t * parent)
 		.colWidths = { 70, LV_GRID_FR(1) }
 	};
 	lv_default_text_field(titleCellArea, &field, 0, 0, event_handler, TAG_ATTACH(TAG_APPINFO));
+	lv_obj_align(field.nameField, LV_ALIGN_CENTER, 0, 0);
 
 }
 
@@ -320,7 +321,8 @@ void MainScreen_Init(screens_t* _screen)
 	// Make the screen
 	// create the screen
 	screen = lv_obj_create(NULL);
-
+	lv_obj_add_event_cb(screen, ScreenEvents_Handler, LV_EVENT_SCREEN_LOADED, NULL);
+	//lv_obj_add_event_cb(screen, ScreenEvents_Handler, LV_EVENT_REFRESH, NULL);
 	// create basic grid
 	static lv_coord_t rowsScreen[] = {60, LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
 	static lv_coord_t colsScreen[] = {LV_GRID_FR(MEASUREMENT_AREA_RATIO), LV_GRID_FR(APP_AREA_RATIO), LV_GRID_TEMPLATE_LAST};

@@ -55,6 +55,7 @@ static const char* chNames[] =
 		"CH9", "CH10", "CH11", "CH12",
 		"CH13", "CH14", "CH15", "CH16",
 };
+static int changeMode = 0;
 /********************************************************************************
  * Function Prototypes
  *******************************************************************************/
@@ -128,32 +129,47 @@ void ScreenManager_Init(DisplayLayer _dispLayer ,adc_info_t* _adcInfo)
 	dispLayer(screens[screenIdx].lvglLayer, LVGL_LAYER);
 	dispLayer(screens[screenIdx].directLayer, DIRECT_LAYER);
 }
-
+// Event handler function
+void ScreenEvents_Handler(lv_event_t * e)
+{
+	//changeMode = 2;
+}
 /**
  * @brief This function refreshes and manages the screens for display.
  */
 void ScreenManager_Refresh(void)
 {
-	static screen_type_t idxPrevious = SCREEN_MAIN;
-	screen_type_t idxNext = screens[screenIdx].Refresh();
-	if (idxNext == SCREEN_NONE)
-		return;
+	if (changeMode == 0)
+	{
+		static screen_type_t idxPrevious = SCREEN_MAIN;
+		screen_type_t idxNext = screens[screenIdx].Refresh();
+		if (idxNext == SCREEN_NONE)
+			return;
 
-	if (idxNext == SCREEN_PREVIOUS)
-		idxNext = idxPrevious;
+		if (idxNext == SCREEN_PREVIOUS)
+			idxNext = idxPrevious;
 
-	idxPrevious = screenIdx;
+		idxPrevious = screenIdx;
+		writeAtScreenEnd = false;
+		changeMode = 1;
 
-	if(screens[screenIdx].Unload != NULL)
-		screens[screenIdx].Unload();
+		if(screens[screenIdx].Unload != NULL)
+			screens[screenIdx].Unload();
 
-	screenIdx = idxNext;
+		screenIdx = idxNext;
 
-	if(screens[screenIdx].Load != NULL)
-		screens[screenIdx].Load();
+		if(screens[screenIdx].Load != NULL)
+			screens[screenIdx].Load();
 
-	dispLayer(screens[screenIdx].lvglLayer, LVGL_LAYER);
-	dispLayer(screens[screenIdx].directLayer, DIRECT_LAYER);
+		dispLayer(NULL, LVGL_LAYER);
+		dispLayer(NULL, DIRECT_LAYER);
+	}
+	else if (writeAtScreenEnd)
+	{
+		dispLayer(screens[screenIdx].lvglLayer, LVGL_LAYER);
+		dispLayer(screens[screenIdx].directLayer, DIRECT_LAYER);
+		changeMode = 0;
+	}
 }
 
 /* EOF */

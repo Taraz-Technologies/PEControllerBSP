@@ -85,6 +85,7 @@ extern void ConfigScreen_LoadMeasurement(int _measurementIndex);
  * @param val Current value of the parameter
  */
 extern void ConfigScreen_LoadParam(data_param_info_t* _paramInfo, char* val);
+extern void ScreenEvents_Handler(lv_event_t * e);
 /********************************************************************************
  * Code
  *******************************************************************************/

@@ -103,6 +103,7 @@ static void FlushLVGLScreen(lv_disp_drv_t * disp, const lv_area_t * area, lv_col
 			color_p++;
 		}
 	}
+	writeAtScreenEnd = (area->x2 > DISPLAY_WIDTH - 30);
 	lv_disp_flush_ready(disp); /* Indicate you are ready with the flushing*/
 }
 
@@ -230,9 +231,9 @@ static void ConfigLTDC(void)
 	hltdc.Init.AccumulatedActiveH = ACCUMULATED_ACTIVE_H;
 	hltdc.Init.TotalWidth = TOTAL_WIDTH;
 	hltdc.Init.TotalHeigh = TOTAL_HEIGHT;
-	hltdc.Init.Backcolor.Blue = 255;
-	hltdc.Init.Backcolor.Green = 255;
-	hltdc.Init.Backcolor.Red = 255;
+	hltdc.Init.Backcolor.Blue = 20;
+	hltdc.Init.Backcolor.Green = 20;
+	hltdc.Init.Backcolor.Red = 20;
 	if (HAL_LTDC_Init(&hltdc) != HAL_OK)
 		Error_Handler();
 	HAL_LTDC_ConfigCLUT(&hltdc, (uint32_t *)clut_data, 256, LVGL_LAYER);

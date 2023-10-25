@@ -416,8 +416,8 @@ void BSP_Screen_Styles_Init(void)
 	lvColorStore.btnBg1 = MakeColor(0, 180, 180);
 	lvColorStore.btnBg2 = MakeColor(180, 180, 180);
 	lvColorStore.btnBg3 = MakeColor(210, 210, 210);
-	lvColorStore.current = MakeColor(250, 90, 0);
-	lvColorStore.voltage = MakeColor(0, 70, 160);
+	lvColorStore.current = MakeColor(210, 70, 0);
+	lvColorStore.voltage = MakeColor(0, 90, 160);
 	lvColorStore.on = MakeColor(11, 161, 51);
 	lvColorStore.off = MakeColor(207, 52, 43);
 	static lv_coord_t singleCoord[] = {LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};

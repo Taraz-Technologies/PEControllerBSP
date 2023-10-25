@@ -265,11 +265,13 @@ void ConfigScreen_LoadMeasurement(int _measurementIndex)
 			.colWidths = { LV_GRID_FR(1), FIELD_VALUE_WIDTH }
 	};
 	field.nameTxt = "Type";
-	field.valueTxt = measureTxts[(uint8_t)dispMeasures.chMeasures[measurementIndex].type];
+	typeIndex = (uint8_t)dispMeasures.chMeasures[measurementIndex].type;
+	field.valueTxt = measureTxts[typeIndex];
 	lv_default_text_field(screenObjs.paramGrid, &field, 0, 0, Type_Toggle, NULL);
 	measureObjs.type = field.valueField;
 	field.nameTxt = "Units";
-	field.valueTxt = unitTxts[(uint8_t)dispMeasures.adcInfo->units[measurementIndex]];
+	unitIndex = (uint8_t)dispMeasures.adcInfo->units[measurementIndex];
+	field.valueTxt = unitTxts[unitIndex];
 	lv_default_text_field(screenObjs.paramGrid, &field, 1, 0, Unit_Toggle, NULL);
 	measureObjs.unit = field.valueField;
 	char txt[12];
@@ -407,6 +409,7 @@ void ConfigScreen_Init(screens_t* _screen)
 {
 	// create the screen
 	screen = lv_obj_create(NULL);
+	lv_obj_add_event_cb(screen, ScreenEvents_Handler, LV_EVENT_SCREEN_LOADED, NULL);
 
 	// create basic grid
 	static lv_coord_t colsScreen[] = {LV_GRID_FR(1), 350, LV_GRID_TEMPLATE_LAST};

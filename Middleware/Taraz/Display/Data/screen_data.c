@@ -61,6 +61,7 @@ ltdc_layer_info_t defaultLayer =
 		.yAlign = ALIGN_UP_Y,
 		.PixelFormat = RAM_PIXEL_FORMAT
 };
+bool writeAtScreenEnd = false;
 /********************************************************************************
  * Function Prototypes
  *******************************************************************************/

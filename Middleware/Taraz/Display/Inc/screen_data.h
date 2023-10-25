@@ -205,6 +205,8 @@ extern const char* unitTxts[UNIT_COUNT];
  * @brief Default layer which can be pointed to, if the LTDC layer needs to be empty
  */
 extern ltdc_layer_info_t defaultLayer;
+
+extern bool writeAtScreenEnd;
 /**
   * @}
   */
