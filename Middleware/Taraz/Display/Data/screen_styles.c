@@ -116,7 +116,6 @@ void lv_default_text_field(lv_obj_t* parent, lv_ta_field_data_t* field, int row,
 
 	lv_obj_t * containerValue = lv_grid_create_general(grid, singleRowCol, singleRowCol, &innerContainerStyle, NULL, event_cb, eventData);
 	lv_obj_set_grid_cell(containerValue, LV_GRID_ALIGN_STRETCH, 1, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
-	//lv_obj_t * containerValue = lv_container_create_general(grid, &valueContainerStyle, 0, 1, event_cb, eventData);
 
 	if (field->isTextArea)
 	{
@@ -156,7 +155,6 @@ void lv_default_text_field(lv_obj_t* parent, lv_ta_field_data_t* field, int row,
 			lv_obj_set_style_border_color(field->valueField, FIELD_FG_FONT_COLOR, LV_PART_CURSOR | LV_STATE_FOCUSED);
 		}
 	}
-	//lv_obj_align(field->valueField, LV_ALIGN_TOP_LEFT, 20, 0);
 }
 
 /**

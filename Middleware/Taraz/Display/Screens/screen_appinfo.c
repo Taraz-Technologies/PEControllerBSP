@@ -58,11 +58,29 @@ static lv_obj_t* screenGrid = NULL;
 /********************************************************************************
  * Code
  *******************************************************************************/
-static void Close_Clicked(lv_event_t * e)
+static void Keypad_Clicked(lv_event_t * e)
 {
 	if (!isActive)
 		return;
-	tag = GET_TAG(e);
+	tag = TAG_CANCEL;
+}
+
+static void Close_Create(lv_obj_t * parent, int row, int col)
+{
+	static const char* map[] = {LV_SYMBOL_HOME, NULL};
+
+	lv_obj_t* kb = lv_keyboard_create(parent);
+	lv_obj_set_grid_cell(kb, LV_GRID_ALIGN_CENTER, col, 1, LV_GRID_ALIGN_STRETCH, row, 1);
+	lv_btnmatrix_set_map(kb, map);
+	lv_obj_set_style_bg_color(kb, lvColorStore.background, 0);
+	lv_obj_set_style_text_color(kb, lvColorStore.lightTaraz, 0);
+	lv_obj_set_style_bg_color(kb, lvColorStore.darkTaraz, LV_PART_ITEMS);
+	lv_obj_set_style_text_color(kb, lvColorStore.white, LV_PART_ITEMS);
+	lv_obj_set_style_border_color(kb, lvColorStore.lightTaraz, LV_PART_ITEMS);
+	lv_obj_set_style_border_width(kb, 2, LV_PART_ITEMS);
+	lv_obj_set_style_text_font(kb, &lv_font_montserrat_30, 0);
+	lv_obj_set_width(kb, 200);
+	lv_obj_add_event_cb(kb, Keypad_Clicked, LV_EVENT_CLICKED, NULL);
 }
 
 static void CreateInfo(lv_obj_t * parent)
@@ -83,7 +101,7 @@ static void CreateInfo(lv_obj_t * parent)
 	// main grid
 	static lv_coord_t rows[] = {LV_GRID_CONTENT, LV_GRID_CONTENT, LV_GRID_CONTENT,
 			LV_GRID_CONTENT, LV_GRID_CONTENT, LV_GRID_CONTENT,
-			LV_GRID_FR(1), 60 , LV_GRID_TEMPLATE_LAST};
+			LV_GRID_FR(1), 80 , LV_GRID_TEMPLATE_LAST};
 	lv_obj_t* grid = lv_grid_create_general(parent, singleRowCol, rows, &lvStyleStore.thickMarginGrid, NULL, NULL, NULL);
 	lv_obj_set_grid_cell(grid, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
 
@@ -117,9 +135,7 @@ static void CreateInfo(lv_obj_t * parent)
 	}
 
 	//
-	lv_obj_t* closeBtn = lv_btn_create_general(grid, &lvStyleStore.btn2, &btnLblStyle, "Close", Close_Clicked, TAG_ATTACH(TAG_CANCEL));
-	lv_obj_set_grid_cell(closeBtn, LV_GRID_ALIGN_CENTER, 0, 1, LV_GRID_ALIGN_STRETCH, 7, 1);
-	lv_obj_set_width(closeBtn, 200);
+	Close_Create(grid, 7, 0);
 }
 
 static screen_type_t Refresh(void)
