@@ -269,8 +269,6 @@ static screen_type_t Refresh(void)
 				return SCREEN_intelliSENS;
 			if (tagBuff == TAG_APPINFO)
 				return SCREEN_APPINFO;
-			if (tagBuff == TAG_HELP)
-				return SCREEN_HELP;
 		}
 
 		screen_type_t scr = AppControlGrid_TouchDetect();
@@ -321,8 +319,7 @@ void MainScreen_Init(screens_t* _screen)
 	// Make the screen
 	// create the screen
 	screen = lv_obj_create(NULL);
-	lv_obj_add_event_cb(screen, ScreenEvents_Handler, LV_EVENT_SCREEN_LOADED, NULL);
-	//lv_obj_add_event_cb(screen, ScreenEvents_Handler, LV_EVENT_REFRESH, NULL);
+
 	// create basic grid
 	static lv_coord_t rowsScreen[] = {60, LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
 	static lv_coord_t colsScreen[] = {LV_GRID_FR(MEASUREMENT_AREA_RATIO), LV_GRID_FR(APP_AREA_RATIO), LV_GRID_TEMPLATE_LAST};

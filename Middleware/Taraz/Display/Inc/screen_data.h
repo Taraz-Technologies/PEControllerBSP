@@ -102,7 +102,6 @@ typedef enum
 	SCREEN_CONF,       /**< Configuration Screen */
 	SCREEN_APPINFO,    /**< Application Information Screen */
 	SCREEN_intelliSENS,/**< intelliSENS Information Screen */
-	SCREEN_HELP,       /**< Help Screen */
 	SCREEN_COUNT,      /**< Not a type. Use this to get the total number of legal types */
 	SCREEN_NONE,       /**< Invalid Screen */
 	SCREEN_PREVIOUS,   /**< Previous Screen */

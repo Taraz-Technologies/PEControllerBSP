@@ -409,7 +409,6 @@ void ConfigScreen_Init(screens_t* _screen)
 {
 	// create the screen
 	screen = lv_obj_create(NULL);
-	lv_obj_add_event_cb(screen, ScreenEvents_Handler, LV_EVENT_SCREEN_LOADED, NULL);
 
 	// create basic grid
 	static lv_coord_t colsScreen[] = {LV_GRID_FR(1), 350, LV_GRID_TEMPLATE_LAST};

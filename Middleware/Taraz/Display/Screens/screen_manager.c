@@ -83,11 +83,6 @@ extern void IntellisensScreen_Init(screens_t* screen);
  * @brief Initialize screen
  * @param *screen Pointer to fill the screen information
  */
-extern void HelpScreen_Init(screens_t* screen);
-/**
- * @brief Initialize screen
- * @param *screen Pointer to fill the screen information
- */
 extern void AppInfoScreen_Init(screens_t* screen);
 /********************************************************************************
  * Code
@@ -99,7 +94,6 @@ static void Screens_Init(void)
 	ConfigScreen_Init(&screens[SCREEN_CONF]);
 	IntellisensScreen_Init(&screens[SCREEN_intelliSENS]);
 	AppInfoScreen_Init(&screens[SCREEN_APPINFO]);
-	HelpScreen_Init(&screens[SCREEN_HELP]);
 }
 
 static void Measurements_Init(adc_info_t* _adcInfo)
@@ -129,11 +123,7 @@ void ScreenManager_Init(DisplayLayer _dispLayer ,adc_info_t* _adcInfo)
 	dispLayer(screens[screenIdx].lvglLayer, LVGL_LAYER);
 	dispLayer(screens[screenIdx].directLayer, DIRECT_LAYER);
 }
-// Event handler function
-void ScreenEvents_Handler(lv_event_t * e)
-{
-	//changeMode = 2;
-}
+
 /**
  * @brief This function refreshes and manages the screens for display.
  */
