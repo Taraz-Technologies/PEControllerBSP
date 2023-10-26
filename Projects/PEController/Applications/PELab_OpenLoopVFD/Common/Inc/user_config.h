@@ -66,7 +66,7 @@ extern "C" {
 /**
  * @brief Select LCD variant installed on PEController
  */
-#define DISPLAY					(LCD_AFY800480A0)
+#define DISPLAY					(LCD_AFY800480B0)
 /**
  * @brief Selects the display brightness value between 0-100
  */

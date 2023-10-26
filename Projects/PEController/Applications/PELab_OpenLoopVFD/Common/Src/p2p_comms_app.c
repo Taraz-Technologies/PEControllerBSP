@@ -51,7 +51,27 @@ state_update_request inv1StateUpdateRequest = { .isPending = false };
 state_update_request inv2StateUpdateRequest = { .isPending = false };
 #endif
 #if IS_COMMS_CORE
-
+data_param_info_t p2pCommsParams[] =
+{
+		// Inverter 1 settings
+		{ .name = "Required Frequency (INV 1)", .index = SHARE_INV1_REQ_FREQ, .type = DTYPE_FLOAT, .arg = 0, .unit = UNIT_Hz },
+		{ .name = "Nominal Frequency (INV 1)", .index = SHARE_INV1_NOM_FREQ, .type = DTYPE_FLOAT, .arg = 0, .unit = UNIT_Hz},
+		{ .name = "Nominal m (INV 1)", .index = SHARE_INV1_NOM_m, .type = DTYPE_FLOAT, .arg = 2, .unit = UNIT_NONE },
+		{ .name = "Acceleration (INV 1)", .index = SHARE_INV1_ACCELERATION, .type = DTYPE_FLOAT,  .arg = 2, .unit = UNIT_NONE},
+		{ .name = "Enable (INV 1)", .index = SHARE_INV1_STATE, .type = DTYPE_BOOL },
+		{ .name = "Direction (INV 1)", .index = SHARE_INV1_DIRECTION, .type = DTYPE_BOOL },
+		{ .name = "Frequency (INV 1)", .index = SHARE_INV1_FREQ, .type = DTYPE_FLOAT, .arg = 1, .unit = UNIT_Hz},
+		{ .name = "m (INV 1)", .index = SHARE_INV1_m, .type = DTYPE_FLOAT,  .arg = 2, .unit = UNIT_NONE},
+		// Inverter 2 settings
+		{ .name = "Required Frequency (INV 2)", .index = SHARE_INV2_REQ_FREQ, .type = DTYPE_FLOAT, .arg = 0, .unit = UNIT_Hz },
+		{ .name = "Nominal Frequency (INV 2)", .index = SHARE_INV2_NOM_FREQ, .type = DTYPE_FLOAT, .arg = 0, .unit = UNIT_Hz},
+		{ .name = "Nominal m (INV 2)", .index = SHARE_INV2_NOM_m, .type = DTYPE_FLOAT, .arg = 2, .unit = UNIT_NONE },
+		{ .name = "Acceleration (INV 2)", .index = SHARE_INV2_ACCELERATION, .type = DTYPE_FLOAT,  .arg = 2, .unit = UNIT_NONE},
+		{ .name = "Enable (INV 2)", .index = SHARE_INV2_STATE, .type = DTYPE_BOOL },
+		{ .name = "Direction (INV 2)", .index = SHARE_INV2_DIRECTION, .type = DTYPE_BOOL },
+		{ .name = "Frequency (INV 2)", .index = SHARE_INV2_FREQ, .type = DTYPE_FLOAT, .arg = 1, .unit = UNIT_Hz},
+		{ .name = "m (INV 2)", .index = SHARE_INV2_m, .type = DTYPE_FLOAT,  .arg = 2, .unit = UNIT_NONE},
+};
 #endif
 /********************************************************************************
  * Function Prototypes
@@ -67,9 +87,13 @@ bool P2PComms_IsStateStorageUpdateNeeded(p2p_data_buffs_t* dest, p2p_data_buffs_
 	return dest->floats[SHARE_INV1_REQ_FREQ] != src->floats[SHARE_INV1_REQ_FREQ] ||
 			dest->floats[SHARE_INV1_NOM_FREQ] != src->floats[SHARE_INV1_NOM_FREQ] ||
 			dest->floats[SHARE_INV1_NOM_m] != src->floats[SHARE_INV1_NOM_m] ||
+			dest->floats[SHARE_INV1_ACCELERATION] != src->floats[SHARE_INV1_ACCELERATION] ||
+			dest->bools[SHARE_INV1_DIRECTION] != src->bools[SHARE_INV2_DIRECTION] ||
 			dest->floats[SHARE_INV2_REQ_FREQ] != src->floats[SHARE_INV2_REQ_FREQ] ||
 			dest->floats[SHARE_INV2_NOM_FREQ] != src->floats[SHARE_INV2_NOM_FREQ] ||
-			dest->floats[SHARE_INV2_NOM_m] != src->floats[SHARE_INV2_NOM_m];
+			dest->floats[SHARE_INV2_NOM_m] != src->floats[SHARE_INV2_NOM_m] ||
+			dest->floats[SHARE_INV2_ACCELERATION] != src->floats[SHARE_INV2_ACCELERATION] ||
+			dest->bools[SHARE_INV2_DIRECTION] != src->bools[SHARE_INV2_DIRECTION];
 }
 
 void P2PComms_UpdateStorableStates(p2p_data_buffs_t* dest, p2p_data_buffs_t* src)

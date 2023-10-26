@@ -44,7 +44,7 @@ extern "C" {
 #include "screen_base.h"
 #include "stdlib.h"
 #include "utility_lib.h"
-#include "interprocessor_comms.h"
+#include <p2p_comms.h>
 /********************************************************************************
  * Defines
  *******************************************************************************/
@@ -56,7 +56,7 @@ extern "C" {
  * @note Combined with @ref CONTROL_COL_COUNT, this calculates the rows required by the control area and
  * thus computes the required sizes for each controllable parameter
  */
-#define CONTROL_CONFS_COUNT					(8)
+#define CONTROL_CONFS_COUNT					(6)
 /**
  * @brief Number of monitored parameters/configurations to be displayed on main screen
  * @note Combined with @ref MONITOR_COL_COUNT, this calculates the rows required by the monitoring area and
@@ -67,11 +67,11 @@ extern "C" {
 /**
  * @brief Number of columns in controls area
  */
-#define CONTROL_COL_COUNT					(4)
+#define CONTROL_COL_COUNT					(3)
 /**
  * @brief Number of columns in monitoring area
  */
-#define MONITOR_COL_COUNT					(4)
+#define MONITOR_COL_COUNT					(2)
 
 // Use only if forcing layout <Not recommended>, otherwise these will be auto-computed.
 #if 0
@@ -87,7 +87,7 @@ extern "C" {
 /**
  * @brief Ratio of control area
  */
-#define CONTROL_AREA_RATIO					(2)
+#define CONTROL_AREA_RATIO					(1)
 /**
  * @brief Ratio of monitoring area
  */

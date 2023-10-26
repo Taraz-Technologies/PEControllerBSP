@@ -122,19 +122,29 @@ void OpenLoopVfControl_Loop(openloopvf_config_t* config)
 {
 	if (config->inverterConfig.state == INVERTER_INACTIVE)
 		return;
+
+	float a = config->acceleration * (config->currentFreq < config->outputFreq ? 1 : -1);
+	config->currentFreq += (a / config->pwmFreq);
+
 	// adjust the frequency with given acceleration
-	if(config->currentFreq < config->outputFreq)
-	{
-		config->currentFreq *= config->acceleration;
-		if(config->currentFreq > config->outputFreq)
-			config->currentFreq = config->outputFreq;
-	}
 	if(config->currentFreq > config->outputFreq)
-	{
-		config->currentFreq /= config->acceleration;
-		if(config->currentFreq < config->outputFreq)
-			config->currentFreq = config->outputFreq;
-	}
+		config->currentFreq = config->outputFreq;
+	if(config->currentFreq < config->outputFreq)
+		config->currentFreq = config->outputFreq;
+
+//	// adjust the frequency with given acceleration
+//	if(config->currentFreq < config->outputFreq)
+//	{
+//		config->currentFreq *= config->acceleration;
+//		if(config->currentFreq > config->outputFreq)
+//			config->currentFreq = config->outputFreq;
+//	}
+//	if(config->currentFreq > config->outputFreq)
+//	{
+//		config->currentFreq /= config->acceleration;
+//		if(config->currentFreq < config->outputFreq)
+//			config->currentFreq = config->outputFreq;
+//	}
 
 	// compute the current modulation index
 	config->currentModulationIndex = (config->nominalModulationIndex / config->nominalFreq) * config->currentFreq;

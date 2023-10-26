@@ -69,6 +69,8 @@ typedef enum
 {
 	SHARE_INV1_STATE,
 	SHARE_INV2_STATE,
+	SHARE_INV1_DIRECTION,
+	SHARE_INV2_DIRECTION,
 	SHARE_BOOL_COUNT,   /**< Not a type. Use this to get the total number of legal types */
 } shared_bools_t;
 typedef enum
@@ -107,9 +109,11 @@ typedef enum
 	SHARE_INV1_REQ_FREQ,
 	SHARE_INV1_NOM_FREQ,
 	SHARE_INV1_NOM_m,
+	SHARE_INV1_ACCELERATION,
 	SHARE_INV2_REQ_FREQ,
 	SHARE_INV2_NOM_FREQ,
 	SHARE_INV2_NOM_m,
+	SHARE_INV2_ACCELERATION,
 	// Monitoring
 	SHARE_INV1_FREQ,
 	SHARE_INV1_m,
@@ -122,6 +126,26 @@ typedef enum
 	SHARE_SAMPLE_BIT_ACCESS,
 	SHARE_BIT_ACCESS_COUNT,   /**< Not a type. Use this to get the total number of legal types */
 } shared_bit_access_t;
+typedef enum
+{
+	P2P_PARAM_f_REQ_INV1,
+	P2P_PARAM_f_NOM_INV1,
+	P2P_PARAM_m_NOM_INV1,
+	P2P_PARAM_a_INV1,
+	P2P_PARAM_EN_INV1,
+	P2P_PARAM_DIR_INV1,
+	P2P_PARAM_f_INV1,
+	P2P_PARAM_m_INV1,
+	P2P_PARAM_f_REQ_INV2,
+	P2P_PARAM_f_NOM_INV2,
+	P2P_PARAM_m_NOM_INV2,
+	P2P_PARAM_a_INV2,
+	P2P_PARAM_EN_INV2,
+	P2P_PARAM_DIR_INV2,
+	P2P_PARAM_f_INV2,
+	P2P_PARAM_m_INV2,
+	P2P_PARAM_COUNT,   /**< Not a type. Use this to get the total number of legal types */
+} p2p_params_type_t;
 /**
  * @}
  */
@@ -136,7 +160,7 @@ typedef struct
 	volatile bool isPending;
 } state_update_request;
 #endif
- /*******************************************************************************
+/*******************************************************************************
  * Exported Variables
  ******************************************************************************/
 #if IS_CONTROL_CORE

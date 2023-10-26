@@ -199,13 +199,13 @@ static void Title_Create(lv_obj_t * parent)
 	{
 		.isTextArea = false,
 		.colorFieldName = true,
-		.nameTxt = {LV_SYMBOL_SETTINGS, NULL}, //appInfoDisplay.appNo,
+		.nameTxt = LV_SYMBOL_SETTINGS,
 		.valueTxt = appInfoDisplay.appTitle,//{LV_SYMBOL_HOME, NULL},
 		.colWidths = { 60, LV_GRID_FR(1) }
 	};
 	lv_default_text_field(titleCellArea, &field, 0, 0, event_handler, TAG_ATTACH(TAG_APPINFO));
 	lv_obj_align(field.nameField, LV_ALIGN_CENTER, 0, 0);
-	lv_obj_set_style_text_font(field.nameField, &lv_font_montserrat_26, 0);
+	lv_obj_set_style_text_font(field.nameField, &lv_font_montserrat_30, 0);
 
 }
 

@@ -61,8 +61,6 @@ appinfo_display_t appInfoDisplay =
 
 		.img = &bsp_docs_QR_info,
 
-		.appNo = "AN01",
-
 		.appTitle = "Open-Loop V/f Control"
 };
 /**

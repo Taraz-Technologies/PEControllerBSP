@@ -52,7 +52,7 @@
 /**
  * @brief Cell Height for the Name of both control and monitor parameters
  */
-#define NAME_CELL_HEIGHT					(35)
+#define NAME_CELL_HEIGHT					(50)
 /**** DATA ITEM SIZING ****/
 /********************************************************************************
  * Typedefs
@@ -76,25 +76,29 @@ typedef struct
  * Static Variables
  *******************************************************************************/
 #if CONTROL_CONFS_COUNT > 0
-static data_param_info_t controlConfs[CONTROL_CONFS_COUNT] =
+static data_param_info_t* controlConfs[CONTROL_CONFS_COUNT] =
 {
-		{ .name = "fReq Inv1", .index = SHARE_INV1_REQ_FREQ, .type = DTYPE_FLOAT, .arg = 0, .unit = UNIT_Hz },
-		{ .name = "fNominal Inv1", .index = SHARE_INV1_NOM_FREQ, .type = DTYPE_FLOAT, .arg = 0, .unit = UNIT_Hz},
-		{ .name = "mNomimal Inv1", .index = SHARE_INV1_NOM_m, .type = DTYPE_FLOAT, .arg = 2, .unit = UNIT_NONE },
-		{ .name = "Control Inv1", .index = SHARE_INV1_STATE, .type = DTYPE_BOOL },
-		{ .name = "fReq Inv2", .index = SHARE_INV2_REQ_FREQ, .type = DTYPE_FLOAT, .arg = 0, .unit = UNIT_Hz },
-		{ .name = "fNominal Inv2", .index = SHARE_INV2_NOM_FREQ, .type = DTYPE_FLOAT, .arg = 0, .unit = UNIT_Hz},
-		{ .name = "mNomimal Inv2", .index = SHARE_INV2_NOM_m, .type = DTYPE_FLOAT, .arg = 2, .unit = UNIT_NONE },
-		{ .name = "Control Inv2", .index = SHARE_INV2_STATE, .type = DTYPE_BOOL },
+		&p2pCommsParams[P2P_PARAM_f_REQ_INV1],
+		&p2pCommsParams[P2P_PARAM_a_INV1],
+		&p2pCommsParams[P2P_PARAM_EN_INV1],
+		&p2pCommsParams[P2P_PARAM_f_REQ_INV2],
+		&p2pCommsParams[P2P_PARAM_a_INV2],
+		&p2pCommsParams[P2P_PARAM_EN_INV2],
 };
+typedef struct
+{
+	const char* title;
+	data_param_info_t* params;
+	int count;
+} setting_window_block_t;
 #endif
 #if MONITOR_CONFS_COUNT > 0
-static data_param_info_t monitorConfs[MONITOR_CONFS_COUNT] =
+static data_param_info_t* monitorConfs[MONITOR_CONFS_COUNT] =
 {
-		{ .name = "fOutput Inv1", .index = SHARE_INV1_FREQ, .type = DTYPE_FLOAT, .arg = 1, .unit = UNIT_Hz},
-		{ .name = "mOutput Inv1", .index = SHARE_INV1_m, .type = DTYPE_FLOAT,  .arg = 2, .unit = UNIT_NONE},
-		{ .name = "fOutput Inv2", .index = SHARE_INV2_FREQ, .type = DTYPE_FLOAT, .arg = 1, .unit = UNIT_Hz},
-		{ .name = "mOutput Inv2", .index = SHARE_INV2_m, .type = DTYPE_FLOAT,  .arg = 2, .unit = UNIT_NONE },
+		&p2pCommsParams[P2P_PARAM_f_INV1],
+		&p2pCommsParams[P2P_PARAM_m_INV1],
+		&p2pCommsParams[P2P_PARAM_f_INV2],
+		&p2pCommsParams[P2P_PARAM_m_INV2],
 };
 #endif
 static param_disp_t paramDisp = {0};
@@ -241,9 +245,9 @@ static void ControlParams_Create(lv_obj_t* parent, int row, int col)
 	char txt[20];
 	for (int i = 0; i < CONTROL_CONFS_COUNT; i++)
 	{
-		if (!IsToggleableParameter(&controlConfs[i]))
-			GetDataParameter_InText(&controlConfs[i], txt, true);
-		paramDisp.lblsControl[i] = Control_Cell_Create(grid, i, &controlConfs[i], txt);
+		if (!IsToggleableParameter(controlConfs[i]))
+			GetDataParameter_InText(controlConfs[i], txt, true);
+		paramDisp.lblsControl[i] = Control_Cell_Create(grid, i, controlConfs[i], txt);
 	}
 }
 #endif
@@ -318,9 +322,9 @@ static void MonitorParams_Create(lv_obj_t* parent, int row, int col)
 	char txt[20];
 	for (int i = 0; i < MONITOR_CONFS_COUNT; i++)
 	{
-		if (!IsToggleableParameter(&monitorConfs[i]))
-			GetDataParameter_InText(&monitorConfs[i], txt, true);
-		paramDisp.lblsMonitor[i] = Monitor_Cell_Create(grid, i, &monitorConfs[i], txt);
+		if (!IsToggleableParameter(monitorConfs[i]))
+			GetDataParameter_InText(monitorConfs[i], txt, true);
+		paramDisp.lblsMonitor[i] = Monitor_Cell_Create(grid, i, monitorConfs[i], txt);
 	}
 }
 #endif
@@ -381,23 +385,23 @@ void AppControlGrid_Refresh(void)
 		if (isNotFirstRefresh)
 		{
 			data_union_t value;
-			GetDataParameter(&controlConfs[i], &value);
+			GetDataParameter(controlConfs[i], &value);
 			if (paramDisp.controlVals[i].u32 == value.u32)
 				continue;
 			paramDisp.controlVals[i].u32 = value.u32;
 		}
 
 		// Refresh area
-		if (IsToggleableParameter(&controlConfs[i]))
+		if (IsToggleableParameter(controlConfs[i]))
 		{
-			if (GetToggleableParameterValue(&controlConfs[i]))
+			if (GetToggleableParameterValue(controlConfs[i]))
 				lv_led_on(paramDisp.lblsControl[i]);
 			else
 				lv_led_off(paramDisp.lblsControl[i]);
 		}
 		else
 		{
-			GetDataParameter_InText(&controlConfs[i], txt, true);
+			GetDataParameter_InText(controlConfs[i], txt, true);
 			lv_label_set_text(paramDisp.lblsControl[i], txt);
 		}
 	}
@@ -409,23 +413,23 @@ void AppControlGrid_Refresh(void)
 		if (isNotFirstRefresh)
 		{
 			data_union_t value;
-			GetDataParameter(&monitorConfs[i], &value);
+			GetDataParameter(monitorConfs[i], &value);
 			if (paramDisp.monitorVals[i].u32 == value.u32)
 				continue;
 			paramDisp.monitorVals[i].u32 = value.u32;
 		}
 
 		// Refresh area
-		if (IsToggleableParameter(&monitorConfs[i]))
+		if (IsToggleableParameter(monitorConfs[i]))
 		{
-			if (GetToggleableParameterValue(&monitorConfs[i]))
+			if (GetToggleableParameterValue(monitorConfs[i]))
 				lv_led_on(paramDisp.lblsMonitor[i]);
 			else
 				lv_led_off(paramDisp.lblsMonitor[i]);
 		}
 		else
 		{
-			GetDataParameter_InText(&monitorConfs[i], txt, true);
+			GetDataParameter_InText(monitorConfs[i], txt, true);
 			lv_label_set_text(paramDisp.lblsMonitor[i], txt);
 		}
 	}
@@ -447,17 +451,17 @@ screen_type_t AppControlGrid_TouchDetect(void)
 		char txt[20];
 #if CONTROL_CONFS_COUNT > 0
 		// Get value and toggle if boolean
-		if (controlConfs[index].type == DTYPE_BOOL)
+		if (controlConfs[index]->type == DTYPE_BOOL)
 		{
 			data_union_t value;
-			device_err_t err = GetDataParameter(&controlConfs[index], &value);
+			device_err_t err = GetDataParameter(controlConfs[index], &value);
 			if (err != ERR_OK)
 			{
 				DisplayMessage(errInfo[err].caption, errInfo[err].desc);
 				return SCREEN_NONE;
 			}
 			value.b = value.b ? false : true;
-			err = SetDataParameter(&controlConfs[index], value);
+			err = SetDataParameter(controlConfs[index], value);
 			if (err != ERR_OK)
 			{
 				DisplayMessage(errInfo[err].caption, errInfo[err].desc);
@@ -465,11 +469,11 @@ screen_type_t AppControlGrid_TouchDetect(void)
 			}
 		}
 		// directly toggle if bit accessible
-		else if(controlConfs[index].type == DTYPE_BIT_ACCESS)
+		else if(controlConfs[index]->type == DTYPE_BIT_ACCESS)
 		{
 			data_union_t value;
 			value.bits = BITS_TOGGLE;
-			device_err_t err = SetDataParameter(&controlConfs[index], value);
+			device_err_t err = SetDataParameter(controlConfs[index], value);
 			if (err != ERR_OK)
 			{
 				DisplayMessage(errInfo[err].caption, errInfo[err].desc);
@@ -478,8 +482,8 @@ screen_type_t AppControlGrid_TouchDetect(void)
 		}
 		else
 		{
-			GetDataParameter_InText(&controlConfs[index], txt, false);
-			ConfigScreen_LoadParam(&controlConfs[index], txt);
+			GetDataParameter_InText(controlConfs[index], txt, false);
+			ConfigScreen_LoadParam(controlConfs[index], txt);
 			return SCREEN_CONF;
 		}
 #endif
