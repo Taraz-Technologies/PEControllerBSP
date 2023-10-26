@@ -89,20 +89,17 @@ static void SelectColor(int i)
 	{
 		txt[0] = 'V';
 		color = &lvColorStore.voltage;
-		//colorBlock = MakeColor(50, 80, 110);
 	}
 	else
 	{
 		txt[0] = 'A';
 		color = &lvColorStore.current;
-		//colorBlock = MakeColor(110, 90, 90);
 	}
 	txt[1] = ' ';
 	CopyString(txt+2, measureTxts[(uint8_t)chDisplay[i].lastType]);
 	lv_label_set_text(chDisplay[i].lblReading, txt);
 	lv_obj_set_style_bg_color(chDisplay[i].gridMeasure, *color, 0);
 	lv_obj_set_style_bg_color(chDisplay[i].gridName, *color, 0);
-	//lv_obj_set_style_bg_color(chDisplay[i].gridValue, colorBlock, 0);
 }
 
 /**
@@ -202,12 +199,13 @@ static void Title_Create(lv_obj_t * parent)
 	{
 		.isTextArea = false,
 		.colorFieldName = true,
-		.nameTxt = appInfoDisplay.appNo,
+		.nameTxt = {LV_SYMBOL_SETTINGS, NULL}, appInfoDisplay.appNo,
 		.valueTxt = appInfoDisplay.appTitle,//{LV_SYMBOL_HOME, NULL},
-		.colWidths = { 70, LV_GRID_FR(1) }
+		.colWidths = { 60, LV_GRID_FR(1) }
 	};
 	lv_default_text_field(titleCellArea, &field, 0, 0, event_handler, TAG_ATTACH(TAG_APPINFO));
 	lv_obj_align(field.nameField, LV_ALIGN_CENTER, 0, 0);
+	lv_obj_set_style_text_font(field.nameField, &lv_font_montserrat_26, 0);
 
 }
 
@@ -246,7 +244,6 @@ static void Unload(void)
 	if (isActive)
 	{
 		isActive = false;
-		//lv_obj_del(screen);
 	}
 }
 

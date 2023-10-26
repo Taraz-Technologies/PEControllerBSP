@@ -91,7 +91,7 @@ static void Keypad_Clicked(lv_event_t * e)
 
 static void Close_Create(lv_obj_t * parent, int row, int col)
 {
-	static const char* map[] = {LV_SYMBOL_HOME, NULL};
+	static const char* map[] = {LV_SYMBOL_OK, NULL};
 
 	lv_obj_t* kb = lv_keyboard_create(parent);
 	lv_obj_set_grid_cell(kb, LV_GRID_ALIGN_CENTER, col, 1, LV_GRID_ALIGN_STRETCH, row, 1);

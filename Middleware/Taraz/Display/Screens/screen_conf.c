@@ -158,7 +158,7 @@ static void Numpad_Create(lv_obj_t * parent)
 
 static void OkClose_Create(lv_obj_t * parent, int row, int col)
 {
-	static const char* map[] = {LV_SYMBOL_SAVE, LV_SYMBOL_HOME,
+	static const char* map[] = {LV_SYMBOL_OK, LV_SYMBOL_CLOSE,
 								NULL};
 	static lv_style_t btnStyle;
 
