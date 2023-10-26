@@ -44,7 +44,7 @@ extern "C" {
  *******************************************************************************/
 #include "general_header.h"
 #include "adc_config.h"
-#include "interprocessor_comms.h"
+#include "p2p_comms.h"
 /********************************************************************************
  * Defines
  *******************************************************************************/
@@ -66,11 +66,11 @@ extern "C" {
 /**
  * @brief Shortcut for accessing messages between CM4 and CM7 core.
  */
-#define CORE_MSGS					(sharedData->interProcessorMsgs)
+#define CORE_MSGS					(sharedData->p2pMsgs)
 /**
  * @brief Shortcut for accessing data shared between CM4 and CM7 core.
  */
-#define INTER_CORE_DATA				(sharedData->interProcessorMsgs.dataBuffs)
+#define INTER_CORE_DATA				(sharedData->p2pMsgs.dataBuffs)
 /**
  * @}
  */
@@ -92,7 +92,7 @@ typedef struct
 	volatile bool isStateStorageInitialized;		/**< Flag indicating if the state storage module has restored states. */
 	adc_raw_data_t rawAdcData;						/**< Raw ADC data */
 	adc_processed_data_t processedAdcData;			/**< Converted ADC data */
-	interprocessor_msg_data_t interProcessorMsgs;	/**< Structure handling the parameters and commjunications between CM4 and CM7 core. */
+	p2p_msg_data_t p2pMsgs;							/**< Structure handling the parameters and commjunications between CM4 and CM7 core. */
 } shared_data_t;
 /**
  * @}

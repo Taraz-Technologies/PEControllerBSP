@@ -22,9 +22,9 @@
 /********************************************************************************
  * Includes
  *******************************************************************************/
+#include "p2p_comms.h"
 #include "shared_memory.h"
 #include "pecontroller_adc.h"
-#include "interprocessor_comms.h"
 /********************************************************************************
  * Defines
  *******************************************************************************/
@@ -63,7 +63,7 @@ void SharedMemory_Init(void)
 	sharedData->isStateStorageInitialized = false;
 #endif
 #if IS_CONTROL_CORE
-	InterprocessorComms_InitData();
+	P2PComms_InitData();
 #endif
 #if IS_ADC_CORE
 	BSP_ADC_SetDefaultParams((adc_processed_data_t*)&PROCESSED_ADC_DATA, (adc_raw_data_t*)&RAW_ADC_DATA);
@@ -76,7 +76,7 @@ void SharedMemory_Init(void)
 void SharedMemory_Refresh(void)
 {
 #if IS_CONTROL_CORE
-	InterprocessorComms_ProcessPendingRequests();
+	P2PComms_ProcessPendingRequests();
 #endif
 #if IS_ADC_CORE
 	BSP_ADC_RefreshData();

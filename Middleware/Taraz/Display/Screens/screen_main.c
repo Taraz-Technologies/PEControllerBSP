@@ -23,10 +23,10 @@
 /********************************************************************************
  * Includes
  *******************************************************************************/
+#include <p2p_comms.h>
 #include "screen_base.h"
 #include "stdlib.h"
 #include "utility_lib.h"
-#include "interprocessor_comms.h"
 #include "screen_main_app.h"
 #include "app_screen_data.h"
 /********************************************************************************
@@ -199,7 +199,7 @@ static void Title_Create(lv_obj_t * parent)
 	{
 		.isTextArea = false,
 		.colorFieldName = true,
-		.nameTxt = {LV_SYMBOL_SETTINGS, NULL}, appInfoDisplay.appNo,
+		.nameTxt = {LV_SYMBOL_SETTINGS, NULL}, //appInfoDisplay.appNo,
 		.valueTxt = appInfoDisplay.appTitle,//{LV_SYMBOL_HOME, NULL},
 		.colWidths = { 60, LV_GRID_FR(1) }
 	};

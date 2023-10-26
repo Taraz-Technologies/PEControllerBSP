@@ -1,10 +1,10 @@
 /**
  ********************************************************************************
- * @file 		interprocessor_comms_base.h
+ * @file 		p2p_comms_app.h
  * @author 		Waqas Ehsan Butt
  * @date 		September 25, 2021
  *
- * @brief	Controls the communication between the communication and controls processors.
+ * @brief	Controls the aplplication specific communication between the communication and controls processors.
  ********************************************************************************
  * @attention
  *
@@ -18,8 +18,8 @@
  *
  ********************************************************************************
  */
-#ifndef INTERPROCESSOR_COMMS_BASE_H
-#define INTERPROCESSOR_COMMS_BASE_H
+#ifndef P2PCOMMS_APP_H
+#define P2PCOMMS_APP_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -28,7 +28,7 @@ extern "C" {
  * @{
  */
 
-/** @addtogroup Interprocessor
+/** @addtogroup P2P
  * @{
  */
 /*******************************************************************************
@@ -41,28 +41,28 @@ extern "C" {
 /*******************************************************************************
  * Defines
  ******************************************************************************/
-/** @defgroup InterprocessorComms_Exported_Macros Macros
+/** @defgroup P2PComms_Exported_Macros Macros
  * @{
  */
 /**
  * @brief No of simultaneous inter-processor messages supported.
  */
-#define INTERPROCESSOR_MSGS_SIZE					(64)
+#define P2P_COMMS_MSGS_SIZE					(64)
 /**
  * @brief No of simultaneous inter-processor commands supported.
  */
-#define INTERPROCESSOR_CMD_BUFF_SIZE				(1024)
+#define P2P_COMMS_CMD_BUFF_SIZE				(1024)
 /**
  * @brief No of simultaneous inter-processor responses supported.
  */
-#define INTERPROCESSOR_RESPONSE_BUFF_SIZE			(1024)
+#define P2P_COMMS_RESPONSE_BUFF_SIZE			(1024)
 /**
  * @}
  */
 /*******************************************************************************
  * Typedefs
  ******************************************************************************/
-/** @defgroup InterprocessorComms_Exported_Typedefs Type Definitions
+/** @defgroup P2PComms_Exported_Typedefs Type Definitions
  * @{
  */
 typedef enum

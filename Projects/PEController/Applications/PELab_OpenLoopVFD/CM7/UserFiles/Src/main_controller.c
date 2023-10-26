@@ -19,7 +19,7 @@
 #include "pecontroller_digital_in.h"
 #include "shared_memory.h"
 #include "pecontroller_timers.h"
-#include "interprocessor_comms.h"
+#include "p2p_comms.h"
 #include "open_loop_vf_controller.h"
 /*******************************************************************************
  * Defines
