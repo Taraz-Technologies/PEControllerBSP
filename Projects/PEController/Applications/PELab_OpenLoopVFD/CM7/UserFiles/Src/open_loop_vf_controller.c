@@ -101,7 +101,6 @@ void OpenLoopVfControl_Init(openloopvf_config_t* config, PWMResetCallback pwmRes
 
 	/***************** Configure Control *********************/
 	config->pwmFreq = PWM_FREQ_Hz;
-	config->acceleration= ACCELERATION;
 	config->wt = 0;
 	config->currentFreq = INITIAL_FREQ;
 	/***************** Configure Control *********************/
@@ -123,28 +122,14 @@ void OpenLoopVfControl_Loop(openloopvf_config_t* config)
 	if (config->inverterConfig.state == INVERTER_INACTIVE)
 		return;
 
-	float a = config->acceleration * (config->currentFreq < config->outputFreq ? 1 : -1);
+	float a = config->acceleration;
+	if (config->currentFreq > config->outputFreq)
+		a *= -1;
 	config->currentFreq += (a / config->pwmFreq);
 
 	// adjust the frequency with given acceleration
-	if(config->currentFreq > config->outputFreq)
+	if((a < 0 && config->currentFreq < config->outputFreq) || (a > 0 && config->currentFreq > config->outputFreq))
 		config->currentFreq = config->outputFreq;
-	if(config->currentFreq < config->outputFreq)
-		config->currentFreq = config->outputFreq;
-
-//	// adjust the frequency with given acceleration
-//	if(config->currentFreq < config->outputFreq)
-//	{
-//		config->currentFreq *= config->acceleration;
-//		if(config->currentFreq > config->outputFreq)
-//			config->currentFreq = config->outputFreq;
-//	}
-//	if(config->currentFreq > config->outputFreq)
-//	{
-//		config->currentFreq /= config->acceleration;
-//		if(config->currentFreq < config->outputFreq)
-//			config->currentFreq = config->outputFreq;
-//	}
 
 	// compute the current modulation index
 	config->currentModulationIndex = (config->nominalModulationIndex / config->nominalFreq) * config->currentFreq;

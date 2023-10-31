@@ -123,6 +123,7 @@ void MainControl_Init(void)
 	openLoopVfConfig1.nominalFreq = INTER_CORE_DATA.floats[SHARE_INV1_NOM_FREQ];
 	openLoopVfConfig1.nominalModulationIndex = INTER_CORE_DATA.floats[SHARE_INV1_NOM_m];
 	openLoopVfConfig1.outputFreq = INTER_CORE_DATA.floats[SHARE_INV1_REQ_FREQ];
+	openLoopVfConfig1.acceleration = INTER_CORE_DATA.floats[SHARE_INV1_ACCELERATION];
 	OpenLoopVfControl_Init(&openLoopVfConfig1, NULL);
 
 #if VFD_COUNT == 2
@@ -135,6 +136,7 @@ void MainControl_Init(void)
 	openLoopVfConfig2.nominalFreq = INTER_CORE_DATA.floats[SHARE_INV2_NOM_FREQ];
 	openLoopVfConfig2.nominalModulationIndex = INTER_CORE_DATA.floats[SHARE_INV2_NOM_m];
 	openLoopVfConfig2.outputFreq = INTER_CORE_DATA.floats[SHARE_INV2_REQ_FREQ];
+	openLoopVfConfig2.acceleration = INTER_CORE_DATA.floats[SHARE_INV2_ACCELERATION];
 	OpenLoopVfControl_Init(&openLoopVfConfig2, NULL);
 #endif
 
@@ -183,6 +185,7 @@ void MainControl_Loop(void)
 	openLoopVfConfig1.nominalFreq = INTER_CORE_DATA.floats[SHARE_INV1_NOM_FREQ];
 	openLoopVfConfig1.outputFreq = INTER_CORE_DATA.floats[SHARE_INV1_REQ_FREQ];
 	openLoopVfConfig1.nominalModulationIndex = INTER_CORE_DATA.floats[SHARE_INV1_NOM_m];
+	openLoopVfConfig1.acceleration = INTER_CORE_DATA.floats[SHARE_INV1_ACCELERATION];
 	OpenLoopVfControl_Loop(&openLoopVfConfig1);
 	INTER_CORE_DATA.floats[SHARE_INV1_FREQ] = openLoopVfConfig1.currentFreq;
 	INTER_CORE_DATA.floats[SHARE_INV1_m] = openLoopVfConfig1.currentModulationIndex;
@@ -190,6 +193,7 @@ void MainControl_Loop(void)
 	openLoopVfConfig2.nominalFreq = INTER_CORE_DATA.floats[SHARE_INV2_NOM_FREQ];
 	openLoopVfConfig2.outputFreq = INTER_CORE_DATA.floats[SHARE_INV2_REQ_FREQ];
 	openLoopVfConfig2.nominalModulationIndex = INTER_CORE_DATA.floats[SHARE_INV2_NOM_m];
+	openLoopVfConfig2.acceleration = INTER_CORE_DATA.floats[SHARE_INV2_ACCELERATION];
 	OpenLoopVfControl_Loop(&openLoopVfConfig2);
 	INTER_CORE_DATA.floats[SHARE_INV2_FREQ] = openLoopVfConfig2.currentFreq;
 	INTER_CORE_DATA.floats[SHARE_INV2_m] = openLoopVfConfig2.currentModulationIndex;
