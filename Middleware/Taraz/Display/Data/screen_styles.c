@@ -106,15 +106,15 @@ void lv_default_text_field(lv_obj_t* parent, lv_ta_field_data_t* field, int row,
 	static lv_coord_t cols[3] = { 200, 100, LV_GRID_TEMPLATE_LAST};
 	cols[0] = field->colWidths[0];
 	cols[1] = field->colWidths[1];
-	lv_obj_t * grid = lv_grid_create_general(parent, cols, singleRowCol, &outerGridStyle, NULL, event_cb, eventData);
-	lv_obj_set_grid_cell(grid, LV_GRID_ALIGN_STRETCH, col, 1, LV_GRID_ALIGN_STRETCH, row, 1);
+	field->container = lv_grid_create_general(parent, cols, singleRowCol, &outerGridStyle, NULL, event_cb, eventData);
+	lv_obj_set_grid_cell(field->container, LV_GRID_ALIGN_STRETCH, col, 1, LV_GRID_ALIGN_STRETCH, row, 1);
 
 	// set the name portion
-	lv_obj_t* containerName = lv_container_create_general(grid, &innerContainerStyle, 0, 0, event_cb, eventData);
+	lv_obj_t* containerName = lv_container_create_general(field->container, &innerContainerStyle, 0, 0, event_cb, eventData);
 	field->nameField = lv_label_create_general(containerName, &nameLblStyle, field->nameTxt, NULL, NULL);
 	lv_obj_align(field->nameField, LV_ALIGN_LEFT_MID, 0, 0);
 
-	lv_obj_t * containerValue = lv_grid_create_general(grid, singleRowCol, singleRowCol, &innerContainerStyle, NULL, event_cb, eventData);
+	lv_obj_t * containerValue = lv_grid_create_general(field->container, singleRowCol, singleRowCol, &innerContainerStyle, NULL, event_cb, eventData);
 	lv_obj_set_grid_cell(containerValue, LV_GRID_ALIGN_STRETCH, 1, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
 
 	if (field->isTextArea)

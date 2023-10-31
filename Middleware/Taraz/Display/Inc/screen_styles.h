@@ -100,6 +100,7 @@ typedef struct
 	bool colorFieldName;
 	lv_obj_t* nameField;
 	lv_obj_t* valueField;
+	lv_obj_t* container;
 	const char* nameTxt;
 	const char* valueTxt;
 	lv_coord_t colWidths[2];

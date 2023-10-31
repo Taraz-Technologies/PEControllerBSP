@@ -65,6 +65,11 @@ typedef struct
 {
 	lv_obj_t* lblValue;
 } var_objs_t;
+typedef struct
+{
+	lv_obj_t* container;
+	lv_obj_t* value;
+} conf_field_info_t;
 /********************************************************************************
  * Static Variables
  *******************************************************************************/
@@ -81,8 +86,8 @@ static int unitIndex;
 static int typeIndex;
 static data_param_group_t* paramGroups;
 static int groupCount;
-static lv_obj_t** currSettingsValues;
-static int currentSettingsIndex = 0;
+static conf_field_info_t* settingObjs;
+static int settingsCount = 0;
 /********************************************************************************
  * Global Variables
  *******************************************************************************/
@@ -234,7 +239,7 @@ static void SetPageTitle(const char* name)
 		lv_label_set_text(screenObjs.paramName, name);
 }
 
-static lv_obj_t* AddField(const char* name, const char* value, bool isWriteable, int row, lv_event_cb_t e, void * eventData)
+static lv_obj_t* AddField(const char* name, const char* value, bool isWriteable, lv_obj_t** container, int row, lv_event_cb_t e, void * eventData)
 {
 	static lv_ta_field_data_t field =
 	{
@@ -245,6 +250,7 @@ static lv_obj_t* AddField(const char* name, const char* value, bool isWriteable,
 	field.valueTxt = value;
 	field.isTextArea = isWriteable;
 	lv_default_text_field(screenObjs.paramGrid, &field, row, 0, e, eventData);
+	*container = field.container;
 	return field.valueField;
 }
 
@@ -265,17 +271,17 @@ void ConfigScreen_LoadMeasurement(int _measurementIndex)
 	char txt[12];
 	// Type
 	typeIndex = (uint8_t)dispMeasures.chMeasures[measurementIndex].type;
-	measureObjs.type = AddField("Type", measureTxts[typeIndex], false, 0, Type_Toggle, NULL);
+	measureObjs.type = AddField("Type", measureTxts[typeIndex], false, NULL, 0, Type_Toggle, NULL);
 	// Units
 	unitIndex = (uint8_t)dispMeasures.adcInfo->units[measurementIndex];
-	measureObjs.unit = AddField("Unit", measureTxts[typeIndex], false, 1, Unit_Toggle, NULL);
+	measureObjs.unit = AddField("Unit", measureTxts[typeIndex], false, NULL, 1, Unit_Toggle, NULL);
 	// Sensitivity
 	(void)ftoa_custom(ADC_INFO.sensitivity[measurementIndex], txt, 7, 4);
-	screenObjs.focusItem = measureObjs.sensitivity = AddField("Sensitivity", txt, true, 2, TextArea_Clicked, NULL);
+	screenObjs.focusItem = measureObjs.sensitivity = AddField("Sensitivity", txt, true, NULL, 2, TextArea_Clicked, NULL);
 	(void)ftoa_custom(ADC_INFO.offsets[measurementIndex], txt, 7, 4);
-	measureObjs.offset = AddField("Offset", txt, true, 3, TextArea_Clicked, NULL);
+	measureObjs.offset = AddField("Offset", txt, true, NULL, 3, TextArea_Clicked, NULL);
 	(void)ftoa_custom(ADC_INFO.freq[measurementIndex], txt, 7, 1);
-	measureObjs.freq = AddField("Fundamental Frequency", txt, true, 4, TextArea_Clicked, NULL);
+	measureObjs.freq = AddField("Fundamental Frequency", txt, true, NULL, 4, TextArea_Clicked, NULL);
 
 	lv_keyboard_set_textarea(screenObjs.keyboard, screenObjs.focusItem);
 }
@@ -294,7 +300,7 @@ void ConfigScreen_LoadParam(data_param_info_t* _paramInfo, char* val)
 
 	CreateParamGrid();
 	SetPageTitle(_paramInfo->name);
-	screenObjs.focusItem = varObjs.lblValue = AddField("Value", val, true, 0, TextArea_Clicked, NULL);
+	screenObjs.focusItem = varObjs.lblValue = AddField("Value", val, true, NULL, 0, TextArea_Clicked, NULL);
 	lv_keyboard_set_textarea(screenObjs.keyboard, screenObjs.focusItem);
 	paramInfo = _paramInfo;
 }
@@ -318,30 +324,61 @@ static bool IsEditableParamField(data_param_info_t* param)
 	return param->type == DTYPE_BOOL ? false : true;
 }
 
-static lv_obj_t* AddParamField(int row, data_param_info_t* param)
+static void AddParamField(int row, data_param_info_t* param, conf_field_info_t* confField)
 {
 	char value[20];
 	GetDataParameter_InText(param, value, false);
 
 	if (IsEditableParamField(param) == false)
-		return AddField(param->name, value, false, row, ToggleableParam_Clicked, param);
+		confField->value = AddField(param->name, value, false, &confField->container, row, ToggleableParam_Clicked, param);
 	else
-		return AddField(param->name, value, true, row, EditableParam_Clicked, param);
+		confField->value = AddField(param->name, value, true, &confField->container, row, EditableParam_Clicked, param);
 }
 
-static void DisplaySettingWindow(int index)
+static void HideAllSettings(void)
 {
-	if (screenObjs.itemContainer == NULL)
+	if (settingObjs == NULL)
 		return;
-	if (currSettingsValues != NULL)
-		free(currSettingsValues);
-	currentSettingsIndex = index;
-	currSettingsValues = (lv_obj_t**) malloc(4 * paramGroups[index].paramCount);
 
-	CreateParamGrid();
+	for (int i = 0; i < settingsCount; i++)
+		lv_obj_add_flag(settingObjs[i].container, LV_OBJ_FLAG_HIDDEN);
+}
+
+static void ShowSpecificSettingWindow(int index)
+{
+	HideAllSettings();
+
+	int firstSetting = 0;
+	for (int i = 0; i < index; i++)
+		firstSetting += paramGroups[i].paramCount;
+
 	SetPageTitle(paramGroups[index].title);
+
 	for (int i = 0; i < paramGroups[index].paramCount; i++)
-		currSettingsValues[i] = AddParamField(i, paramGroups[index].paramPointers[i]);
+		lv_obj_clear_flag(settingObjs[firstSetting++].container, LV_OBJ_FLAG_HIDDEN);
+}
+
+static void FillAllSettings(void)
+{
+	if (settingObjs != NULL)
+		free(settingObjs);
+	settingsCount = 0;
+
+	for (int i = 0; i < groupCount; i++)
+		settingsCount += paramGroups[i].paramCount;
+
+	settingObjs = (conf_field_info_t*) malloc(sizeof(conf_field_info_t) * settingsCount);
+
+	// Create and hide all
+	int index = 0;
+	for (int i = 0; i < groupCount; i++)
+	{
+		for (int j = 0; j < paramGroups[i].paramCount; j++)
+		{
+			AddParamField(j, paramGroups[i].paramPointers[j], &settingObjs[index]);
+			lv_obj_add_flag(settingObjs[index++].container, LV_OBJ_FLAG_HIDDEN);
+		}
+	}
 }
 
 void ConfigScreen_LoadSettings(data_param_group_t* _paramGroups, int _groupCount)
@@ -352,13 +389,10 @@ void ConfigScreen_LoadSettings(data_param_group_t* _paramGroups, int _groupCount
 
 	paramGroups = _paramGroups;
 	groupCount = _groupCount;
-	DisplaySettingWindow(0);
-	// get all values
-	// create grid
-	// load local values
-	// save values on switching
+	CreateParamGrid();
+	FillAllSettings();
+	ShowSpecificSettingWindow(0);
 }
-
 
 static void Load(void)
 {
@@ -374,9 +408,9 @@ static void Unload(void)
 		isActive = false;
 		lv_obj_del(screenObjs.paramGrid);
 		screenObjs.paramGrid = NULL;
-		if (currSettingsValues != NULL)
-			free(currSettingsValues);
-		currSettingsValues = NULL;
+		if (settingObjs != NULL)
+			free(settingObjs);
+		settingObjs = NULL;
 	}
 }
 
@@ -402,15 +436,19 @@ static device_err_t UpdateParameter(void)
 
 static device_err_t UpdateSettings(void)
 {
-	if (paramGroups == NULL || groupCount <= 0 || currSettingsValues == NULL || currentSettingsIndex < 0 || currentSettingsIndex >= groupCount)
+	if (paramGroups == NULL || groupCount <= 0 || settingObjs == NULL || settingsCount < 0)
 		return ERR_OK;
 
-	for (int i = 0; i < paramGroups[currentSettingsIndex].paramCount; i++)
+	int index = 0;
+	for (int i = 0; i < groupCount; i++)
 	{
-		data_param_info_t* param = paramGroups[currentSettingsIndex].paramPointers[i];
-		device_err_t err = SetDataParameter_FromText(param, IsEditableParamField(param) == false ? lv_label_get_text(currSettingsValues[i]) : lv_textarea_get_text(currSettingsValues[i]));
-		if (err != ERR_OK)
-			return err;
+		for (int j = 0; j < paramGroups[i].paramCount; j++)
+		{
+			data_param_info_t* param = paramGroups[i].paramPointers[i];
+			device_err_t err = SetDataParameter_FromText(param, IsEditableParamField(param) == false ? lv_label_get_text(settingObjs[index++].value) : lv_textarea_get_text(settingObjs[index++].value));
+			if (err != ERR_OK)
+				return err;
+		}
 	}
 
 	return ERR_OK;
