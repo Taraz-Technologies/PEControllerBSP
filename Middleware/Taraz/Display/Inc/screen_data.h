@@ -80,6 +80,14 @@ extern "C" {
  */
 #define TAG_SETTINGS			(6)
 /**
+ * @brief Use this tag to indicate touch on Left button
+ */
+#define TAG_LEFT				(7)
+/**
+ * @brief Use this tag to indicate touch on Right button
+ */
+#define TAG_RIGHT				(8)
+/**
  * @brief Use this to attach tag
  */
 #define TAG_ATTACH(x)			((void*)x)

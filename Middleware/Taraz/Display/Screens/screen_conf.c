@@ -88,6 +88,7 @@ static data_param_group_t* paramGroups;
 static int groupCount;
 static conf_field_info_t* settingObjs;
 static int settingsCount = 0;
+static int currentSettingIndex = 0;
 /********************************************************************************
  * Global Variables
  *******************************************************************************/
@@ -99,12 +100,14 @@ static int settingsCount = 0;
 /********************************************************************************
  * Code
  *******************************************************************************/
-static void Keypad_Clicked(lv_event_t * e)
+static void StyleKeypadButtons(lv_obj_t* item)
 {
-	if (!isActive)
-		return;
-	lv_obj_t * obj = lv_event_get_target(e);
-	tag = lv_btnmatrix_get_selected_btn(obj) ? TAG_CANCEL : TAG_OK;
+	lv_obj_set_style_bg_color(item, lvColorStore.background, 0);
+	lv_obj_set_style_text_color(item, lvColorStore.darkTaraz, 0);
+	lv_obj_set_style_bg_color(item, lvColorStore.darkTaraz, LV_PART_ITEMS);
+	lv_obj_set_style_text_color(item, lvColorStore.white, LV_PART_ITEMS);
+	lv_obj_set_style_border_color(item, lvColorStore.lightTaraz, LV_PART_ITEMS);
+	lv_obj_set_style_border_width(item, 2, LV_PART_ITEMS);
 }
 
 static void Type_Toggle(lv_event_t* e)
@@ -148,15 +151,17 @@ static void Numpad_Create(lv_obj_t * parent)
 	screenObjs.keyboard = lv_keyboard_create(parent);
 	lv_obj_set_grid_cell(screenObjs.keyboard, LV_GRID_ALIGN_STRETCH, 1, 1, LV_GRID_ALIGN_STRETCH, 1, 1);
 	lv_obj_set_style_text_font(screenObjs.keyboard, &lv_font_montserrat_26, 0);
-	//lv_keyboard_set_mode(screenObjs.keyboard, LV_KEYBOARD_MODE_NUMBER);
 	lv_btnmatrix_set_map(screenObjs.keyboard, map);
 	lv_btnmatrix_set_btn_width(screenObjs.keyboard, 13, 2);
-	lv_obj_set_style_bg_color(screenObjs.keyboard, lvColorStore.background, 0);
-	lv_obj_set_style_text_color(screenObjs.keyboard, lvColorStore.darkTaraz, 0);
-	lv_obj_set_style_bg_color(screenObjs.keyboard, lvColorStore.darkTaraz, LV_PART_ITEMS);
-	lv_obj_set_style_text_color(screenObjs.keyboard, lvColorStore.white, LV_PART_ITEMS);
-	lv_obj_set_style_border_color(screenObjs.keyboard, lvColorStore.lightTaraz, LV_PART_ITEMS);
-	lv_obj_set_style_border_width(screenObjs.keyboard, 2, LV_PART_ITEMS);
+	StyleKeypadButtons(screenObjs.keyboard);
+}
+
+static void Close_Clicked(lv_event_t * e)
+{
+	if (!isActive)
+		return;
+	lv_obj_t * obj = lv_event_get_target(e);
+	tag = lv_btnmatrix_get_selected_btn(obj) ? TAG_CANCEL : TAG_OK;
 }
 
 static void OkClose_Create(lv_obj_t * parent, int row, int col)
@@ -167,14 +172,30 @@ static void OkClose_Create(lv_obj_t * parent, int row, int col)
 	lv_obj_t* kb = lv_keyboard_create(parent);
 	lv_obj_set_grid_cell(kb, LV_GRID_ALIGN_STRETCH, col, 1, LV_GRID_ALIGN_STRETCH, row, 1);
 	lv_btnmatrix_set_map(kb, map);
-	lv_obj_set_style_bg_color(kb, lvColorStore.background, 0);
-	lv_obj_set_style_text_color(kb, lvColorStore.lightTaraz, 0);
-	lv_obj_set_style_bg_color(kb, lvColorStore.darkTaraz, LV_PART_ITEMS);
-	lv_obj_set_style_text_color(kb, lvColorStore.white, LV_PART_ITEMS);
-	lv_obj_set_style_border_color(kb, lvColorStore.lightTaraz, LV_PART_ITEMS);
-	lv_obj_set_style_border_width(kb, 2, LV_PART_ITEMS);
 	lv_obj_set_style_text_font(kb, &lv_font_montserrat_30, 0);
-	lv_obj_add_event_cb(kb, Keypad_Clicked, LV_EVENT_CLICKED, NULL);
+	lv_obj_add_event_cb(kb, Close_Clicked, LV_EVENT_CLICKED, NULL);
+	StyleKeypadButtons(kb);
+}
+
+static void LeftRight_Clicked(lv_event_t * e)
+{
+	if (!isActive)
+		return;
+	lv_obj_t * obj = lv_event_get_target(e);
+	tag = lv_btnmatrix_get_selected_btn(obj) ? TAG_RIGHT : TAG_LEFT;
+}
+
+static void LeftRight_Create(lv_obj_t * parent, int row, int col)
+{
+	static const char* map[] = {LV_SYMBOL_LEFT, LV_SYMBOL_RIGHT,
+			NULL};
+
+	lv_obj_t* kb = lv_keyboard_create(parent);
+	lv_obj_set_grid_cell(kb, LV_GRID_ALIGN_STRETCH, col, 1, LV_GRID_ALIGN_STRETCH, row, 1);
+	lv_btnmatrix_set_map(kb, map);
+	lv_obj_set_style_text_font(kb, &lv_font_montserrat_30, 0);
+	lv_obj_add_event_cb(kb, LeftRight_Clicked, LV_EVENT_CLICKED, NULL);
+	StyleKeypadButtons(kb);
 }
 
 static void StaticForm_Create(lv_obj_t * parent)
@@ -194,11 +215,13 @@ static void StaticForm_Create(lv_obj_t * parent)
 	}
 
 	// name and container for configuration data
-	lv_obj_t* nameContainerArea = lv_grid_create_general(parent, singleRowCol, singleRowCol, &lvStyleStore.defaultGrid, NULL, NULL, NULL);
+	static lv_coord_t cols[] = {120, LV_GRID_FR(1), 120, LV_GRID_TEMPLATE_LAST};
+	lv_obj_t* nameContainerArea = lv_grid_create_general(parent, cols, singleRowCol, &lvStyleStore.defaultGrid, NULL, NULL, NULL);
 	lv_obj_set_grid_cell(nameContainerArea, LV_GRID_ALIGN_STRETCH, 0, 2, LV_GRID_ALIGN_STRETCH, 0, 1);
-	lv_obj_t * nameContainer = lv_container_create_general(nameContainerArea, &nameContainerStyle, 0, 0, NULL, NULL);
+	lv_obj_t * nameContainer = lv_container_create_general(nameContainerArea, &nameContainerStyle, 0, 1, NULL, NULL);
 	screenObjs.paramName = lv_label_create_general(nameContainer, &lblStyleName, "", NULL, NULL);
 	lv_obj_align(screenObjs.paramName, LV_ALIGN_CENTER, 0, 0);
+	LeftRight_Create(nameContainerArea, 0, 2);
 
 	static lv_coord_t rows[] = {LV_GRID_FR(1), 80, LV_GRID_TEMPLATE_LAST};
 	lv_obj_t* grid = lv_grid_create_general(parent, singleRowCol, rows, &lvStyleStore.thinMarginGrid, NULL, NULL, NULL);
@@ -354,6 +377,7 @@ static void ShowSpecificSettingWindow(int index)
 
 	SetPageTitle(paramGroups[index].title);
 
+	currentSettingIndex = index;
 	for (int i = 0; i < paramGroups[index].paramCount; i++)
 		lv_obj_clear_flag(settingObjs[firstSetting++].container, LV_OBJ_FLAG_HIDDEN);
 }
@@ -462,7 +486,11 @@ static screen_type_t Refresh(void)
 		tag = TAG_NONE;
 		if (tagBuff == TAG_CANCEL)
 			return SCREEN_PREVIOUS;
-		if (tagBuff == TAG_OK)
+		else if (tagBuff == TAG_RIGHT && confType == CONF_SETTINGS)
+			ShowSpecificSettingWindow(currentSettingIndex < groupCount - 1 ? currentSettingIndex + 1 : 0);
+		else if (tagBuff == TAG_LEFT && confType == CONF_SETTINGS)
+			ShowSpecificSettingWindow(currentSettingIndex = currentSettingIndex > 0 ? currentSettingIndex - 1 : groupCount - 1);
+		else if (tagBuff == TAG_OK)
 		{
 			device_err_t err = ERR_OK;
 			if (confType == CONF_MEASURE)
