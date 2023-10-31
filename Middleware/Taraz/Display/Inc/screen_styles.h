@@ -90,9 +90,7 @@ typedef struct
 	lv_style_t mediumMarginGrid;
 	lv_style_t thickMarginGrid;
 	lv_style_t defaultTextArea;
-	lv_style_t btn1;
-	lv_style_t btn2;
-	lv_style_t btn3;
+	lv_style_t defaultBtn;
 } lv_style_store;
 typedef struct
 {
@@ -105,6 +103,15 @@ typedef struct
 	const char* valueTxt;
 	lv_coord_t colWidths[2];
 } lv_ta_field_data_t;
+typedef struct
+{
+	lv_color_t bgColor;
+	lv_color_t txtColor;
+	lv_color_t borderColor;
+	lv_coord_t radius;
+	lv_coord_t borderWidth;
+	lv_coord_t pad;
+} basic_style_props_t;
 /**
  * @}
  */

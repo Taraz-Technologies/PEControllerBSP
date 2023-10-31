@@ -395,6 +395,21 @@ void BSP_Screen_InitDropDownStyle(lv_style_t* style, const lv_font_t * font, lv_
 	lv_style_set_bg_color(style, lvColorStore.darkTaraz);
 	lv_style_set_border_width(style, 0);
 }
+
+void BSP_Screen_CreateGenericBasicStyle(lv_style_t* style, basic_style_props_t* props)
+{
+	lv_style_init(style);
+	lv_style_set_border_opa(style, LV_OPA_100);
+	lv_style_set_bg_opa(style, LV_OPA_100);
+	lv_style_set_shadow_width(style, 0);
+	lv_style_set_bg_color(style, props->bgColor);
+	lv_style_set_border_color(style, props->borderColor);
+	lv_style_set_text_color(style, props->txtColor);
+	lv_style_set_radius(style, props->radius);
+	lv_style_set_border_width(style, props->borderWidth);
+	lv_style_set_pad_all(style, props->pad);
+}
+
 /**
  * @brief Initializes base screen styles
  */
@@ -425,9 +440,9 @@ void BSP_Screen_Styles_Init(void)
 	BSP_Screen_InitGridStyle(&lvStyleStore.mediumMarginGrid, 5, 5, 0, 0, &lvColorStore.background);
 	BSP_Screen_InitGridStyle(&lvStyleStore.thickMarginGrid, 8, 8, 0, 0, &lvColorStore.background);
 	BSP_Screen_InitTextAreaStyle(&lvStyleStore.defaultTextArea, NULL, &lvColorStore.darkFont);
-	BSP_Screen_InitBtnStyle(&lvStyleStore.btn1, 1, 10, &lvColorStore.btnBg1);
-	BSP_Screen_InitBtnStyle(&lvStyleStore.btn2, 1, 10, &lvColorStore.btnBg2);
-	BSP_Screen_InitBtnStyle(&lvStyleStore.btn3, 1, 10, &lvColorStore.btnBg3);
+	basic_style_props_t basicProps = { .bgColor = lvColorStore.darkTaraz, .txtColor = lvColorStore.white, .borderColor = lvColorStore.lightTaraz,
+									.radius = 10, .pad = 5, .borderWidth = 2 };
+	BSP_Screen_CreateGenericBasicStyle(&lvStyleStore.defaultBtn, &basicProps);
 }
 
 
