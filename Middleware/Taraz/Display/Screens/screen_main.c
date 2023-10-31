@@ -203,7 +203,7 @@ static void Title_Create(lv_obj_t * parent)
 		.valueTxt = appInfoDisplay.appTitle,//{LV_SYMBOL_HOME, NULL},
 		.colWidths = { 60, LV_GRID_FR(1) }
 	};
-	lv_default_text_field(titleCellArea, &field, 0, 0, event_handler, TAG_ATTACH(TAG_APPINFO));
+	lv_default_text_field(titleCellArea, &field, 0, 0, event_handler, TAG_ATTACH(TAG_SETTINGS));
 	lv_obj_align(field.nameField, LV_ALIGN_CENTER, 0, 0);
 	lv_obj_set_style_text_font(field.nameField, &lv_font_montserrat_30, 0);
 
@@ -259,6 +259,11 @@ static screen_type_t Refresh(void)
 			{
 				uint8_t index = GET_MEASURE_INDEX(tagBuff);
 				ConfigScreen_LoadMeasurement(index);
+				return SCREEN_CONF;
+			}
+			if (tagBuff == TAG_SETTINGS)
+			{
+				ConfigScreen_LoadSettings(&settingWindows[0], 2);
 				return SCREEN_CONF;
 			}
 			if (tagBuff == TAG_intelliSENS)

@@ -24,6 +24,7 @@
  * Includes
  *******************************************************************************/
 #include "app_screen_data.h"
+#include "p2p_comms.h"
 /********************************************************************************
  * Defines
  *******************************************************************************/
@@ -67,6 +68,21 @@ appinfo_display_t appInfoDisplay =
  * @brief Assigns the image to be displayed on the splash screen
  */
 image_info_t* splashImg = &taraz_logo_info;
+static data_param_info_t* firstWindowParams[] = { &p2pCommsParams[P2P_PARAM_f_NOM_INV1], &p2pCommsParams[P2P_PARAM_m_NOM_INV1], &p2pCommsParams[P2P_PARAM_a_INV1], };
+static data_param_info_t* secondWindowParams[] = { &p2pCommsParams[P2P_PARAM_f_NOM_INV2], &p2pCommsParams[P2P_PARAM_m_NOM_INV2], &p2pCommsParams[P2P_PARAM_a_INV2], };
+data_param_group_t settingWindows[2] =
+{
+		{
+				.title = "Inverter 1 Configuration",
+				.paramPointers = firstWindowParams,
+				.paramCount = 3
+		},
+		{
+				.title = "Inverter 2 Configuration",
+				.paramPointers = secondWindowParams,
+				.paramCount = 3
+		}
+};
 /********************************************************************************
  * Function Prototypes
  *******************************************************************************/

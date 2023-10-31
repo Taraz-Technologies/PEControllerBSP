@@ -108,6 +108,10 @@ extern "C" {
  */
 #define DEFAULT_NOMINAL_m				(.7f)
 /**
+ * @brief The default frequency acceleration
+ */
+#define DEFAULT_ACCELERATION			(1.0f)
+/**
  * @brief The minimum allowed value of the output frequency
  */
 #define MIN_OUTPUT_FREQ					(1.f)
@@ -120,6 +124,10 @@ extern "C" {
  */
 #define MIN_NOMINAL_m					(.05f)
 /**
+ * @brief The minimum frequency acceleration
+ */
+#define MIN_ACCELERATION				(0.1f)
+/**
  * @brief The maximum allowed value of the output frequency
  */
 #define MAX_OUTPUT_FREQ					(70.f)
@@ -131,6 +139,10 @@ extern "C" {
  * @brief The maximum allowed value of the nominal modulation index
  */
 #define MAX_NOMINAL_m					(.95f)
+/**
+ * @brief The maximum frequency acceleration
+ */
+#define MAX_ACCELERATION				(10.f)
 /**
  * @}
  */

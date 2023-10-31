@@ -85,12 +85,6 @@ static data_param_info_t* controlConfs[CONTROL_CONFS_COUNT] =
 		&p2pCommsParams[P2P_PARAM_a_INV2],
 		&p2pCommsParams[P2P_PARAM_EN_INV2],
 };
-typedef struct
-{
-	const char* title;
-	data_param_info_t* params;
-	int count;
-} setting_window_block_t;
 #endif
 #if MONITOR_CONFS_COUNT > 0
 static data_param_info_t* monitorConfs[MONITOR_CONFS_COUNT] =

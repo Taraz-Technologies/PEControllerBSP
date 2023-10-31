@@ -76,6 +76,10 @@ extern "C" {
  */
 #define TAG_HELP				(5)
 /**
+ * @brief Use this tag to indicate touch on settings button
+ */
+#define TAG_SETTINGS			(6)
+/**
  * @brief Use this to attach tag
  */
 #define TAG_ATTACH(x)			((void*)x)
@@ -179,6 +183,12 @@ typedef struct
 	ltdc_layer_info_t* directLayer;		/**< @brief The information for the directly displayed layer in LTDC module. */
 	ltdc_layer_info_t* lvglLayer;		/**< @brief The information for the LVGL layer in LTDC module. */
 } screens_t;
+typedef struct
+{
+	const char* title;
+	data_param_info_t** paramPointers;
+	int paramCount;
+} data_param_group_t;
 /**
   * @}
   */
@@ -206,6 +216,8 @@ extern const char* unitTxts[UNIT_COUNT];
 extern ltdc_layer_info_t defaultLayer;
 
 extern bool writeAtScreenEnd;
+
+extern data_param_group_t settingWindows[2];
 /**
   * @}
   */

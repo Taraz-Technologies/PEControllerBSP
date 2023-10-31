@@ -88,7 +88,7 @@ bool P2PComms_IsStateStorageUpdateNeeded(p2p_data_buffs_t* dest, p2p_data_buffs_
 			dest->floats[SHARE_INV1_NOM_FREQ] != src->floats[SHARE_INV1_NOM_FREQ] ||
 			dest->floats[SHARE_INV1_NOM_m] != src->floats[SHARE_INV1_NOM_m] ||
 			dest->floats[SHARE_INV1_ACCELERATION] != src->floats[SHARE_INV1_ACCELERATION] ||
-			dest->bools[SHARE_INV1_DIRECTION] != src->bools[SHARE_INV2_DIRECTION] ||
+			dest->bools[SHARE_INV1_DIRECTION] != src->bools[SHARE_INV1_DIRECTION] ||
 			dest->floats[SHARE_INV2_REQ_FREQ] != src->floats[SHARE_INV2_REQ_FREQ] ||
 			dest->floats[SHARE_INV2_NOM_FREQ] != src->floats[SHARE_INV2_NOM_FREQ] ||
 			dest->floats[SHARE_INV2_NOM_m] != src->floats[SHARE_INV2_NOM_m] ||
@@ -101,10 +101,14 @@ void P2PComms_UpdateStorableStates(p2p_data_buffs_t* dest, p2p_data_buffs_t* src
 	dest->floats[SHARE_INV1_REQ_FREQ] = src->floats[SHARE_INV1_REQ_FREQ] < MAX_OUTPUT_FREQ && src->floats[SHARE_INV1_REQ_FREQ] > MIN_OUTPUT_FREQ ? src->floats[SHARE_INV1_REQ_FREQ] : DEFAULT_OUTPUT_FREQ;
 	dest->floats[SHARE_INV1_NOM_FREQ] = src->floats[SHARE_INV1_NOM_FREQ] < MAX_NOMINAL_FREQ && src->floats[SHARE_INV1_NOM_FREQ] > MIN_NOMINAL_FREQ ? src->floats[SHARE_INV1_NOM_FREQ] : DEFAULT_NOMINAL_FREQ;
 	dest->floats[SHARE_INV1_NOM_m] = src->floats[SHARE_INV1_NOM_m] < MAX_NOMINAL_m && src->floats[SHARE_INV1_NOM_m] > MIN_NOMINAL_m ? src->floats[SHARE_INV1_NOM_m] : DEFAULT_NOMINAL_m;
+	dest->floats[SHARE_INV1_ACCELERATION] = src->floats[SHARE_INV1_ACCELERATION] < MAX_ACCELERATION && src->floats[SHARE_INV1_ACCELERATION] > MIN_ACCELERATION ? src->floats[SHARE_INV1_ACCELERATION] : DEFAULT_ACCELERATION;
+	dest->bools[SHARE_INV1_DIRECTION] = src->bools[SHARE_INV1_DIRECTION];
 
 	dest->floats[SHARE_INV2_REQ_FREQ] = src->floats[SHARE_INV2_REQ_FREQ] < MAX_OUTPUT_FREQ && src->floats[SHARE_INV2_REQ_FREQ] > MIN_OUTPUT_FREQ ? src->floats[SHARE_INV2_REQ_FREQ] : DEFAULT_OUTPUT_FREQ;
 	dest->floats[SHARE_INV2_NOM_FREQ] = src->floats[SHARE_INV2_NOM_FREQ] < MAX_NOMINAL_FREQ && src->floats[SHARE_INV2_NOM_FREQ] > MIN_NOMINAL_FREQ ? src->floats[SHARE_INV2_NOM_FREQ] : DEFAULT_NOMINAL_FREQ;
 	dest->floats[SHARE_INV2_NOM_m] = src->floats[SHARE_INV2_NOM_m] < MAX_NOMINAL_m && src->floats[SHARE_INV2_NOM_m] > MIN_NOMINAL_m ? src->floats[SHARE_INV2_NOM_m] : DEFAULT_NOMINAL_m;
+	dest->floats[SHARE_INV2_ACCELERATION] = src->floats[SHARE_INV2_ACCELERATION] < MAX_ACCELERATION && src->floats[SHARE_INV2_ACCELERATION] > MIN_ACCELERATION ? src->floats[SHARE_INV2_ACCELERATION] : DEFAULT_ACCELERATION;
+	dest->bools[SHARE_INV2_DIRECTION] = src->bools[SHARE_INV2_DIRECTION];
 }
 
 void P2PComms_InitStatesFromStorage(uint32_t* data, bool isDataValid)
@@ -126,9 +130,13 @@ void P2PComms_InitStatesFromStorage(uint32_t* data, bool isDataValid)
 		dest->floats[SHARE_INV1_REQ_FREQ] = DEFAULT_OUTPUT_FREQ;
 		dest->floats[SHARE_INV1_NOM_FREQ] = DEFAULT_NOMINAL_FREQ;
 		dest->floats[SHARE_INV1_NOM_m] = DEFAULT_NOMINAL_m;
+		dest->floats[SHARE_INV1_ACCELERATION] = DEFAULT_ACCELERATION;
+		dest->bools[SHARE_INV1_DIRECTION] = false;
 		dest->floats[SHARE_INV2_REQ_FREQ] = DEFAULT_OUTPUT_FREQ;
 		dest->floats[SHARE_INV2_NOM_FREQ] = DEFAULT_NOMINAL_FREQ;
 		dest->floats[SHARE_INV2_NOM_m] = DEFAULT_NOMINAL_m;
+		dest->floats[SHARE_INV2_ACCELERATION] = DEFAULT_ACCELERATION;
+		dest->bools[SHARE_INV2_DIRECTION] = false;
 	}
 }
 
@@ -161,14 +169,19 @@ device_err_t P2PComms_UpdateFloat(uint8_t index, float value)
 		if(value < MIN_OUTPUT_FREQ || value > MAX_OUTPUT_FREQ)
 			return ERR_OUT_OF_RANGE;
 	}
-	else if (index == SHARE_INV1_NOM_FREQ || index == SHARE_INV1_NOM_FREQ)
+	else if (index == SHARE_INV1_NOM_FREQ || index == SHARE_INV2_NOM_FREQ)
 	{
 		if(value < MIN_NOMINAL_FREQ || value > MAX_NOMINAL_FREQ)
 			return ERR_OUT_OF_RANGE;
 	}
-	else if (index == SHARE_INV1_NOM_m || index == SHARE_INV1_NOM_FREQ)
+	else if (index == SHARE_INV1_NOM_m || index == SHARE_INV2_NOM_m)
 	{
 		if(value < MIN_NOMINAL_m || value > MAX_NOMINAL_m)
+			return ERR_OUT_OF_RANGE;
+	}
+	else if (index == SHARE_INV1_ACCELERATION || index == SHARE_INV2_ACCELERATION)
+	{
+		if(value < MIN_ACCELERATION || value > MAX_ACCELERATION)
 			return ERR_OUT_OF_RANGE;
 	}
 	else

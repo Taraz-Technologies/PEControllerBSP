@@ -39,6 +39,7 @@ typedef enum
 {
 	CONF_MEASURE,
 	CONF_PARAM,
+	CONF_SETTINGS,
 	CONF_COUNT
 } conf_type_t;
 /********************************************************************************
@@ -76,7 +77,12 @@ static int measurementIndex = 0;
 static data_param_info_t* paramInfo = NULL;
 static measure_objs_t measureObjs = {0};
 static var_objs_t varObjs = {0};
-static int unitIndex, typeIndex;
+static int unitIndex;
+static int typeIndex;
+static data_param_group_t* paramGroups;
+static int groupCount;
+static lv_obj_t** currSettingsValues;
+static int currentSettingsIndex = 0;
 /********************************************************************************
  * Global Variables
  *******************************************************************************/
@@ -88,19 +94,11 @@ static int unitIndex, typeIndex;
 /********************************************************************************
  * Code
  *******************************************************************************/
-static void Close_Clicked(lv_event_t * e)
-{
-	if (!isActive)
-		return;
-	tag = GET_TAG(e);
-}
-
 static void Keypad_Clicked(lv_event_t * e)
 {
 	if (!isActive)
 		return;
 	lv_obj_t * obj = lv_event_get_target(e);
-	lv_keyboard_t * keyboard = (lv_keyboard_t *)obj;
 	tag = lv_btnmatrix_get_selected_btn(obj) ? TAG_CANCEL : TAG_OK;
 }
 
@@ -159,8 +157,7 @@ static void Numpad_Create(lv_obj_t * parent)
 static void OkClose_Create(lv_obj_t * parent, int row, int col)
 {
 	static const char* map[] = {LV_SYMBOL_OK, LV_SYMBOL_CLOSE,
-								NULL};
-	static lv_style_t btnStyle;
+			NULL};
 
 	lv_obj_t* kb = lv_keyboard_create(parent);
 	lv_obj_set_grid_cell(kb, LV_GRID_ALIGN_STRETCH, col, 1, LV_GRID_ALIGN_STRETCH, row, 1);
@@ -172,13 +169,11 @@ static void OkClose_Create(lv_obj_t * parent, int row, int col)
 	lv_obj_set_style_border_color(kb, lvColorStore.lightTaraz, LV_PART_ITEMS);
 	lv_obj_set_style_border_width(kb, 2, LV_PART_ITEMS);
 	lv_obj_set_style_text_font(kb, &lv_font_montserrat_30, 0);
-	//lv_keyboard_def_event_cb()
 	lv_obj_add_event_cb(kb, Keypad_Clicked, LV_EVENT_CLICKED, NULL);
 }
 
 static void StaticForm_Create(lv_obj_t * parent)
 {
-	const lv_coord_t btnWidth = 180;
 	static lv_style_t btnLblStyle;
 	static lv_style_t lblStyleName;
 	static lv_style_t nameContainerStyle;
@@ -208,20 +203,49 @@ static void StaticForm_Create(lv_obj_t * parent)
 	lv_obj_set_grid_cell(screenObjs.itemContainer, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
 
 	OkClose_Create(grid, 1, 0);
-	/*
-	// buttons
-	static lv_coord_t cols[] = {LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
-	lv_obj_t* gridBtns = lv_grid_create_general(grid, cols, singleRowCol, &lvStyleStore.thickMarginGrid, NULL, NULL, NULL);
-	lv_obj_set_grid_cell(gridBtns, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 1, 1);
-	/*
+}
 
-	lv_obj_t* okBtn = lv_btn_create_general(gridBtns, &lvStyleStore.btn2, &btnLblStyle, "Save", Close_Clicked, TAG_ATTACH(TAG_OK));
-	lv_obj_set_grid_cell(okBtn, LV_GRID_ALIGN_CENTER, 0, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
-	lv_obj_set_width(okBtn, btnWidth);
-	lv_obj_t* cancelBtn = lv_btn_create_general(gridBtns, &lvStyleStore.btn2, &btnLblStyle, "Cancel", Close_Clicked, TAG_ATTACH(TAG_CANCEL));
-	lv_obj_set_grid_cell(cancelBtn, LV_GRID_ALIGN_CENTER, 1, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
-	lv_obj_set_width(cancelBtn, btnWidth);
-	*/
+static void CreateParamGrid(void)
+{
+	if (screenObjs.paramGrid != NULL)
+	{
+		lv_obj_del(screenObjs.paramGrid);
+		screenObjs.paramGrid = NULL;
+	}
+
+	static lv_style_t gridStyle;
+	static bool init = false;
+	// initialize styles once
+	if (!init)
+	{
+		BSP_Screen_InitGridStyle(&gridStyle, 12, 12, 0, 0, &lvColorStore.background);
+		init = true;
+	}
+	static lv_coord_t rows[] = {FIELD_ROW_HEIGHT, FIELD_ROW_HEIGHT, FIELD_ROW_HEIGHT,
+			FIELD_ROW_HEIGHT, FIELD_ROW_HEIGHT, FIELD_ROW_HEIGHT,
+			LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
+	screenObjs.paramGrid = lv_grid_create_general(screenObjs.itemContainer, singleRowCol, rows, &gridStyle, NULL, NULL, NULL);
+	lv_obj_set_grid_cell(screenObjs.paramGrid, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
+}
+
+static void SetPageTitle(const char* name)
+{
+	if(screenObjs.paramName != NULL)
+		lv_label_set_text(screenObjs.paramName, name);
+}
+
+static lv_obj_t* AddField(const char* name, const char* value, bool isWriteable, int row, lv_event_cb_t e, void * eventData)
+{
+	static lv_ta_field_data_t field =
+	{
+			.colorFieldName = false,
+			.colWidths = { LV_GRID_FR(1), FIELD_VALUE_WIDTH }
+	};
+	field.nameTxt = name;
+	field.valueTxt = value;
+	field.isTextArea = isWriteable;
+	lv_default_text_field(screenObjs.paramGrid, &field, row, 0, e, eventData);
+	return field.valueField;
 }
 
 /**
@@ -235,60 +259,23 @@ void ConfigScreen_LoadMeasurement(int _measurementIndex)
 		return;
 	measurementIndex = _measurementIndex;
 	confType = CONF_MEASURE;
-	static lv_style_t gridStyle;
-	static bool init = false;
-	// initialize styles once
-	if (!init)
-	{
-		BSP_Screen_InitGridStyle(&gridStyle, 12, 12, 0, 0, &lvColorStore.background);
-		init = true;
-	}
 
-	if (screenObjs.paramGrid != NULL)
-	{
-		lv_obj_del(screenObjs.paramGrid);
-		screenObjs.paramGrid = NULL;
-	}
-
-	static lv_coord_t rows[] = {FIELD_ROW_HEIGHT, FIELD_ROW_HEIGHT, FIELD_ROW_HEIGHT,
-			FIELD_ROW_HEIGHT, FIELD_ROW_HEIGHT, FIELD_ROW_HEIGHT,
-			LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
-	screenObjs.paramGrid = lv_grid_create_general(screenObjs.itemContainer, singleRowCol, rows, &gridStyle, NULL, NULL, NULL);
-	lv_obj_set_grid_cell(screenObjs.paramGrid, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
-
-	if(screenObjs.paramName != NULL)
-		lv_label_set_text(screenObjs.paramName, dispMeasures.chNames[measurementIndex]);
-	lv_ta_field_data_t field =
-	{
-			.isTextArea = false,
-			.colorFieldName = false,
-			.colWidths = { LV_GRID_FR(1), FIELD_VALUE_WIDTH }
-	};
-	field.nameTxt = "Type";
-	typeIndex = (uint8_t)dispMeasures.chMeasures[measurementIndex].type;
-	field.valueTxt = measureTxts[typeIndex];
-	lv_default_text_field(screenObjs.paramGrid, &field, 0, 0, Type_Toggle, NULL);
-	measureObjs.type = field.valueField;
-	field.nameTxt = "Units";
-	unitIndex = (uint8_t)dispMeasures.adcInfo->units[measurementIndex];
-	field.valueTxt = unitTxts[unitIndex];
-	lv_default_text_field(screenObjs.paramGrid, &field, 1, 0, Unit_Toggle, NULL);
-	measureObjs.unit = field.valueField;
+	CreateParamGrid();
+	SetPageTitle(dispMeasures.chNames[measurementIndex]);
 	char txt[12];
-	field.isTextArea = true;
-	field.valueTxt = txt;
+	// Type
+	typeIndex = (uint8_t)dispMeasures.chMeasures[measurementIndex].type;
+	measureObjs.type = AddField("Type", measureTxts[typeIndex], false, 0, Type_Toggle, NULL);
+	// Units
+	unitIndex = (uint8_t)dispMeasures.adcInfo->units[measurementIndex];
+	measureObjs.unit = AddField("Unit", measureTxts[typeIndex], false, 1, Unit_Toggle, NULL);
+	// Sensitivity
 	(void)ftoa_custom(ADC_INFO.sensitivity[measurementIndex], txt, 7, 4);
-	field.nameTxt = "Sensitivity";
-	lv_default_text_field(screenObjs.paramGrid, &field, 2, 0, TextArea_Clicked, NULL);
-	screenObjs.focusItem = measureObjs.sensitivity = field.valueField;
+	screenObjs.focusItem = measureObjs.sensitivity = AddField("Sensitivity", txt, true, 2, TextArea_Clicked, NULL);
 	(void)ftoa_custom(ADC_INFO.offsets[measurementIndex], txt, 7, 4);
-	field.nameTxt = "Offset";
-	lv_default_text_field(screenObjs.paramGrid, &field, 3, 0, TextArea_Clicked, NULL);
-	measureObjs.offset = field.valueField;
+	measureObjs.offset = AddField("Offset", txt, true, 3, TextArea_Clicked, NULL);
 	(void)ftoa_custom(ADC_INFO.freq[measurementIndex], txt, 7, 1);
-	field.nameTxt = "Fundamental Frequency";
-	lv_default_text_field(screenObjs.paramGrid, &field, 4, 0, TextArea_Clicked, NULL);
-	measureObjs.freq = field.valueField;
+	measureObjs.freq = AddField("Fundamental Frequency", txt, true, 4, TextArea_Clicked, NULL);
 
 	lv_keyboard_set_textarea(screenObjs.keyboard, screenObjs.focusItem);
 }
@@ -303,42 +290,75 @@ void ConfigScreen_LoadParam(data_param_info_t* _paramInfo, char* val)
 {
 	if (screenObjs.itemContainer == NULL)
 		return;
-	static bool init = false;
 	confType = CONF_PARAM;
-	static lv_style_t gridStyle;
-	// initialize styles once
-	if (!init)
-	{
-		BSP_Screen_InitGridStyle(&gridStyle, 12, 12, 0, 0, &lvColorStore.background);
-		init = true;
-	}
 
-	if (screenObjs.paramGrid != NULL)
-	{
-		lv_obj_del(screenObjs.paramGrid);
-		screenObjs.paramGrid = NULL;
-	}
-
-	static lv_coord_t rows[] = {FIELD_ROW_HEIGHT, LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
-	screenObjs.paramGrid = lv_grid_create_general(screenObjs.itemContainer, singleRowCol, rows, &gridStyle, NULL, NULL, NULL);
-	lv_obj_set_grid_cell(screenObjs.paramGrid, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
-
-	if(screenObjs.paramName != NULL)
-		lv_label_set_text(screenObjs.paramName, _paramInfo->name);
-	lv_ta_field_data_t field =
-	{
-			.isTextArea = true,
-			.colorFieldName = false,
-			.nameTxt = "Value",
-			.valueTxt = val,
-			.colWidths = { LV_GRID_FR(1), FIELD_VALUE_WIDTH }
-	};
-	lv_default_text_field(screenObjs.paramGrid, &field, 0, 0, TextArea_Clicked, NULL);
-	screenObjs.focusItem = varObjs.lblValue = field.valueField;// lv_create_textfield_display(screenObjs.paramGrid, &lblStyle, &lvStyleStore.defaultTextArea, "Value", val, TextArea_Clicked, NULL, 0);
-
+	CreateParamGrid();
+	SetPageTitle(_paramInfo->name);
+	screenObjs.focusItem = varObjs.lblValue = AddField("Value", val, true, 0, TextArea_Clicked, NULL);
 	lv_keyboard_set_textarea(screenObjs.keyboard, screenObjs.focusItem);
 	paramInfo = _paramInfo;
 }
+
+static void EditableParam_Clicked(lv_event_t * e)
+{
+	if (!isActive)
+		return;
+	screenObjs.focusItem = lv_event_get_target(e);
+	lv_keyboard_set_textarea(screenObjs.keyboard, screenObjs.focusItem);
+}
+
+static void ToggleableParam_Clicked(lv_event_t * e)
+{
+	if (!isActive)
+		return;
+}
+
+static bool IsEditableParamField(data_param_info_t* param)
+{
+	return param->type == DTYPE_BOOL ? false : true;
+}
+
+static lv_obj_t* AddParamField(int row, data_param_info_t* param)
+{
+	char value[20];
+	GetDataParameter_InText(param, value, false);
+
+	if (IsEditableParamField(param) == false)
+		return AddField(param->name, value, false, row, ToggleableParam_Clicked, param);
+	else
+		return AddField(param->name, value, true, row, EditableParam_Clicked, param);
+}
+
+static void DisplaySettingWindow(int index)
+{
+	if (screenObjs.itemContainer == NULL)
+		return;
+	if (currSettingsValues != NULL)
+		free(currSettingsValues);
+	currentSettingsIndex = index;
+	currSettingsValues = (lv_obj_t**) malloc(4 * paramGroups[index].paramCount);
+
+	CreateParamGrid();
+	SetPageTitle(paramGroups[index].title);
+	for (int i = 0; i < paramGroups[index].paramCount; i++)
+		currSettingsValues[i] = AddParamField(i, paramGroups[index].paramPointers[i]);
+}
+
+void ConfigScreen_LoadSettings(data_param_group_t* _paramGroups, int _groupCount)
+{
+	if (screenObjs.itemContainer == NULL)
+		return;
+	confType = CONF_SETTINGS;
+
+	paramGroups = _paramGroups;
+	groupCount = _groupCount;
+	DisplaySettingWindow(0);
+	// get all values
+	// create grid
+	// load local values
+	// save values on switching
+}
+
 
 static void Load(void)
 {
@@ -354,6 +374,9 @@ static void Unload(void)
 		isActive = false;
 		lv_obj_del(screenObjs.paramGrid);
 		screenObjs.paramGrid = NULL;
+		if (currSettingsValues != NULL)
+			free(currSettingsValues);
+		currSettingsValues = NULL;
 	}
 }
 
@@ -377,6 +400,22 @@ static device_err_t UpdateParameter(void)
 	return ERR_OK;
 }
 
+static device_err_t UpdateSettings(void)
+{
+	if (paramGroups == NULL || groupCount <= 0 || currSettingsValues == NULL || currentSettingsIndex < 0 || currentSettingsIndex >= groupCount)
+		return ERR_OK;
+
+	for (int i = 0; i < paramGroups[currentSettingsIndex].paramCount; i++)
+	{
+		data_param_info_t* param = paramGroups[currentSettingsIndex].paramPointers[i];
+		device_err_t err = SetDataParameter_FromText(param, IsEditableParamField(param) == false ? lv_label_get_text(currSettingsValues[i]) : lv_textarea_get_text(currSettingsValues[i]));
+		if (err != ERR_OK)
+			return err;
+	}
+
+	return ERR_OK;
+}
+
 static screen_type_t Refresh(void)
 {
 	if (isActive && tag != TAG_NONE)
@@ -392,6 +431,8 @@ static screen_type_t Refresh(void)
 				err = UpdateMeasurementSettings();
 			else if (confType == CONF_PARAM)
 				err = UpdateParameter();
+			else if (confType == CONF_SETTINGS)
+				err = UpdateSettings();
 			if (err == ERR_OK)
 				return SCREEN_PREVIOUS;
 			DisplayMessage(errInfo[err].caption, errInfo[err].desc);
