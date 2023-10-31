@@ -468,10 +468,11 @@ static device_err_t UpdateSettings(void)
 	{
 		for (int j = 0; j < paramGroups[i].paramCount; j++)
 		{
-			data_param_info_t* param = paramGroups[i].paramPointers[i];
-			device_err_t err = SetDataParameter_FromText(param, IsEditableParamField(param) == false ? lv_label_get_text(settingObjs[index++].value) : lv_textarea_get_text(settingObjs[index++].value));
+			data_param_info_t* param = paramGroups[i].paramPointers[j];
+			device_err_t err = SetDataParameter_FromText(param, IsEditableParamField(param) == false ? lv_label_get_text(settingObjs[index].value) : lv_textarea_get_text(settingObjs[index].value));
 			if (err != ERR_OK)
 				return err;
+			index++;
 		}
 	}
 
