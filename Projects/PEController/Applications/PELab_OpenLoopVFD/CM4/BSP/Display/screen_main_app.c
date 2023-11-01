@@ -79,10 +79,10 @@ typedef struct
 static data_param_info_t* controlConfs[CONTROL_CONFS_COUNT] =
 {
 		&p2pCommsParams[P2P_PARAM_f_REQ_INV1],
-		&p2pCommsParams[P2P_PARAM_DIR_INV1],
+		&p2pCommsParams[P2P_PARAM_DIR_REQ_INV1],
 		&p2pCommsParams[P2P_PARAM_EN_INV1],
 		&p2pCommsParams[P2P_PARAM_f_REQ_INV2],
-		&p2pCommsParams[P2P_PARAM_DIR_INV2],
+		&p2pCommsParams[P2P_PARAM_DIR_REQ_INV2],
 		&p2pCommsParams[P2P_PARAM_EN_INV2],
 };
 #endif
@@ -90,8 +90,10 @@ static data_param_info_t* controlConfs[CONTROL_CONFS_COUNT] =
 static data_param_info_t* monitorConfs[MONITOR_CONFS_COUNT] =
 {
 		&p2pCommsParams[P2P_PARAM_f_INV1],
+		&p2pCommsParams[P2P_PARAM_DIR_INV1],
 		&p2pCommsParams[P2P_PARAM_m_INV1],
 		&p2pCommsParams[P2P_PARAM_f_INV2],
+		&p2pCommsParams[P2P_PARAM_DIR_INV2],
 		&p2pCommsParams[P2P_PARAM_m_INV2],
 };
 #endif

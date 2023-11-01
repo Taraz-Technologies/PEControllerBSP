@@ -105,9 +105,15 @@ static lv_obj_t* leftRightKb;
 static void EnableKeypadButtons(lv_obj_t* item, bool en)
 {
 	if (en)
+	{
 		lv_obj_clear_state(item, LV_STATE_DISABLED);
+		lv_obj_set_style_bg_color(item, lvColorStore.darkTaraz, LV_PART_ITEMS);
+	}
 	else
+	{
 		lv_obj_add_state(item, LV_STATE_DISABLED);
+		lv_obj_set_style_bg_color(item, lvColorStore.background, LV_PART_ITEMS);
+	}
 }
 
 static void StyleKeypadButtons(lv_obj_t* item)

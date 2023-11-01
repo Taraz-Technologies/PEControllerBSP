@@ -99,7 +99,7 @@ void OpenLoopVfControl_Init(openloopvf_config_t* config, PWMResetCallback pwmRes
 	/***************** Configure Control *********************/
 	config->pwmFreq = PWM_FREQ_Hz;
 	config->wt = 0;
-	config->currentFreq = INITIAL_FREQ;
+	config->currentFreq = 0;
 	/***************** Configure Control *********************/
 
 	if(pwmResetCallback != NULL)

@@ -62,7 +62,7 @@ extern "C" {
  * @note Combined with @ref MONITOR_COL_COUNT, this calculates the rows required by the monitoring area and
  * thus computes the required sizes for each monitor-able parameter
  */
-#define MONITOR_CONFS_COUNT					(4)
+#define MONITOR_CONFS_COUNT					(6)
 
 /**
  * @brief Number of columns in controls area
@@ -71,7 +71,7 @@ extern "C" {
 /**
  * @brief Number of columns in monitoring area
  */
-#define MONITOR_COL_COUNT					(2)
+#define MONITOR_COL_COUNT					(3)
 
 // Use only if forcing layout <Not recommended>, otherwise these will be auto-computed.
 #if 0

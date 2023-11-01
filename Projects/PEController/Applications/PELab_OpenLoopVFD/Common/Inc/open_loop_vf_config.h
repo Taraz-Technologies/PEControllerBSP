@@ -53,11 +53,6 @@ extern "C" {
  */
 #define PWM_FREQ_Hz						(25000)
 /**
- * @brief Initial frequency used by the system
- * @note The initial frequency should be equal to or greater than 1
- */
-#define INITIAL_FREQ					(1.f)
-/**
  * @brief Dead time (ns) value to be used
  */
 #define INVERTER_DEADTIME_ns			(200)
