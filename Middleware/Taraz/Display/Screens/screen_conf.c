@@ -90,6 +90,7 @@ static conf_field_info_t* settingObjs;
 static int settingsCount = 0;
 static int currentSettingIndex = 0;
 static lv_obj_t* nameContainerArea;
+static lv_obj_t* leftRightKb;
 /********************************************************************************
  * Global Variables
  *******************************************************************************/
@@ -101,6 +102,14 @@ static lv_obj_t* nameContainerArea;
 /********************************************************************************
  * Code
  *******************************************************************************/
+static void EnableKeypadButtons(lv_obj_t* item, bool en)
+{
+	if (en)
+		lv_obj_clear_state(item, LV_STATE_DISABLED);
+	else
+		lv_obj_add_state(item, LV_STATE_DISABLED);
+}
+
 static void StyleKeypadButtons(lv_obj_t* item)
 {
 	lv_obj_set_style_bg_color(item, lvColorStore.background, 0);
@@ -191,14 +200,15 @@ static void LeftRight_Create(lv_obj_t * parent, int row, int col)
 	static const char* map[] = {LV_SYMBOL_LEFT, LV_SYMBOL_RIGHT,
 			NULL};
 
-	lv_obj_t* kb = lv_keyboard_create(parent);
-	lv_obj_set_grid_cell(kb, LV_GRID_ALIGN_STRETCH, col, 1, LV_GRID_ALIGN_STRETCH, row, 1);
-	lv_btnmatrix_set_map(kb, map);
-	lv_obj_set_style_pad_top(kb, 0, 0);
-	lv_obj_set_style_pad_bottom(kb, 0, 0);
-	lv_obj_set_style_text_font(kb, &lv_font_montserrat_30, 0);
-	lv_obj_add_event_cb(kb, LeftRight_Clicked, LV_EVENT_CLICKED, NULL);
-	StyleKeypadButtons(kb);
+	leftRightKb = lv_keyboard_create(parent);
+	lv_obj_set_grid_cell(leftRightKb, LV_GRID_ALIGN_STRETCH, col, 1, LV_GRID_ALIGN_STRETCH, row, 1);
+	lv_btnmatrix_set_map(leftRightKb, map);
+	lv_obj_set_style_pad_top(leftRightKb, 0, 0);
+	lv_obj_set_style_pad_bottom(leftRightKb, 0, 0);
+	lv_obj_set_style_text_font(leftRightKb, &lv_font_montserrat_30, 0);
+	lv_obj_add_event_cb(leftRightKb, LeftRight_Clicked, LV_EVENT_CLICKED, NULL);
+	StyleKeypadButtons(leftRightKb);
+	EnableKeypadButtons(leftRightKb, false);
 }
 
 static void StaticForm_Create(lv_obj_t * parent)
@@ -419,9 +429,8 @@ void ConfigScreen_LoadSettings(data_param_group_t* _paramGroups, int _groupCount
 	groupCount = _groupCount;
 	CreateParamGrid();
 	FillAllSettings();
-	//lv_grid_set_row(nameContainerArea, 0, 120);
-	//lv_grid_set_row(nameContainerArea, 2, 120);
 	ShowSpecificSettingWindow(0);
+	EnableKeypadButtons(leftRightKb, true);
 }
 
 static void Load(void)
@@ -441,6 +450,7 @@ static void Unload(void)
 		if (settingObjs != NULL)
 			free(settingObjs);
 		settingObjs = NULL;
+		EnableKeypadButtons(leftRightKb, false);
 	}
 }
 

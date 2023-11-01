@@ -56,6 +56,7 @@ typedef enum
 	ERR_ILLEGAL,      /**< Value is illegal */
 	ERR_OUT_OF_RANGE, /**< Value is out of defined range */
 	ERR_NOT_AVAILABLE,/**< Parameter not available */
+	ERR_INVERTER_SHUTDOWN,/**< Inverter is busy in shutdown mode */
 	ERR_COUNT,        /**< Not an error. Use this to get the total number of legal error types. */
 } device_err_t;
 /**

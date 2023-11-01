@@ -53,11 +53,45 @@ static adc_mode_t adcMode = ADC_MODE_MONITORING;
  * Code
  ******************************************************************************/
 #if IS_ADC_CORE
+static void ProcessInverterActivation(state_update_request* request, int regID, openloopvf_config_t* config)
+{
+	if (request->isPending)
+	{
+		if (config == NULL)
+		{
+			INTER_CORE_DATA.bools[regID] = request->state;
+			request->err = ERR_OK;
+		}
+		else if (config->requestedState != config->inverterConfig.state)
+			request->err = ERR_INVERTER_SHUTDOWN;
+		else
+		{
+			config->requestedState = request->state ? INVERTER_ACTIVE : INVERTER_INACTIVE;
+			INTER_CORE_DATA.bools[regID] = request->state;
+			request->err = ERR_OK;
+		}
+		request->isPending = false;
+	}
+}
+
 static void ADC_Callback(adc_measures_t* result)
 {
+	ProcessInverterActivation(&inv1StateUpdateRequest, SHARE_INV1_STATE, &openLoopVfConfig1);
+	ProcessInverterActivation(&inv2StateUpdateRequest, SHARE_INV2_STATE,
+#if VFD_COUNT == 2
+			&openLoopVfConfig2
+#else
+			NULL
+#endif
+			);
+
+	/*
 	if (inv1StateUpdateRequest.isPending)
 	{
-		OpenLoopVfControl_Activate(&openLoopVfConfig1, inv1StateUpdateRequest.state);
+		if (inv1StateUpdateRequest.state)
+		{
+			OpenLoopVfControl_Activate(&openLoopVfConfig1, inv1StateUpdateRequest.state);
+		}
 		INTER_CORE_DATA.bools[SHARE_INV1_STATE] = inv1StateUpdateRequest.state;
 		inv1StateUpdateRequest.err = ERR_OK;
 		inv1StateUpdateRequest.isPending = false;
@@ -65,18 +99,23 @@ static void ADC_Callback(adc_measures_t* result)
 	if (inv2StateUpdateRequest.isPending)
 	{
 #if VFD_COUNT == 2
-		OpenLoopVfControl_Activate(&openLoopVfConfig2, inv2StateUpdateRequest.state);
+		if (inv2StateUpdateRequest.state)
+		{
+			OpenLoopVfControl_Activate(&openLoopVfConfig2, inv2StateUpdateRequest.state);
+		}
 #endif
 		INTER_CORE_DATA.bools[SHARE_INV2_STATE] = inv2StateUpdateRequest.state;
 		inv2StateUpdateRequest.err = ERR_OK;
 		inv2StateUpdateRequest.isPending = false;
 	}
+	*/
+
 	// Switch between Monitoring and control mode
 	if (openLoopVfConfig1.inverterConfig.state == INVERTER_ACTIVE
 #if VFD_COUNT == 2
 			|| openLoopVfConfig2.inverterConfig.state == INVERTER_ACTIVE
 #endif
-			)
+	)
 	{
 		if (adcMode == ADC_MODE_MONITORING)
 		{

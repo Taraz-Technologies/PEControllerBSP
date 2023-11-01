@@ -107,6 +107,57 @@ void OpenLoopVfControl_Init(openloopvf_config_t* config, PWMResetCallback pwmRes
 
 	Inverter3Ph_Activate(inverterConfig, false);
 }
+
+static bool EnableDisableInverter_IfRequired(openloopvf_config_t* config, float a)
+{
+	// if inverter state change request in process
+	if (config->requestedState != config->inverterConfig.state)
+	{
+		float f = config->currentFreq - a;
+		// if frequency negligible update state
+		if (f <= 0)
+		{
+			config->currentFreq = 0;
+			Inverter3Ph_Activate(&config->inverterConfig, config->requestedState == INVERTER_INACTIVE ? false : true);
+		}
+		else
+			config->currentFreq = f;
+		return true;
+	}
+	return false;
+}
+
+static bool ChangeInverterDirection_IfRequired(openloopvf_config_t* config, float a)
+{
+	// if direction changed
+	if (config->currentDir != config->dir)
+	{
+		float f = config->currentFreq - a;
+		// if frequency becomes smaller than 0 acknowledge direction change
+		if (f <= 0)
+		{
+			config->currentFreq = 0;
+			config->currentDir = config->dir;
+		}
+		else
+			config->currentFreq = f;
+		return true;
+	}
+	return false;
+}
+
+static void UpdateCurrentFrequency(openloopvf_config_t* config, float a)
+{
+	if (config->currentFreq > config->outputFreq)
+		config->currentFreq -= a;
+	else
+		config->currentFreq += a;
+
+	// adjust the frequency with given acceleration
+	if((a < 0 && config->currentFreq < config->outputFreq) || (a > 0 && config->currentFreq > config->outputFreq))
+		config->currentFreq = config->outputFreq;
+}
+
 /**
  * @brief This function computes new duty cycles for the inverter in each cycle
  * @param config Pointer to the inverter structure
@@ -116,37 +167,18 @@ void OpenLoopVfControl_Init(openloopvf_config_t* config, PWMResetCallback pwmRes
  */
 void OpenLoopVfControl_Loop(openloopvf_config_t* config)
 {
+	float a = config->acceleration / config->pwmFreq;
+
+	EnableDisableInverter_IfRequired(config, a);
+
 	if (config->inverterConfig.state == INVERTER_INACTIVE)
 		return;
 
-	float a = config->acceleration / config->pwmFreq;
-
-	// if direction changed always decelerate
-	if (config->currentDir != config->dir)
+	if (config->requestedState == config->inverterConfig.state)
 	{
-		float f = config->currentFreq - a;
-		// if frequency becomes smaller than 0 acknowledge direction change
-		if (f <= 0)
-		{
-			config->currentFreq = f * -1;
-			config->currentDir = config->dir;
-		}
-		else
-			config->currentFreq = f;
+		if(ChangeInverterDirection_IfRequired(config, a) == false)
+			UpdateCurrentFrequency(config, a);
 	}
-	// if the direction is the same
-	else
-	{
-		if (config->currentFreq > config->outputFreq)
-			config->currentFreq -= a;
-		else
-			config->currentFreq += a;
-
-		// adjust the frequency with given acceleration
-		if((a < 0 && config->currentFreq < config->outputFreq) || (a > 0 && config->currentFreq > config->outputFreq))
-			config->currentFreq = config->outputFreq;
-	}
-
 
 	// compute the current modulation index
 	config->currentModulationIndex = (config->nominalModulationIndex / config->nominalFreq) * config->currentFreq;
@@ -165,18 +197,7 @@ void OpenLoopVfControl_Loop(openloopvf_config_t* config)
  */
 void OpenLoopVfControl_Activate(openloopvf_config_t* config, bool activate)
 {
-	if (activate)
-	{
-		if (config->inverterConfig.state == INVERTER_INACTIVE)
-			config->currentFreq = INITIAL_FREQ;
-		Inverter3Ph_Activate(&config->inverterConfig, true);
-	}
-	else
-	{
-		if (config->inverterConfig.state == INVERTER_ACTIVE)
-			config->currentFreq = INITIAL_FREQ;
-		Inverter3Ph_Activate(&config->inverterConfig, false);
-	}
+	Inverter3Ph_Activate(&config->inverterConfig, activate);
 }
 
 #pragma GCC pop_options

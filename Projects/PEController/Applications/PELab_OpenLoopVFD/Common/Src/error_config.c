@@ -54,6 +54,8 @@ device_err_info_t errInfo[ERR_COUNT] =
 				"Kindly, provide a value with-in allowed parameter range." },
 		{.caption = "Functionality Unavailable", .desc = "The desired functionality is currently unavailable. "
 				"Kindly, contact support if error persists." },
+		{.caption = "Inverter Shutdown", .desc = "Inverter is in shutdown mode. "
+				"Kindly, wait for the shutdown process to complete." },
 };
 /********************************************************************************
  * Function Prototypes

@@ -76,6 +76,7 @@ typedef struct
 {
 	bool dir;								/**< @brief Direction of the three-phase signals */
 	bool currentDir;						/**< @brief Current direction of the three-phase signals */
+	inverter_state_t requestedState;		/**< @brief Contains the requested state for the inverter */
 	float pwmFreq;							/**< @brief PWM frequency used by the inverter */
 	float nominalFreq;						/**< @brief Nominal frequency is used to compute modulation index at different frequencies */
 	float nominalModulationIndex;			/**< @brief Nominal modulation index is used to compute modulation index at different frequencies */
