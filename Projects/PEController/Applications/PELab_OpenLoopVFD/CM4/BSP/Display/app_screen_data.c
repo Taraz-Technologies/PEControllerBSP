@@ -51,10 +51,12 @@
  */
 appinfo_display_t appInfoDisplay =
 {
-		.appInfo = "This example controls one/multiple three phase inverter modules using the PWM signals of the PEController."
-				" The three phase signal starts from the INITIAL_FREQ and gradually increases dependent upon the value of ACCELERATION to reach the OUTPUT_FREQ. "
-				"A constant V/f is maintained through out this process using the ratio NOMINAL_FREQ / NOMINAL_MODULATION_INDEX. "
-				"These configurations are available in the file open_loop_vf_config.h",
+		.appInfo = "This is a demonstration of Open-loop V/f Control of a Three-Phase Inverter."
+				"\n\n 1. Set the frequency of operation for the inverter."
+				"\n 2. Set the direction of motor."
+				"\n 3. Use the settings button to set additional parameters."
+				"\n 4. Control the Inverters using Enable buttons."
+				"\n 5. Update the values of frequency and direction to view the effect of acceleration.",
 
 		.connectionInfo = NULL,
 
