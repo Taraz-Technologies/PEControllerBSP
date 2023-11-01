@@ -53,11 +53,6 @@ extern "C" {
  */
 #define PWM_FREQ_Hz						(25000)
 /**
- * @brief Acceleration factor for increasing speed of the controller
- * @note The acceleration should be grater than 1
- */
-#define ACCELERATION					(1.00001f)
-/**
  * @brief Initial frequency used by the system
  * @note The initial frequency should be equal to or greater than 1
  */

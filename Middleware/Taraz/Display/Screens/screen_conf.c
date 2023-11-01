@@ -194,6 +194,8 @@ static void LeftRight_Create(lv_obj_t * parent, int row, int col)
 	lv_obj_t* kb = lv_keyboard_create(parent);
 	lv_obj_set_grid_cell(kb, LV_GRID_ALIGN_STRETCH, col, 1, LV_GRID_ALIGN_STRETCH, row, 1);
 	lv_btnmatrix_set_map(kb, map);
+	lv_obj_set_style_pad_top(kb, 0, 0);
+	lv_obj_set_style_pad_bottom(kb, 0, 0);
 	lv_obj_set_style_text_font(kb, &lv_font_montserrat_30, 0);
 	lv_obj_add_event_cb(kb, LeftRight_Clicked, LV_EVENT_CLICKED, NULL);
 	StyleKeypadButtons(kb);
@@ -216,13 +218,13 @@ static void StaticForm_Create(lv_obj_t * parent)
 	}
 
 	// name and container for configuration data
-	static lv_coord_t cols[] = {0, LV_GRID_FR(1), 0, LV_GRID_TEMPLATE_LAST};
+	static lv_coord_t cols[] = {180, LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
 	nameContainerArea = lv_grid_create_general(parent, cols, singleRowCol, &lvStyleStore.defaultGrid, NULL, NULL, NULL);
 	lv_obj_set_grid_cell(nameContainerArea, LV_GRID_ALIGN_STRETCH, 0, 2, LV_GRID_ALIGN_STRETCH, 0, 1);
 	lv_obj_t * nameContainer = lv_container_create_general(nameContainerArea, &nameContainerStyle, 0, 1, NULL, NULL);
 	screenObjs.paramName = lv_label_create_general(nameContainer, &lblStyleName, "", NULL, NULL);
 	lv_obj_align(screenObjs.paramName, LV_ALIGN_CENTER, 0, 0);
-	LeftRight_Create(nameContainerArea, 0, 2);
+	LeftRight_Create(nameContainerArea, 0, 0);
 
 	static lv_coord_t rows[] = {LV_GRID_FR(1), 80, LV_GRID_TEMPLATE_LAST};
 	lv_obj_t* grid = lv_grid_create_general(parent, singleRowCol, rows, &lvStyleStore.thinMarginGrid, NULL, NULL, NULL);
@@ -274,7 +276,8 @@ static lv_obj_t* AddField(const char* name, const char* value, bool isWriteable,
 	field.valueTxt = value;
 	field.isTextArea = isWriteable;
 	lv_default_text_field(screenObjs.paramGrid, &field, row, 0, e, eventData);
-	*container = field.container;
+	if (container != NULL)
+		*container = field.container;
 	return field.valueField;
 }
 
