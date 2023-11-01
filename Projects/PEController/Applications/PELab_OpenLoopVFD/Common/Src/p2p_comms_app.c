@@ -54,22 +54,22 @@ state_update_request inv2StateUpdateRequest = { .isPending = false };
 data_param_info_t p2pCommsParams[] =
 {
 		// Inverter 1 settings
-		{ .name = "Required Frequency (INV 1)", .index = SHARE_INV1_REQ_FREQ, .type = DTYPE_FLOAT, .arg = 0, .unit = UNIT_Hz },
+		{ .name = "Set Frequency (INV 1)", .index = SHARE_INV1_REQ_FREQ, .type = DTYPE_FLOAT, .arg = 0, .unit = UNIT_Hz },
 		{ .name = "Nominal Frequency (INV 1)", .index = SHARE_INV1_NOM_FREQ, .type = DTYPE_FLOAT, .arg = 0, .unit = UNIT_Hz},
 		{ .name = "Nominal m (INV 1)", .index = SHARE_INV1_NOM_m, .type = DTYPE_FLOAT, .arg = 2, .unit = UNIT_NONE },
 		{ .name = "Acceleration (INV 1)", .index = SHARE_INV1_ACCELERATION, .type = DTYPE_FLOAT,  .arg = 2, .unit = UNIT_NONE},
 		{ .name = "Enable\n (INV 1)", .index = SHARE_INV1_STATE, .type = DTYPE_BOOL },
-		{ .name = "Required Direction (INV 1)", .index = SHARE_INV1_REQ_DIRECTION, .type = DTYPE_BOOL },
+		{ .name = "Direction (INV 1)", .index = SHARE_INV1_REQ_DIRECTION, .type = DTYPE_BOOL },
 		{ .name = "Frequency (INV 1)", .index = SHARE_INV1_FREQ, .type = DTYPE_FLOAT, .arg = 1, .unit = UNIT_Hz},
 		{ .name = "Direction (INV 1)", .index = SHARE_INV1_DIRECTION, .type = DTYPE_BOOL },
 		{ .name = "m (INV 1)", .index = SHARE_INV1_m, .type = DTYPE_FLOAT,  .arg = 2, .unit = UNIT_NONE},
 		// Inverter 2 settings
-		{ .name = "Required Frequency (INV 2)", .index = SHARE_INV2_REQ_FREQ, .type = DTYPE_FLOAT, .arg = 0, .unit = UNIT_Hz },
+		{ .name = "Set Frequency (INV 2)", .index = SHARE_INV2_REQ_FREQ, .type = DTYPE_FLOAT, .arg = 0, .unit = UNIT_Hz },
 		{ .name = "Nominal Frequency (INV 2)", .index = SHARE_INV2_NOM_FREQ, .type = DTYPE_FLOAT, .arg = 0, .unit = UNIT_Hz},
 		{ .name = "Nominal m (INV 2)", .index = SHARE_INV2_NOM_m, .type = DTYPE_FLOAT, .arg = 2, .unit = UNIT_NONE },
 		{ .name = "Acceleration (INV 2)", .index = SHARE_INV2_ACCELERATION, .type = DTYPE_FLOAT,  .arg = 2, .unit = UNIT_NONE},
 		{ .name = "Enable\n (INV 2)", .index = SHARE_INV2_STATE, .type = DTYPE_BOOL },
-		{ .name = "Required Direction (INV 2)", .index = SHARE_INV2_REQ_DIRECTION, .type = DTYPE_BOOL },
+		{ .name = "Direction (INV 2)", .index = SHARE_INV2_REQ_DIRECTION, .type = DTYPE_BOOL },
 		{ .name = "Frequency (INV 2)", .index = SHARE_INV2_FREQ, .type = DTYPE_FLOAT, .arg = 1, .unit = UNIT_Hz},
 		{ .name = "Direction (INV 2)", .index = SHARE_INV2_DIRECTION, .type = DTYPE_BOOL },
 		{ .name = "m (INV 2)", .index = SHARE_INV2_m, .type = DTYPE_FLOAT,  .arg = 2, .unit = UNIT_NONE},

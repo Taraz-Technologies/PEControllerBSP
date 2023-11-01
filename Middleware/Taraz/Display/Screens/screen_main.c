@@ -203,9 +203,13 @@ static void Title_Create(lv_obj_t * parent)
 		.valueTxt = appInfoDisplay.appTitle,//{LV_SYMBOL_HOME, NULL},
 		.colWidths = { 60, LV_GRID_FR(1) }
 	};
-	lv_default_text_field(titleCellArea, &field, 0, 0, event_handler, TAG_ATTACH(TAG_SETTINGS));
+	lv_default_text_field(titleCellArea, &field, 0, 0, NULL, NULL);
 	lv_obj_align(field.nameField, LV_ALIGN_CENTER, 0, 0);
 	lv_obj_set_style_text_font(field.nameField, &lv_font_montserrat_30, 0);
+	lv_obj_add_flag(field.nameField, LV_OBJ_FLAG_CLICKABLE);
+	lv_obj_add_flag(field.valueField, LV_OBJ_FLAG_CLICKABLE);
+	lv_obj_add_event_cb(field.nameField, event_handler, LV_EVENT_CLICKED, TAG_ATTACH(TAG_SETTINGS));
+	lv_obj_add_event_cb(field.valueField, event_handler, LV_EVENT_CLICKED, TAG_ATTACH(TAG_APPINFO));
 
 }
 
