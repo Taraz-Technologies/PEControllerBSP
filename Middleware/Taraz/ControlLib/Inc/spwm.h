@@ -40,6 +40,7 @@ extern "C" {
  * Includes
  *******************************************************************************/
 #include "transforms.h"
+#include "general_header.h"
 /********************************************************************************
  * Defines
  *******************************************************************************/
@@ -63,12 +64,13 @@ extern "C" {
   * @{
   */
 /**
- * @brief Get duty cycles of each leg using sinousidal PWM
+ * @brief Get duty cycles of each leg using sinusoidal PWM
  * @param theta Current angle of Phase A in radians
  * @param modulationIndex Modulation index for the PWM
- * @param *duties Pointer to the array where duty cycles need to be updated.
+ * @param duties Pointer to the array where duty cycles need to be updated.
+ * @param dir Direction of the three phase signal.
  */
-extern void ComputeDuty_SPWM(float theta, float modulationIndex, float* duties);
+extern void ComputeDuty_SPWM(float theta, float modulationIndex, float* duties, bool dir);
 /********************************************************************************
  * Code
  *******************************************************************************/

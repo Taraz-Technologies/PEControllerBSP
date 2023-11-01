@@ -135,8 +135,9 @@ extern void Inverter3Ph_UpdateDuty(inverter3Ph_config_t* config, float* duties);
  * @param *config Pointer to the Inverter Configurations.
  * @param *theta angle of phase u in radians.
  * @param modulationIndex modulation index to be used for the generation.
+ * @param dir Direction of the three phase signal.
  */
-extern void Inverter3Ph_UpdateSPWM(inverter3Ph_config_t* config, float theta, float modulationIndex);
+extern void Inverter3Ph_UpdateSPWM(inverter3Ph_config_t* config, float theta, float modulationIndex, bool dir);
 /**
  * @brief Activate/Deactive the 3-Phase inverter output.
  * @param *config Pointer to the Inverter Configurations.

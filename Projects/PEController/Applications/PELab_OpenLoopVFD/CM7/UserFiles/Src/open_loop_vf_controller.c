@@ -122,14 +122,34 @@ void OpenLoopVfControl_Loop(openloopvf_config_t* config)
 	if (config->inverterConfig.state == INVERTER_INACTIVE)
 		return;
 
-	float a = config->acceleration;
-	if (config->currentFreq > config->outputFreq)
-		a *= -1;
-	config->currentFreq += (a / config->pwmFreq);
+	float a = config->acceleration / config->pwmFreq;
 
-	// adjust the frequency with given acceleration
-	if((a < 0 && config->currentFreq < config->outputFreq) || (a > 0 && config->currentFreq > config->outputFreq))
-		config->currentFreq = config->outputFreq;
+	// if direction changed always decelerate
+	if (config->currentDir != config->dir)
+	{
+		float f = config->currentFreq - a;
+		// if frequency becomes smaller than 0 acknowledge direction change
+		if (f <= 0)
+		{
+			config->currentFreq = f * -1;
+			config->currentDir = config->dir;
+		}
+		else
+			config->currentFreq = f;
+	}
+	// if the direction is the same
+	else
+	{
+		if (config->currentFreq > config->outputFreq)
+			config->currentFreq -= a;
+		else
+			config->currentFreq += a;
+
+		// adjust the frequency with given acceleration
+		if((a < 0 && config->currentFreq < config->outputFreq) || (a > 0 && config->currentFreq > config->outputFreq))
+			config->currentFreq = config->outputFreq;
+	}
+
 
 	// compute the current modulation index
 	config->currentModulationIndex = (config->nominalModulationIndex / config->nominalFreq) * config->currentFreq;
@@ -139,7 +159,7 @@ void OpenLoopVfControl_Loop(openloopvf_config_t* config)
 		config->wt -= TWO_PI;
 
 	// generate and apply SPWM according to the theta and modulation index
-	Inverter3Ph_UpdateSPWM(&config->inverterConfig, config->wt, config->currentModulationIndex);
+	Inverter3Ph_UpdateSPWM(&config->inverterConfig, config->wt, config->currentModulationIndex, config->currentDir);
 }
 /**
  * @brief Activate/Deactivate the inverter

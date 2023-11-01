@@ -159,6 +159,11 @@ device_err_t P2PComms_UpdateBool(uint8_t index, bool value)
 		return ProcessStateUpdateRequest(&inv1StateUpdateRequest, value);
 	else if (index == SHARE_INV2_STATE)
 		return ProcessStateUpdateRequest(&inv2StateUpdateRequest, value);
+	else if (index == SHARE_INV1_DIRECTION || index == SHARE_INV2_DIRECTION)
+	{
+		INTER_CORE_DATA.bools[index] = value;
+		return ERR_OK;
+	}
 	return ERR_ILLEGAL;
 }
 

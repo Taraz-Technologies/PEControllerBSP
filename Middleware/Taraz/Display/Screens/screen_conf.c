@@ -89,6 +89,7 @@ static int groupCount;
 static conf_field_info_t* settingObjs;
 static int settingsCount = 0;
 static int currentSettingIndex = 0;
+static lv_obj_t* nameContainerArea;
 /********************************************************************************
  * Global Variables
  *******************************************************************************/
@@ -215,8 +216,8 @@ static void StaticForm_Create(lv_obj_t * parent)
 	}
 
 	// name and container for configuration data
-	static lv_coord_t cols[] = {120, LV_GRID_FR(1), 120, LV_GRID_TEMPLATE_LAST};
-	lv_obj_t* nameContainerArea = lv_grid_create_general(parent, cols, singleRowCol, &lvStyleStore.defaultGrid, NULL, NULL, NULL);
+	static lv_coord_t cols[] = {0, LV_GRID_FR(1), 0, LV_GRID_TEMPLATE_LAST};
+	nameContainerArea = lv_grid_create_general(parent, cols, singleRowCol, &lvStyleStore.defaultGrid, NULL, NULL, NULL);
 	lv_obj_set_grid_cell(nameContainerArea, LV_GRID_ALIGN_STRETCH, 0, 2, LV_GRID_ALIGN_STRETCH, 0, 1);
 	lv_obj_t * nameContainer = lv_container_create_general(nameContainerArea, &nameContainerStyle, 0, 1, NULL, NULL);
 	screenObjs.paramName = lv_label_create_general(nameContainer, &lblStyleName, "", NULL, NULL);
@@ -415,6 +416,8 @@ void ConfigScreen_LoadSettings(data_param_group_t* _paramGroups, int _groupCount
 	groupCount = _groupCount;
 	CreateParamGrid();
 	FillAllSettings();
+	//lv_grid_set_row(nameContainerArea, 0, 120);
+	//lv_grid_set_row(nameContainerArea, 2, 120);
 	ShowSpecificSettingWindow(0);
 }
 
