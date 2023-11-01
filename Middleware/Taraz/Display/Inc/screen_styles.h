@@ -112,6 +112,13 @@ typedef struct
 	lv_coord_t borderWidth;
 	lv_coord_t pad;
 } basic_style_props_t;
+typedef struct
+{
+	int row;
+	int col;
+	int rowSpan;
+	int colSpan;
+} lv_grid_pos_info_t;
 /**
  * @}
  */
@@ -258,6 +265,7 @@ extern void BSP_Screen_InitBtnStyle(lv_style_t* style, lv_coord_t border, lv_coo
  * @return Container object
  */
 extern lv_obj_t* lv_container_create_general(lv_obj_t* parent, lv_style_t* style, int row, int col, lv_event_cb_t event_cb, void * eventData);
+extern lv_obj_t* CreateTitle(lv_obj_t* parent, lv_grid_pos_info_t* gridInfo, const char* title);
 /********************************************************************************
  * Code
  *******************************************************************************/

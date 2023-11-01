@@ -103,7 +103,7 @@ static void CreateInfo(lv_obj_t * parent)
 			LV_GRID_CONTENT, LV_GRID_CONTENT, LV_GRID_CONTENT,
 			LV_GRID_FR(1), 80 , LV_GRID_TEMPLATE_LAST};
 	lv_obj_t* grid = lv_grid_create_general(parent, singleRowCol, rows, &lvStyleStore.thickMarginGrid, NULL, NULL, NULL);
-	lv_obj_set_grid_cell(grid, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
+	lv_obj_set_grid_cell(grid, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 1, 1);
 
 	int rowNo = 0;
 	if (appInfoDisplay.appInfo)
@@ -157,9 +157,12 @@ static void CreateScreen()
 {
 	// create basic grid
 	static lv_coord_t colsScreen[] = {LV_GRID_FR(1), ROW_WIDTH_QR, LV_GRID_TEMPLATE_LAST};
-	screenGrid = lv_grid_create_general(screen, colsScreen, singleRowCol, &lvStyleStore.defaultGrid, NULL, NULL, NULL);
+	static lv_coord_t rowsScreen[] = {60, LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
+	screenGrid = lv_grid_create_general(screen, colsScreen, rowsScreen, &lvStyleStore.defaultGrid, NULL, NULL, NULL);
 	lv_obj_set_size(screenGrid, DISPLAY_WIDTH_RAM, DISPLAY_HEIGHT_RAM);
 
+	lv_grid_pos_info_t gridInfo = { .col = 0, .row = 0, .colSpan = 2, .rowSpan = 1 };
+	CreateTitle(screenGrid, &gridInfo, "Application Information");
 	CreateInfo(screenGrid);
 }
 

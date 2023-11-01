@@ -59,15 +59,12 @@ static const char* sectionValues[4] = {
 		" to develop, monitor & test power systems by replacing multiple lab equipment, such as,"
 		" oscilloscopes, spectrum analyzers, power analyzers and recorders.",
 
-		"\t1. For intelliSENS activation consult \"licensing\" section.\n"
-		"\t2. Set \"ENABLE_INTELLISENS\" in \"user_config.h\" to 1.\n"
-		"\t3. Reprogram the PEController.\n"
-		"\t4. Connect OTG port to desired computer.\n"
-		"\t5. In \"intelliSENS Analysis\" connect to your PEController.",
+		"\t1. Set \"ENABLE_INTELLISENS\" in \"user_config.h\" to 1.\n"
+		"\t2. Program the PEController and connect OTG port to PC.\n"
+		"\t3. In \"intelliSENS Analysis\" connect to your PEController.",
 
-		"Send license number to sales@taraztechnologies.com with the subject "
-		"\"Quotation request for PEController support on intelliSENS software\" to "
-		"activate intelliSENS for this PEController.",
+		"For activation send license number to sales@taraztechnologies.com with the subject "
+		"\"Quotation request for PEController intelliSENS activation\".",
 
 		NULL};
 static lv_obj_t* screenGrid = NULL;
@@ -129,7 +126,7 @@ static void CreateInfo(lv_obj_t * parent)
 			LV_GRID_CONTENT, LV_GRID_CONTENT,
 			LV_GRID_FR(1), 80 , LV_GRID_TEMPLATE_LAST};
 	lv_obj_t* grid = lv_grid_create_general(parent, singleRowCol, rows, &lvStyleStore.thickMarginGrid, NULL, NULL, NULL);
-	lv_obj_set_grid_cell(grid, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
+	lv_obj_set_grid_cell(grid, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 1, 1);
 
 	int rowNo = 0;
 	// Set the names and description
@@ -173,10 +170,10 @@ static void CreateQRCode(lv_obj_t * parent)
 	}
 
 	// main grid
-	static lv_coord_t rows[] = {LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
+	static lv_coord_t rows[] = {LV_GRID_FR(1), 265, LV_GRID_FR(1), 60, LV_GRID_TEMPLATE_LAST};
 	rows[1] = intelliSENS_QR_info.height;
 	lv_obj_t* grid = lv_grid_create_general(parent, singleRowCol, rows, &lvStyleStore.thickMarginGrid, NULL, NULL, NULL);
-	lv_obj_set_grid_cell(grid, LV_GRID_ALIGN_STRETCH, 1, 1, LV_GRID_ALIGN_STRETCH, 0, 1);
+	lv_obj_set_grid_cell(grid, LV_GRID_ALIGN_STRETCH, 1, 1, LV_GRID_ALIGN_STRETCH, 1, 1);
 
 	lv_obj_t* lblHeading = lv_label_create_general(grid, &lblStyleHeading, qrCodeHeading, NULL, NULL);
 	lv_obj_set_grid_cell(lblHeading, LV_GRID_ALIGN_CENTER, 0, 1, LV_GRID_ALIGN_END, 0, 1);
@@ -208,8 +205,11 @@ static void CreateScreen()
 {
 	// create basic grid
 	static lv_coord_t colsScreen[] = {LV_GRID_FR(1), ROW_WIDTH_QR, LV_GRID_TEMPLATE_LAST};
-	screenGrid = lv_grid_create_general(screen, colsScreen, singleRowCol, &lvStyleStore.defaultGrid, NULL, NULL, NULL);
+	static lv_coord_t rowsScreen[] = {60, LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
+	screenGrid = lv_grid_create_general(screen, colsScreen, rowsScreen, &lvStyleStore.defaultGrid, NULL, NULL, NULL);
 	lv_obj_set_size(screenGrid, DISPLAY_WIDTH_RAM, DISPLAY_HEIGHT_RAM);
+	lv_grid_pos_info_t gridInfo = { .col = 0, .row = 0, .colSpan = 2, .rowSpan = 1 };
+	CreateTitle(screenGrid, &gridInfo, "intelliSENS Application Usage");
 
 	CreateInfo(screenGrid);
 	CreateQRCode(screenGrid);

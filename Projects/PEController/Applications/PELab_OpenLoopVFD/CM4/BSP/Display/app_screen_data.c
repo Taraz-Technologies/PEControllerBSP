@@ -52,7 +52,7 @@
 appinfo_display_t appInfoDisplay =
 {
 		.appInfo = "This is a demonstration of Open-loop V/f Control of a Three-Phase Inverter."
-				"\n\n 1. Set the frequency of operation for the inverter."
+				"\n 1. Set the frequency of operation for the inverter."
 				"\n 2. Set the direction of motor."
 				"\n 3. Use the settings button to set additional parameters."
 				"\n 4. Control the Inverters using Enable buttons."

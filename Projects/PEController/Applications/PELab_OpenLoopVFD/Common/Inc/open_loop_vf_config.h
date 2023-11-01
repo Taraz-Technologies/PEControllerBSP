@@ -120,19 +120,19 @@ extern "C" {
 /**
  * @brief The maximum allowed value of the output frequency
  */
-#define MAX_OUTPUT_FREQ					(70.f)
+#define MAX_OUTPUT_FREQ					(100.f)
 /**
  * @brief The maximum allowed value of the nominal frequency
  */
-#define MAX_NOMINAL_FREQ				(70.f)
+#define MAX_NOMINAL_FREQ				(100.f)
 /**
  * @brief The maximum allowed value of the nominal modulation index
  */
-#define MAX_NOMINAL_m					(.95f)
+#define MAX_NOMINAL_m					(1.f)
 /**
  * @brief The maximum frequency acceleration
  */
-#define MAX_ACCELERATION				(10.f)
+#define MAX_ACCELERATION				(1000.f)
 /**
  * @}
  */

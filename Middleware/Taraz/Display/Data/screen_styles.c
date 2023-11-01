@@ -409,7 +409,27 @@ void BSP_Screen_CreateGenericBasicStyle(lv_style_t* style, basic_style_props_t* 
 	lv_style_set_border_width(style, props->borderWidth);
 	lv_style_set_pad_all(style, props->pad);
 }
+lv_obj_t* CreateTitle(lv_obj_t* parent, lv_grid_pos_info_t* gridInfo, const char* title)
+{
+	static lv_style_t lblStyleName;
+	static lv_style_t nameContainerStyle;
+	static bool init = false;
+	// initialize styles once
+	if (!init)
+	{
+		BSP_Screen_InitLabelStyle(&lblStyleName, &lv_font_montserrat_30, LV_TEXT_ALIGN_CENTER, &lvColorStore.white);
+		BSP_Screen_InitGridStyle(&nameContainerStyle, 0, 0, 2, 10, &lvColorStore.background);
+		lv_style_set_border_color(&nameContainerStyle, lvColorStore.gray);
+		init = true;
+	}
 
+	lv_obj_t* nameContainerArea = lv_grid_create_general(parent, singleRowCol, singleRowCol, &lvStyleStore.defaultGrid, NULL, NULL, NULL);
+	lv_obj_set_grid_cell(nameContainerArea, LV_GRID_ALIGN_STRETCH, gridInfo->col, gridInfo->colSpan, LV_GRID_ALIGN_STRETCH, gridInfo->row, gridInfo->rowSpan);
+	lv_obj_t * nameContainer = lv_container_create_general(nameContainerArea, &nameContainerStyle, 0, 0, NULL, NULL);
+	lv_obj_t* titleLbl = lv_label_create_general(nameContainer, &lblStyleName, title, NULL, NULL);
+	lv_obj_align(titleLbl, LV_ALIGN_CENTER, 0, 0);
+	return titleLbl;
+}
 /**
  * @brief Initializes base screen styles
  */
