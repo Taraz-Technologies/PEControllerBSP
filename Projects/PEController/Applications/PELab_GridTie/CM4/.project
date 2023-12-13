@@ -45,6 +45,11 @@
 			<locationURI>PARENT-5-PROJECT_LOC/Drivers/BSP/PEController/ADC/pecontroller_adc.c</locationURI>
 		</link>
 		<link>
+			<name>BSP/Components/p2p_comms.c</name>
+			<type>1</type>
+			<locationURI>PARENT-5-PROJECT_LOC/Drivers/BSP/PEController/Components/p2p_comms.c</locationURI>
+		</link>
+		<link>
 			<name>BSP/Components/shared_memory.c</name>
 			<type>1</type>
 			<locationURI>PARENT-5-PROJECT_LOC/Drivers/BSP/PEController/Common/shared_memory.c</locationURI>

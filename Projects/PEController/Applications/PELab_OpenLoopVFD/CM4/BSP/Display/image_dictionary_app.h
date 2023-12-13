@@ -1,11 +1,10 @@
 /**
  ********************************************************************************
- * @file    	app_screen_data.c
+ * @file 		image_dictionary_app.h
  * @author 		Waqas Ehsan Butt
- * @date    	Jun 6, 2023
+ * @date 		Jun 7, 2023
  *
- * @brief   
- ********************************************************************************
+ * @brief    Contains the application specific image definitions
  ********************************************************************************
  * @attention
  *
@@ -20,10 +19,17 @@
  ********************************************************************************
  */
 
+#ifndef IMAGE_DICTIONARY_APP_H_
+#define IMAGE_DICTIONARY_APP_H_
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /********************************************************************************
  * Includes
  *******************************************************************************/
-#include "app_screen_data.h"
+#include "image_dictionary.h"
 /********************************************************************************
  * Defines
  *******************************************************************************/
@@ -37,44 +43,11 @@
  *******************************************************************************/
 
 /********************************************************************************
- * Static Variables
+ * Exported Variables
  *******************************************************************************/
 
 /********************************************************************************
- * Global Variables
- *******************************************************************************/
-/**
- * @brief This information will be displayed in the application information screen
- * @note The information is application dependent and can be edited in @ref screen_appinfo_data.c.
- * The file is located in \"CM4/BSP/Display\" folder in the relevant project
- */
-appinfo_display_t appInfoDisplay =
-{
-		.appInfo =
-				"This example controls a three phase inverter module as well as a boost converter for PELab (PLB-6PH). "
-				"The boost converter starts regulation to provide a stabilized DC-Link voltage. "
-				"Once stabilized, the relay connects the grid. "
-				"The control implements a PLL algorithm to detect the phase of the grid voltages. "
-				"After estimating the exact phase angle the inverter is enabled and starts injecting power in the grid. "
-				"Set measurement sensitivity before connecting to the input or output. "
-				"Make sure to provide the DC Link before connecting to the grid to avoid failure due to in-rush current.",
-
-		.connectionInfo = NULL,
-
-		.documentationLink = "www.taraztechnologies.com/help/pecontroller-three-phase-grid-tie-inverter/",
-
-		.img = NULL,
-
-		.appNo = "AN02",
-
-		.appTitle = "Three-Phase Grid-Tie Inverter"
-};
-/**
- * @brief Assigns the image to be displayed on the splash screen
- */
-image_info_t* splashImg = &taraz_logo_info;
-/********************************************************************************
- * Function Prototypes
+ * Global Function Prototypes
  *******************************************************************************/
 
 /********************************************************************************
@@ -82,5 +55,9 @@ image_info_t* splashImg = &taraz_logo_info;
  *******************************************************************************/
 
 
+#ifdef __cplusplus
+}
+#endif
 
+#endif 
 /* EOF */

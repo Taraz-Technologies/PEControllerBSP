@@ -62,7 +62,7 @@ typedef struct
 {
 	uint16_t width;	 		/**< @brief Image width */
 	uint16_t height;	 	/**< @brief Image height */
-	uint32_t pixelFormat;	/**< @brief Image pixel format @ref LTDC_Pixelformat */
+	uint32_t pixelFormat;	/**< @brief Image pixel format LTDC_Pixelformat */
 	const uint8_t* data;	/**< @brief Image pixel color data in specified format */
 } image_info_t;
 /**

@@ -32,8 +32,12 @@ extern "C" {
 /** @addtogroup Display
  * @{
  */
+ 
+/** @addtogroup DisplayScreens
+ * @{
+ */
 
-/** @defgroup AppScreensCustomization Application Screen Handling
+/** @defgroup DisplayMainScreen	Main Screen Customization
  * @brief Use these macros and functions to customize the appearance of the main screen for every application independently.
  * @{
  */
@@ -44,11 +48,11 @@ extern "C" {
 #include "screen_base.h"
 #include "stdlib.h"
 #include "utility_lib.h"
-#include <p2p_comms.h>
+#include "p2p_comms.h"
 /********************************************************************************
  * Defines
  *******************************************************************************/
-/** @defgroup PEDISPLAYSCREEN_Exported_Macros Macros
+/** @defgroup PEDISPLAYSCREEN_MAIN_Exported_Macros Macros
  * @{
  */
 /**
@@ -95,11 +99,11 @@ extern "C" {
 /**
  * @brief Ratio of measurement area on the main screen
  */
-#define MEASUREMENT_AREA_RATIO				(8)
+#define MEASUREMENT_AREA_RATIO				(5)
 /**
  * @brief Ratio of application specific area on the main screen
  */
-#define APP_AREA_RATIO						(7)
+#define APP_AREA_RATIO						(4)
 
 /**
  * @brief Font used by the displayed measurement value
@@ -123,15 +127,51 @@ extern "C" {
 /********************************************************************************
  * Structures
  *******************************************************************************/
-
+/** @defgroup PEDISPLAYSCREEN_MAIN_Exported_Structures Structures
+ * @{
+ */
+/**
+ * @brief Contains the information related to all the application specific controllable and observable parameters.
+ */
+typedef struct
+{
+#if CONTROL_CONFS_COUNT > 0
+	data_union_t controlVals[CONTROL_CONFS_COUNT];  /**< @brief Contains the buffered values of all controllable parameters */
+	lv_obj_t* lblsControl[CONTROL_CONFS_COUNT];		/**< @brief Contains the lv_label_t objects to update all controllable parameters */
+#endif
+#if MONITOR_CONFS_COUNT > 0
+	data_union_t monitorVals[MONITOR_CONFS_COUNT];  /**< @brief Contains the buffered values of all monitored parameters */
+	lv_obj_t* lblsMonitor[MONITOR_CONFS_COUNT];		/**< @brief Contains the lv_label_t objects to update all monitored parameters */
+#endif
+} main_screen_param_disp_t;
+/**
+ * @}
+ */
 /********************************************************************************
  * Exported Variables
  *******************************************************************************/
-
+/** @defgroup PEDISPLAYSCREEN_MAIN_Exported_Variables Variables
+ * @{
+ */
+/**
+ * @brief Collection of data parameters representing the controllable parameters.
+ */
+extern data_param_info_t* mainScreenControlConfs[CONTROL_CONFS_COUNT];
+/**
+ * @brief Collection of data parameters representing the monitored parameters.
+ */
+extern data_param_info_t* mainScreenMonitorConfs[MONITOR_CONFS_COUNT];
+/**
+ * @brief Contains the information related to all the application specific controllable and observable parameters.
+ */
+extern main_screen_param_disp_t mainScreenParamDisp;
+/**
+ * @}
+ */
 /********************************************************************************
  * Global Function Prototypes
  *******************************************************************************/
-/** @defgroup PEDISPLAYSCREEN_Exported_Functions Functions
+/** @defgroup PEDISPLAYSCREEN_MAIN_Exported_Functions Functions
  * @{
  */
 /**
@@ -140,16 +180,17 @@ extern "C" {
  * @param row Row index for the item.
  * @param col Column index for the item.
  */
-extern void AppControlGrid_Create(lv_obj_t* parent, int row, int col);
+extern void MainScreen_CreateAppArea(lv_obj_t* parent, int row, int col);
 /**
  * @brief Refreshes the application dependent area of the main screen.
  */
-extern void AppControlGrid_Refresh(void);
+extern void MainScreen_RefreshAppArea(void);
 /**
  * @brief Touch detection of the application dependent area of the screen.
+ * @param _tag Tag if any detected on the generic main screen.
  * @return A new screen type if screen needs to be changed based upon the touch response.
  */
-extern screen_type_t AppControlGrid_TouchDetect(void);
+extern screen_type_t MainScreen_AppTouchDetect(uint8_t _tag);
 /********************************************************************************
  * Code
  *******************************************************************************/
@@ -160,7 +201,9 @@ extern screen_type_t AppControlGrid_TouchDetect(void);
 #ifdef __cplusplus
 }
 #endif
-
+/**
+ * @}
+ */
 /**
  * @}
  */

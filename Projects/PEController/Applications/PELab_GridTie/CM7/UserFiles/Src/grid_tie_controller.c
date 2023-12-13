@@ -186,7 +186,7 @@ device_err_t GridTie_EnableBoost(grid_tie_t* gridTie, bool en)
 	for (int i = 0; i < BOOST_COUNT; i++)
 		BSP_PWMOut_Enable((1 << (gridTie->boostConfig[i].pinNo - 1)) , en);
 	// correct flags
-	INTER_CORE_DATA.bools[SHARE_BOOST_STATE] = gridTie->isBoostEnabled = en;
+	INTER_CORE_DATA.bools[P2P_BOOST_STATE] = gridTie->isBoostEnabled = en;
 	return ERR_OK;
 }
 
@@ -204,7 +204,7 @@ device_err_t GridTie_EnableInverter(grid_tie_t* gridTie, bool en)
 		// Disable inverters
 		Inverter3Ph_Activate(&gridTie->inverterConfig, en);
 		// set flags
-		INTER_CORE_DATA.bools[SHARE_INVERTER_STATE] = gridTie->isInverterEnabled = en;
+		INTER_CORE_DATA.bools[P2P_INVERTER_STATE] = gridTie->isInverterEnabled = en;
 		return ERR_OK;
 	}
 	else
@@ -218,7 +218,7 @@ device_err_t GridTie_EnableInverter(grid_tie_t* gridTie, bool en)
 		// Enable inverters
 		Inverter3Ph_Activate(&gridTie->inverterConfig, en);
 		// set flags
-		INTER_CORE_DATA.bools[SHARE_INVERTER_STATE] = gridTie->isInverterEnabled = en;
+		INTER_CORE_DATA.bools[P2P_INVERTER_STATE] = gridTie->isInverterEnabled = en;
 		return ERR_OK;
 	}
 }
@@ -250,15 +250,15 @@ static void GridTie_GenerateOutput(grid_tie_t* gridTie)
 	// Transform the current measurements to DQ coordinates
 	Transform_abc_dq0(&iCoor->abc, &iCoor->dq0, &iCoor->trigno, SRC_ABC, PARK_SINE);
 	if(Average_Compute(&iGenAvg, iCoor->dq0.d))
-		INTER_CORE_DATA.floats[SHARE_CURR_RMS_CURRENT] = iGenAvg.avg / 1.414f;
+		INTER_CORE_DATA.floats[P2P_CURR_RMS_CURRENT] = iGenAvg.avg / 1.414f;
 	// Apply PI control to both DQ coordinates gridTie->dCompensator.dt
 	LIB_COOR_ALL_t coor;
 
 	// Get the required parameters
-	float fGrid = INTER_CORE_DATA.floats[SHARE_GRID_FREQ];
-	float lOut = INTER_CORE_DATA.floats[SHARE_LOUT];
+	float fGrid = INTER_CORE_DATA.floats[P2P_GRID_FREQ];
+	float lOut = INTER_CORE_DATA.floats[P2P_LOUT_mH] / 1000.f;
 	// convert to peak current
-	gridTie->iRef = INTER_CORE_DATA.floats[SHARE_REQ_RMS_CURRENT] * 1.414f;
+	gridTie->iRef = INTER_CORE_DATA.floats[P2P_REQ_RMS_CURRENT] * 1.414f;
 
 	coor.dq0.d = PI_Compensate(&gridTie->iDComp, gridTie->iRef - iCoor->dq0.d) + vCoor->dq0.d
 			- TWO_PI * fGrid * lOut * iCoor->dq0.q / PWM_FREQ_Hz;
@@ -287,7 +287,7 @@ static void ControlRelays(grid_tie_t* gridTie)
 		// Turn off relay if goes beyond acceptable voltage
 		if (gridTie->vdc < RELAY_TURN_ON_VDC)
 		{
-			gridTie->isRelayOn = INTER_CORE_DATA.bools[SHARE_RELAY_STATUS] = false;
+			gridTie->isRelayOn = INTER_CORE_DATA.bools[P2P_RELAY_STATUS] = false;
 			gridTie->tempIndex = 0;
 			for (int i = 0; i < GRID_RELAY_COUNT; i++)
 				BSP_Dout_SetAsIOPin(GRID_RELAY_IO + i, GPIO_PIN_RESET);
@@ -301,7 +301,7 @@ static void ControlRelays(grid_tie_t* gridTie)
 		// wait for stabilization of boost
 		else if (++gridTie->tempIndex == (int)PWM_FREQ_Hz)
 		{
-			gridTie->isRelayOn = INTER_CORE_DATA.bools[SHARE_RELAY_STATUS] = true;
+			gridTie->isRelayOn = INTER_CORE_DATA.bools[P2P_RELAY_STATUS] = true;
 			for (int i = 0; i < GRID_RELAY_COUNT; i++)
 				BSP_Dout_SetAsIOPin(GRID_RELAY_IO + i, GPIO_PIN_SET);
 			gridTie->tempIndex = 0;
@@ -335,7 +335,7 @@ void GridTieControl_Loop(grid_tie_t* gridTie)
 
 	// Implement phase lock loop
 	Pll_LockGrid(pll);
-	INTER_CORE_DATA.bools[SHARE_PLL_STATUS] = gridTie->pll.status == PLL_LOCKED;
+	INTER_CORE_DATA.bools[P2P_PLL_STATUS] = gridTie->pll.status == PLL_LOCKED;
 
 	// Generate inverter PWM is enabled and not faulty
 	if (gridTie->isInverterEnabled)
@@ -344,7 +344,7 @@ void GridTieControl_Loop(grid_tie_t* gridTie)
 		if(gridTie->isRelayOn == false || gridTie->pll.status != PLL_LOCKED)
 		{
 			Inverter3Ph_Activate(&gridTie->inverterConfig, false);
-			gridTie->isInverterEnabled = INTER_CORE_DATA.bools[SHARE_INVERTER_STATE] = false;
+			gridTie->isInverterEnabled = INTER_CORE_DATA.bools[P2P_INVERTER_STATE] = false;
 			Average_Reset(&iGenAvg);
 		}
 		else

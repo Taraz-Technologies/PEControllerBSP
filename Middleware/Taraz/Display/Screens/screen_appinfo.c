@@ -24,7 +24,7 @@
  * Includes
  *******************************************************************************/
 #include "screen_base.h"
-#include "app_screen_data.h"
+#include "screen_data_app.h"
 /********************************************************************************
  * Defines
  *******************************************************************************/
@@ -58,7 +58,7 @@ static lv_obj_t* screenGrid = NULL;
 /********************************************************************************
  * Code
  *******************************************************************************/
-static void Keypad_Clicked(lv_event_t * e)
+static void Close_Clicked(lv_event_t * e)
 {
 	if (!isActive)
 		return;
@@ -71,16 +71,10 @@ static void Close_Create(lv_obj_t * parent, int row, int col)
 
 	lv_obj_t* kb = lv_keyboard_create(parent);
 	lv_obj_set_grid_cell(kb, LV_GRID_ALIGN_CENTER, col, 1, LV_GRID_ALIGN_STRETCH, row, 1);
-	lv_btnmatrix_set_map(kb, map);
-	lv_obj_set_style_bg_color(kb, lvColorStore.background, 0);
-	lv_obj_set_style_text_color(kb, lvColorStore.lightTaraz, 0);
-	lv_obj_set_style_bg_color(kb, lvColorStore.darkTaraz, LV_PART_ITEMS);
-	lv_obj_set_style_text_color(kb, lvColorStore.white, LV_PART_ITEMS);
-	lv_obj_set_style_border_color(kb, lvColorStore.lightTaraz, LV_PART_ITEMS);
-	lv_obj_set_style_border_width(kb, 2, LV_PART_ITEMS);
 	lv_obj_set_style_text_font(kb, &lv_font_montserrat_30, 0);
+	lv_btnmatrix_set_map(kb, map);
 	lv_obj_set_width(kb, 200);
-	lv_obj_add_event_cb(kb, Keypad_Clicked, LV_EVENT_CLICKED, NULL);
+	lv_obj_add_event_cb(kb, Close_Clicked, LV_EVENT_CLICKED, NULL);
 }
 
 static void CreateInfo(lv_obj_t * parent)
@@ -91,10 +85,10 @@ static void CreateInfo(lv_obj_t * parent)
 	static bool init = false;
 	if (!init)
 	{
-		BSP_Screen_InitLabelStyle(&lblStyleType, &lv_font_montserrat_22, LV_TEXT_ALIGN_LEFT, &lvColorStore.mediumTaraz);
+		BSP_Screen_InitLabelStyle(&lblStyleType, &lv_font_montserrat_22, LV_TEXT_ALIGN_LEFT, &themeColors.btn);
 		lv_style_set_text_decor(&lblStyleType, LV_TEXT_DECOR_UNDERLINE);
-		BSP_Screen_InitLabelStyle(&lblStyleValue, &lv_font_montserrat_18, LV_TEXT_ALIGN_LEFT, &lvColorStore.white);
-		BSP_Screen_InitLabelStyle(&btnLblStyle, &lv_font_montserrat_26, LV_TEXT_ALIGN_CENTER, &lvColorStore.white);
+		BSP_Screen_InitLabelStyle(&lblStyleValue, &lv_font_montserrat_18, LV_TEXT_ALIGN_LEFT, NULL);
+		BSP_Screen_InitLabelStyle(&btnLblStyle, &lv_font_montserrat_26, LV_TEXT_ALIGN_CENTER, NULL);
 		init = true;
 	}
 

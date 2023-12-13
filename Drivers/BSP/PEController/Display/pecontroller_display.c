@@ -206,8 +206,8 @@ static void ConfigLVGL(void)
 	disp_drv.ver_res = DISPLAY_HEIGHT; /*Set the vertical resolution of the display*/
 	disp_drv.rotated = LV_ROTATION;
 	disp_drv.sw_rotate = 1;
-	lv_disp_drv_register(&disp_drv); /*Finally register the driver*/
-
+	lv_disp_t* disp = lv_disp_drv_register(&disp_drv); /*Finally register the driver*/
+	disp->theme = lv_theme_taraz_init(disp, lv_color_make(0, 100, 100), lv_color_make(0, 200, 200), true, LV_FONT_DEFAULT);
 
 	static lv_indev_drv_t indev_drv; /*Descriptor of a input device driver*/
 	lv_indev_drv_init(&indev_drv); /*Basic initialization*/

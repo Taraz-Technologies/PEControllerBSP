@@ -66,7 +66,7 @@ extern "C" {
 /**
  * @brief Select LCD variant installed on PEController
  */
-#define DISPLAY					(LCD_AFY800480B0)
+#define DISPLAY					(LCD_AFY800480A0)
 /**
  * @brief Selects the display brightness value between 0-100
  */
@@ -88,7 +88,7 @@ extern "C" {
 /**
  * @brief Use this frequency when control loop is enabled to get low bandwidth measurements. Max value is 100K and is dependent upon the control performance.
  */
-#define CONTROL_FREQUENCY_Hz		(25000)
+#define CONTROL_FREQUENCY_Hz		(50000)
 /******** MEASUREMENT CONFIGURATION ***********/
 
 #ifdef __cplusplus

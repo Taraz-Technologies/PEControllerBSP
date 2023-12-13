@@ -160,7 +160,7 @@ extern "C" {
 /**
  * @brief The output inductance of the inverter 1st time the application is run. Current value can be updated from screen
  */
-#define DEFAULT_LOUT					(.001f)
+#define DEFAULT_LOUT_mH					(1.f)
 /**
  * @brief The phase voltage of the inverter 1st time the application is run. Current value can be updated from screen
  */
@@ -180,11 +180,11 @@ extern "C" {
 /**
  * @brief The maximum allowed value of the output inductance
  */
-#define MAX_LOUT						(.01f)
+#define MAX_LOUT_mH						(10.f)
 /**
  * @brief The minimum allowed value of the output inductance
  */
-#define MIN_LOUT						(.0005f)
+#define MIN_LOUT_mH						(0.5f)
 /**
  * @brief The maximum allowed value of grid phase voltage
  */

@@ -163,8 +163,8 @@ extern const char* unitTxts[UNIT_COUNT];
 // turn off the specific warning. Can also use "-Wall"
 #pragma GCC diagnostic ignored "-Wunused-function"
 /**
- * @brief Default function to get the data parameters in textual format, according to the parameter info
- * @note This function is used whenever the @ref data_param_info_t.Getter_InText function is not defined and @ref GetDataParameter_InText() is called.
+ * @brief Default function to get the data parameters in textual format, according to the parameter info.
+ * @note A weak implementation of this function is provided. User can create a custom implementation if needed.
  * @param _paramInfo Structure defining the parameter.
  * @param value Pointer to the location to be updated with the value
  * @param addUnit <c>true</c> if unit needs to be added with the text else false.
@@ -172,27 +172,29 @@ extern const char* unitTxts[UNIT_COUNT];
  */
 extern device_err_t Default_GetDataParameter_InText(data_param_info_t* _paramInfo, char* value, bool addUnit);
 /**
- * @brief  Default function to set the data parameters from textual value, according to the parameter info
- * @note This function is used whenever the @ref data_param_info_t.Setter_FromText function is not defined and @ref SetDataParameter_FromText() is called.
+ * @brief  Default function to set the data parameters from textual value, according to the parameter info.
+ * @note A weak implementation of this function is provided. User can create a custom implementation if needed.
  * @param _paramInfo Structure defining the parameter.
  * @param value Value to be set as string
  * @return <c>ERR_OK</c> if no error else appropriate error thrown
  */
 extern device_err_t Default_SetDataParameter_FromText(data_param_info_t* _paramInfo, const char* value);
 /**
- * @brief  Default function to get the data parameters according to the parameter info
+ * @brief Default function to get the value of a parameter in string format.
  * @note This function is used whenever the @ref data_param_info_t.Getter function is not defined and @ref GetDataParameter() is called.
- * @param _paramInfo Structure defining the parameter.
- * @param value Pointer to the location to be updated with the value
- * @return <c>ERR_OK</c> if no error else appropriate error thrown
+ * @note A weak implementation of this function is provided. User can create a custom implementation if needed.
+ * @param _paramInfo Information regarding the data parameter.
+ * @param value text representation of the value acquired.
+ * @return device_err_t If successful <c>ERR_OK</c> else some other error.
  */
 extern device_err_t Default_GetDataParameter(data_param_info_t* _paramInfo, data_union_t* value);
 /**
- * @brief  Default function to set the data parameters according to the parameter info
+ * @brief Default function to set the value of a parameter from string format.
  * @note This function is used whenever the @ref data_param_info_t.Setter function is not defined and @ref SetDataParameter() is called.
- * @param _paramInfo Structure defining the parameter.
- * @param value Value to be set
- * @return <c>ERR_OK</c> if no error else appropriate error thrown
+ * @note A weak implementation of this function is provided. User can create a custom implementation if needed.
+ * @param _paramInfo Information regarding the data parameter.
+ * @param value text representation of the parameter value.
+ * @return device_err_t If successful <c>ERR_OK</c> else some other error.
  */
 extern device_err_t Default_SetDataParameter(data_param_info_t* _paramInfo, data_union_t value);
 /*******************************************************************************

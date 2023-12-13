@@ -34,7 +34,7 @@ extern "C" {
  * @{
  */
 
-/** @addtogroup CLUT Color look up table
+/** @addtogroup CLUT Color Look Up Table
  * @brief Contains the mapping scheme for the color look up table of the PEController.
  * @{
  */

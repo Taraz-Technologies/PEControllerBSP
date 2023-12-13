@@ -1,10 +1,11 @@
 /**
  ********************************************************************************
- * @file 		SPWM.h
+ * @file    	screen_data_app.c
  * @author 		Waqas Ehsan Butt
- * @date 		Nov 25, 2021
+ * @date    	Jun 6, 2023
  *
- * @brief    
+ * @brief   
+ ********************************************************************************
  ********************************************************************************
  * @attention
  *
@@ -19,28 +20,11 @@
  ********************************************************************************
  */
 
-#ifndef SPWM_H_
-#define SPWM_H_
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/** @addtogroup Control_Library
- * @{
- */
-
-/** @defgroup SPWM SPWM
- * @brief Contains the declaration and procedures for Sinouisidal PWM generation
- * @details List of functions
- * 	-# <b>@ref ComputeDuty_SPWM() :</b> Get duty cycles of each leg using sinousidal PWM
- * @{
- */
 /********************************************************************************
  * Includes
  *******************************************************************************/
-#include "transforms.h"
-#include "general_header.h"
+#include "screen_data_app.h"
+#include "p2p_comms.h"
 /********************************************************************************
  * Defines
  *******************************************************************************/
@@ -54,41 +38,43 @@ extern "C" {
  *******************************************************************************/
 
 /********************************************************************************
- * Exported Variables
+ * Static Variables
  *******************************************************************************/
 
 /********************************************************************************
- * Global Function Prototypes
+ * Global Variables
  *******************************************************************************/
-/** @defgroup SPWM_Exported_Functions Functions
-  * @{
-  */
 /**
- * @brief Get duty cycles of each leg using sinusoidal PWM
- * @param theta Current angle of Phase A in radians
- * @param modulationIndex Modulation index for the PWM
- * @param duties Pointer to the array where duty cycles need to be updated.
- * @param dir Direction of the three phase signal
+ * @brief This information will be displayed in the application information screen
  */
-extern void ComputeDuty_SPWM(float theta, float modulationIndex, float* duties, bool dir);
+appinfo_display_t appInfoDisplay =
+{
+		.appInfo = "PWM 1-2 (LEG 1) displays synchronization of the PWM generation with HRTIM_Master COMP1. "
+				"PWM 3-6 (LEG 2,3) displays an H-Bridge switching scheme. "
+				"PWM1 and PWM3 have a controllable phase shift update-able through the display. Value should be between 0-120 degrees. "
+				"PWM 7-8 (LEG 4) synchronizes HRTIM submodule to the Fiber Tx and generates the Fiber Tx signal to synchronize slave controllers. "
+				"PWM 9-16 (LEG 5-8) presents 2 H-Bridges with 8 switches synchronizing with Fiber Rx signal, and also synchronizing TIM1 and HRTIM.",
+
+		.connectionInfo = NULL,
+
+		.documentationLink = "www.taraztechnologies.com/Downloads/Software/PEControllerBSP/index.html",
+
+		.img = &bsp_docs_QR_info,
+
+		.appTitle = "PWM Generator"
+};
+/**
+ * @brief Assigns the image to be displayed on the splash screen
+ */
+image_info_t* splashImg = &taraz_logo_info;
+/********************************************************************************
+ * Function Prototypes
+ *******************************************************************************/
+
 /********************************************************************************
  * Code
  *******************************************************************************/
 
-/**
- * @}
- */
-#ifdef __cplusplus
-}
-#endif
 
-/**
- * @}
- */
 
-/**
- * @}
- */
-
-#endif 
 /* EOF */

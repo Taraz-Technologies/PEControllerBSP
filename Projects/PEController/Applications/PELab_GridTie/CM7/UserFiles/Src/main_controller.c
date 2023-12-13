@@ -19,7 +19,7 @@
 #include "pecontroller_digital_in.h"
 #include "shared_memory.h"
 #include "pecontroller_timers.h"
-#include "interprocessor_comms.h"
+#include "p2p_comms.h"
 #include "grid_tie_controller.h"
 /*******************************************************************************
  * Defines
@@ -40,7 +40,11 @@ typedef enum
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
-
+/**
+ * @brief Call this function to process the control loop.
+ * @param result ADC conversion data
+ */
+static void MainControl_Loop(adc_measures_t* result);
 /*******************************************************************************
  * Variables
  ******************************************************************************/
@@ -144,9 +148,9 @@ void MainControl_Stop(void)
 
 /**
  * @brief Call this function to process the control loop.
- * If the new computation request is available new duty cycle values are computed and applied to all inverter legs
+ * @param result ADC conversion data
  */
-void MainControl_Loop(adc_measures_t* result)
+static void MainControl_Loop(adc_measures_t* result)
 {
 	/* add the required measurements and current reference point */
 	gridTieConfig.vCoor.abc.a = result->Ch13;

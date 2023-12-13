@@ -1,10 +1,10 @@
 /**
  ********************************************************************************
- * @file 		app_image_dictionary.h
+ * @file 		screen_data_app.h
  * @author 		Waqas Ehsan Butt
- * @date 		Jun 7, 2023
+ * @date 		Jun 6, 2023
  *
- * @brief    Contains the application specific image definitions
+ * @brief    
  ********************************************************************************
  * @attention
  *
@@ -19,21 +19,44 @@
  ********************************************************************************
  */
 
-#ifndef APP_IMAGE_DICTIONARY_H_
-#define APP_IMAGE_DICTIONARY_H_
+#ifndef SCREEN_DATA_APP_H_
+#define SCREEN_DATA_APP_H_
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+/** @addtogroup BSP
+ * @{
+ */
+/** @addtogroup Display
+ * @{
+ */
+/** @defgroup DisplayScreens Screens
+ * @brief Contains the declaration and procedures for the display screens
+ * @{
+ */
+/** @defgroup Data Data
+ * @{
+ */
 /********************************************************************************
  * Includes
  *******************************************************************************/
+#include "general_header.h"
 #include "image_dictionary.h"
+#include "screen_base.h"
 /********************************************************************************
  * Defines
  *******************************************************************************/
-
+/** @defgroup PEDISPLAYSCREEN_Exported_Macros Macros
+ * @{
+ */
+/**
+ * @brief Number of setting groups to be displayed. Size of @ref settingWindows
+ */
+#define SETTINGS_WINDOW_COUNT			(0)
+/**
+  * @}
+  */
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
@@ -59,5 +82,17 @@ extern "C" {
 }
 #endif
 
+/**
+  * @}
+  */
+/**
+  * @}
+  */
+/**
+  * @}
+  */
+/**
+  * @}
+  */
 #endif 
 /* EOF */

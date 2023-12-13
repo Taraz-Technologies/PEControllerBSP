@@ -102,7 +102,7 @@ extern "C" {
   * @{
   */
 /**
- * @brief Frame buffer used for storage of a display frma in RAM.
+ * @brief Frame buffer used for storage of a display frame in RAM.
  */
 extern uint8_t frame_buff[DISPLAY_HEIGHT_RAM][DISPLAY_WIDTH_RAM];
 /**

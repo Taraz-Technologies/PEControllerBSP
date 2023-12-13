@@ -51,7 +51,7 @@ extern "C" {
  * @brief PWM frequency in Hz.
  * @note Minimum value is 5000
  */
-#define PWM_FREQ_Hz						(25000)
+#define PWM_FREQ_Hz						(CONTROL_FREQUENCY_Hz)
 /**
  * @brief Dead time (ns) value to be used
  */

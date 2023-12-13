@@ -38,7 +38,6 @@ extern "C" {
 #include "ring_buffer.h"
 #include "error_config.h"
 #include "utility_lib.h"
-#include "open_loop_vf_config.h"
 /*******************************************************************************
  * Defines
  ******************************************************************************/
@@ -71,12 +70,7 @@ extern "C" {
  */
 typedef enum
 {
-	P2P_INV1_STATE,
-	P2P_INV2_STATE,
-	P2P_INV1_REQ_DIRECTION,
-	P2P_INV2_REQ_DIRECTION,
-	P2P_INV1_DIRECTION,
-	P2P_INV2_DIRECTION,
+	P2P_CONTROL_STATE,
 	P2P_BOOL_COUNT,   /**< Not a type. Use this to get the total number of legal types */
 } p2p_bools_t;
 /**
@@ -133,19 +127,7 @@ typedef enum
 typedef enum
 {
 	// Controls
-	P2P_INV1_REQ_FREQ,
-	P2P_INV1_NOM_FREQ,
-	P2P_INV1_NOM_m,
-	P2P_INV1_ACCELERATION,
-	P2P_INV2_REQ_FREQ,
-	P2P_INV2_NOM_FREQ,
-	P2P_INV2_NOM_m,
-	P2P_INV2_ACCELERATION,
-	// Monitoring
-	P2P_INV1_FREQ,
-	P2P_INV1_m,
-	P2P_INV2_FREQ,
-	P2P_INV2_m,
+	P2P_PWM_PHASE_SHIFT,
 	P2P_FLOAT_COUNT,   /**< Not a type. Use this to get the total number of legal types */
 } p2p_float_t;
 /**
@@ -164,24 +146,7 @@ typedef enum
  */
 typedef enum
 {
-	P2P_PARAM_f_REQ_INV1,
-	P2P_PARAM_f_NOM_INV1,
-	P2P_PARAM_m_NOM_INV1,
-	P2P_PARAM_a_INV1,
-	P2P_PARAM_EN_INV1,
-	P2P_PARAM_DIR_REQ_INV1,
-	P2P_PARAM_f_INV1,
-	P2P_PARAM_DIR_INV1,
-	P2P_PARAM_m_INV1,
-	P2P_PARAM_f_REQ_INV2,
-	P2P_PARAM_f_NOM_INV2,
-	P2P_PARAM_m_NOM_INV2,
-	P2P_PARAM_a_INV2,
-	P2P_PARAM_EN_INV2,
-	P2P_PARAM_DIR_REQ_INV2,
-	P2P_PARAM_f_INV2,
-	P2P_PARAM_DIR_INV2,
-	P2P_PARAM_m_INV2,
+	P2P_PARAM_PHASE_SHIFT,
 	P2P_PARAM_COUNT,   /**< Not a type. Use this to get the total number of legal types */
 } p2p_params_type_t;
 #endif
@@ -191,21 +156,11 @@ typedef enum
 /*******************************************************************************
  * Structures
  ******************************************************************************/
-#if IS_CONTROL_CORE
-typedef struct
-{
-	bool state;
-	volatile device_err_t err;
-	volatile bool isPending;
-} state_update_request;
-#endif
+
 /*******************************************************************************
  * Exported Variables
  ******************************************************************************/
-#if IS_CONTROL_CORE
-extern state_update_request inv1StateUpdateRequest;
-extern state_update_request inv2StateUpdateRequest;
-#endif
+
 /*******************************************************************************
  * Global Function Prototypes
  ******************************************************************************/

@@ -40,10 +40,12 @@ extern "C" {
  * Includes
  *******************************************************************************/
 #include "general_header.h"
+#include "lvgl.h"
 #include "pecontroller_display.h"
 #include "screen_data.h"
 #include "screen_styles.h"
-#include "app_image_dictionary.h"
+#include "image_dictionary_app.h"
+#include "lv_theme_taraz.h"
 /********************************************************************************
  * Defines
  *******************************************************************************/
@@ -78,14 +80,6 @@ extern void DisplayMessage(const char* _titleTxt, const char* _msgTxt);
  * @param _measurementIndex Channel index for which the measurement configuration is required. Starts from index 0
  */
 extern void ConfigScreen_LoadMeasurement(int _measurementIndex);
-/**
- * @brief Load the relevant fields and configurations for the desired parameter
- * @note Make sure to call this function before switching to the configuration screen
- * @param _paramInfo Pointer to the desired parameter to be configured.
- * @param val Current value of the parameter
- */
-extern void ConfigScreen_LoadParam(data_param_info_t* _paramInfo, char* val);
-extern void ConfigScreen_LoadSettings(data_param_group_t* _paramGroups, int groupCount);
 extern void ScreenEvents_Handler(lv_event_t * e);
 /********************************************************************************
  * Code

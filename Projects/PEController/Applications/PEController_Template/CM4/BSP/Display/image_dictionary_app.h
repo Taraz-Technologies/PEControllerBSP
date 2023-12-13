@@ -1,11 +1,10 @@
 /**
  ********************************************************************************
- * @file    	app_screen_data.c
+ * @file 		image_dictionary_app.h
  * @author 		Waqas Ehsan Butt
- * @date    	Jun 6, 2023
+ * @date 		Jun 7, 2023
  *
- * @brief   
- ********************************************************************************
+ * @brief    Contains the application specific image definitions
  ********************************************************************************
  * @attention
  *
@@ -20,10 +19,17 @@
  ********************************************************************************
  */
 
+#ifndef IMAGE_DICTIONARY_APP_H_
+#define IMAGE_DICTIONARY_APP_H_
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /********************************************************************************
  * Includes
  *******************************************************************************/
-#include "app_screen_data.h"
+#include "image_dictionary.h"
 /********************************************************************************
  * Defines
  *******************************************************************************/
@@ -37,37 +43,11 @@
  *******************************************************************************/
 
 /********************************************************************************
- * Static Variables
+ * Exported Variables
  *******************************************************************************/
 
 /********************************************************************************
- * Global Variables
- *******************************************************************************/
-/**
- * @brief This information will be displayed in the application information screen
- * @note The information is application dependent and can be edited in @ref screen_appinfo_data.c.
- * The file is located in \"CM4/BSP/Display\" folder in the relevant project
- */
-appinfo_display_t appInfoDisplay =
-{
-		.appInfo = "PWM 1-2 (LEG 1) displays synchronization of the PWM generation with HRTIM_Master COMP1. "
-				"PWM 3-6 (LEG 2,3) displays an H-Bridge switching scheme. "
-				"PWM1 and PWM3 have a controllable phase shift update-able through the display. Value should be between 0-120 degrees. "
-				"PWM 7-8 (LEG 4) synchronizes HRTIM submodule to the Fiber Tx and generates the Fiber Tx signal to synchronize slave controllers. "
-				"PWM 9-16 (LEG 5-8) presents 2 H-Bridges with 8 switches synchronizing with Fiber Rx signal, and also synchronizing TIM1 and HRTIM.",
-
-		.connectionInfo = NULL,
-
-		.documentationLink = "www.taraztechnologies.com/Downloads/Software/PEControllerBSP/index.html",
-
-		.img = NULL,
-};
-/**
- * @brief Assigns the image to be displayed on the splash screen
- */
-image_info_t* splashImg = &taraz_logo_info;
-/********************************************************************************
- * Function Prototypes
+ * Global Function Prototypes
  *******************************************************************************/
 
 /********************************************************************************
@@ -75,5 +55,9 @@ image_info_t* splashImg = &taraz_logo_info;
  *******************************************************************************/
 
 
+#ifdef __cplusplus
+}
+#endif
 
+#endif 
 /* EOF */

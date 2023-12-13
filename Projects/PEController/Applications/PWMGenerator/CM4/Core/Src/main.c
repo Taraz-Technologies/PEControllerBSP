@@ -159,7 +159,7 @@ int main(void)
 	storageClients[0].arg = (void*)&PROCESSED_ADC_DATA;
 	BSP_ADC_ConfigStorage(&storageClients[0]);
 	ScreenData_ConfigStorage(&storageClients[1]);
-	BSP_InterProcessorMsgs_ConfigStorage(&storageClients[2]);
+	P2PComms_ConfigStorage(&storageClients[2]);
 	StateStorage_Init(&storageConfig);
 	sharedData->isStateStorageInitialized = true;
   /* USER CODE END Init */

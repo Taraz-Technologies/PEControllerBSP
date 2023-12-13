@@ -1,6 +1,6 @@
 /**
  ********************************************************************************
- * @file    	app_screen_data.c
+ * @file    	screen_data_app.c
  * @author 		Waqas Ehsan Butt
  * @date    	Jun 6, 2023
  *
@@ -23,7 +23,7 @@
 /********************************************************************************
  * Includes
  *******************************************************************************/
-#include "app_screen_data.h"
+#include "screen_data_app.h"
 #include "p2p_comms.h"
 /********************************************************************************
  * Defines
@@ -40,14 +40,13 @@
 /********************************************************************************
  * Static Variables
  *******************************************************************************/
-
+static data_param_info_t* firstWindowParams[] = { &p2pCommsParams[P2P_PARAM_f_NOM_INV1], &p2pCommsParams[P2P_PARAM_m_NOM_INV1], &p2pCommsParams[P2P_PARAM_a_INV1], };
+static data_param_info_t* secondWindowParams[] = { &p2pCommsParams[P2P_PARAM_f_NOM_INV2], &p2pCommsParams[P2P_PARAM_m_NOM_INV2], &p2pCommsParams[P2P_PARAM_a_INV2], };
 /********************************************************************************
  * Global Variables
  *******************************************************************************/
 /**
  * @brief This information will be displayed in the application information screen
- * @note The information is application dependent and can be edited in @ref screen_appinfo_data.c.
- * The file is located in \"CM4/BSP/Display\" folder in the relevant project
  */
 appinfo_display_t appInfoDisplay =
 {
@@ -70,9 +69,10 @@ appinfo_display_t appInfoDisplay =
  * @brief Assigns the image to be displayed on the splash screen
  */
 image_info_t* splashImg = &taraz_logo_info;
-static data_param_info_t* firstWindowParams[] = { &p2pCommsParams[P2P_PARAM_f_NOM_INV1], &p2pCommsParams[P2P_PARAM_m_NOM_INV1], &p2pCommsParams[P2P_PARAM_a_INV1], };
-static data_param_info_t* secondWindowParams[] = { &p2pCommsParams[P2P_PARAM_f_NOM_INV2], &p2pCommsParams[P2P_PARAM_m_NOM_INV2], &p2pCommsParams[P2P_PARAM_a_INV2], };
-data_param_group_t settingWindows[2] =
+/**
+ * @brief This represents list of groups of settings to be configured in the application
+ */
+data_param_group_t settingWindows[SETTINGS_WINDOW_COUNT] =
 {
 		{
 				.title = "Inverter 1 Configuration",

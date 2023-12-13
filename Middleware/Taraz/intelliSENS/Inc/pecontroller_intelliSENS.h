@@ -1,6 +1,6 @@
 /**
  ********************************************************************************
- * @file 		intelliSENS_drivers.h
+ * @file 		pecontroller_intelliSENS.h
  * @author 		Waqas Ehsan Butt
  * @date 		Dec 28, 2021
  *

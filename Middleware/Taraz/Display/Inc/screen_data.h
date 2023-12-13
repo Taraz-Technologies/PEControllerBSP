@@ -37,6 +37,10 @@ extern "C" {
 /** @addtogroup DisplayScreens
  * @{
  */
+
+/** @defgroup Data Data
+ * @{
+ */
 /********************************************************************************
  * Includes
  *******************************************************************************/
@@ -45,6 +49,8 @@ extern "C" {
 #include "adc_config.h"
 #include "shared_memory.h"
 #include "state_storage_lib.h"
+#include "image_dictionary.h"
+#include "screen_data_app.h"
 /********************************************************************************
  * Defines
  *******************************************************************************/
@@ -56,7 +62,7 @@ extern "C" {
  */
 #define TAG_NONE				(0)
 /**
- * @brief Use this tag to indicate touch on Ok button
+ * @brief Use this tag to indicate touch on OK button
  */
 #define TAG_OK					(1)
 /**
@@ -94,7 +100,7 @@ extern "C" {
 /**
  * @brief Use this to get tag from attached event argument
  */
-#define GET_TAG(e)				((uint8_t)(e->user_data))
+#define GET_TAG(e)				((uint32_t)(e->user_data))
 /**
  * @}
  */
@@ -158,7 +164,7 @@ typedef struct
 	image_align_x_t xAlign;				/**< @brief X-Axis alignment of image on display */
 	image_align_y_t yAlign;				/**< @brief Y-Axis alignment of image on display */
 	uint32_t PixelFormat;               /**< @brief Specifies the pixel format.
-                                            This parameter can be one of value of @ref LTDC_Pixelformat */
+                                            This parameter can be one of value of LTDC_Pixelformat */
 } ltdc_layer_info_t;
 /**
  * @brief Contains the information regarding a measurement channel to be displayed
@@ -191,12 +197,30 @@ typedef struct
 	ltdc_layer_info_t* directLayer;		/**< @brief The information for the directly displayed layer in LTDC module. */
 	ltdc_layer_info_t* lvglLayer;		/**< @brief The information for the LVGL layer in LTDC module. */
 } screens_t;
+/**
+ * @brief Represents a data parameter group
+ */
 typedef struct
 {
-	const char* title;
-	data_param_info_t** paramPointers;
-	int paramCount;
+	const char* title;					/**< @brief Title of the group */
+	data_param_info_t** paramPointers;	/**< @brief Parameters of the group */
+	int paramCount;						/**< @brief Parameter count in the group */
 } data_param_group_t;
+/**
+* @brief Contains the information of the application required by the display unit.
+*/
+typedef struct
+{
+	const char* appInfo;							/**< @brief Text representing the application information.
+															Set to NULL if no need to display this parameter.*/
+	const char* connectionInfo;						/**< @brief Text representing the connection information for the application.
+															Set to NULL if no need to display this parameter.*/
+	const char* documentationLink;					/**< @brief Text representing the documentation link for the application.
+															Set to NULL if no need to display this parameter.*/
+	image_info_t* img;								/**< @brief Image displayed in the application screen.
+															Set to NULL if no image to display.*/
+	const char* appTitle;							/**< @brief Text representing the application title. */
+} appinfo_display_t;
 /**
   * @}
   */
@@ -222,10 +246,26 @@ extern const char* unitTxts[UNIT_COUNT];
  * @brief Default layer which can be pointed to, if the LTDC layer needs to be empty
  */
 extern ltdc_layer_info_t defaultLayer;
-
+/**
+ * @brief This variable is used by the system to make sure that the whole screen is refreshed before changing to avoid glitching.
+ */
 extern bool writeAtScreenEnd;
-
-extern data_param_group_t settingWindows[2];
+/**
+ * @brief This information will be displayed in the application information screen
+ * @note The information is application dependent and can be edited in <b>screen_appinfo_data.c</b>.
+ * The file is located in \"CM4/BSP/Display\" folder in the relevant project
+ */
+extern appinfo_display_t appInfoDisplay;
+/**
+ * @brief Assigns the image to be displayed on the splash screen
+ */
+extern image_info_t* splashImg;
+#if SETTINGS_WINDOW_COUNT
+/**
+ * @brief This represents list of groups of settings to be configured in the application
+ */
+extern data_param_group_t settingWindows[SETTINGS_WINDOW_COUNT];
+#endif
 /**
   * @}
   */
@@ -240,6 +280,19 @@ extern data_param_group_t settingWindows[2];
  * @param _config Configuration for the storage
  */
 extern void ScreenData_ConfigStorage(state_storage_client_t* _config);
+/**
+ * @brief Load the relevant fields and configurations for the desired parameter
+ * @note Make sure to call this function before switching to the configuration screen
+ * @param _paramInfo Pointer to the desired parameter to be configured.
+ * @param val Current value of the parameter
+ */
+extern void ConfigScreen_LoadParam(data_param_info_t* _paramInfo, char* val);
+/**
+ * @brief Load settings in the configuration screen.
+ * @param _paramGroups List of parameter groups.
+ * @param _groupCount No of parameter groups.
+ */
+extern void ConfigScreen_LoadSettings(data_param_group_t* _paramGroups, int _groupCount);
 /********************************************************************************
  * Code
  *******************************************************************************/
@@ -253,6 +306,9 @@ extern void ScreenData_ConfigStorage(state_storage_client_t* _config);
 #ifdef __cplusplus
 extern "C" }
 #endif
+/**
+  * @}
+  */
 /**
   * @}
   */

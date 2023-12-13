@@ -40,7 +40,11 @@ typedef enum
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
-
+/**
+ * @brief Call this function to process the control loop.
+ * @param result ADC conversion data
+ */
+static void MainControl_Loop(adc_measures_t* result);
 /*******************************************************************************
  * Variables
  ******************************************************************************/
@@ -76,8 +80,8 @@ static void ProcessInverterActivation(state_update_request* request, int regID, 
 
 static void ADC_Callback(adc_measures_t* result)
 {
-	ProcessInverterActivation(&inv1StateUpdateRequest, SHARE_INV1_STATE, &openLoopVfConfig1);
-	ProcessInverterActivation(&inv2StateUpdateRequest, SHARE_INV2_STATE,
+	ProcessInverterActivation(&inv1StateUpdateRequest, P2P_INV1_STATE, &openLoopVfConfig1);
+	ProcessInverterActivation(&inv2StateUpdateRequest, P2P_INV2_STATE,
 #if VFD_COUNT == 2
 			&openLoopVfConfig2
 #else
@@ -112,7 +116,7 @@ static void ADC_Callback(adc_measures_t* result)
 			adcMode = ADC_MODE_MONITORING;
 		}
 	}
-	MainControl_Loop();
+	MainControl_Loop(result);
 }
 #endif
 /**
@@ -134,11 +138,11 @@ void MainControl_Init(void)
 #if HAS_DUPLICATE_SWITCH
 	openLoopVfConfig1.inverterConfig.s1PinDuplicate = openLoopVfConfig1.inverterConfig.s1PinNos[2] + LEG_SWITCH_COUNT;
 #endif
-	openLoopVfConfig1.nominalFreq = INTER_CORE_DATA.floats[SHARE_INV1_NOM_FREQ];
-	openLoopVfConfig1.nominalModulationIndex = INTER_CORE_DATA.floats[SHARE_INV1_NOM_m];
-	openLoopVfConfig1.outputFreq = INTER_CORE_DATA.floats[SHARE_INV1_REQ_FREQ];
-	openLoopVfConfig1.acceleration = INTER_CORE_DATA.floats[SHARE_INV1_ACCELERATION];
-	openLoopVfConfig1.currentDir = openLoopVfConfig1.dir = INTER_CORE_DATA.bools[SHARE_INV1_DIRECTION] = INTER_CORE_DATA.bools[SHARE_INV1_REQ_DIRECTION];
+	openLoopVfConfig1.nominalFreq = INTER_CORE_DATA.floats[P2P_INV1_NOM_FREQ];
+	openLoopVfConfig1.nominalModulationIndex = INTER_CORE_DATA.floats[P2P_INV1_NOM_m];
+	openLoopVfConfig1.outputFreq = INTER_CORE_DATA.floats[P2P_INV1_REQ_FREQ];
+	openLoopVfConfig1.acceleration = INTER_CORE_DATA.floats[P2P_INV1_ACCELERATION];
+	openLoopVfConfig1.currentDir = openLoopVfConfig1.dir = INTER_CORE_DATA.bools[P2P_INV1_DIRECTION] = INTER_CORE_DATA.bools[P2P_INV1_REQ_DIRECTION];
 	OpenLoopVfControl_Init(&openLoopVfConfig1, NULL);
 
 #if VFD_COUNT == 2
@@ -148,11 +152,11 @@ void MainControl_Init(void)
 #if HAS_DUPLICATE_SWITCH
 	openLoopVfConfig2.inverterConfig.s1PinDuplicate = openLoopVfConfig2.inverterConfig.s1PinNos[2] + LEG_SWITCH_COUNT;
 #endif
-	openLoopVfConfig2.nominalFreq = INTER_CORE_DATA.floats[SHARE_INV2_NOM_FREQ];
-	openLoopVfConfig2.nominalModulationIndex = INTER_CORE_DATA.floats[SHARE_INV2_NOM_m];
-	openLoopVfConfig2.outputFreq = INTER_CORE_DATA.floats[SHARE_INV2_REQ_FREQ];
-	openLoopVfConfig2.acceleration = INTER_CORE_DATA.floats[SHARE_INV2_ACCELERATION];
-	openLoopVfConfig2.currentDir = openLoopVfConfig2.dir = INTER_CORE_DATA.bools[SHARE_INV2_DIRECTION] = INTER_CORE_DATA.bools[SHARE_INV2_REQ_DIRECTION];
+	openLoopVfConfig2.nominalFreq = INTER_CORE_DATA.floats[P2P_INV2_NOM_FREQ];
+	openLoopVfConfig2.nominalModulationIndex = INTER_CORE_DATA.floats[P2P_INV2_NOM_m];
+	openLoopVfConfig2.outputFreq = INTER_CORE_DATA.floats[P2P_INV2_REQ_FREQ];
+	openLoopVfConfig2.acceleration = INTER_CORE_DATA.floats[P2P_INV2_ACCELERATION];
+	openLoopVfConfig2.currentDir = openLoopVfConfig2.dir = INTER_CORE_DATA.bools[P2P_INV2_DIRECTION] = INTER_CORE_DATA.bools[P2P_INV2_REQ_DIRECTION];
 	OpenLoopVfControl_Init(&openLoopVfConfig2, NULL);
 #endif
 
@@ -194,29 +198,29 @@ void MainControl_Stop(void)
 
 /**
  * @brief Call this function to process the control loop.
- * If the new computation request is available new duty cycle values are computed and applied to all inverter legs
+ * @param result ADC conversion data
  */
-void MainControl_Loop(void)
+static void MainControl_Loop(adc_measures_t* result)
 {
-	openLoopVfConfig1.nominalFreq = INTER_CORE_DATA.floats[SHARE_INV1_NOM_FREQ];
-	openLoopVfConfig1.outputFreq = INTER_CORE_DATA.floats[SHARE_INV1_REQ_FREQ];
-	openLoopVfConfig1.nominalModulationIndex = INTER_CORE_DATA.floats[SHARE_INV1_NOM_m];
-	openLoopVfConfig1.acceleration = INTER_CORE_DATA.floats[SHARE_INV1_ACCELERATION];
-	openLoopVfConfig1.dir = INTER_CORE_DATA.bools[SHARE_INV1_REQ_DIRECTION];
+	openLoopVfConfig1.nominalFreq = INTER_CORE_DATA.floats[P2P_INV1_NOM_FREQ];
+	openLoopVfConfig1.outputFreq = INTER_CORE_DATA.floats[P2P_INV1_REQ_FREQ];
+	openLoopVfConfig1.nominalModulationIndex = INTER_CORE_DATA.floats[P2P_INV1_NOM_m];
+	openLoopVfConfig1.acceleration = INTER_CORE_DATA.floats[P2P_INV1_ACCELERATION];
+	openLoopVfConfig1.dir = INTER_CORE_DATA.bools[P2P_INV1_REQ_DIRECTION];
 	OpenLoopVfControl_Loop(&openLoopVfConfig1);
-	INTER_CORE_DATA.floats[SHARE_INV1_FREQ] = openLoopVfConfig1.currentFreq;
-	INTER_CORE_DATA.floats[SHARE_INV1_m] = openLoopVfConfig1.currentModulationIndex;
-	INTER_CORE_DATA.bools[SHARE_INV1_DIRECTION] = openLoopVfConfig1.currentDir;
+	INTER_CORE_DATA.floats[P2P_INV1_FREQ] = openLoopVfConfig1.currentFreq;
+	INTER_CORE_DATA.floats[P2P_INV1_m] = openLoopVfConfig1.currentModulationIndex;
+	INTER_CORE_DATA.bools[P2P_INV1_DIRECTION] = openLoopVfConfig1.currentDir;
 #if VFD_COUNT == 2
-	openLoopVfConfig2.nominalFreq = INTER_CORE_DATA.floats[SHARE_INV2_NOM_FREQ];
-	openLoopVfConfig2.outputFreq = INTER_CORE_DATA.floats[SHARE_INV2_REQ_FREQ];
-	openLoopVfConfig2.nominalModulationIndex = INTER_CORE_DATA.floats[SHARE_INV2_NOM_m];
-	openLoopVfConfig2.acceleration = INTER_CORE_DATA.floats[SHARE_INV2_ACCELERATION];
-	openLoopVfConfig2.dir = INTER_CORE_DATA.bools[SHARE_INV2_REQ_DIRECTION];
+	openLoopVfConfig2.nominalFreq = INTER_CORE_DATA.floats[P2P_INV2_NOM_FREQ];
+	openLoopVfConfig2.outputFreq = INTER_CORE_DATA.floats[P2P_INV2_REQ_FREQ];
+	openLoopVfConfig2.nominalModulationIndex = INTER_CORE_DATA.floats[P2P_INV2_NOM_m];
+	openLoopVfConfig2.acceleration = INTER_CORE_DATA.floats[P2P_INV2_ACCELERATION];
+	openLoopVfConfig2.dir = INTER_CORE_DATA.bools[P2P_INV2_REQ_DIRECTION];
 	OpenLoopVfControl_Loop(&openLoopVfConfig2);
-	INTER_CORE_DATA.floats[SHARE_INV2_FREQ] = openLoopVfConfig2.currentFreq;
-	INTER_CORE_DATA.floats[SHARE_INV2_m] = openLoopVfConfig2.currentModulationIndex;
-	INTER_CORE_DATA.bools[SHARE_INV2_DIRECTION] = openLoopVfConfig2.currentDir;
+	INTER_CORE_DATA.floats[P2P_INV2_FREQ] = openLoopVfConfig2.currentFreq;
+	INTER_CORE_DATA.floats[P2P_INV2_m] = openLoopVfConfig2.currentModulationIndex;
+	INTER_CORE_DATA.bools[P2P_INV2_DIRECTION] = openLoopVfConfig2.currentDir;
 #endif
 }
 

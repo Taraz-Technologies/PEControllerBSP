@@ -1,8 +1,8 @@
 /**
  ********************************************************************************
- * @file    	screen_main_app.c
+ * @file    	screen_data_app.c
  * @author 		Waqas Ehsan Butt
- * @date    	May 23, 2023
+ * @date    	Jun 6, 2023
  *
  * @brief   
  ********************************************************************************
@@ -23,9 +23,8 @@
 /********************************************************************************
  * Includes
  *******************************************************************************/
-#include "screen_main_app.h"
-#include "shared_memory.h"
-#include "data_config.h"
+#include "screen_data_app.h"
+#include "p2p_comms.h"
 /********************************************************************************
  * Defines
  *******************************************************************************/
@@ -41,34 +40,47 @@
 /********************************************************************************
  * Static Variables
  *******************************************************************************/
-/**
- * @brief Collection of data parameters representing the controllable parameters.
- */
-data_param_info_t* mainScreenControlConfs[CONTROL_CONFS_COUNT] =
-{
-		&p2pCommsParams[P2P_PARAM_f_REQ_INV1],
-		&p2pCommsParams[P2P_PARAM_DIR_REQ_INV1],
-		&p2pCommsParams[P2P_PARAM_EN_INV1],
-		&p2pCommsParams[P2P_PARAM_f_REQ_INV2],
-		&p2pCommsParams[P2P_PARAM_DIR_REQ_INV2],
-		&p2pCommsParams[P2P_PARAM_EN_INV2],
-};
-/**
- * @brief Collection of data parameters representing the monitored parameters.
- */
-data_param_info_t* mainScreenMonitorConfs[MONITOR_CONFS_COUNT] =
-{
-		&p2pCommsParams[P2P_PARAM_f_INV1],
-		&p2pCommsParams[P2P_PARAM_a_INV1],
-		&p2pCommsParams[P2P_PARAM_m_INV1],
-		&p2pCommsParams[P2P_PARAM_f_INV2],
-		&p2pCommsParams[P2P_PARAM_a_INV2],
-		&p2pCommsParams[P2P_PARAM_m_INV2],
-};
+static data_param_info_t* firstWindowParams[] = { &p2pCommsParams[P2P_PARAM_U8_SAMPLE], &p2pCommsParams[P2P_PARAM_S8_SAMPLE], &p2pCommsParams[P2P_PARAM_U16_SAMPLE], &p2pCommsParams[P2P_PARAM_U32_SAMPLE], };
+static data_param_info_t* secondWindowParams[] = { &p2pCommsParams[P2P_PARAM_S16_SAMPLE], &p2pCommsParams[P2P_PARAM_S32_SAMPLE], };
 /********************************************************************************
  * Global Variables
  *******************************************************************************/
+/**
+ * @brief This information will be displayed in the application information screen
+ */
+appinfo_display_t appInfoDisplay =
+{
+		.appInfo = "This application serves as a template to demonstrate the usage of PEControllerBSP. "
+				"It can be used as a starting point to enhance functionality by incorporating various control and communication schemes.",
 
+		.connectionInfo = NULL,
+
+		.documentationLink = "www.taraztechnologies.com/Downloads/Software/PEControllerBSP/index.html",
+
+		.img = &bsp_docs_QR_info,
+
+		.appTitle = "Template Project"
+};
+/**
+ * @brief Assigns the image to be displayed on the splash screen
+ */
+image_info_t* splashImg = &taraz_logo_info;
+/**
+ * @brief This represents list of groups of settings to be configured in the application
+ */
+data_param_group_t settingWindows[SETTINGS_WINDOW_COUNT] =
+{
+		{
+				.title = "Settings Page 1",
+				.paramPointers = firstWindowParams,
+				.paramCount = 4
+		},
+		{
+				.title = "Settings Page 2",
+				.paramPointers = secondWindowParams,
+				.paramCount = 2
+		}
+};
 /********************************************************************************
  * Function Prototypes
  *******************************************************************************/
@@ -76,5 +88,7 @@ data_param_info_t* mainScreenMonitorConfs[MONITOR_CONFS_COUNT] =
 /********************************************************************************
  * Code
  *******************************************************************************/
+
+
 
 /* EOF */

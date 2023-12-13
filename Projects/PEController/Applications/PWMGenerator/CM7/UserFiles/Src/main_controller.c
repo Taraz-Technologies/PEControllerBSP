@@ -19,7 +19,7 @@
 #include "pecontroller_digital_in.h"
 #include "shared_memory.h"
 #include "pecontroller_timers.h"
-#include "interprocessor_comms.h"
+#include "p2p_comms.h"
 /*******************************************************************************
  * Defines
  ******************************************************************************/
@@ -35,7 +35,10 @@
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
-
+/**
+ * @brief Call this function to process the control loop.
+ */
+static void MainControl_Loop(void);
 /*******************************************************************************
  * Variables
  ******************************************************************************/
@@ -71,6 +74,12 @@ hrtim_opts_t opts =
 /*******************************************************************************
  * Code
  ******************************************************************************/
+#if IS_ADC_CORE
+static void ADC_Callback(adc_measures_t* result)
+{
+	MainControl_Loop();
+}
+#endif
 /**
  * @brief Initialize the main control loop
  */
@@ -174,7 +183,7 @@ void MainControl_Init(void)
 
 #if IS_ADC_CORE
 	adc_cont_config_t adcConfig = {
-			.callback = NULL,
+			.callback = ADC_Callback,
 			.fs = MONITORING_FREQUENCY_Hz };
 	BSP_ADC_Init(ADC_MODE_CONT, &adcConfig, &RAW_ADC_DATA, &PROCESSED_ADC_DATA);
 	(void) BSP_ADC_Run();
@@ -199,13 +208,12 @@ void MainControl_Stop(void)
 
 /**
  * @brief Call this function to process the control loop.
- * If the new computation request is available new duty cycle values are computed and applied to all inverter legs
  */
-void MainControl_Loop(void)
+static void MainControl_Loop(void)
 {
 	// The register SHARE_PWM_PHASE_SHIFT can be controlled from the screen.
 	// The phase shift should be between 0 and 180 degrees
-	BSP_MasterHRTIM_SetShiftPercent(&opts, HRTIM_COMP2, INTER_CORE_DATA.floats[SHARE_PWM_PHASE_SHIFT] / 360.f);
+	BSP_MasterHRTIM_SetShiftPercent(&opts, HRTIM_COMP2, INTER_CORE_DATA.floats[P2P_PWM_PHASE_SHIFT] / 360.f);
 }
 
 /* EOF */

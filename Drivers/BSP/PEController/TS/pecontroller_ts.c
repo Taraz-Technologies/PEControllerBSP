@@ -269,16 +269,9 @@ TS_StateTypeDef* BSP_TS_GetState(void)
  */
 void BSP_TS_Poll(void)
 {
-	if (initComplete == false)
-	{
-		tsState.touchDetected = false;
-		tsState.touchX = 0;
-		tsState.touchY = 0;
-		return;
-	}
-	uint16_t x;
-	uint16_t y;
-	tsState.touchDetected = MXTDrivers_GetState(&x, &y);
+	uint16_t x = 0;
+	uint16_t y = 0;
+	tsState.touchDetected = initComplete ? MXTDrivers_GetState(&x, &y) : false;
 	tsState.touchX = x;
 	tsState.touchY = y;
 	return;

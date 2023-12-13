@@ -31,7 +31,7 @@
  * Defines
  *******************************************************************************/
 #define MIN_MAX_BALANCING_INVERTER		(false)
-#define INVERTER_DUTY_MODE				OUTPUT_DUTY_MINUS_DEADTIME_AT_PWMH
+#define INVERTER_DUTY_MODE				OUTPUT_DUTY_MINUS_DEADTIME_AT_PWMH//OUTPUT_DUTY_AT_PWMH//OUTPUT_DUTY_MINUS_DEADTIME_AT_PWMH
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
@@ -149,21 +149,22 @@ static bool ChangeInverterDirection_IfRequired(openloopvf_config_t* config, floa
 static void UpdateCurrentFrequency(openloopvf_config_t* config, float a)
 {
 	if (config->currentFreq > config->outputFreq)
+	{
 		config->currentFreq -= a;
-	else
+		if(config->currentFreq < config->outputFreq)
+			config->currentFreq = config->outputFreq;
+	}
+	else if (config->currentFreq < config->outputFreq)
+	{
 		config->currentFreq += a;
-
-	// adjust the frequency with given acceleration
-	if((a < 0 && config->currentFreq < config->outputFreq) || (a > 0 && config->currentFreq > config->outputFreq))
-		config->currentFreq = config->outputFreq;
+		if(config->currentFreq > config->outputFreq)
+			config->currentFreq = config->outputFreq;
+	}
 }
 
 /**
  * @brief This function computes new duty cycles for the inverter in each cycle
  * @param config Pointer to the inverter structure
- * @details Here the frequency starts from the @ref INITIAL_FREQ and keeps increasing till
- * 	it reaches the required frequency value with constant @ref ACCELERATION. The currentModulationIndex
- * 	is acquired by nominalModulationIndex / nominalFreq
  */
 void OpenLoopVfControl_Loop(openloopvf_config_t* config)
 {

@@ -109,9 +109,6 @@ extern void OpenLoopVfControl_Init(openloopvf_config_t* config, PWMResetCallback
 /**
  * @brief This function computes new duty cycles for the inverter in each cycle
  * @param config Pointer to the inverter structure
- * @details Here the frequency starts from the @ref INITIAL_FREQ and keeps increasing till
- * 	it reaches the required frequency value with constant @ref ACCELERATION. The currentModulationIndex
- * 	is acquired by nominalModulationIndex / nominalFreq
  */
 extern void OpenLoopVfControl_Loop(openloopvf_config_t* config);
 /**

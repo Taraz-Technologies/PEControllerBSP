@@ -32,6 +32,9 @@
  *******************************************************************************/
 #define FIELD_ROW_HEIGHT				(45)
 #define FIELD_VALUE_WIDTH				(120)
+#define MEASURES_CONFIGURABLE			(1)
+#define PARAMS_CONFIGURABLE				(1)
+#define SETTINGS_CONFIGURABLE			(1)
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
@@ -52,6 +55,8 @@ typedef struct
 	lv_obj_t* keyboard;
 	lv_obj_t* paramGrid;
 	lv_obj_t* paramName;
+	lv_obj_t* nameContainerArea;
+	lv_obj_t* leftRightKb;
 } screen_objs_t;
 typedef struct
 {
@@ -70,6 +75,26 @@ typedef struct
 	lv_obj_t* container;
 	lv_obj_t* value;
 } conf_field_info_t;
+typedef struct
+{
+	int unitIndex;
+	int typeIndex;
+	int measurementIndex;
+	measure_objs_t objs;
+} measure_data_t;
+typedef struct
+{
+	data_param_info_t* paramInfo;
+	var_objs_t objs;
+} var_data_t;
+typedef struct
+{
+	int groupCount;
+	int settingsCount;
+	int currentSettingIndex;
+	data_param_group_t* paramGroups;
+	conf_field_info_t* objs;
+} conf_field_data_t;
 /********************************************************************************
  * Static Variables
  *******************************************************************************/
@@ -78,19 +103,9 @@ static volatile bool isActive;
 static screen_objs_t screenObjs = {0};
 static volatile uint8_t tag = TAG_NONE;
 static conf_type_t confType = CONF_MEASURE;
-static int measurementIndex = 0;
-static data_param_info_t* paramInfo = NULL;
-static measure_objs_t measureObjs = {0};
-static var_objs_t varObjs = {0};
-static int unitIndex;
-static int typeIndex;
-static data_param_group_t* paramGroups;
-static int groupCount;
-static conf_field_info_t* settingObjs;
-static int settingsCount = 0;
-static int currentSettingIndex = 0;
-static lv_obj_t* nameContainerArea;
-static lv_obj_t* leftRightKb;
+static measure_data_t measureData = {0};
+static var_data_t varData = {0};
+static conf_field_data_t confFieldData = {0};
 /********************************************************************************
  * Global Variables
  *******************************************************************************/
@@ -102,50 +117,17 @@ static lv_obj_t* leftRightKb;
 /********************************************************************************
  * Code
  *******************************************************************************/
-static void EnableKeypadButtons(lv_obj_t* item, bool en)
+static void EnablePageChange(lv_obj_t* item, bool en)
 {
 	if (en)
 	{
 		lv_obj_clear_state(item, LV_STATE_DISABLED);
-		lv_obj_set_style_bg_color(item, lvColorStore.darkTaraz, LV_PART_ITEMS);
+		lv_obj_set_style_bg_color(item, themeColors.btn, LV_PART_ITEMS);
 	}
 	else
 	{
 		lv_obj_add_state(item, LV_STATE_DISABLED);
-		lv_obj_set_style_bg_color(item, lvColorStore.background, LV_PART_ITEMS);
-	}
-}
-
-static void StyleKeypadButtons(lv_obj_t* item)
-{
-	lv_obj_set_style_bg_color(item, lvColorStore.background, 0);
-	lv_obj_set_style_text_color(item, lvColorStore.darkTaraz, 0);
-	lv_obj_set_style_bg_color(item, lvColorStore.darkTaraz, LV_PART_ITEMS);
-	lv_obj_set_style_text_color(item, lvColorStore.white, LV_PART_ITEMS);
-	lv_obj_set_style_border_color(item, lvColorStore.lightTaraz, LV_PART_ITEMS);
-	lv_obj_set_style_border_width(item, 2, LV_PART_ITEMS);
-}
-
-static void Type_Toggle(lv_event_t* e)
-{
-	if (!isActive)
-		return;
-	if (measureObjs.type != NULL)
-	{
-		if(++typeIndex >= MEASURE_COUNT)
-			typeIndex = 0;
-		lv_label_set_text(measureObjs.type, measureTxts[typeIndex]);
-	}
-}
-static void Unit_Toggle(lv_event_t* e)
-{
-	if (!isActive)
-		return;
-	if (measureObjs.unit != NULL)
-	{
-		if(++unitIndex >= UNIT_COUNT)
-			unitIndex = 0;
-		lv_label_set_text(measureObjs.unit, unitTxts[unitIndex]);
+		lv_obj_set_style_bg_color(item, themeColors.bg, LV_PART_ITEMS);
 	}
 }
 
@@ -168,8 +150,8 @@ static void Numpad_Create(lv_obj_t * parent)
 	lv_obj_set_grid_cell(screenObjs.keyboard, LV_GRID_ALIGN_STRETCH, 1, 1, LV_GRID_ALIGN_STRETCH, 1, 1);
 	lv_obj_set_style_text_font(screenObjs.keyboard, &lv_font_montserrat_26, 0);
 	lv_btnmatrix_set_map(screenObjs.keyboard, map);
+	// 0 button should be twice the size of other buttons
 	lv_btnmatrix_set_btn_width(screenObjs.keyboard, 13, 2);
-	StyleKeypadButtons(screenObjs.keyboard);
 }
 
 static void Close_Clicked(lv_event_t * e)
@@ -190,7 +172,6 @@ static void OkClose_Create(lv_obj_t * parent, int row, int col)
 	lv_btnmatrix_set_map(kb, map);
 	lv_obj_set_style_text_font(kb, &lv_font_montserrat_30, 0);
 	lv_obj_add_event_cb(kb, Close_Clicked, LV_EVENT_CLICKED, NULL);
-	StyleKeypadButtons(kb);
 }
 
 static void LeftRight_Clicked(lv_event_t * e)
@@ -206,41 +187,37 @@ static void LeftRight_Create(lv_obj_t * parent, int row, int col)
 	static const char* map[] = {LV_SYMBOL_LEFT, LV_SYMBOL_RIGHT,
 			NULL};
 
-	leftRightKb = lv_keyboard_create(parent);
-	lv_obj_set_grid_cell(leftRightKb, LV_GRID_ALIGN_STRETCH, col, 1, LV_GRID_ALIGN_STRETCH, row, 1);
-	lv_btnmatrix_set_map(leftRightKb, map);
-	lv_obj_set_style_pad_top(leftRightKb, 0, 0);
-	lv_obj_set_style_pad_bottom(leftRightKb, 0, 0);
-	lv_obj_set_style_text_font(leftRightKb, &lv_font_montserrat_30, 0);
-	lv_obj_add_event_cb(leftRightKb, LeftRight_Clicked, LV_EVENT_CLICKED, NULL);
-	StyleKeypadButtons(leftRightKb);
-	EnableKeypadButtons(leftRightKb, false);
+	screenObjs.leftRightKb = lv_keyboard_create(parent);
+	lv_obj_set_grid_cell(screenObjs.leftRightKb, LV_GRID_ALIGN_STRETCH, col, 1, LV_GRID_ALIGN_STRETCH, row, 1);
+	lv_btnmatrix_set_map(screenObjs.leftRightKb, map);
+	lv_obj_set_style_pad_ver(screenObjs.leftRightKb, 0, 0);
+	lv_obj_set_style_text_font(screenObjs.leftRightKb, &lv_font_montserrat_30, 0);
+	lv_obj_add_event_cb(screenObjs.leftRightKb, LeftRight_Clicked, LV_EVENT_CLICKED, NULL);
+	EnablePageChange(screenObjs.leftRightKb, false);
 }
 
 static void StaticForm_Create(lv_obj_t * parent)
 {
-	static lv_style_t btnLblStyle;
 	static lv_style_t lblStyleName;
 	static lv_style_t nameContainerStyle;
 	static bool init = false;
 	// initialize styles once
 	if (!init)
 	{
-		BSP_Screen_InitLabelStyle(&btnLblStyle, &lv_font_montserrat_26, LV_TEXT_ALIGN_CENTER, &lvColorStore.darkFont);
-		BSP_Screen_InitLabelStyle(&lblStyleName, &lv_font_montserrat_30, LV_TEXT_ALIGN_CENTER, &lvColorStore.white);
-		BSP_Screen_InitGridStyle(&nameContainerStyle, 0, 0, 2, 10, &lvColorStore.background);
-		lv_style_set_border_color(&nameContainerStyle, lvColorStore.gray);
+		BSP_Screen_InitLabelStyle(&lblStyleName, &lv_font_montserrat_30, LV_TEXT_ALIGN_CENTER, NULL);
+		BSP_Screen_InitGridStyle(&nameContainerStyle, 0, 0, 2, 10, NULL);
+		lv_style_set_border_color(&nameContainerStyle, themeColors.gray);
 		init = true;
 	}
 
 	// name and container for configuration data
 	static lv_coord_t cols[] = {180, LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
-	nameContainerArea = lv_grid_create_general(parent, cols, singleRowCol, &lvStyleStore.defaultGrid, NULL, NULL, NULL);
-	lv_obj_set_grid_cell(nameContainerArea, LV_GRID_ALIGN_STRETCH, 0, 2, LV_GRID_ALIGN_STRETCH, 0, 1);
-	lv_obj_t * nameContainer = lv_container_create_general(nameContainerArea, &nameContainerStyle, 0, 1, NULL, NULL);
+	screenObjs.nameContainerArea = lv_grid_create_general(parent, cols, singleRowCol, &lvStyleStore.defaultGrid, NULL, NULL, NULL);
+	lv_obj_set_grid_cell(screenObjs.nameContainerArea, LV_GRID_ALIGN_STRETCH, 0, 2, LV_GRID_ALIGN_STRETCH, 0, 1);
+	lv_obj_t * nameContainer = lv_container_create_general(screenObjs.nameContainerArea, &nameContainerStyle, 0, 1, NULL, NULL);
 	screenObjs.paramName = lv_label_create_general(nameContainer, &lblStyleName, "", NULL, NULL);
 	lv_obj_align(screenObjs.paramName, LV_ALIGN_CENTER, 0, 0);
-	LeftRight_Create(nameContainerArea, 0, 0);
+	LeftRight_Create(screenObjs.nameContainerArea, 0, 0);
 
 	static lv_coord_t rows[] = {LV_GRID_FR(1), 80, LV_GRID_TEMPLATE_LAST};
 	lv_obj_t* grid = lv_grid_create_general(parent, singleRowCol, rows, &lvStyleStore.thinMarginGrid, NULL, NULL, NULL);
@@ -265,7 +242,7 @@ static void CreateParamGrid(void)
 	// initialize styles once
 	if (!init)
 	{
-		BSP_Screen_InitGridStyle(&gridStyle, 12, 12, 0, 0, &lvColorStore.background);
+		BSP_Screen_InitGridStyle(&gridStyle, 12, 12, 0, 0, NULL);
 		init = true;
 	}
 	static lv_coord_t rows[] = {FIELD_ROW_HEIGHT, FIELD_ROW_HEIGHT, FIELD_ROW_HEIGHT,
@@ -291,10 +268,35 @@ static lv_obj_t* AddField(const char* name, const char* value, bool isWriteable,
 	field.nameTxt = name;
 	field.valueTxt = value;
 	field.isTextArea = isWriteable;
-	lv_default_text_field(screenObjs.paramGrid, &field, row, 0, e, eventData);
+	lv_create_default_text_field(screenObjs.paramGrid, &field, row, 0, e, eventData);
 	if (container != NULL)
 		*container = field.container;
 	return field.valueField;
+}
+
+#if MEASURES_CONFIGURABLE
+
+static void Type_Toggle(lv_event_t* e)
+{
+	if (!isActive)
+		return;
+	if (measureData.objs.type != NULL)
+	{
+		if(++measureData.typeIndex >= MEASURE_COUNT)
+			measureData.typeIndex = 0;
+		lv_label_set_text(measureData.objs.type, measureTxts[measureData.typeIndex]);
+	}
+}
+static void Unit_Toggle(lv_event_t* e)
+{
+	if (!isActive)
+		return;
+	if (measureData.objs.unit != NULL)
+	{
+		if(++measureData.unitIndex >= 2)
+			measureData.unitIndex = 0;
+		lv_label_set_text(measureData.objs.unit, unitTxts[measureData.unitIndex]);
+	}
 }
 
 /**
@@ -306,29 +308,45 @@ void ConfigScreen_LoadMeasurement(int _measurementIndex)
 {
 	if (screenObjs.itemContainer == NULL)
 		return;
-	measurementIndex = _measurementIndex;
+	measureData.measurementIndex = _measurementIndex;
 	confType = CONF_MEASURE;
 
 	CreateParamGrid();
-	SetPageTitle(dispMeasures.chNames[measurementIndex]);
+	SetPageTitle(dispMeasures.chNames[measureData.measurementIndex]);
 	char txt[12];
 	// Type
-	typeIndex = (uint8_t)dispMeasures.chMeasures[measurementIndex].type;
-	measureObjs.type = AddField("Type", measureTxts[typeIndex], false, NULL, 0, Type_Toggle, NULL);
+	measureData.typeIndex = (uint8_t)dispMeasures.chMeasures[measureData.measurementIndex].type;
+	measureData.objs.type = AddField("Type", measureTxts[measureData.typeIndex], false, NULL, 0, Type_Toggle, NULL);
 	// Units
-	unitIndex = (uint8_t)dispMeasures.adcInfo->units[measurementIndex];
-	measureObjs.unit = AddField("Unit", measureTxts[typeIndex], false, NULL, 1, Unit_Toggle, NULL);
+	measureData.unitIndex = (uint8_t)dispMeasures.adcInfo->units[measureData.measurementIndex];
+	measureData.objs.unit = AddField("Unit", unitTxts[measureData.unitIndex], false, NULL, 1, Unit_Toggle, NULL);
 	// Sensitivity
-	(void)ftoa_custom(ADC_INFO.sensitivity[measurementIndex], txt, 7, 4);
-	screenObjs.focusItem = measureObjs.sensitivity = AddField("Sensitivity", txt, true, NULL, 2, TextArea_Clicked, NULL);
-	(void)ftoa_custom(ADC_INFO.offsets[measurementIndex], txt, 7, 4);
-	measureObjs.offset = AddField("Offset", txt, true, NULL, 3, TextArea_Clicked, NULL);
-	(void)ftoa_custom(ADC_INFO.freq[measurementIndex], txt, 7, 1);
-	measureObjs.freq = AddField("Fundamental Frequency", txt, true, NULL, 4, TextArea_Clicked, NULL);
+	(void)ftoa_custom(ADC_INFO.sensitivity[measureData.measurementIndex], txt, 7, 4);
+	screenObjs.focusItem = measureData.objs.sensitivity = AddField("Sensitivity", txt, true, NULL, 2, TextArea_Clicked, NULL);
+	(void)ftoa_custom(ADC_INFO.offsets[measureData.measurementIndex], txt, 7, 4);
+	measureData.objs.offset = AddField("Offset", txt, true, NULL, 3, TextArea_Clicked, NULL);
+	(void)ftoa_custom(ADC_INFO.freq[measureData.measurementIndex], txt, 7, 1);
+	measureData.objs.freq = AddField("Fundamental Frequency", txt, true, NULL, 4, TextArea_Clicked, NULL);
 
 	lv_keyboard_set_textarea(screenObjs.keyboard, screenObjs.focusItem);
 }
 
+static device_err_t UpdateMeasurementSettings(void)
+{
+	float freq, sensitivity, offset;
+	bool isValid = atof_custom(lv_textarea_get_text(measureData.objs.freq), &freq) &&
+			atof_custom(lv_textarea_get_text(measureData.objs.sensitivity), &sensitivity) &&
+			atof_custom(lv_textarea_get_text(measureData.objs.offset), &offset);
+	if (isValid == false)
+		return ERR_INVALID_TEXT;
+	device_err_t err = BSP_ADC_UpdateConfig(dispMeasures.adcInfo, dispMeasures.adcInfo->fs, measureData.measurementIndex, freq, sensitivity, offset, (data_units_t)measureData.unitIndex);
+	dispMeasures.chMeasures[measureData.measurementIndex].type = (measure_type_t)measureData.typeIndex;
+	return err;
+}
+
+#endif
+
+#if PARAMS_CONFIGURABLE
 /**
  * @brief Load the relevant fields and configurations for the desired parameter
  * @note Make sure to call this function before switching to the configuration screen
@@ -343,10 +361,21 @@ void ConfigScreen_LoadParam(data_param_info_t* _paramInfo, char* val)
 
 	CreateParamGrid();
 	SetPageTitle(_paramInfo->name);
-	screenObjs.focusItem = varObjs.lblValue = AddField("Value", val, true, NULL, 0, TextArea_Clicked, NULL);
+	screenObjs.focusItem = varData.objs.lblValue = AddField("Value", val, true, NULL, 0, TextArea_Clicked, NULL);
 	lv_keyboard_set_textarea(screenObjs.keyboard, screenObjs.focusItem);
-	paramInfo = _paramInfo;
+	varData.paramInfo = _paramInfo;
 }
+
+static device_err_t UpdateParameter(void)
+{
+	if(varData.paramInfo != NULL)
+		return SetDataParameter_FromText(varData.paramInfo, lv_textarea_get_text(varData.objs.lblValue));
+	return ERR_OK;
+}
+
+#endif
+
+#if SETTINGS_CONFIGURABLE
 
 static void EditableParam_Clicked(lv_event_t * e)
 {
@@ -380,11 +409,11 @@ static void AddParamField(int row, data_param_info_t* param, conf_field_info_t* 
 
 static void HideAllSettings(void)
 {
-	if (settingObjs == NULL)
+	if (confFieldData.objs == NULL)
 		return;
 
-	for (int i = 0; i < settingsCount; i++)
-		lv_obj_add_flag(settingObjs[i].container, LV_OBJ_FLAG_HIDDEN);
+	for (int i = 0; i < confFieldData.settingsCount; i++)
+		lv_obj_add_flag(confFieldData.objs[i].container, LV_OBJ_FLAG_HIDDEN);
 }
 
 static void ShowSpecificSettingWindow(int index)
@@ -393,51 +422,79 @@ static void ShowSpecificSettingWindow(int index)
 
 	int firstSetting = 0;
 	for (int i = 0; i < index; i++)
-		firstSetting += paramGroups[i].paramCount;
+		firstSetting += confFieldData.paramGroups[i].paramCount;
 
-	SetPageTitle(paramGroups[index].title);
+	SetPageTitle(confFieldData.paramGroups[index].title);
 
-	currentSettingIndex = index;
-	for (int i = 0; i < paramGroups[index].paramCount; i++)
-		lv_obj_clear_flag(settingObjs[firstSetting++].container, LV_OBJ_FLAG_HIDDEN);
+	confFieldData.currentSettingIndex = index;
+	for (int i = 0; i < confFieldData.paramGroups[index].paramCount; i++)
+		lv_obj_clear_flag(confFieldData.objs[firstSetting++].container, LV_OBJ_FLAG_HIDDEN);
 }
 
 static void FillAllSettings(void)
 {
-	if (settingObjs != NULL)
-		free(settingObjs);
-	settingsCount = 0;
+	if (confFieldData.objs != NULL)
+		free(confFieldData.objs);
+	confFieldData.settingsCount = 0;
 
-	for (int i = 0; i < groupCount; i++)
-		settingsCount += paramGroups[i].paramCount;
+	for (int i = 0; i < confFieldData.groupCount; i++)
+		confFieldData.settingsCount += confFieldData.paramGroups[i].paramCount;
 
-	settingObjs = (conf_field_info_t*) malloc(sizeof(conf_field_info_t) * settingsCount);
+	confFieldData.objs = (conf_field_info_t*) malloc(sizeof(conf_field_info_t) * confFieldData.settingsCount);
 
 	// Create and hide all
 	int index = 0;
-	for (int i = 0; i < groupCount; i++)
+	for (int i = 0; i < confFieldData.groupCount; i++)
 	{
-		for (int j = 0; j < paramGroups[i].paramCount; j++)
+		for (int j = 0; j < confFieldData.paramGroups[i].paramCount; j++)
 		{
-			AddParamField(j, paramGroups[i].paramPointers[j], &settingObjs[index]);
-			lv_obj_add_flag(settingObjs[index++].container, LV_OBJ_FLAG_HIDDEN);
+			AddParamField(j, confFieldData.paramGroups[i].paramPointers[j], &confFieldData.objs[index]);
+			lv_obj_add_flag(confFieldData.objs[index++].container, LV_OBJ_FLAG_HIDDEN);
 		}
 	}
 }
 
+/**
+ * @brief Load settings in the configuration screen.
+ * @param _paramGroups List of parameter groups.
+ * @param _groupCount No of parameter groups.
+ */
 void ConfigScreen_LoadSettings(data_param_group_t* _paramGroups, int _groupCount)
 {
 	if (screenObjs.itemContainer == NULL)
 		return;
 	confType = CONF_SETTINGS;
 
-	paramGroups = _paramGroups;
-	groupCount = _groupCount;
+	confFieldData.paramGroups = _paramGroups;
+	confFieldData.groupCount = _groupCount;
 	CreateParamGrid();
 	FillAllSettings();
 	ShowSpecificSettingWindow(0);
-	EnableKeypadButtons(leftRightKb, true);
+	EnablePageChange(screenObjs.leftRightKb, true);
 }
+
+static device_err_t UpdateSettings(void)
+{
+	if (confFieldData.paramGroups == NULL || confFieldData.groupCount <= 0 || confFieldData.objs == NULL || confFieldData.settingsCount < 0)
+		return ERR_OK;
+
+	int index = 0;
+	for (int i = 0; i < confFieldData.groupCount; i++)
+	{
+		for (int j = 0; j < confFieldData.paramGroups[i].paramCount; j++)
+		{
+			data_param_info_t* param = confFieldData.paramGroups[i].paramPointers[j];
+			device_err_t err = SetDataParameter_FromText(param, IsEditableParamField(param) == false ? lv_label_get_text(confFieldData.objs[index].value) : lv_textarea_get_text(confFieldData.objs[index].value));
+			if (err != ERR_OK)
+				return err;
+			index++;
+		}
+	}
+
+	return ERR_OK;
+}
+
+#endif
 
 static void Load(void)
 {
@@ -453,52 +510,11 @@ static void Unload(void)
 		isActive = false;
 		lv_obj_del(screenObjs.paramGrid);
 		screenObjs.paramGrid = NULL;
-		if (settingObjs != NULL)
-			free(settingObjs);
-		settingObjs = NULL;
-		EnableKeypadButtons(leftRightKb, false);
+		if (confFieldData.objs != NULL)
+			free(confFieldData.objs);
+		confFieldData.objs = NULL;
+		EnablePageChange(screenObjs.leftRightKb, false);
 	}
-}
-
-static device_err_t UpdateMeasurementSettings(void)
-{
-	float freq, sensitivity, offset;
-	bool isValid = atof_custom(lv_textarea_get_text(measureObjs.freq), &freq) &&
-			atof_custom(lv_textarea_get_text(measureObjs.sensitivity), &sensitivity) &&
-			atof_custom(lv_textarea_get_text(measureObjs.offset), &offset);
-	if (isValid == false)
-		return ERR_INVALID_TEXT;
-	device_err_t err = BSP_ADC_UpdateConfig(dispMeasures.adcInfo, dispMeasures.adcInfo->fs, measurementIndex, freq, sensitivity, offset, (data_units_t)unitIndex);
-	dispMeasures.chMeasures[measurementIndex].type = (measure_type_t)typeIndex;
-	return err;
-}
-
-static device_err_t UpdateParameter(void)
-{
-	if(paramInfo != NULL)
-		return SetDataParameter_FromText(paramInfo, lv_textarea_get_text(varObjs.lblValue));
-	return ERR_OK;
-}
-
-static device_err_t UpdateSettings(void)
-{
-	if (paramGroups == NULL || groupCount <= 0 || settingObjs == NULL || settingsCount < 0)
-		return ERR_OK;
-
-	int index = 0;
-	for (int i = 0; i < groupCount; i++)
-	{
-		for (int j = 0; j < paramGroups[i].paramCount; j++)
-		{
-			data_param_info_t* param = paramGroups[i].paramPointers[j];
-			device_err_t err = SetDataParameter_FromText(param, IsEditableParamField(param) == false ? lv_label_get_text(settingObjs[index].value) : lv_textarea_get_text(settingObjs[index].value));
-			if (err != ERR_OK)
-				return err;
-			index++;
-		}
-	}
-
-	return ERR_OK;
 }
 
 static screen_type_t Refresh(void)
@@ -510,9 +526,9 @@ static screen_type_t Refresh(void)
 		if (tagBuff == TAG_CANCEL)
 			return SCREEN_PREVIOUS;
 		else if (tagBuff == TAG_RIGHT && confType == CONF_SETTINGS)
-			ShowSpecificSettingWindow(currentSettingIndex < groupCount - 1 ? currentSettingIndex + 1 : 0);
+			ShowSpecificSettingWindow(confFieldData.currentSettingIndex < confFieldData.groupCount - 1 ? confFieldData.currentSettingIndex + 1 : 0);
 		else if (tagBuff == TAG_LEFT && confType == CONF_SETTINGS)
-			ShowSpecificSettingWindow(currentSettingIndex = currentSettingIndex > 0 ? currentSettingIndex - 1 : groupCount - 1);
+			ShowSpecificSettingWindow(confFieldData.currentSettingIndex = confFieldData.currentSettingIndex > 0 ? confFieldData.currentSettingIndex - 1 : confFieldData.groupCount - 1);
 		else if (tagBuff == TAG_OK)
 		{
 			device_err_t err = ERR_OK;

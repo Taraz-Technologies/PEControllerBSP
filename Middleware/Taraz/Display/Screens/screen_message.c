@@ -74,13 +74,10 @@ void DisplayMessage(const char* _titleTxt, const char* _msgTxt)
 	lv_obj_set_width(win, MSG_BOX_WIDTH);
 	lv_obj_set_height(win, MSG_BOX_HEIGHT);
 	lv_obj_align(win, LV_ALIGN_CENTER, 0, 0);
-	lv_obj_set_style_border_color(win, lvColorStore.lightTaraz, 0);
+	lv_obj_set_style_border_color(win, lv_theme_taraz_get()->color_secondary, 0);
 	lv_obj_set_style_border_width(win, 2, 0);
 	lv_obj_set_style_radius(win, 10, 0);
-	lv_obj_set_style_bg_color(lv_win_get_header(win), lvColorStore.darkTaraz, 0);
-	//lv_obj_set_style_border_color(lv_win_get_header(win), lvColorStore.lightTaraz, 0);
-	//lv_obj_set_style_border_width(lv_win_get_header(win), 2, 0);
-	//lv_obj_set_style_radius(lv_win_get_header(win), 10, 0);
+	lv_obj_set_style_bg_color(lv_win_get_header(win), lv_theme_taraz_get()->color_primary, 0);
 
 	// TITLE
 	//char txt[50];
@@ -88,25 +85,21 @@ void DisplayMessage(const char* _titleTxt, const char* _msgTxt)
 	lv_obj_set_style_text_align(title, LV_TEXT_ALIGN_LEFT, 0);
 	lv_obj_set_style_pad_left(title, 15, 0);
 	lv_obj_set_style_text_font(title, &lv_font_montserrat_26, 0);
-	lv_obj_set_style_text_color(title, lvColorStore.white, 0);
 
 	/*Add control button to the header*/
 	lv_obj_t * closeBtn = lv_win_add_btn(win, LV_SYMBOL_CLOSE, 50);           /*Add close button and use built-in close action*/
-	lv_obj_set_style_bg_color(closeBtn, lvColorStore.background, 0);
-	lv_obj_set_style_text_color(closeBtn, lvColorStore.white, 0);
-	lv_obj_set_style_border_color(closeBtn, lvColorStore.lightTaraz, 0);
-	lv_obj_set_style_border_width(closeBtn, 2, 0);
+	lv_obj_set_style_bg_color(closeBtn, themeColors.bg, 0);
+	lv_obj_set_style_border_color(closeBtn, lv_theme_taraz_get()->color_secondary, 0);
+	//lv_obj_set_style_border_width(closeBtn, 2, 0);
 	lv_obj_add_event_cb(closeBtn, Close_Clicked, LV_EVENT_CLICKED, win);
 	lv_obj_add_event_cb(lv_win_get_header(win), Close_Clicked, LV_EVENT_CLICKED, win);
 
 	// content
-	lv_obj_set_style_bg_color(lv_win_get_content(win), lvColorStore.background, 0);
+	lv_obj_set_style_bg_color(lv_win_get_content(win), themeColors.bg, 0);
 	lv_obj_set_style_pad_top(lv_win_get_content(win), 0, 0);
 	// text message
 	lv_obj_t * txt = lv_label_create(lv_win_get_content(win));
 	lv_label_set_text(txt, _msgTxt == NULL ? "Unspecified Error": _msgTxt);
-	lv_obj_set_style_text_color(txt, lvColorStore.white, 0);
-	//lv_obj_set_style_pad_top(txt, 20, 0);
 	lv_obj_set_style_text_font(txt, &lv_font_montserrat_22, 0);
 	lv_obj_set_style_text_align(txt, LV_TEXT_ALIGN_CENTER, 0);
 	lv_obj_set_width(txt, MSG_BOX_WIDTH - 50);

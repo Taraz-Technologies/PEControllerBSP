@@ -1,11 +1,10 @@
 /**
  ********************************************************************************
- * @file    	app_screen_data.c
+ * @file 		image_dictionary_app.h
  * @author 		Waqas Ehsan Butt
- * @date    	Jun 6, 2023
+ * @date 		Jun 7, 2023
  *
- * @brief   
- ********************************************************************************
+ * @brief    Contains the application specific image definitions
  ********************************************************************************
  * @attention
  *
@@ -20,10 +19,17 @@
  ********************************************************************************
  */
 
+#ifndef IMAGE_DICTIONARY_APP_H_
+#define IMAGE_DICTIONARY_APP_H_
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /********************************************************************************
  * Includes
  *******************************************************************************/
-#include "app_screen_data.h"
+#include "image_dictionary.h"
 /********************************************************************************
  * Defines
  *******************************************************************************/
@@ -37,34 +43,11 @@
  *******************************************************************************/
 
 /********************************************************************************
- * Static Variables
+ * Exported Variables
  *******************************************************************************/
 
 /********************************************************************************
- * Global Variables
- *******************************************************************************/
-/**
- * @brief This information will be displayed in the application information screen
- * @note The information is application dependent and can be edited in @ref screen_appinfo_data.c.
- * The file is located in \"CM4/BSP/Display\" folder in the relevant project
- */
-appinfo_display_t appInfoDisplay =
-{
-		.appInfo = "This application serves as a template to demonstrate the usage of PEControllerBSP. "
-				"It can be used as a starting point to enhance functionality by incorporating various control and communication schemes.",
-
-		.connectionInfo = NULL,
-
-		.documentationLink = "www.taraztechnologies.com/Downloads/Software/PEControllerBSP/index.html",
-
-		.img = NULL,
-};
-/**
- * @brief Assigns the image to be displayed on the splash screen
- */
-image_info_t* splashImg = &taraz_logo_info;
-/********************************************************************************
- * Function Prototypes
+ * Global Function Prototypes
  *******************************************************************************/
 
 /********************************************************************************
@@ -72,5 +55,9 @@ image_info_t* splashImg = &taraz_logo_info;
  *******************************************************************************/
 
 
+#ifdef __cplusplus
+}
+#endif
 
+#endif 
 /* EOF */

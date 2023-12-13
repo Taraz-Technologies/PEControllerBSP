@@ -81,39 +81,39 @@ typedef struct
 	void (*InitStatesFromStorage)(uint32_t* data, bool isDataValid);	/**< @brief This callback initiates the storage for the relevant client.
 @code
 //Sample Definition
-//static void InitStatesFromStorage(uint32_t* data, bool isDataValid)
-//{
-//	// @note Make sure to only save/load controllable variables here
-//	dest_data_t* src = (dest_data_t*)data;
-//	src_data_t* dest = (src_data_t*)&srcData;
-//	// Put elements here which will always be default values here, such as enable etc which can't be 1 when the control starts
-//	if (isDataValid)
-//		src->value = dest->value;
-//	// Set default values because the loaded values are invalid
-//	// @note Make sure to only save/load controllable variables here
-//	else
-//		src->value = 0;
-//}
+static void InitStatesFromStorage(uint32_t* data, bool isDataValid)
+{
+	// @note Make sure to only save/load controllable variables here
+	dest_data_t* src = (dest_data_t*)data;
+	src_data_t* dest = (src_data_t*)&srcData;
+	// Put elements here which will always be default values here, such as enable etc which can't be 1 when the control starts
+	if (isDataValid)
+		src->value = dest->value;
+	// Set default values because the loaded values are invalid
+	// @note Make sure to only save/load controllable variables here
+	else
+		src->value = 0;
+}
 @endcode
 		 	 	 	 	 	 	 	 	 	 	 @param data Buffer containing stored states at startup used for data initialization by the client.
 		 	 	 	 	 	 	 	 	 	 	 @param isDataValid Contains the validity state of the data. If not valid, start with default values. */
 	uint32_t (*RefreshStates)(uint32_t* data, uint32_t* indexPtr);		/**< @brief This callback is used to refresh the states in the data buffer for the client.
 @code
 //Sample Definition
-//static uint32_t RefreshStates(uint32_t* data, uint32_t* indexPtr)
-//{
-//	uint32_t len = 0;
-//	dest_data_t* dest = (dest_data_t*)data;
-//	src_data_t* src = (src_data_t*)&srcData;
-//	// @note Only update values and signal to update if values have been changed
-//	if (dest->value != src->value)
-//	{
-//		dest->value = src->value;
-//		len = storageWordLen;
-//	}
-//	*indexPtr = 0;
-//	return len;
-//}
+static uint32_t RefreshStates(uint32_t* data, uint32_t* indexPtr)
+{
+	uint32_t len = 0;
+	dest_data_t* dest = (dest_data_t*)data;
+	src_data_t* src = (src_data_t*)&srcData;
+	// @note Only update values and signal to update if values have been changed
+	if (dest->value != src->value)
+	{
+		dest->value = src->value;
+		len = storageWordLen;
+	}
+	*indexPtr = 0;
+	return len;
+}
 @endcode
 	 	 	 	 	 	 	 	 	 	 	 	 @param data Buffer to be updated by the client if states have been updated.
 	 	 	 	 	 	 	 	 	 	 	 	 @param indexPtr Pointer for the initial index of the client, used in case of multiple blocks of state storages by a single client.
@@ -123,14 +123,14 @@ typedef struct
  * @brief Defines the flash sectors for configuring storage.
 @code
 //Sample Definition (Should be kept same for the same controller and memory configuration)
-//storageConfig.sectors[0].sectorNo = FLASH_SECTOR_TOTAL - 2;
-//storageConfig.sectors[1].sectorNo = FLASH_SECTOR_TOTAL - 1;
-//for (int i = 0; i < 2; i++)
-//{
-//	storageConfig.sectors[i].bank = FLASH_BANK_1;
-//	storageConfig.sectors[i].byteCount = FLASH_SECTOR_SIZE;
-//	storageConfig.sectors[i].addr =  (uint32_t*)(FLASH_BANK1_BASE + (storageConfig.sectors[i].sectorNo * FLASH_SECTOR_SIZE));
-//}
+storageConfig.sectors[0].sectorNo = FLASH_SECTOR_TOTAL - 2;
+storageConfig.sectors[1].sectorNo = FLASH_SECTOR_TOTAL - 1;
+for (int i = 0; i < 2; i++)
+{
+	storageConfig.sectors[i].bank = FLASH_BANK_1;
+	storageConfig.sectors[i].byteCount = FLASH_SECTOR_SIZE;
+	storageConfig.sectors[i].addr =  (uint32_t*)(FLASH_BANK1_BASE + (storageConfig.sectors[i].sectorNo * FLASH_SECTOR_SIZE));
+}
 @endcode
  */
 typedef struct
@@ -188,39 +188,39 @@ storageConfig.clientCount = 3;
 storageConfig.clients = storageClients;
 storageClients[0].arg = (void*)&CLIENT_DATA;
 //Following are sample definitions for the functions to be defined in the client.
-//static void InitStatesFromStorage(uint32_t* data, bool isDataValid)
-//{
-//	// @note Make sure to only save/load controllable variables here
-//	dest_data_t* src = (dest_data_t*)data;
-//	src_data_t* dest = (src_data_t*)&srcData;
-//	// Put elements here which will always be default values here, such as enable etc which can't be 1 when the control starts
-//	if (isDataValid)
-//		src->value = dest->value;
-//	// Set default values because the loaded values are invalid
-//	// @note Make sure to only save/load controllable variables here
-//	else
-//		src->value = 0;
-//}
-//static uint32_t RefreshStates(uint32_t* data, uint32_t* indexPtr)
-//{
-//	uint32_t len = 0;
-//	dest_data_t* dest = (dest_data_t*)data;
-//	src_data_t* src = (src_data_t*)&srcData;
-//	// @note Only update values and signal to update if values have been changed
-//	if (dest->value != src->value)
-//	{
-//		dest->value = src->value;
-//		len = storageWordLen;
-//	}
-//	*indexPtr = 0;
-//	return len;
-//}
-//Client1_ConfigStorage(state_storage_client_t* _config)
-//{
-//	_config->InitStatesFromStorage = InitStatesFromStorage;
-//	_config->RefreshStates = RefreshStates;
-//	_config->dataWordLen = STORAGE_WORD_LEN;
-//}
+static void InitStatesFromStorage(uint32_t* data, bool isDataValid)
+{
+	// @note Make sure to only save/load controllable variables here
+	dest_data_t* src = (dest_data_t*)data;
+	src_data_t* dest = (src_data_t*)&srcData;
+	// Put elements here which will always be default values here, such as enable etc which can't be 1 when the control starts
+	if (isDataValid)
+		src->value = dest->value;
+	// Set default values because the loaded values are invalid
+	// @note Make sure to only save/load controllable variables here
+	else
+		src->value = 0;
+}
+static uint32_t RefreshStates(uint32_t* data, uint32_t* indexPtr)
+{
+	uint32_t len = 0;
+	dest_data_t* dest = (dest_data_t*)data;
+	src_data_t* src = (src_data_t*)&srcData;
+	// @note Only update values and signal to update if values have been changed
+	if (dest->value != src->value)
+	{
+		dest->value = src->value;
+		len = storageWordLen;
+	}
+	*indexPtr = 0;
+	return len;
+}
+Client1_ConfigStorage(state_storage_client_t* _config)
+{
+	_config->InitStatesFromStorage = InitStatesFromStorage;
+	_config->RefreshStates = RefreshStates;
+	_config->dataWordLen = STORAGE_WORD_LEN;
+}
 Client1_ConfigStorage(&storageClients[0]);
 Client2_ConfigStorage(&storageClients[1]);
 StateStorage_Init(&storageConfig);

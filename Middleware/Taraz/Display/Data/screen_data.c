@@ -46,9 +46,21 @@
 /********************************************************************************
  * Global Variables
  *******************************************************************************/
+/**
+ * @brief Text representing measurement statistics
+ */
 const char* measureTxts[MEASURE_COUNT] = {"RMS", "Avg", "Max", "Min", "Pk-Pk"};
+/**
+ * @brief Text representing measurement units
+ */
 const char* unitTxts[UNIT_COUNT] = {"V", "A", "W", "Hz"};
+/**
+ * @brief Display related information of the channel measurements
+ */
 disp_measure_t dispMeasures = { 0 };
+/**
+ * @brief Default layer which can be pointed to, if the LTDC layer needs to be empty
+ */
 ltdc_layer_info_t defaultLayer =
 {
 		.data = (uint8_t*)frame_buff,
@@ -61,6 +73,9 @@ ltdc_layer_info_t defaultLayer =
 		.yAlign = ALIGN_UP_Y,
 		.PixelFormat = RAM_PIXEL_FORMAT
 };
+/**
+ * @brief This variable is used by the system to make sure that the whole screen is refreshed before changing to avoid glitching.
+ */
 bool writeAtScreenEnd = false;
 /********************************************************************************
  * Function Prototypes
@@ -109,7 +124,10 @@ static uint32_t RefreshStates(uint32_t* data, uint32_t* indexPtr)
 	*indexPtr = 0;
 	return len;
 }
-
+/**
+ * @brief Configure the storage for the screen data
+ * @param _config Configuration for the storage
+ */
 void ScreenData_ConfigStorage(state_storage_client_t* _config)
 {
 	_config->InitStatesFromStorage = InitStatesFromStorage;

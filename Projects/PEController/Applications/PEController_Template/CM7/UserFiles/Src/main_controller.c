@@ -19,7 +19,7 @@
 #include "pecontroller_digital_in.h"
 #include "shared_memory.h"
 #include "pecontroller_timers.h"
-#include "interprocessor_comms.h"
+#include "p2p_comms.h"
 /*******************************************************************************
  * Defines
  ******************************************************************************/
@@ -39,7 +39,11 @@ typedef enum
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
-
+/**
+ * @brief Call this function to process the control loop.
+ * @param result ADC conversion data
+ */
+static void MainControl_Loop(adc_measures_t* result);
 /*******************************************************************************
  * Variables
  ******************************************************************************/
@@ -52,12 +56,12 @@ static void ADC_Callback(adc_measures_t* result)
 {
 	if (modeChangeRequest.isPending)
 	{
-		INTER_CORE_DATA.bools[SHARE_CONTROL_STATE] = modeChangeRequest.state;
+		INTER_CORE_DATA.bools[P2P_CONTROL_STATE] = modeChangeRequest.state;
 		modeChangeRequest.err = ERR_OK;
 		modeChangeRequest.isPending = false;
 	}
 	// Switch between Monitoring and control mode
-	if (INTER_CORE_DATA.bools[SHARE_CONTROL_STATE])
+	if (INTER_CORE_DATA.bools[P2P_CONTROL_STATE])
 	{
 		if (adcMode == ADC_MODE_MONITORING)
 		{
@@ -79,7 +83,7 @@ static void ADC_Callback(adc_measures_t* result)
 			adcMode = ADC_MODE_MONITORING;
 		}
 	}
-	MainControl_Loop();
+	MainControl_Loop(result);
 }
 #endif
 /**
@@ -124,9 +128,9 @@ void MainControl_Stop(void)
 
 /**
  * @brief Call this function to process the control loop.
- * If the new computation request is available new duty cycle values are computed and applied to all inverter legs
+ * @param result ADC conversion data
  */
-void MainControl_Loop(void)
+static void MainControl_Loop(adc_measures_t* result)
 {
 
 }

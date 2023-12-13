@@ -82,11 +82,11 @@ extern "C" {
  */
 #define ENABLE_INTELLISENS		(1)
 /**
- * @brief Use this frequency when no control loop is enabled to get high bandwidth measurements. Max value is 40K.
+ * @brief Use this frequency when no control loop is enabled to get high bandwidth measurements. Max value is 100K.
  */
 #define MONITORING_FREQUENCY_Hz		(40000)
 /**
- * @brief Use this frequency when control loop is enabled to get low bandwidth measurements. Max value is 40K and is dependent upon the control performance.
+ * @brief Use this frequency when control loop is enabled to get low bandwidth measurements. Max value is 100K and is dependent upon the control performance.
  */
 #define CONTROL_FREQUENCY_Hz		(40000)
 /******** MEASUREMENT CONFIGURATION ***********/

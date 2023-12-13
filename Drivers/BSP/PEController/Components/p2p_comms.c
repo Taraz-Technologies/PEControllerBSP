@@ -1,6 +1,6 @@
 /**
  ********************************************************************************
- * @file    	interprocessor_comms.c
+ * @file    	p2p_comms.c
  * @author 		Waqas Ehsan Butt
  * @date    	April 23, 2021
  *
@@ -25,7 +25,6 @@
 #include "p2p_comms.h"
 #include "shared_memory.h"
 #include "utility_lib.h"
-#include "open_loop_vf_config.h"
 /********************************************************************************
  * Defines
  *******************************************************************************/
@@ -46,21 +45,21 @@
  * @brief Describes the limits of each type of parameters
  * @note The order should strictly match @ref base_data_type_t
  */
-static uint8_t sharedItemsConfig[DTYPE_COUNT] = // --todo-- p2p
+static uint8_t p2pItemsConfig[DTYPE_COUNT] =
 {
-		SHARE_BOOL_COUNT,
-		SHARE_U8_COUNT,
-		SHARE_U16_COUNT,
-		SHARE_U32_COUNT,
-		SHARE_S8_COUNT,
-		SHARE_S16_COUNT,
-		SHARE_S32_COUNT,
-		SHARE_FLOAT_COUNT,
-		SHARE_BIT_ACCESS_COUNT
+		P2P_BOOL_COUNT,
+		P2P_U8_COUNT,
+		P2P_U16_COUNT,
+		P2P_U32_COUNT,
+		P2P_S8_COUNT,
+		P2P_S16_COUNT,
+		P2P_S32_COUNT,
+		P2P_FLOAT_COUNT,
+		P2P_BIT_ACCESS_COUNT
 };
 #endif
 #if IS_STORAGE_CORE
-static uint32_t storageWordLen = 0;//--todo-- p2p
+static uint32_t storageWordLen = 0;
 #endif
 /********************************************************************************
  * Global Variables
@@ -74,6 +73,15 @@ static uint32_t storageWordLen = 0;//--todo-- p2p
  * Code
  *******************************************************************************/
 #if IS_COMMS_CORE
+/**
+ * @brief Update a parameter in control.
+ * @note This is a blocking call and will return only after request is completed.
+ * @note A weak implementation of this function is provided. User can create a custom implementation if needed.
+ * @param type Type of message to be delivered.
+ * @param index Register index.
+ * @param value Data value to be updated.
+ * @return device_err_t If successful <c>ERR_OK</c> else some other error.
+ */
 __weak device_err_t P2PComms_SingleUpdateRequest_Blocking(p2p_msg_type_t type, uint8_t index, data_union_t value)
 {
 	// Disable IRQ to avoid clash
@@ -101,17 +109,28 @@ __weak device_err_t P2PComms_SingleUpdateRequest_Blocking(p2p_msg_type_t type, u
 
 	return (device_err_t)CORE_MSGS.response[msg->responseIndex].u8;
 }
-
-__weak bool P2PComms_IsParameterValid(data_param_info_t* _paramInfo) // --todo-- p2p
+/**
+ * @brief Validates that the parameter is valid.
+ * @note A weak implementation of this function is provided. User can create a custom implementation if needed.
+ * @param _paramInfo Desired parameter.
+ * @return <c>true</c> if valid else <c>false</c>.
+ */
+__weak bool P2PComms_IsParameterValid(data_param_info_t* _paramInfo)
 {
 	// Error if no parameter found
 	// Error if parameter type not in range
 	// Error if parameter index out of range
-	if (_paramInfo == NULL || _paramInfo->type >= DTYPE_COUNT || _paramInfo->index >= sharedItemsConfig[_paramInfo->type])
+	if (_paramInfo == NULL || _paramInfo->type >= DTYPE_COUNT || _paramInfo->index >= p2pItemsConfig[_paramInfo->type])
 		return false;
 	return true;
 }
-
+/**
+ * @brief Get value of a parameter shared in both cores.
+ * @note A weak implementation of this function is provided. User can create a custom implementation if needed.
+ * @param _paramInfo Desired parameter.
+ * @param value Writes the acquired value at this pointer location
+ * @return device_err_t If successful <c>ERR_OK</c> else some other error.
+ */
 __weak device_err_t P2PComms_GetValue(data_param_info_t* _paramInfo, data_union_t* value)
 {
 	if (!P2PComms_IsParameterValid(_paramInfo))
@@ -137,7 +156,13 @@ __weak device_err_t P2PComms_GetValue(data_param_info_t* _paramInfo, data_union_
 	}
 	return ERR_OK;
 }
-
+/**
+ * @brief Update value of a parameter shared in both cores.
+ * @note A weak implementation of this function is provided. User can create a custom implementation if needed.
+ * @param _paramInfo Desired parameter.
+ * @param value Value to be updated.
+ * @return device_err_t If successful <c>ERR_OK</c> else some other error.
+ */
 __weak device_err_t P2PComms_UpdateValue(data_param_info_t* _paramInfo, data_union_t value)
 {
 	if (!P2PComms_IsParameterValid(_paramInfo))
@@ -166,6 +191,7 @@ __weak device_err_t P2PComms_UpdateValue(data_param_info_t* _paramInfo, data_uni
 }
 /**
  * @brief Get the value of a parameter (shared between both processors) in string format.
+ * @note A weak implementation of this function is provided. User can create a custom implementation if needed.
  * @param _paramInfo Relevant parameter information.
  * @param value text value to be updated.
  * @param addUnit If <c>true</c> append the unit of the parameter at the end of the string result.
@@ -203,6 +229,7 @@ __weak device_err_t P2PComms_GetStringValue(data_param_info_t* _paramInfo, char*
 }
 /**
  * @brief Update the value of a parameter (shared between both processors) from a string value.
+ * @note A weak implementation of this function is provided. User can create a custom implementation if needed.
  * @param _paramInfo Relevant parameter information
  * @param value Text value used for updating the parameter
  * @return device_err_t If successful <c>ERR_OK</c> else some other error.
@@ -253,7 +280,8 @@ __weak device_err_t P2PComms_UpdateFromString(data_param_info_t* _paramInfo, con
 	return ERR_ILLEGAL;
 }
 /**
- * @brief Default function to get the data parameters in textual format, according to the parameter info
+ * @brief Default function to get the data parameters in textual format, according to the parameter info.
+ * @note A weak implementation of this function is provided. User can create a custom implementation if needed.
  * @param _paramInfo Structure defining the parameter.
  * @param value Pointer to the location to be updated with the value
  * @param addUnit <c>true</c> if unit needs to be added with the text else false.
@@ -264,7 +292,8 @@ __weak device_err_t Default_GetDataParameter_InText(data_param_info_t* _paramInf
 	return P2PComms_GetStringValue(_paramInfo, value, addUnit);
 }
 /**
- * @brief  Default function to set the data parameters from textual value, according to the parameter info
+ * @brief  Default function to set the data parameters from textual value, according to the parameter info.
+ * @note A weak implementation of this function is provided. User can create a custom implementation if needed.
  * @param _paramInfo Structure defining the parameter.
  * @param value Value to be set as string
  * @return <c>ERR_OK</c> if no error else appropriate error thrown
@@ -276,9 +305,9 @@ __weak device_err_t Default_SetDataParameter_FromText(data_param_info_t* _paramI
 /**
  * @brief Default function to get the value of a parameter in string format.
  * @note This function is used whenever the @ref data_param_info_t.Getter function is not defined and @ref GetDataParameter() is called.
+ * @note A weak implementation of this function is provided. User can create a custom implementation if needed.
  * @param _paramInfo Information regarding the data parameter.
  * @param value text representation of the value acquired.
- * @param addUnit If <c>true</c> append the unit of the parameter at the end of the string result.
  * @return device_err_t If successful <c>ERR_OK</c> else some other error.
  */
 __weak device_err_t Default_GetDataParameter(data_param_info_t* _paramInfo, data_union_t* value)
@@ -288,6 +317,7 @@ __weak device_err_t Default_GetDataParameter(data_param_info_t* _paramInfo, data
 /**
  * @brief Default function to set the value of a parameter from string format.
  * @note This function is used whenever the @ref data_param_info_t.Setter function is not defined and @ref SetDataParameter() is called.
+ * @note A weak implementation of this function is provided. User can create a custom implementation if needed.
  * @param _paramInfo Information regarding the data parameter.
  * @param value text representation of the parameter value.
  * @return device_err_t If successful <c>ERR_OK</c> else some other error.
@@ -301,6 +331,13 @@ __weak device_err_t Default_SetDataParameter(data_param_info_t* _paramInfo, data
 
 #if IS_STORAGE_CORE
 
+/**
+ * @brief This function updates the state storage if needed. Call it periodically.
+ * @note A weak implementation of this function is provided. User can create a custom implementation if needed.
+ * @param data Data pointer
+ * @param indexPtr Index of next data
+ * @return Size of data that is updated. (Unit is 4-bytes)
+ */
 __weak uint32_t P2PComms_RefreshStates(uint32_t* data, uint32_t* indexPtr)
 {
 	uint32_t len = 0;
@@ -332,85 +369,153 @@ void P2PComms_ConfigStorage(state_storage_client_t* _config)
 #endif
 
 #if IS_CONTROL_CORE
-
+/**
+ * @brief Update a boolean parameter share in both cores.
+ * @note A weak implementation of this function is provided. User can create a custom implementation if needed.
+ * @param index Register index.
+ * @param value Desired value.
+ * @return device_err_t If successful <c>ERR_OK</c> else some other error.
+ */
 __weak device_err_t P2PComms_UpdateBool(uint8_t index, bool value)
 {
 	INTER_CORE_DATA.bools[index] = value;
 	return ERR_OK;
 }
-
+/**
+ * @brief Update a uint8_t parameter share in both cores.
+ * @note A weak implementation of this function is provided. User can create a custom implementation if needed.
+ * @param index Register index.
+ * @param value Desired value.
+ * @return device_err_t If successful <c>ERR_OK</c> else some other error.
+ */
 __weak device_err_t P2PComms_UpdateU8(uint8_t index, uint8_t value)
 {
 	INTER_CORE_DATA.u8s[index] = value;
 	return ERR_OK;
 }
-
+/**
+ * @brief Update a uint16_t parameter share in both cores.
+ * @note A weak implementation of this function is provided. User can create a custom implementation if needed.
+ * @param index Register index.
+ * @param value Desired value.
+ * @return device_err_t If successful <c>ERR_OK</c> else some other error.
+ */
 __weak device_err_t P2PComms_UpdateU16(uint8_t index, uint16_t value)
 {
 	INTER_CORE_DATA.u16s[index] = value;
 	return ERR_OK;
 }
-
+/**
+ * @brief Update a uint32_t parameter share in both cores.
+ * @note A weak implementation of this function is provided. User can create a custom implementation if needed.
+ * @param index Register index.
+ * @param value Desired value.
+ * @return device_err_t If successful <c>ERR_OK</c> else some other error.
+ */
 __weak device_err_t P2PComms_UpdateU32(uint8_t index, uint32_t value)
 {
 	INTER_CORE_DATA.u32s[index] = value;
 	return ERR_OK;
 }
-
+/**
+ * @brief Update a int8_t parameter share in both cores.
+ * @note A weak implementation of this function is provided. User can create a custom implementation if needed.
+ * @param index Register index.
+ * @param value Desired value.
+ * @return device_err_t If successful <c>ERR_OK</c> else some other error.
+ */
 __weak device_err_t P2PComms_UpdateS8(uint8_t index, int8_t value)
 {
 	INTER_CORE_DATA.s8s[index] = value;
 	return ERR_OK;
 }
-
+/**
+ * @brief Update a int16_t parameter share in both cores.
+ * @note A weak implementation of this function is provided. User can create a custom implementation if needed.
+ * @param index Register index.
+ * @param value Desired value.
+ * @return device_err_t If successful <c>ERR_OK</c> else some other error.
+ */
 __weak device_err_t P2PComms_UpdateS16(uint8_t index, int16_t value)
 {
 	INTER_CORE_DATA.s16s[index] = value;
 	return ERR_OK;
 }
+/**
+ * @brief Update a int32_t parameter share in both cores.
+ * @note A weak implementation of this function is provided. User can create a custom implementation if needed.
+ * @param index Register index.
+ * @param value Desired value.
+ * @return device_err_t If successful <c>ERR_OK</c> else some other error.
+ */
 __weak device_err_t P2PComms_UpdateS32(uint8_t index, int32_t value)
 {
 	INTER_CORE_DATA.s32s[index] = value;
 	return ERR_OK;
 }
-
+/**
+ * @brief Update a single-precision floating parameter share in both cores.
+ * @note A weak implementation of this function is provided. User can create a custom implementation if needed.
+ * @param index Register index.
+ * @param value Desired value.
+ * @return device_err_t If successful <c>ERR_OK</c> else some other error.
+ */
 __weak device_err_t P2PComms_UpdateFloat(uint8_t index, float value)
 {
 	INTER_CORE_DATA.floats[index] = value;
 	return ERR_OK;
 }
-
+/**
+ * @brief Set bits in bit accessible registers shared in both cores.
+ * @note A weak implementation of this function is provided. User can create a custom implementation if needed.
+ * @param index Register index.
+ * @param value Bits to be set.
+ * @return device_err_t If successful <c>ERR_OK</c> else some other error.
+ */
 __weak device_err_t P2PComms_SetBits(uint8_t index, uint8_t value)
 {
 	// if the bits are already set no need to reset them
 	if ((INTER_CORE_DATA.bitAccess[index] & value) == value)
 		return ERR_OK;
 
-	if (index < SHARE_BIT_ACCESS_COUNT)
+	if (index < P2P_BIT_ACCESS_COUNT)
 		INTER_CORE_DATA.bitAccess[index] |= value;
 	return ERR_OK;
 }
-
+/**
+ * @brief Clear bits in bit accessible registers shared in both cores.
+ * @note A weak implementation of this function is provided. User can create a custom implementation if needed.
+ * @param index Register index.
+ * @param value Bits to be cleared.
+ * @return device_err_t If successful <c>ERR_OK</c> else some other error.
+ */
 __weak device_err_t P2PComms_ClearBits(uint8_t index, uint8_t value)
 {
 	// if the bits are already clear no need to clear them
 	if ((INTER_CORE_DATA.bitAccess[index] & value) == 0)
 		return ERR_OK;
 
-	if (index < SHARE_BIT_ACCESS_COUNT)
+	if (index < P2P_BIT_ACCESS_COUNT)
 		INTER_CORE_DATA.bitAccess[index] &= ~value;
 	return ERR_OK;
 }
-
+/**
+ * @brief Toggle bits in bit accessible registers shared in both cores.
+ * @note A weak implementation of this function is provided. User can create a custom implementation if needed.
+ * @param index Register index.
+ * @param value Bits to be toggled.
+ * @return device_err_t If successful <c>ERR_OK</c> else some other error.
+ */
 __weak device_err_t P2PComms_ToggleBits(uint8_t index, uint8_t value)
 {
-	if (index < SHARE_BIT_ACCESS_COUNT)
+	if (index < P2P_BIT_ACCESS_COUNT)
 		INTER_CORE_DATA.bitAccess[index] ^= value;
 	return ERR_OK;
 }
 /**
  * @brief Process the pending request for interprocessor communications.
  * @note Call this function frequently to make sure that interprocessor communications work flawlessly.
+ * @note A weak implementation of this function is provided. User can create a custom implementation if needed.
  */
 __weak void P2PComms_ProcessPendingRequests(void)
 {
