@@ -31,11 +31,11 @@ extern "C" {
  */
 
 /** @defgroup Inverter3Ph 3 Phase Inverter
- * @brief Contains the declaration and procedures relating to a three phase inverter
+ * @brief Contains the declaration and procedures relating to a three phase inverter.
  * @details List of functions
- * 	-# <b>@ref Inverter3Ph_Init() :</b> Initialize an inverter module
- * 	-# <b>@ref Inverter3Ph_UpdateSPWM() :</b> Update the duty cycles of the inverter by using SPWM configuration
- * 	-# <b>@ref Inverter3Ph_UpdateDuty() :</b> Update the duty cycles of the inverter
+ * 	-# <b>@ref Inverter3Ph_Init() :</b> Initialize an inverter module.
+ * 	-# <b>@ref Inverter3Ph_UpdateSPWM() :</b> Update the duty cycles of the inverter by using SPWM configuration.
+ * 	-# <b>@ref Inverter3Ph_UpdateDuty() :</b> Update the duty cycles of the inverter.
  * 	-# <b>@ref Inverter3Ph_Activate() :</b> Activate/Deactive the 3-Phase inverter output
  * @{
  */
@@ -118,32 +118,30 @@ typedef struct
 /** @defgroup INVETER_3PH_Exported_Functions Functions
   * @{
   */
-
 /**
- * @brief Initialize an inverter module
- *
- * @param *config Pointer to the Inverter Configurations
+ * @brief Initialize the inverter module.
+ * @note Sets up all Duty cycles to 0.5. Disables all PWM outputs.
+ * @param *config Pointer to the Inverter Configurations.
  */
-void Inverter3Ph_Init(inverter3Ph_config_t* config);
+extern void Inverter3Ph_Init(inverter3Ph_config_t* config);
 /**
- * @brief Update the duty cycles of the inverter by using SPWM configuration
- *
- * @param *config handle representing the inverter
- * @param *theta angle of phase u in radians
- * @param modulationIndex modulation index to be used for the generation
- */
-void Inverter3Ph_UpdateSPWM(inverter3Ph_config_t* config, float theta, float modulationIndex);
-/**
- * @brief Update the duty cycles of the inverter
- *
- * @param *config handle representing the inverter
+ * @brief Update the duty cycles of the inverter.
+ * @param *config Pointer to the Inverter Configurations.
  * @param *duties pointer to the three duty cycles of the inverter (Range 0-1)
  */
-void Inverter3Ph_UpdateDuty(inverter3Ph_config_t* config, float* duties);
+extern void Inverter3Ph_UpdateDuty(inverter3Ph_config_t* config, float* duties);
 /**
- * @brief Activate/Deactive the 3-Phase inverter output
- * @param *config handle representing the inverter
- * @param en <c>true</c> if needs to be enabled, else <c>false</c>
+ * @brief Update the duty cycles of the inverter by using SPWM configuration.
+ * @param *config Pointer to the Inverter Configurations.
+ * @param *theta angle of phase u in radians.
+ * @param modulationIndex modulation index to be used for the generation.
+ * @param dir Direction of the three phase signal.
+ */
+extern void Inverter3Ph_UpdateSPWM(inverter3Ph_config_t* config, float theta, float modulationIndex, bool dir);
+/**
+ * @brief Activate/Deactive the 3-Phase inverter output.
+ * @param *config Pointer to the Inverter Configurations.
+ * @param en <c>true</c> if needs to be enabled, else <c>false</c>.
  */
 extern void Inverter3Ph_Activate(inverter3Ph_config_t* config, bool en);
 /*******************************************************************************

@@ -180,7 +180,6 @@ extern void Transform_wt_sincos(LIB_3COOR_TRIGNO_t *trigno);
  * @return float transformed value of theta
  */
 extern float Transform_Theta_0to2pi(float theta);
-
 /********************************************************************************
  * Code
  *******************************************************************************/

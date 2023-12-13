@@ -40,7 +40,6 @@ extern "C" {
  * Make sure to provide the DC Link before connecting to the grid to avoid failure due to in-rush current.
  * Initializes the algorithm using @ref GridTieControl_Init().
  * Once initialized constantly polls using @ref GridTieControl_Loop().
- * The structure @ref adcVals contains all measurements obtained by the cortex-M4 processor
  * @{
  */
 /********************************************************************************
@@ -48,29 +47,15 @@ extern "C" {
  *******************************************************************************/
 #include "control_library.h"
 #include "grid_tie_config.h"
+#include "error_config.h"
 /********************************************************************************
  * Defines
  *******************************************************************************/
-#define PWM_PERIOD_s					(PWM_PERIOD_Us/1000000.f)
-#define PWM_FREQ_KHz					(1000.f/PWM_PERIOD_Us)
-#define PWM_FREQ_Hz						(1.f/PWM_PERIOD_s)
+#define PWM_PERIOD_s				(1.f / PWM_FREQ_Hz)
 /********************************************************************************
  * Typedefs
  *******************************************************************************/
-/** @defgroup GRIDTIE_Exported_Typedefs Type Definitions
-  * @{
-  */
-/**
- * @brief Defines the states for the grid-tie controller
- */
-typedef enum
-{
-	GRID_TIE_INACTIVE,      /**< Grid tie non functional */
-	GRID_TIE_ACTIVE,        /**< Grid tie functional */
-} grid_tie_state_t;
-/**
- * @}
- */
+
 /********************************************************************************
  * Structures
  *******************************************************************************/
@@ -82,6 +67,9 @@ typedef enum
  */
 typedef struct
 {
+	bool isBoostEnabled;					/**< @brief Current state of the boost controller */
+	bool isRelayOn;							/**< @brief Current state of the control relays */
+	bool isInverterEnabled;					/**< @brief Current state of the grid tie inverter */
 	float vdc;								/**< @brief DC link voltage */
 	float iRef;								/**< @brief Constant reference current for output */
 	LIB_COOR_ALL_t vCoor;					/**< @brief Phase voltage coordinates */
@@ -93,8 +81,6 @@ typedef struct
 	independent_pwm_config_t boostConfig[BOOST_COUNT];	/**< @brief Boost configuration for developing DC link */
 	uint16_t boostDiodePin[BOOST_COUNT];				/**< @brief Pin no of the switches acting as diode */
 	float VbstSet;							/**< @brief Boost set point voltage */
-	bool isVbstStable;						/**< @brief Describes the state of boost stability */
-	grid_tie_state_t state;					/**< @brief Current state of the grid tie controller */
 	float tempIndex;						/**< @brief Temporary variable */
 } grid_tie_t;
 /**
@@ -121,6 +107,20 @@ extern void GridTieControl_Init(grid_tie_t* gridTie, PWMResetCallback pwmResetCa
  * @param gridTie Pointer to the grid tie structure
  */
 extern void GridTieControl_Loop(grid_tie_t* gridTie);
+/**
+ * @brief Enable/Disable the boost converter for the grid tie controller
+ * @param gridTie Pointer to the grid tie structure
+ * @param en <c>true</c> if needs to be enabled else <c>false</c>
+ * @return <c>ERR_OK</c> if command successfully run else some other error
+ */
+extern device_err_t GridTie_EnableBoost(grid_tie_t* gridTie, bool en);
+/**
+ * @brief Enable/Disable the inverter for the grid tie controller
+ * @param gridTie Pointer to the grid tie structure
+ * @param en <c>true</c> if needs to be enabled else <c>false</c>
+ * @return <c>ERR_OK</c> if command successfully run else some other error
+ */
+extern device_err_t GridTie_EnableInverter(grid_tie_t* gridTie, bool en);
 /********************************************************************************
  * Code
  *******************************************************************************/

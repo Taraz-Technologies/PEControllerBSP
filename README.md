@@ -36,15 +36,19 @@ https://www.taraztechnologies.com/Downloads/Software/PEControllerBSP/index.html
 			- *Components:* Contains the other components used by the BSP.
 			- *DigitalPins:* Contains the drivers for the digital Pins.
 			- *Display:* Contains the display drivers.
-			- *intelliSENS:* Contains the drivers for integration with intelliSENS software.
 			- *PWM:* Contains the PWM drivers.
-			- *Timers: * Contains the drivers for the supporting timers.
+			- *Timers:* Contains the drivers for the supporting timers.
+			- *TS:* Contains the touch screen drivers for the display.
+			- *Inc:* Contains the BSP files which should be included in each folder.
 	- *CMSIS:* Contains the drivers provided by CMSIS.
 	- *STM32H7xx_HAL_Driver:* Contains the drivers provided by ST.
 2. **Middleware**
 	- *ST:* Helper libraries provided by ST.
 	- *Taraz:* Helper libraries provided by Taraz Technologies.
-		- *ControlLib:* Control System library containing different coordinate systems and transformations.
+		- *ControlLib:* Control System library containing different coordinate systems and transformations as well as commonly used control schemes.
+		- *Display:* Conatins the common display system libraries used by the BSP, relevant screens and screen management modules.
+		- *intelliSENS:* Conatins the intelliSENS library used by the framework.
+		- *MiscLib:* Conatins the miscellenous libraries for string handling and general data handling.
 	- *Third_Party:* Third party libraries.
 3. **Projects**
 	- *PEController:* 

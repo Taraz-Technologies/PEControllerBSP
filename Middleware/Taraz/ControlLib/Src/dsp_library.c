@@ -53,10 +53,10 @@
  * Code
  *******************************************************************************/
 /**
- * @brief Evaluates the result for the PI compensation
- * @param *pi Pointer to the PI compensator structure
- * @param err Current value of error
- * @return float Result of the PI compensation of current cycle
+ * @brief Evaluates the result for the PI compensation.
+ * @param *pi Pointer to the PI compensator parameters.
+ * @param err Current value of error.
+ * @return float Result of the PI compensation of current cycle.
  */
 float PI_Compensate(pi_compensator_t* pi, float err)
 {
@@ -88,12 +88,22 @@ float PI_Compensate(pi_compensator_t* pi, float err)
 #endif
 	return result;
 }
-
 /**
- * @brief Computes the moving average
- * @param *filt Pointer to the filter
- * @param val Current value
- * @return float Resultant value of the moving average filter
+ * @brief Resets the PI compensator parameters.
+ * @param *pi Pointer to the PI compensator parameters.
+ */
+void PI_Reset(pi_compensator_t* pi)
+{
+	pi->Integral = 0;
+#if MONITOR_PI
+	pi->result = 0;
+#endif
+}
+/**
+ * @brief Computes the moving average.
+ * @param *filt Pointer to the filter parameters.
+ * @param val Current value.
+ * @return float Resultant value of the moving average filter.
  */
 float MovingAverage_Compute(mov_avg_t* filt, float val)
 {
@@ -123,10 +133,9 @@ float MovingAverage_Compute(mov_avg_t* filt, float val)
 	}
 	return filt->avg;
 }
-
 /**
- * @brief Resets the moving average filter
- * @param *filt Pointer to the filter
+ * @brief Resets the moving average filter parameters.
+ * @param *filt Pointer to the filter parameters.
  */
 void MovingAverage_Reset(mov_avg_t* filt)
 {
@@ -137,6 +146,34 @@ void MovingAverage_Reset(mov_avg_t* filt)
 	filt->stable = false;
 }
 
+/**
+ * @brief Computes the average filter value.
+ * @param *filt Pointer to the filter parameters.
+ * @param val Current value.
+ * @return float Resultant value of the average filter.
+ */
+bool Average_Compute(avg_t* filt, float val)
+{
+	filt->tempAvg += val;
+	if (--filt->index <= 0)
+	{
+		filt->avg = filt->tempAvg / filt->count;
+		filt->index = filt->count;
+		filt->tempAvg = 0;
+		return true;
+	}
+	return false;
+}
+
+/**
+ * @brief Reset the average filter parameters.
+ * @param filt Pointer to the filter parameters.
+ */
+void Average_Reset(avg_t* filt)
+{
+	filt->index = filt->count;
+	filt->tempAvg = 0;
+}
 
 #pragma GCC pop_options
 /* EOF */

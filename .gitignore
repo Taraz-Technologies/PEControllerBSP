@@ -54,5 +54,17 @@ dkms.conf
 **/Debug/
 **/Release/
 **/Docs/
+**/.settings/
+
+
+**LICENSE.txt
+**Licence.txt
 *.prefs
 *.bak
+Projects/PEController/Applications/PELab_OpenLoopVFD/Drivers/CMSIS/Device/ST/STM32H7xx/License.md
+Projects/PEController/Applications/PELab_OpenLoopVFD/Drivers/CMSIS/LICENSE.txt
+Projects/PEController/Applications/PELab_OpenLoopVFD/Drivers/STM32H7xx_HAL_Driver/License.md
+*LICENSE
+Projects/PEController/Applications/PELab_OpenLoopVFD___/
+Projects/PEController/Applications/PELab_GridTie___/
+Projects/PEController/Applications/PWMGenerator___/

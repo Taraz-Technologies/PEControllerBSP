@@ -31,12 +31,14 @@ extern "C" {
  */
 
 /** @defgroup DSP_Library DSP Library
- * @brief Contains the declaration and procedures for Digital Signal Processing Library
- * @details The following digital signal processing units are currently available in this library
- * 	-# <b>Moving Average Filter:</b> @ref mov_avg_t defines the filter unit. Use @ref MovingAverage_Compute()
- * 									to compute the moving average and @ref MovingAverage_Reset() to reset the filter
+ * @brief Contains the declaration and procedures for Digital Signal Processing Library.
+ * @details The following digital signal processing units are currently available in this library.
  * 	-# <b>PI Compensator:</b> @ref pi_compensator_t defines the compensator unit. Use @ref PI_Compensate()
- * 									to compute the value for the compensation
+ * 									to compute the value for the compensation.
+ * 	-# <b>Moving Average Filter:</b> @ref mov_avg_t defines the filter unit. Use @ref MovingAverage_Compute()
+ * 									to compute the moving average and @ref MovingAverage_Reset() to reset the filter.
+ * 	-# <b>Average Filter:</b> @ref avg_t defines the filter unit. Use @ref Average_Compute()
+ * 									to compute the average and @ref Average_Reset() to reset the filter.
  * @{
  */
 /********************************************************************************
@@ -51,15 +53,14 @@ extern "C" {
   */
 #if MONITOR
 /**
- * @brief Set to 1 to enable monitoring of PI compensator in debug window
+ * @brief Set to 1 to enable monitoring of compensators and filters in debug window
  */
 #define MONITOR_PI					(0)
 #endif
 /**
- * @brief Enable this macro if PI compensator should possess capability of limiting the
- * output and integral portion
- * @note If 1, PI result will be limited by max and min values defined in @ref pi_compensator_t
- * if has_lmt is true, otherwise the result will not be limited
+ * @brief Enables/Disables limit feature for the PI compensator.
+ * @note If 1, PI compensator will be limited by max and min values defined in @ref pi_compensator_t
+ * if has_lmt is <c>true</c>, otherwise the result will not be limited.
  */
 #define PI_COMPENSATOR_LIMIT_CAPABLE		(1)
 /**
@@ -76,7 +77,7 @@ extern "C" {
   * @{
   */
 /**
- * @brief Defines the parameters used by a moving average filter
+ * @brief Defines the parameters used by the moving average filter.
  */
 typedef struct
 {
@@ -87,19 +88,29 @@ typedef struct
 	int index;		/**< @brief Initialize to zero. Used internally for detecting current data position */
 } mov_avg_t;
 /**
- * @brief Defines the parameters used by a PI compensator
+ * @brief Defines the parameters used by the averaging filter.
+ */
+typedef struct
+{
+	float avg;		/**< @brief Mean/Average value of the samples.  */
+	float tempAvg;	/**< @brief Temporary variable used for computations. */
+	int count;		/**< @brief No of samples per computation */
+	int index;		/**< @brief Initialize to @ref count. Used internally for detecting current data position */
+} avg_t;
+/**
+ * @brief Defines the parameters used by the PI compensator.
  */
 typedef struct
 {
 #if PI_COMPENSATOR_LIMIT_CAPABLE
-	bool has_lmt;		/**< @brief Enable/disable the limiting capability for the PI compensator */
-	float max;			/**< @brief Maximum value limit for the PI compensator */
-	float min;			/**< @brief Minimum value limit for the PI compensator */
+	bool has_lmt;		/**< @brief Turn on/off the limits for the integrator of the PI compensator */
+	float max;			/**< @brief Maximum integrator limit of the PI compensator */
+	float min;			/**< @brief Minimum integrator limit of the PI compensator */
 #endif
 	float Kp;			/**< @brief Kp parameter for the PI compensator */
 	float Ki;			/**< @brief Ki parameter for the PI compensator */
 	float dt;			/**< @brief Time interval in seconds for the PI compensator */
-	float Integral;		/**< @brief Integral term for the PI compensator. Should be zero at startup */
+	float Integral;		/**< @brief Integral term for the PI compensator. Should be zero at startup and reset */
 #if MONITOR_PI
 	float err;			/**< @brief Variable for monitoring the instantaneous error while debugging */
 	float result;		/**< @brief Variable for monitoring the instantaneous result while debugging */
@@ -119,25 +130,41 @@ typedef struct
   * @{
   */
 /**
- * @brief Computes the moving average
- * @param *filt Pointer to the filter
- * @param val Current value
- * @return float Resultant value of the moving average filter
+ * @brief Evaluates the result for the PI compensation.
+ * @param *pi Pointer to the PI compensator parameters.
+ * @param err Current value of error.
+ * @return float Result of the PI compensation of current cycle.
+ */
+extern float PI_Compensate(pi_compensator_t* pi, float err);
+/**
+ * @brief Resets the PI compensator parameters.
+ * @param *pi Pointer to the PI compensator parameters.
+ */
+extern void PI_Reset(pi_compensator_t* pi);
+/**
+ * @brief Computes the moving average.
+ * @param *filt Pointer to the filter parameters.
+ * @param val Current value.
+ * @return float Resultant value of the moving average filter.
  */
 extern float MovingAverage_Compute(mov_avg_t* filt, float val);
 /**
- * @brief Resets the moving average filter
- * @param *filt Pointer to the filter
+ * @brief Resets the moving average filter parameters.
+ * @param *filt Pointer to the filter parameters.
  */
 extern void MovingAverage_Reset(mov_avg_t* filt);
 /**
- * @brief Evaluates the result for the PI compensation
- * @param *pi Pointer to the PI compensator structure
- * @param err Current value of error
- * @return float Result of the PI compensation of current cycle
+ * @brief Computes the average filter value.
+ * @param *filt Pointer to the filter parameters.
+ * @param val Current value.
+ * @return float Resultant value of the average filter.
  */
-extern float PI_Compensate(pi_compensator_t* pi, float err);
-
+extern bool Average_Compute(avg_t* filt, float val);
+/**
+ * @brief Reset the average filter parameters.
+ * @param filt Pointer to the filter parameters.
+ */
+extern void Average_Reset(avg_t* filt);
 /********************************************************************************
  * Code
  *******************************************************************************/

@@ -14,10 +14,12 @@
 #include "general_header.h"
 #include "user_config.h"
 #include "control_library.h"
-#include "adc_config.h"
+#include "pecontroller_adc.h"
 #include "main_controller.h"
 #include "pecontroller_digital_in.h"
-#include "pecontroller_pwm.h"
+#include "shared_memory.h"
+#include "pecontroller_timers.h"
+#include "p2p_comms.h"
 /*******************************************************************************
  * Defines
  ******************************************************************************/
@@ -33,38 +35,51 @@
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
-static void Inverter3Ph_ResetSignal(void);
+/**
+ * @brief Call this function to process the control loop.
+ */
+static void MainControl_Loop(void);
 /*******************************************************************************
  * Variables
  ******************************************************************************/
-extern adc_measures_t adcVals;
-static volatile bool recompute = false;
 pwm_module_config_t inverterPWMModuleConfig =
 {
 		.alignment = EDGE_ALIGNED,
-		.periodInUsec = 100,
+		.f = 10000,
 		.deadtime = {.on = true, .nanoSec = 1000 }
 };
-pwm_slave_opts_t slaveOpts =
+static tim_in_trigger_config_t timerTriggerIn =
 {
-		.syncSrc = PWM_SYNC_SRC_HRTIM_MASTER_CMP1,
-		.syncType = TIM_SLAVEMODE_COMBINED_RESETTRIGGER,
+		.src = TIM_TRG_SRC_HRTIM_MASTER_CMP1,
+		.type = TIM_TRGI_TYPE_RESET_AND_START
+};
+static tim_out_trigger_config_t timerTriggerOut =
+{
+		.type = TIM_TRGO_OUT_RST,
+		.isTriggerDelayInitRequired = false,
+		.triggerDelayInUsec = 0
 };
 pwm_config_t pwm =
 {
 		.dutyMode = OUTPUT_DUTY_MINUS_DEADTIME_AT_PWMH,
 		.lim = { .min = 0, .max = 1, .minMaxDutyCycleBalancing = false },
 		.module = &inverterPWMModuleConfig,
-		.slaveOpts = &slaveOpts
+		.slaveOpts = &timerTriggerIn
 };
 hrtim_opts_t opts =
 {
-		.periodInUsecs = 80,
-		.syncSrc = PWM_SYNC_SRC_NONE,
+		.f = 10000,
+		.syncSrc = TIM_TRG_SRC_NONE,
 };
 /*******************************************************************************
  * Code
  ******************************************************************************/
+#if IS_ADC_CORE
+static void ADC_Callback(adc_measures_t* result)
+{
+	MainControl_Loop();
+}
+#endif
 /**
  * @brief Initialize the main control loop
  */
@@ -75,13 +90,13 @@ void MainControl_Init(void)
 	// Activate input port
 	BSP_Din_SetPortGPIO();
 	// latch zero to the output state till PWM signals are enabled
-	BSP_Dout_SetPortValue(0);
 	BSP_Dout_SetPortAsGPIO();
+	BSP_Dout_SetPortValue(0);
 
 	/****************** Inverted Pair synched to CMP1 of Master HRTIM ***********************/
 	/** Creates an inverted PWM Pair which resets whenever the
 	 * value matches compare 1 value of the master HRTIM */
-	slaveOpts.syncSrc = PWM_SYNC_SRC_HRTIM_MASTER_CMP1;
+	timerTriggerIn.src = TIM_TRG_SRC_HRTIM_MASTER_CMP1;
 	DutyCycleUpdateFnc updateFnc = BSP_PWM_ConfigInvertedPair(1, &pwm);
 	updateFnc(1, .5f, &pwm);
 	BSP_Dout_SetAsPWMPin(1);
@@ -92,7 +107,7 @@ void MainControl_Init(void)
 	/** Creates a PWM sequence for the H-Bridges where switches 3, 6 get the same signal
 	 * whereas switches 4,5 get the inverted signal. The phase shift for the H-Bridge is controlled
 	 * via the value of compare 2 unit of master HRTIM */
-	slaveOpts.syncSrc = PWM_SYNC_SRC_HRTIM_MASTER_CMP2;
+	timerTriggerIn.src = TIM_TRG_SRC_HRTIM_MASTER_CMP2;
 	updateFnc = BSP_PWM_ConfigInvertedPair(3, &pwm);
 	updateFnc(3, .5f, &pwm);
 	BSP_Dout_SetAsPWMPin(3);
@@ -107,7 +122,7 @@ void MainControl_Init(void)
 	/********************* Inverted Pair synched to FiberTx TIM3 ************************/
 	/** Creates an inverted PWM Pair which resets whenever the
 	 * Timer 3 falling edge is detected */
-	slaveOpts.syncSrc = PWM_SYNC_SRC_TIM3;
+	timerTriggerIn.src = TIM_TRG_SRC_TIM3;
 	updateFnc = BSP_PWM_ConfigInvertedPair(7, &pwm);
 	updateFnc(7, .5f, &pwm);
 	BSP_Dout_SetAsPWMPin(7);
@@ -118,8 +133,9 @@ void MainControl_Init(void)
 	/** This portion shows the capability of synchronizing with another PEController
 	 * via synch or fiber connection, while simultaneously showing the synchronization between
 	 * HRTIM PWMs and TIM1 PWMs */
-	BSP_TIM2_ConfigFiberRx(TIM_SLAVEMODE_COMBINED_RESETTRIGGER, TIM_TRIGGERPOLARITY_FALLING);
-	slaveOpts.syncSrc = PWM_SYNC_SRC_TIM2;
+
+	BSP_TIM2_ConfigFiberRx(TIM_TRGI_TYPE_RESET_AND_START, TIM_SLAVE_FALLING, &timerTriggerOut, 0);
+	timerTriggerIn.src = TIM_TRG_SRC_TIM2;
 	updateFnc = BSP_PWM_ConfigInvertedPair(9, &pwm);
 	updateFnc(9, .5f, &pwm);
 	BSP_Dout_SetAsPWMPin(9);
@@ -154,11 +170,24 @@ void MainControl_Init(void)
 	BSP_MasterHRTIM_SetShiftPercent(&opts, HRTIM_COMP4, .75f);		// resets the timer with a 270 degrees phase shift with master HRTIM
 
 	// Configure and connect the Fiber synchronization between PEControllers
-	BSP_TIM3_ConfigFiberTx(opts.periodInUsecs, 18);
+	timerTriggerOut.isTriggerDelayInitRequired = true;
+	timerTriggerOut.triggerDelayInUsec = 18;
+	timerTriggerOut.type = TIM_TRGO_OUT_OC1;
+	BSP_TIM3_ConfigFiberTx(NULL, &timerTriggerOut, opts.f);
 	// Start both fiber and HRTIM master timers
 	BSP_TIM3_FiberTxStart(true);
 
-	BSP_HRTIM_Config_Interrupt(true, Inverter3Ph_ResetSignal, 0);
+	BSP_HRTIM_Config_Interrupt(true, MainControl_Loop, 1);
+
+	MainControl_Run();
+
+#if IS_ADC_CORE
+	adc_cont_config_t adcConfig = {
+			.callback = ADC_Callback,
+			.fs = MONITORING_FREQUENCY_Hz };
+	BSP_ADC_Init(ADC_MODE_CONT, &adcConfig, &RAW_ADC_DATA, &PROCESSED_ADC_DATA);
+	(void) BSP_ADC_Run();
+#endif
 }
 
 /**
@@ -178,26 +207,13 @@ void MainControl_Stop(void)
 }
 
 /**
- * @brief Used to signal the computation for new duty cycle
- */
-static void Inverter3Ph_ResetSignal(void)
-{
-	recompute = true;
-}
-
-/**
  * @brief Call this function to process the control loop.
- * If the new computation request is available new duty cycle values are computed and applied to all inverter legs
  */
-void MainControl_Loop(void)
+static void MainControl_Loop(void)
 {
-	if(recompute)
-	{
-		static uint32_t val = 0;
-		// switch between 90 and 180 degrees phase shift alternate PWM cycles
-		BSP_MasterHRTIM_SetShiftPercent(&opts, HRTIM_COMP2, ++val % 2 ? .25f : .5f);
-		recompute = false;
-	}
+	// The register SHARE_PWM_PHASE_SHIFT can be controlled from the screen.
+	// The phase shift should be between 0 and 180 degrees
+	BSP_MasterHRTIM_SetShiftPercent(&opts, HRTIM_COMP2, INTER_CORE_DATA.floats[P2P_PWM_PHASE_SHIFT] / 360.f);
 }
 
 /* EOF */

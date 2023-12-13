@@ -20,6 +20,8 @@
  ********************************************************************************
  */
 
+#pragma GCC push_options
+#pragma GCC optimize ("-Ofast")
 /********************************************************************************
  * Includes
  *******************************************************************************/
@@ -52,21 +54,22 @@
  * Code
  *******************************************************************************/
 /**
- * @brief Get duty cycles of each leg using sinousidal PWM
+ * @brief Get duty cycles of each leg using sinusoidal PWM
  * @param theta Current angle of Phase A in radians
  * @param modulationIndex Modulation index for the PWM
- * @param *duties Pointer to the array where duty cycles need to be updated.
+ * @param duties Pointer to the array where duty cycles need to be updated.
+ * @param dir Direction of the three phase signal
  */
-void ComputeDuty_SPWM(float theta, float modulationIndex, float* duties)
+void ComputeDuty_SPWM(float theta, float modulationIndex, float* duties, bool dir)
 {
 	// get the equivalent duty cycle
 	float resThetas[3] = { theta , theta + (TWO_PI/3), theta - (TWO_PI/3)};
 	for (int i = 0; i < 3; i++)
 	{
-		theta = Transform_Theta_0to2pi(resThetas[i]);
+		theta = Transform_Theta_0to2pi(resThetas[dir ? i : 2 - i]);
 		duties[i] = ((sinf(theta) * modulationIndex) * 0.5f) + 0.5f;
 	}
 }
 
-
+#pragma GCC pop_options
 /* EOF */

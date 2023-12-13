@@ -40,22 +40,17 @@
  * Prototypes
  ******************************************************************************/
 /**
- * @brief Initiates PWM for both inverters, and enable Disable signals and configure the relays
+ * @brief Initialize the main control loop
  */
 void MainControl_Init(void);
 /**
- * @brief Call this function to run both inverter PWMs
+ * @brief Call this function to start generating PWM signals
  */
 void MainControl_Run(void);
 /**
- * @brief Call this function to stop the inverters
+ * @brief Call this function to stop the control loop from generating PWM signals
  */
 void MainControl_Stop(void);
-/**
- * @brief Call this function to process the control loop.
- * If the new computation request is available new duty cycle values are computed and applied to all inverter legs
- */
-void MainControl_Loop(void);
 /*******************************************************************************
  * Variables
  ******************************************************************************/

@@ -48,7 +48,6 @@ extern "C" {
  * <br>
  * Initializes the algorithm using @ref OpenLoopVfControl_Init().
  * Once initialized constantly polls using @ref OpenLoopVfControl_Loop().
- * The structure @ref adcVals contains all measurements obtained by the cortex-M4 processor and can be incorporated in the design
  * @{
  */
 /********************************************************************************
@@ -75,6 +74,9 @@ extern "C" {
  */
 typedef struct
 {
+	bool dir;								/**< @brief Direction of the three-phase signals */
+	bool currentDir;						/**< @brief Current direction of the three-phase signals */
+	inverter_state_t requestedState;		/**< @brief Contains the requested state for the inverter */
 	float pwmFreq;							/**< @brief PWM frequency used by the inverter */
 	float nominalFreq;						/**< @brief Nominal frequency is used to compute modulation index at different frequencies */
 	float nominalModulationIndex;			/**< @brief Nominal modulation index is used to compute modulation index at different frequencies */
@@ -103,15 +105,18 @@ typedef struct
  * @param config Pointer to the configuration structure
  * @param pwmResetCallback Function callback issued after each PWM completion
  */
-void OpenLoopVfControl_Init(openloopvf_config_t* config, PWMResetCallback pwmResetCallback);
+extern void OpenLoopVfControl_Init(openloopvf_config_t* config, PWMResetCallback pwmResetCallback);
 /**
  * @brief This function computes new duty cycles for the inverter in each cycle
  * @param config Pointer to the inverter structure
- * @details Here the frequency starts from the @ref INITIAL_FREQ and keeps increasing till
- * 	it reaches the @ref OUTPUT_FREQ value with constant @ref ACCELERATION. The currentModulationIndex
- * 	is acquired by nominalModulationIndex / nominalFreq
  */
-void OpenLoopVfControl_Loop(openloopvf_config_t* config);
+extern void OpenLoopVfControl_Loop(openloopvf_config_t* config);
+/**
+ * @brief Activate/Deactivate the inverter
+ * @param config Pointer to the inverter structure
+ * @param activate en <c>true</c> if needs to be enabled else <c>false</c>
+ */
+extern void OpenLoopVfControl_Activate(openloopvf_config_t* config, bool activate);
 /********************************************************************************
  * Code
  *******************************************************************************/

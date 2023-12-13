@@ -40,6 +40,13 @@ defined in linker script */
 .word  _sdata
 /* end address for the .data section. defined in linker script */
 .word  _edata
+/* start address for the initialization values of the .data section.
+defined in linker script */
+.word  _tCritical
+/* start address for the .data section. defined in linker script */
+.word  _sCritical
+/* end address for the .data section. defined in linker script */
+.word  _eCritical
 /* start address for the .bss section. defined in linker script */
 .word  _sbss
 /* end address for the .bss section. defined in linker script */
@@ -55,47 +62,164 @@ defined in linker script */
  * @retval : None
 */
 
-    .section  .text.Reset_Handler
+  .section  .text.Reset_Handler
   .weak  Reset_Handler
   .type  Reset_Handler, %function
 Reset_Handler:
   ldr   sp, =_estack      /* set stack pointer */
 
-/* Call the clock system initialization function.*/
-  bl  SystemInit
-
 /* Copy the data segment initializers from flash to SRAM */
-  ldr r0, =_sdata
-  ldr r1, =_edata
-  ldr r2, =_sidata
-  movs r3, #0
-  b LoopCopyDataInit
+  movs  r1, #0
+  b  LoopCopyDataInit
 
 CopyDataInit:
-  ldr r4, [r2, r3]
-  str r4, [r0, r3]
-  adds r3, r3, #4
+  ldr  r3, =_sidata
+  ldr  r3, [r3, r1]
+  str  r3, [r0, r1]
+  adds  r1, r1, #4
 
 LoopCopyDataInit:
-  adds r4, r0, r3
-  cmp r4, r1
-  bcc CopyDataInit
-/* Zero fill the bss segment. */
-  ldr r2, =_sbss
-  ldr r4, =_ebss
-  movs r3, #0
-  b LoopFillZerobss
+  ldr  r0, =_sdata
+  ldr  r3, =_edata
+  adds  r2, r0, r1
+  cmp  r2, r3
+  bcc  CopyDataInit
+  movs  r1, #0
+  b  LoopCopyIsrInit
 
+CopyIsrInit:
+  ldr  r3, =_siisr_vector
+  ldr  r3, [r3, r1]
+  str  r3, [r0, r1]
+  adds  r1, r1, #4
+
+LoopCopyIsrInit:
+  ldr  r0, =_sisr_vector
+  ldr  r3, =_eisr_vector
+  adds  r2, r0, r1
+  cmp  r2, r3
+  bcc  CopyIsrInit
+  movs r1, #0
+  b  LoopCopyCodeInit
+
+CopyCodeInit:
+  ldr  r3, =_sitext
+  ldr  r3, [r3, r1]
+  str  r3, [r0, r1]
+  adds  r1, r1, #4
+
+LoopCopyCodeInit:
+  ldr  r0, =_stext
+  ldr  r3, =_etext
+  adds  r2, r0, r1
+  cmp  r2, r3
+  bcc  CopyCodeInit
+  movs  r1, #0
+  b  LoopCopyRodataInit
+
+CopyRodataInit:
+  ldr  r3, =_sirodata
+  ldr  r3, [r3, r1]
+  str  r3, [r0, r1]
+  adds  r1, r1, #4
+
+LoopCopyRodataInit:
+  ldr  r0, =_srodata
+  ldr  r3, =_erodata
+  adds  r2, r0, r1
+  cmp  r2, r3
+  bcc  CopyRodataInit
+  movs  r1, #0
+  b  LoopCopyArmExtabInit
+
+CopyArmExtabInit:
+  ldr  r3, =_siextab
+  ldr  r3, [r3, r1]
+  str  r3, [r0, r1]
+  adds  r1, r1, #4
+
+LoopCopyArmExtabInit:
+  ldr  r0, =_sextab
+  ldr  r3, =_eextab
+  adds  r2, r0, r1
+  cmp  r2, r3
+  bcc  CopyArmExtabInit
+  movs  r1, #0
+  b  LoopCopyArmInit
+
+CopyArmInit:
+  ldr  r3, =_siexidx
+  ldr  r3, [r3, r1]
+  str  r3, [r0, r1]
+  adds  r1, r1, #4
+
+LoopCopyArmInit:
+  ldr  r0, =__exidx_start
+  ldr  r3, =__exidx_end
+  adds  r2, r0, r1
+  cmp  r2, r3
+  bcc  CopyArmInit
+  movs  r1, #0
+  b  LoopCopyPreinitArrayInit
+
+CopyPreinitArrayInit:
+  ldr  r3, =_sipreinit_array
+  ldr  r3, [r3, r1]
+  str  r3, [r0, r1]
+  adds  r1, r1, #4
+
+LoopCopyPreinitArrayInit:
+  ldr  r0, =__preinit_array_start
+  ldr  r3, =__preinit_array_end
+  adds  r2, r0, r1
+  cmp  r2, r3
+  bcc  CopyPreinitArrayInit
+  movs  r1, #0
+  b  LoopCopyInitArrayInit
+
+CopyInitArrayInit:
+  ldr  r3, =_siinit_array
+  ldr  r3, [r3, r1]
+  str  r3, [r0, r1]
+  adds  r1, r1, #4
+
+LoopCopyInitArrayInit:
+  ldr  r0, =__init_array_start
+  ldr  r3, =__init_array_end
+  adds  r2, r0, r1
+  cmp  r2, r3
+  bcc  CopyInitArrayInit
+  movs  r1, #0
+  b  LoopCopyFiniArrayInit
+
+CopyFiniArrayInit:
+  ldr  r3, =_sifini_array
+  ldr  r3, [r3, r1]
+  str  r3, [r0, r1]
+  adds  r1, r1, #4
+
+LoopCopyFiniArrayInit:
+  ldr  r0, =__fini_array_start
+  ldr  r3, =__fini_array_end
+  adds  r2, r0, r1
+  cmp  r2, r3
+  bcc  CopyFiniArrayInit
+  ldr  r2, =_sbss
+  b  LoopFillZerobss
+/* Zero fill the bss segment. */
 FillZerobss:
-  str  r3, [r2]
-  adds r2, r2, #4
+  movs  r3, #0
+  str  r3, [r2], #4
 
 LoopFillZerobss:
-  cmp r2, r4
-  bcc FillZerobss
+  ldr  r3, = _ebss
+  cmp  r2, r3
+  bcc  FillZerobss
 
+/* Call the clock system initialization function.*/
+  bl  SystemInit
 /* Call static constructors */
-    bl __libc_init_array
+  bl __libc_init_array
 /* Call the application's entry point.*/
   bl  main
   bx  lr

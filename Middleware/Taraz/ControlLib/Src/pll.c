@@ -18,6 +18,8 @@
  *
  ********************************************************************************
  */
+#pragma GCC push_options
+#pragma GCC optimize ("-Ofast")
 /********************************************************************************
  * Includes
  *******************************************************************************/
@@ -144,7 +146,6 @@ static pll_states_t IsPLLSynched(pll_lock_t* pll)
 
 /**
  * @brief Lock the grid voltages using PLL
- *
  * @param pll Pointer to the data structure
  * @return pll_states_t PLL_LOCKED if grid phase successfully locked
  */
@@ -165,5 +166,5 @@ pll_states_t Pll_LockGrid(pll_lock_t* pll)
 
 	return IsPLLSynched(pll);
 }
-
+#pragma GCC pop_options
 /* EOF */
